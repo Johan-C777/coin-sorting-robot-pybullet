@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<!-- Brazo clasificador de vasos de monedas, 5 GDL + pinza de dedos paralelos.
+     Unidades del URDF: metros y radianes. Equivalencia con la memoria de cálculo:
+     d1 = 0,11 m | L1 = 0,16 m | L2 = 0,15 m | L3 = 0,08 m
+     En la configuración cero el brazo queda extendido horizontal hacia +X. -->
+<robot name="brazo_clasificador">
+
+  <material name="naranja"><color rgba="0.88 0.43 0.09 1"/></material>
+  <material name="grafito"><color rgba="0.17 0.19 0.19 1"/></material>
+  <material name="acero"><color rgba="0.55 0.60 0.62 1"/></material>
+
+  <!-- ================= base fija ================= -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.01"/>
+      <geometry><box size="0.18 0.18 0.02"/></geometry>
+      <material name="grafito"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01"/>
+      <geometry><box size="0.18 0.18 0.02"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="1.2"/>
+      <origin xyz="0 0 0.01"/>
+      <inertia ixx="0.0033" ixy="0" ixz="0" iyy="0.0033" iyz="0" izz="0.0065"/>
+    </inertial>
+  </link>
+
+  <!-- ================= J1: giro de base ================= -->
+  <joint name="j1_base" type="revolute">
+    <parent link="base_link"/>
+    <child link="columna_link"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="1.08" velocity="6.0"/>
+    <dynamics damping="0.05" friction="0.02"/>
+  </joint>
+
+  <link name="columna_link">
+    <visual>
+      <origin xyz="0 0 0.045"/>
+      <geometry><box size="0.08 0.07 0.09"/></geometry>
+      <material name="acero"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.045"/>
+      <geometry><box size="0.08 0.07 0.09"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.25"/>
+      <origin xyz="0 0 0.045"/>
+      <inertia ixx="0.0004" ixy="0" ixz="0" iyy="0.0004" iyz="0" izz="0.0003"/>
+    </inertial>
+  </link>
+
+  <!-- ================= J2: hombro ================= -->
+  <joint name="j2_hombro" type="revolute">
+    <parent link="columna_link"/>
+    <child link="brazo_link"/>
+    <origin xyz="0 0 0.09" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="0.0" upper="3.1416" effort="3.14" velocity="5.0"/>
+    <dynamics damping="0.08" friction="0.03"/>
+  </joint>
+
+  <link name="brazo_link">
+    <visual>
+      <origin xyz="0.08 0 0"/>
+      <geometry><box size="0.16 0.029 0.032"/></geometry>
+      <material name="naranja"/>
+    </visual>
+    <collision>
+      <origin xyz="0.08 0 0"/>
+      <geometry><box size="0.16 0.029 0.032"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.105"/>
+      <origin xyz="0.08 0 0"/>
+      <inertia ixx="0.00002" ixy="0" ixz="0" iyy="0.00023" iyz="0" izz="0.00023"/>
+    </inertial>
+  </link>
+
+  <!-- ================= J3: codo ================= -->
+  <joint name="j3_codo" type="revolute">
+    <parent link="brazo_link"/>
+    <child link="antebrazo_link"/>
+    <origin xyz="0.16 0 0" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-2.6180" upper="0.0" effort="2.00" velocity="5.0"/>
+    <dynamics damping="0.06" friction="0.02"/>
+  </joint>
+
+  <link name="antebrazo_link">
+    <visual>
+      <origin xyz="0.075 0 0"/>
+      <geometry><box size="0.15 0.024 0.026"/></geometry>
+      <material name="naranja"/>
+    </visual>
+    <collision>
+      <origin xyz="0.075 0 0"/>
+      <geometry><box size="0.15 0.024 0.026"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.090"/>
+      <origin xyz="0.075 0 0"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00017" iyz="0" izz="0.00017"/>
+    </inertial>
+  </link>
+
+  <!-- ================= J4: cabeceo de muñeca ================= -->
+  <joint name="j4_cabeceo" type="revolute">
+    <parent link="antebrazo_link"/>
+    <child link="muneca_link"/>
+    <origin xyz="0.15 0 0" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="-2.0944" upper="1.0472" effort="1.08" velocity="5.0"/>
+    <dynamics damping="0.04" friction="0.02"/>
+  </joint>
+
+  <link name="muneca_link">
+    <visual>
+      <origin xyz="0.02 0 0"/>
+      <geometry><box size="0.04 0.028 0.028"/></geometry>
+      <material name="grafito"/>
+    </visual>
+    <collision>
+      <origin xyz="0.02 0 0"/>
+      <geometry><box size="0.04 0.028 0.028"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.030"/>
+      <origin xyz="0.02 0 0"/>
+      <inertia ixx="0.000006" ixy="0" ixz="0" iyy="0.000008" iyz="0" izz="0.000008"/>
+    </inertial>
+  </link>
+
+  <!-- ================= J5: giro de muñeca ================= -->
+  <joint name="j5_giro" type="revolute">
+    <parent link="muneca_link"/>
+    <child link="pinza_link"/>
+    <origin xyz="0.04 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="0.22" velocity="6.0"/>
+    <dynamics damping="0.03" friction="0.01"/>
+  </joint>
+
+  <link name="pinza_link">
+    <visual>
+      <origin xyz="0.018 0 0"/>
+      <geometry><box size="0.036 0.05 0.022"/></geometry>
+      <material name="grafito"/>
+    </visual>
+    <collision>
+      <origin xyz="0.018 0 0"/>
+      <geometry><box size="0.036 0.05 0.022"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.045"/>
+      <origin xyz="0.018 0 0"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <!-- ================= dedos paralelos ================= -->
+  <joint name="dedo_izq" type="prismatic">
+    <parent link="pinza_link"/>
+    <child link="dedo_izq_link"/>
+    <origin xyz="0.040 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="0.0" upper="0.035" effort="12.0" velocity="0.1"/>
+  </joint>
+
+  <link name="dedo_izq_link">
+    <visual>
+      <origin xyz="0.0 0.004 0"/>
+      <geometry><box size="0.043 0.006 0.018"/></geometry>
+      <material name="grafito"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.004 0"/>
+      <geometry><box size="0.043 0.006 0.018"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.010"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000002" iyz="0" izz="0.000002"/>
+    </inertial>
+  </link>
+
+  <joint name="dedo_der" type="prismatic">
+    <parent link="pinza_link"/>
+    <child link="dedo_der_link"/>
+    <origin xyz="0.040 0 0" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="0.0" upper="0.035" effort="12.0" velocity="0.1"/>
+    <mimic joint="dedo_izq" multiplier="1.0" offset="0.0"/>
+  </joint>
+
+  <link name="dedo_der_link">
+    <visual>
+      <origin xyz="0.0 -0.004 0"/>
+      <geometry><box size="0.043 0.006 0.018"/></geometry>
+      <material name="grafito"/>
+    </visual>
+    <collision>
+      <origin xyz="0.0 -0.004 0"/>
+      <geometry><box size="0.043 0.006 0.018"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.010"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000002" iyz="0" izz="0.000002"/>
+    </inertial>
+  </link>
+
+  <!-- ================= TCP de referencia ================= -->
+  <joint name="tcp_fijo" type="fixed">
+    <parent link="pinza_link"/>
+    <child link="tcp_link"/>
+    <origin xyz="0.04 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="tcp_link">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
+    </inertial>
+  </link>
+
+</robot>

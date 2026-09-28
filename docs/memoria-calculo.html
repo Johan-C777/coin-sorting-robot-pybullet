@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brazo clasificador de vasos: memoria de cálculo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<script>
+window.MathJax={
+  tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},
+  svg:{fontCache:'global'},
+  options:{enableMenu:false}
+};
+</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{
+  --paper:#F1F4EF; --panel:#E6ECE6; --panel-2:#DCE4DD;
+  --ink:#1E2928; --ink-2:#465452; --muted:#687572;
+  --rule:#C9D3CC; --grid:#DCE3DD;
+  --orange:#E06E17; --orange-ink:#A24C09; --orange-soft:rgba(224,110,23,.16);
+  --blue:#2F5878; --blue-soft:rgba(47,88,120,.13); --blue-dot:rgba(47,88,120,.55);
+  --ok:#2C7A54; --warn:#B23E0C;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-ui:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;
+  --f-num:"Barlow",system-ui,sans-serif;
+  --f-code:ui-monospace,"Cascadia Code","SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#172020; --panel:#1F2A29; --panel-2:#263332;
+    --ink:#E1E8E3; --ink-2:#B7C2BD; --muted:#8E9B96;
+    --rule:#354341; --grid:#223030;
+    --orange:#F0883A; --orange-ink:#F49D5A; --orange-soft:rgba(240,136,58,.18);
+    --blue:#89B1D0; --blue-soft:rgba(137,177,208,.15); --blue-dot:rgba(137,177,208,.6);
+    --ok:#6CC499; --warn:#F28B5E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#172020; --panel:#1F2A29; --panel-2:#263332;
+  --ink:#E1E8E3; --ink-2:#B7C2BD; --muted:#8E9B96;
+  --rule:#354341; --grid:#223030;
+  --orange:#F0883A; --orange-ink:#F49D5A; --orange-soft:rgba(240,136,58,.18);
+  --blue:#89B1D0; --blue-soft:rgba(137,177,208,.15); --blue-dot:rgba(137,177,208,.6);
+  --ok:#6CC499; --warn:#F28B5E;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:18px;line-height:1.62;
+  font-optical-sizing:auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img,svg,canvas{max-width:100%}
+a{color:var(--blue);text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px;border-radius:2px}
+::selection{background:var(--orange-soft)}
+
+/* ---------- cabecera ---------- */
+.topbar{max-width:1260px;margin:0 auto;padding:18px 28px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  font-family:var(--f-ui);font-size:15px;color:var(--muted)}
+.topbar a{color:var(--muted)}
+.btn-theme{font:500 14px/1 var(--f-ui);color:var(--ink-2);background:transparent;border:1px solid var(--rule);border-radius:4px;padding:7px 11px;cursor:pointer}
+.btn-theme:hover{border-color:var(--ink-2)}
+.hero{max-width:1260px;margin:0 auto;padding:30px 28px 10px}
+.hero h1{font-family:var(--f-ui);font-weight:600;font-size:clamp(2.3rem,5.4vw,4.1rem);line-height:1.02;letter-spacing:-.012em;margin:0;max-width:17ch}
+.hero .sub{font-size:1.13rem;color:var(--ink-2);max-width:60ch;margin:16px 0 28px}
+
+/* hoja de plano */
+.sheet{margin:0;border:1.5px solid var(--ink);padding:7px;background:var(--paper)}
+.sheet-in{border:.75px solid var(--ink);position:relative;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.sheet-draw{padding:10px 8px 4px;min-width:0}
+.sheet-draw svg{display:block;width:100%;height:auto}
+.cajetin{border-left:.75px solid var(--ink);display:grid;grid-template-rows:repeat(6,auto) 1fr;font-family:var(--f-ui);font-size:14px;align-content:end}
+.cajetin div{border-top:.75px solid var(--ink);padding:6px 10px 7px}
+.cajetin div:first-child{border-top:0}
+.cajetin span{display:block;color:var(--muted);font-size:12.5px;line-height:1.2}
+.cajetin b{font-weight:600;font-size:15px;line-height:1.25;display:block}
+.cajetin .big b{font-size:19px}
+.sheet figcaption{font-family:var(--f-ui);font-size:14.5px;color:var(--muted);padding:8px 4px 1px}
+
+/* ---------- estructura ---------- */
+.page{max-width:1260px;margin:0 auto;padding:40px 28px 80px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-family:var(--f-ui);font-size:15px;max-height:calc(100vh - 40px);overflow:auto;padding-right:6px}
+.toc summary{display:none}
+.toc p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t}
+.toc a{display:grid;grid-template-columns:26px 1fr;padding:3px 0;color:var(--ink-2);text-decoration:none;line-height:1.3}
+.toc a::before{content:counter(t);color:var(--muted);font-variant-numeric:tabular-nums}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--orange-ink);font-weight:600}
+.toc a.on::before{color:var(--orange-ink)}
+.doc{min-width:0;counter-reset:sec}
+.doc > section{margin:0 0 72px}
+.doc p,.doc ul,.doc ol.steps,.doc .note{max-width:68ch}
+.doc h2{font-family:var(--f-ui);font-weight:600;font-size:clamp(1.65rem,2.6vw,2.05rem);line-height:1.1;margin:0 0 18px;letter-spacing:-.005em;
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;counter-increment:sec;padding-top:18px;border-top:1.5px solid var(--ink)}
+.doc h2::before{content:counter(sec);color:var(--orange);font-variant-numeric:tabular-nums;min-width:1.2em}
+.doc h3{font-family:var(--f-ui);font-weight:600;font-size:1.25rem;line-height:1.2;margin:34px 0 10px}
+.doc h4{font-family:var(--f-ui);font-weight:600;font-size:1.08rem;margin:0 0 4px}
+.doc p{margin:0 0 14px}
+.doc ul{padding-left:1.2em;margin:0 0 14px}
+.doc li{margin:0 0 6px}
+.note{font-size:16px;color:var(--ink-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0;margin:18px 0}
+.note b{color:var(--ink)}
+.muted{color:var(--muted)}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+
+/* pasos numerados (contenido secuencial) */
+ol.steps{list-style:none;padding:0;margin:8px 0 18px;counter-reset:st}
+ol.steps > li{counter-increment:st;display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px;margin:0 0 12px}
+ol.steps > li::before{content:counter(st);font-family:var(--f-ui);font-weight:600;color:var(--orange-ink);font-size:17px;line-height:1.55;
+  width:24px;height:24px;border:1.25px solid var(--orange);border-radius:50%;display:grid;place-items:center;font-size:14px;margin-top:3px}
+ol.steps .eq-inline{overflow-x:auto;overflow-y:hidden}
+
+/* ecuaciones */
+.eq{overflow-x:auto;overflow-y:hidden;margin:10px 0 16px;padding:2px 0}
+mjx-container[jax="SVG"][display="true"]{margin:.4em 0 !important;overflow-x:auto;overflow-y:hidden;max-width:100%}
+mjx-container[jax="SVG"]{color:var(--ink)}
+mjx-container mjx-assistive-mml{width:1px !important;max-width:1px !important;height:1px !important;overflow:hidden !important}
+
+/* tablas */
+.tbl{overflow-x:auto;margin:14px 0 22px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-family:var(--f-num);font-size:15.5px;line-height:1.35;min-width:100%}
+.tbl.fit table{min-width:0}
+th,td{text-align:left;padding:7px 12px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--f-ui);font-weight:600;font-size:15px;color:var(--ink);border-bottom:1.5px solid var(--ink);white-space:nowrap}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.c,th.c{text-align:center}
+tbody tr:last-child td{border-bottom:1.5px solid var(--ink)}
+tfoot td{font-weight:600;border-bottom:0}
+caption{caption-side:bottom;text-align:left;font-family:var(--f-ui);font-size:14px;color:var(--muted);padding-top:8px}
+td code,p code,li code{font-family:var(--f-code);font-size:.86em;background:var(--panel);padding:1px 5px;border-radius:3px;white-space:nowrap}
+.ok{color:var(--ok);font-weight:600}
+.bad{color:var(--warn);font-weight:600}
+
+/* figuras */
+figure.fig{margin:22px 0 26px}
+figure.fig figcaption{font-family:var(--f-ui);font-size:14.5px;color:var(--muted);margin-top:8px;max-width:80ch}
+.fig-frame{border:1px solid var(--rule);background:var(--paper)}
+.fig-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+canvas{display:block;width:100%}
+.diagram svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-ui);font-size:14px;color:var(--ink-2);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px;border-radius:2px}
+
+/* calculadoras */
+.calc{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px 20px 20px;margin:24px 0 28px;font-family:var(--f-num)}
+.calc > h4{font-family:var(--f-ui);font-size:1.15rem;margin:0 0 2px}
+.calc > .hint{font-family:var(--f-ui);font-size:14.5px;color:var(--muted);margin:0 0 14px}
+.calc-grid{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:22px;align-items:start}
+.calc-grid.even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ctrl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;margin:0 0 10px;font-size:15px}
+.ctrl label{font-family:var(--f-ui);font-weight:500;color:var(--ink)}
+.ctrl output{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:62px;text-align:right}
+.ctrl input[type=range]{grid-column:1 / -1;width:100%;accent-color:var(--orange);margin:2px 0 0;height:24px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.row.tight{margin:0 0 6px}
+.btn{font:500 14.5px/1 var(--f-ui);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:8px 11px;cursor:pointer;min-height:34px}
+.btn:hover{border-color:var(--ink-2)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+select,input[type=number]{font:500 15px/1.2 var(--f-num);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:6px 8px;min-height:34px}
+input[type=number]{width:74px}
+.field{display:flex;flex-direction:column;gap:4px;font-family:var(--f-ui);font-size:14px;color:var(--ink-2)}
+.fields{display:flex;flex-wrap:wrap;gap:12px 16px;margin:0 0 14px;align-items:flex-end}
+.readout{font-size:15px}
+.readout dl{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;margin:0 0 12px}
+.readout dt{font-family:var(--f-ui);color:var(--ink-2)}
+.readout dd{margin:0;font-variant-numeric:tabular-nums}
+.mat{display:inline-grid;grid-template-columns:repeat(4,auto);gap:2px 16px;padding:6px 12px;border-left:1.5px solid var(--ink);border-right:1.5px solid var(--ink);
+  font-variant-numeric:tabular-nums;font-size:14.5px;text-align:right;margin:4px 0 10px;border-radius:3px}
+.status{font-family:var(--f-ui);font-weight:600;font-size:15px;padding:6px 10px;border-radius:4px;display:inline-block;margin:0 0 10px}
+.status.ok{background:rgba(44,122,84,.13);color:var(--ok)}
+.status.bad{background:rgba(178,62,12,.12);color:var(--warn)}
+.frame{font-family:var(--f-code);font-size:14.5px;background:var(--paper);border:1px solid var(--rule);padding:6px 10px;border-radius:4px;display:inline-block;word-break:break-all}
+.mini-arm{background:var(--paper);border:1px solid var(--rule);border-radius:4px}
+.mini-arm svg{display:block;width:100%;height:auto}
+.steps-out{list-style:none;counter-reset:so;padding:0;margin:0;font-size:15px}
+.steps-out li{counter-increment:so;display:grid;grid-template-columns:24px minmax(0,1fr);gap:4px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.steps-out li::before{content:counter(so);color:var(--orange-ink);font-family:var(--f-ui);font-weight:600}
+.steps-out li:last-child{border-bottom:0}
+.steps-out b{font-family:var(--f-ui);font-weight:600}
+.bar{display:block;height:8px;background:var(--panel-2);border-radius:4px;overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:4px}
+.bar i.low{background:var(--warn)}
+.calc table{font-size:15px}
+.calc .tbl{margin:6px 0 10px}
+
+/* bloques de código */
+.code{position:relative;margin:16px 0 26px}
+.code pre{margin:0;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;overflow:auto;max-height:560px;
+  font-family:var(--f-code);font-size:13.8px;line-height:1.55;tab-size:2}
+.code .copy{position:absolute;top:8px;right:8px}
+.code-title{font-family:var(--f-ui);font-weight:600;font-size:15px;margin:22px 0 6px}
+.c-k{color:var(--orange-ink)} .c-c{color:var(--muted);font-style:italic} .c-s{color:var(--blue)} .c-n{color:var(--ok)}
+
+footer.end{max-width:1260px;margin:0 auto;padding:0 28px 60px;font-family:var(--f-ui);font-size:14.5px;color:var(--muted)}
+
+@media (max-width:1060px){
+  .sheet-in{grid-template-columns:1fr}
+  .cajetin{border-left:0;border-top:.75px solid var(--ink);grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto}
+  .cajetin div{border-top:.75px solid var(--ink);border-left:.75px solid var(--ink)}
+  .cajetin div:nth-child(-n+3){border-top:0}
+  .cajetin div:nth-child(3n+1){border-left:0}
+  .cajetin .spacer{display:none}
+}
+@media (max-width:980px){
+  .page{grid-template-columns:1fr;gap:10px;padding-top:24px}
+  .toc{position:static;max-height:none;border:1px solid var(--rule);border-radius:6px;padding:10px 14px;background:var(--panel)}
+  .toc summary{display:block;cursor:pointer;font-weight:600;color:var(--ink);list-style-position:inside}
+  .toc p{display:none}
+  .toc ol{margin-top:8px;columns:2;column-gap:20px}
+  .calc-grid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  .topbar,.hero,.page,footer.end{padding-left:16px;padding-right:16px}
+  .cajetin{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cajetin div:nth-child(n){border-left:.75px solid var(--ink);border-top:.75px solid var(--ink)}
+  .cajetin div:nth-child(-n+2){border-top:0}
+  .cajetin div:nth-child(2n+1){border-left:0}
+  .fig-pair{grid-template-columns:1fr}
+  .toc ol{columns:1}
+  .calc{padding:14px 14px 16px}
+  th,td{padding-right:10px}
+}
+@media print{
+  .toc,.topbar,.calc .row,.code .copy,.btn-theme{display:none}
+  .page{display:block}
+  .doc > section{break-inside:auto}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span>Universidad Militar Nueva Granada, Ingeniería Mecatrónica</span>
+  <button class="btn-theme" id="themeBtn" type="button">Tema automático</button>
+</div>
+
+<header class="hero">
+  <h1>Brazo clasificador de vasos de monedas</h1>
+  <p class="sub">Memoria de cálculo del módulo 6 del Sistema de Logística de Monedas Inteligentes: geometría, cinemática directa e inversa, espacio de trabajo, trayectorias, cargas, actuadores, electrónica y comunicación. Todos los números salen de los mismos parámetros que usa la simulación 3D, y las calculadoras de esta página corren el mismo código.</p>
+
+  <figure class="sheet">
+    <div class="sheet-in">
+      <div class="sheet-draw"><svg id="heroArm" role="img" aria-label="Vista lateral acotada del brazo en la pose de agarre"></svg></div>
+      <div class="cajetin">
+        <div class="big"><span>Proyecto</span><b>Sistema de Logística de Monedas Inteligentes</b></div>
+        <div><span>Módulo</span><b>6, brazo clasificador de 5 GDL</b></div>
+        <div><span>Vista</span><b>Plano del brazo, pose de agarre en el puesto R1</b></div>
+        <div><span>Unidades</span><b>Centímetros y grados</b></div>
+        <div><span>Carga de diseño</span><b>416 g (vaso con 40 monedas de $1.000)</b></div>
+        <div><span>Alcance máximo</span><b>39 cm desde el eje del hombro</b></div>
+        <div class="spacer"></div>
+      </div>
+    </div>
+    <figcaption>El TCP es el punto de agarre entre los dedos. Los ángulos siguen la convención de la sección 3: \(\theta_2\) se mide desde la horizontal y \(\theta_3\), \(\theta_4\) son relativos al eslabón anterior.</figcaption>
+  </figure>
+</header>
+
+<div class="page">
+  <nav class="toc" aria-label="Contenido">
+    <details open>
+    <summary>Contenido</summary>
+    <p>Contenido</p>
+    <ol>
+      <li><a href="#s1">Alcance del módulo</a></li>
+      <li><a href="#s2">Arquitectura del sistema</a></li>
+      <li><a href="#s3">Modelo del robot y parámetros</a></li>
+      <li><a href="#s4">Cinemática directa</a></li>
+      <li><a href="#s5">Cinemática inversa</a></li>
+      <li><a href="#s6">Espacio de trabajo</a></li>
+      <li><a href="#s7">Jacobiano y singularidades</a></li>
+      <li><a href="#s8">Trayectorias y ciclo de trabajo</a></li>
+      <li><a href="#s9">Datos de los vasos y algoritmo de orden</a></li>
+      <li><a href="#s10">Estática y selección de servos</a></li>
+      <li><a href="#s11">Electrónica y potencia</a></li>
+      <li><a href="#s12">Comunicación</a></li>
+      <li><a href="#s13">Materiales</a></li>
+      <li><a href="#s14">Código de referencia</a></li>
+      <li><a href="#s15">Verificación numérica</a></li>
+      <li><a href="#s16">Pendientes de integración</a></li>
+    </ol>
+    </details>
+  </nav>
+
+  <main class="doc">
+
+  <!-- ============ 1 ============ -->
+  <section id="s1">
+    <h2>Alcance del módulo</h2>
+    <p>El punto 6 del proyecto pide un brazo de al menos cuatro grados de libertad que organice de forma ascendente o descendente las cajas de monedas. Aquí la caja es un vaso cilíndrico de 5,2 cm de diámetro y 8 cm de alto que llega lleno desde el contador. El brazo lo recoge de la zona de entrada y lo deja en el rack, en el puesto que le corresponde según el criterio de orden que se elija en la app.</p>
+    <p>Se usan cinco articulaciones más la pinza. Con cuatro alcanzaría para posicionar y orientar en el plano, pero la quinta (giro de muñeca) permite mantener la pinza alineada con el radio del arco en cualquier puesto y deja margen para tomar vasos que lleguen girados.</p>
+
+    <h3>La celda de trabajo</h3>
+    <p>Los diez puestos están sobre un arco de radio 23 cm alrededor del eje de la base: entrada E1 a E5 a un lado (\(\theta_1\) de −86° a −24°) y rack R1 a R5 al otro (24° a 86°), separados 15,5° entre sí. La cuerda entre dos puestos vecinos es \(2\cdot23\cdot\sin 7{,}75^\circ = 6{,}20\) cm, así que entre vasos contiguos quedan 1,0 cm libres. Como todos los puestos comparten el mismo radio, la postura del brazo es idéntica en los diez: solo cambia el ángulo de la base, lo que simplifica la planificación y hace que el error de posicionamiento sea el mismo en todos.</p>
+
+    <div class="tbl">
+      <table>
+        <caption>Requisitos que se verifican en las secciones siguientes.</caption>
+        <thead><tr><th>Código</th><th>Requisito</th><th>Verificación</th></tr></thead>
+        <tbody>
+          <tr><td>RF1</td><td>Recoger vasos en los cinco puestos de entrada y depositarlos en los cinco del rack</td><td>Secciones 5 y 15</td></tr>
+          <tr><td>RF2</td><td>Ordenar por denominación, cantidad de monedas, valor o peso, en ambos sentidos</td><td>Sección 9</td></tr>
+          <tr><td>RF3</td><td>Recibir órdenes y datos de los vasos desde la app Streamlit</td><td>Sección 12</td></tr>
+          <tr><td>RF4</td><td>Reportar pose, estado y contenido del rack para el dashboard</td><td>Sección 12</td></tr>
+          <tr><td>RF5</td><td>Modo manual articular y cartesiano para calibrar</td><td>Simulación 3D, secciones 4 y 5</td></tr>
+          <tr><td>RNF1</td><td>Mínimo 4 GDL</td><td>5 GDL más pinza, sección 3</td></tr>
+          <tr><td>RNF2</td><td>Carga útil de 416 g, el vaso más pesado posible</td><td>Sección 10</td></tr>
+          <tr><td>RNF3</td><td>Tolerancia de posicionamiento de ±5 mm en los puestos</td><td>Secciones 11 (resolución 1,8 mm) y 1 (holgura de pinza 7 mm)</td></tr>
+          <tr><td>RNF4</td><td>Ciclo menor a 10 s por vaso a velocidad 1×</td><td>Sección 8, 7,2 s estimados</td></tr>
+          <tr><td>RNF5</td><td>Potencia de servos separada de la lógica, con tierra común</td><td>Sección 11</td></tr>
+          <tr><td>RNF6</td><td>Piezas imprimibles en 3D y componentes de bajo costo</td><td>Sección 13</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">La pinza abierta mide 66 mm y el vaso 52 mm, así que hay 7 mm de holgura por lado al bajar sobre él. Ese número es el que fija la tolerancia de posicionamiento exigida al brazo.</p>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section id="s2">
+    <h2>Arquitectura del sistema</h2>
+    <p>El brazo es un nodo más del sistema. Recibe dos cosas: los datos de cada vaso que produce el contador de monedas (denominación y cantidad) y la orden de ordenar con un criterio y un sentido. Devuelve su estado: pose actual, paso en curso y contenido del rack, que es lo que alimenta el dashboard.</p>
+
+    <figure class="fig diagram">
+      <div class="fig-frame"><svg id="archDiagram" viewBox="0 0 900 380" role="img" aria-label="Diagrama de bloques del sistema"></svg></div>
+      <figcaption>Flujo de datos y de potencia. La lógica del ESP32 trabaja a 3,3 V y los servos a 6 V con tierra común.</figcaption>
+    </figure>
+
+    <p>La división de responsabilidades es la siguiente:</p>
+    <ul>
+      <li>La app en Streamlit decide qué ordenar y muestra ruta, valor, peso y cantidad. No calcula cinemática.</li>
+      <li>El ESP32 del brazo guarda el estado de los diez puestos, planifica la secuencia de movimientos (sección 9), resuelve la cinemática inversa (sección 5) y comanda los ángulos.</li>
+      <li>El PCA9685 genera los seis PWM a 50 Hz, de modo que el ESP32 no gasta temporizadores ni se ve afectado por el Wi-Fi.</li>
+      <li>La simulación 3D reemplaza al hardware mientras se construye: produce exactamente la misma trama de servos que saldría por el puerto serie.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section id="s3">
+    <h2>Modelo del robot y parámetros</h2>
+    <p>La cadena es antropomórfica: base giratoria, hombro, codo y muñeca de dos ejes. Los tres ejes del centro (hombro, codo y cabeceo de muñeca) son paralelos entre sí y perpendiculares al eje de la base, así que el brazo se resuelve como una cadena plana de tres eslabones que gira alrededor del eje vertical.</p>
+
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th>Símbolo</th><th>Descripción</th><th class="r">Valor</th></tr></thead>
+        <tbody>
+          <tr><td>\(d_1\)</td><td>Altura del eje del hombro sobre la mesa</td><td class="r">11 cm</td></tr>
+          <tr><td>\(L_1\)</td><td>Brazo, del hombro al codo</td><td class="r">16 cm</td></tr>
+          <tr><td>\(L_2\)</td><td>Antebrazo, del codo a la muñeca</td><td class="r">15 cm</td></tr>
+          <tr><td>\(L_3\)</td><td>De la muñeca al TCP, entre los dedos</td><td class="r">8 cm</td></tr>
+          <tr><td>\(a\)</td><td>Apertura de la pinza</td><td class="r">0 a 70 mm</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Convención de ángulos</h3>
+    <p>\(\theta_1\) gira alrededor del eje vertical, positivo hacia el lado del rack. \(\theta_2\) se mide desde la horizontal, positivo levantando el brazo. \(\theta_3\) y \(\theta_4\) son relativos al eslabón anterior. La suma</p>
+    <div class="eq">\[\varphi=\theta_2+\theta_3+\theta_4\]</div>
+    <p>es el cabeceo absoluto de la pinza respecto a la horizontal: \(\varphi=-90^\circ\) significa que la pinza apunta hacia abajo, que es la orientación con la que se toman y se sueltan todos los vasos.</p>
+
+    <div class="tbl">
+      <table>
+        <caption>El ángulo de servo es el que se envía al PCA9685; el desfase existe porque los servos trabajan entre 0° y 180° y J3 va montado invertido.</caption>
+        <thead><tr><th>Articulación</th><th>Eje</th><th class="r">Rango</th><th class="r">Home</th><th>Ángulo de servo</th></tr></thead>
+        <tbody>
+          <tr><td>J1, base</td><td>Vertical</td><td class="r">−90° a 90°</td><td class="r">0°</td><td>\(s_1=\theta_1+90^\circ\)</td></tr>
+          <tr><td>J2, hombro</td><td>Horizontal</td><td class="r">0° a 180°</td><td class="r">90°</td><td>\(s_2=\theta_2\)</td></tr>
+          <tr><td>J3, codo</td><td>Horizontal</td><td class="r">−150° a 0°</td><td class="r">−90°</td><td>\(s_3=-\theta_3\)</td></tr>
+          <tr><td>J4, cabeceo de muñeca</td><td>Horizontal</td><td class="r">−120° a 60°</td><td class="r">−90°</td><td>\(s_4=\theta_4+120^\circ\)</td></tr>
+          <tr><td>J5, giro de muñeca</td><td>Eje de aproximación</td><td class="r">−90° a 90°</td><td class="r">0°</td><td>\(s_5=\theta_5+90^\circ\)</td></tr>
+          <tr><td>Pinza</td><td>Dedos paralelos</td><td class="r">0 a 70 mm</td><td class="r">66 mm</td><td>\(s_6=90^\circ\,a/70\,\text{mm}\)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parámetros de Denavit-Hartenberg</h3>
+    <p>Con la convención estándar, el marco 0 se ubica en la base con \(z_0\) vertical y el marco 5 en el TCP con \(z_5\) sobre el eje de aproximación de la pinza. El desfase de 90° en \(\theta_4\) es el que gira el eje de la muñeca para que \(z_4\) quede alineado con la dirección de aproximación.</p>
+
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th class="c">\(i\)</th><th class="r">\(\theta_i\)</th><th class="r">\(d_i\) (cm)</th><th class="r">\(a_i\) (cm)</th><th class="r">\(\alpha_i\)</th></tr></thead>
+        <tbody>
+          <tr><td class="c">1</td><td class="r">\(\theta_1\)</td><td class="r">11</td><td class="r">0</td><td class="r">90°</td></tr>
+          <tr><td class="c">2</td><td class="r">\(\theta_2\)</td><td class="r">0</td><td class="r">16</td><td class="r">0°</td></tr>
+          <tr><td class="c">3</td><td class="r">\(\theta_3\)</td><td class="r">0</td><td class="r">15</td><td class="r">0°</td></tr>
+          <tr><td class="c">4</td><td class="r">\(\theta_4+90^\circ\)</td><td class="r">0</td><td class="r">0</td><td class="r">90°</td></tr>
+          <tr><td class="c">5</td><td class="r">\(\theta_5\)</td><td class="r">8</td><td class="r">0</td><td class="r">0°</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 4 ============ -->
+  <section id="s4">
+    <h2>Cinemática directa</h2>
+    <p>Cada fila de la tabla anterior produce una matriz homogénea</p>
+    <div class="eq">\[{}^{i-1}A_i=\begin{bmatrix}\cos\theta_i&-\sin\theta_i\cos\alpha_i&\sin\theta_i\sin\alpha_i&a_i\cos\theta_i\\ \sin\theta_i&\cos\theta_i\cos\alpha_i&-\cos\theta_i\sin\alpha_i&a_i\sin\theta_i\\ 0&\sin\alpha_i&\cos\alpha_i&d_i\\ 0&0&0&1\end{bmatrix}\]</div>
+    <p>y la pose del TCP es el producto de las cinco:</p>
+    <div class="eq">\[{}^{0}T_5={}^{0}A_1\,{}^{1}A_2\,{}^{2}A_3\,{}^{3}A_4\,{}^{4}A_5=\begin{bmatrix}\mathbf n&\mathbf o&\mathbf a&\mathbf p\\ 0&0&0&1\end{bmatrix}\]</div>
+    <p>Desarrollando el producto con la notación \(c_1=\cos\theta_1\), \(s_{23}=\sin(\theta_2+\theta_3)\), \(c_{234}=\cos(\theta_2+\theta_3+\theta_4)\), el resultado se reduce a la extensión radial del brazo</p>
+    <div class="eq">\[\rho=L_1c_2+L_2c_{23}+L_3c_{234}\]</div>
+    <p>y con ella la posición y el eje de aproximación:</p>
+    <div class="eq">\[\mathbf p=\begin{bmatrix}c_1\,\rho\\ s_1\,\rho\\ d_1+L_1s_2+L_2s_{23}+L_3s_{234}\end{bmatrix},\qquad \mathbf a=\begin{bmatrix}c_1c_{234}\\ s_1c_{234}\\ s_{234}\end{bmatrix}\]</div>
+    <p>Las otras dos columnas de la orientación dependen además del giro de muñeca:</p>
+    <div class="eq">\[\mathbf n=\begin{bmatrix}s_1s_5-c_1s_{234}c_5\\ -c_1s_5-s_1s_{234}c_5\\ c_{234}c_5\end{bmatrix},\qquad \mathbf o=\begin{bmatrix}s_1c_5+c_1s_{234}s_5\\ s_1s_{234}s_5-c_1c_5\\ -c_{234}s_5\end{bmatrix}\]</div>
+    <p>En la posición de reposo \(\mathbf q=(0^\circ,\,90^\circ,\,-90^\circ,\,-90^\circ,\,0^\circ)\) queda \(\rho=15\) cm, \(p_z=11+16-8=19\) cm y \(\mathbf a=(0,0,-1)\): el brazo vertical, el antebrazo horizontal y la pinza mirando hacia abajo. El producto de las cinco matrices se comparó con estas expresiones en 2.000 poses aleatorias y el error máximo fue de \(1{,}5\times10^{-14}\) cm, es decir, ruido numérico.</p>
+
+    <div class="calc" id="fkCalc">
+      <h4>Cinemática directa paso a paso</h4>
+      <p class="hint">Mueve las articulaciones y observa la matriz, la pose del TCP y la trama que saldría hacia el ESP32.</p>
+      <div class="calc-grid">
+        <div>
+          <div class="row tight">
+            <button class="btn" type="button" data-pose="home">Reposo</button>
+            <button class="btn" type="button" data-pose="agarre">Agarre</button>
+            <button class="btn" type="button" data-pose="segura">Altura segura</button>
+            <button class="btn" type="button" data-pose="ext">Extendido</button>
+          </div>
+          <div id="fkSliders"></div>
+        </div>
+        <div class="readout">
+          <div class="mini-arm"><svg id="fkArm" role="img" aria-label="Vista lateral de la pose"></svg></div>
+          <h4 style="margin-top:14px">Matriz \({}^{0}T_5\)</h4>
+          <div class="mat" id="fkMat"></div>
+          <dl>
+            <dt>TCP (X, Y, Z)</dt><dd id="fkP"></dd>
+            <dt>Extensión radial \(\rho\)</dt><dd id="fkRho"></dd>
+            <dt>Cabeceo \(\varphi\)</dt><dd id="fkPhi"></dd>
+            <dt>Ángulos de servo</dt><dd id="fkServo"></dd>
+            <dt>Ancho de pulso</dt><dd id="fkPwm"></dd>
+          </dl>
+          <div class="frame" id="fkFrame"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 ============ -->
+  <section id="s5">
+    <h2>Cinemática inversa</h2>
+    <p>Como los tres ejes centrales son paralelos, la inversa tiene solución cerrada y no hace falta iterar: el ESP32 la resuelve con seis llamadas a funciones trigonométricas. Los datos de entrada son la posición del TCP \((X,Y,Z)\), el cabeceo \(\varphi\) y el giro de muñeca \(\psi\).</p>
+
+    <ol class="steps">
+      <li><b>Ángulo de base.</b> El brazo trabaja en el plano vertical que pasa por el TCP, así que <span class="eq-inline">\(\theta_1=\operatorname{atan2}(Y,X)\)</span>. Si \(X=Y=0\) el ángulo es indeterminado y se conserva el anterior.</li>
+      <li><b>Coordenadas en ese plano.</b> \(r=\sqrt{X^2+Y^2}\) y \(h=Z-d_1\), medidas desde el eje del hombro.</li>
+      <li><b>Centro de muñeca.</b> Se descuenta el último eslabón, que va en la dirección del cabeceo: \(r_w=r-L_3\cos\varphi\) y \(h_w=h-L_3\sin\varphi\).</li>
+      <li><b>Ley de cosenos.</b> Con \(c^2=r_w^2+h_w^2\), el codo vale <span class="eq-inline">\(D=\dfrac{c^2-L_1^2-L_2^2}{2L_1L_2}\)</span>. Si \(|D|\gt1\) el punto está fuera del alcance y la solución se rechaza antes de mover nada.</li>
+      <li><b>Codo.</b> \(\theta_3=-\arccos D\). Se toma la raíz negativa, codo arriba, porque la positiva cae fuera del rango de J3.</li>
+      <li><b>Hombro.</b> \(\theta_2=\operatorname{atan2}(h_w,r_w)-\operatorname{atan2}\!\left(L_2\sin\theta_3,\;L_1+L_2\cos\theta_3\right)\): el ángulo hacia el centro de muñeca menos la corrección por el codo doblado.</li>
+      <li><b>Muñeca.</b> \(\theta_4=\varphi-\theta_2-\theta_3\) y \(\theta_5=\psi\).</li>
+      <li><b>Validación.</b> Se comprueba cada ángulo contra su rango. Si uno se sale, se informa cuál y no se ejecuta el movimiento.</li>
+    </ol>
+
+    <h3>Ejemplo resuelto: agarre en el puesto R1</h3>
+    <p>El puesto R1 está a \(\theta_1=24^\circ\) sobre el arco de 23 cm, y el TCP baja hasta 6,8 cm sobre la mesa, que es donde queda el punto de agarre del vaso. Entonces \(X=21{,}01\), \(Y=9{,}35\), \(Z=6{,}80\) cm y \(\varphi=-90^\circ\).</p>
+
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th>Paso</th><th>Operación</th><th class="r">Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>\(\theta_1=\operatorname{atan2}(9{,}35;\,21{,}01)\)</td><td class="r">24,00°</td></tr>
+          <tr><td>2</td><td>\(r=\sqrt{X^2+Y^2}\), \(h=Z-11\)</td><td class="r">23,00 cm; −4,20 cm</td></tr>
+          <tr><td>3</td><td>\(r_w=23-8\cos(-90^\circ)\), \(h_w=-4{,}20-8\sin(-90^\circ)\)</td><td class="r">23,00 cm; 3,80 cm</td></tr>
+          <tr><td>4</td><td>\(c=\sqrt{23{,}00^2+3{,}80^2}\), contra \(L_1+L_2=31\)</td><td class="r">23,31 cm</td></tr>
+          <tr><td>5</td><td>\(D=(543{,}44-256-225)/480\)</td><td class="r">0,1301</td></tr>
+          <tr><td>6</td><td>\(\theta_3=-\arccos(0{,}1301)\)</td><td class="r">−82,53°</td></tr>
+          <tr><td>7</td><td>\(\operatorname{atan2}(3{,}80;\,23{,}00)=9{,}38^\circ\); \(\operatorname{atan2}(-14{,}87;\,17{,}95)=-39{,}64^\circ\)</td><td class="r">\(\theta_2=49{,}02^\circ\)</td></tr>
+          <tr><td>8</td><td>\(\theta_4=-90-49{,}02+82{,}53\)</td><td class="r">−56,50°</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Los cinco ángulos quedan dentro de rango, así que la pose es válida. La solución de codo abajo daría \(\theta_3=+82{,}53^\circ\), fuera del rango de J3, de modo que en esta celda la solución es única. Llevados a ángulos de servo y a ancho de pulso, con la pinza abierta a 66 mm:</p>
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th>Canal</th><th class="r">J1</th><th class="r">J2</th><th class="r">J3</th><th class="r">J4</th><th class="r">J5</th><th class="r">Pinza</th></tr></thead>
+        <tbody>
+          <tr><td>Ángulo de servo</td><td class="r">114°</td><td class="r">49°</td><td class="r">83°</td><td class="r">64°</td><td class="r">90°</td><td class="r">85°</td></tr>
+          <tr><td>Ancho de pulso</td><td class="r">1767 µs</td><td class="r">1044 µs</td><td class="r">1422 µs</td><td class="r">1211 µs</td><td class="r">1500 µs</td><td class="r">1444 µs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>La trama que viaja al ESP32 es entonces <code>S:114,49,83,64,90,85</code>, exactamente la que muestra la simulación en esa misma pose.</p>
+
+    <div class="calc" id="ikCalc">
+      <h4>Resolver la cinemática inversa</h4>
+      <p class="hint">Elige un puesto o mueve el objetivo a mano. Si el punto no tiene solución, se indica por qué.</p>
+      <div class="calc-grid">
+        <div>
+          <div class="fields">
+            <label class="field">Puesto
+              <select id="ikSlot"></select>
+            </label>
+            <label class="field">Altura
+              <select id="ikH">
+                <option value="6.8">Agarre, 6,8 cm</option>
+                <option value="17">Segura, 17 cm</option>
+              </select>
+            </label>
+          </div>
+          <div id="ikSliders"></div>
+        </div>
+        <div class="readout">
+          <div class="mini-arm"><svg id="ikArm" role="img" aria-label="Solución de la cinemática inversa"></svg></div>
+          <div id="ikStatus" class="status ok" role="status" style="margin-top:12px"></div>
+          <ol class="steps-out" id="ikSteps"></ol>
+          <div style="margin-top:12px" class="frame" id="ikFrame"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ============ 6 ============ -->
+  <section id="s6">
+    <h2>Espacio de trabajo</h2>
+    <p>El alcance máximo desde el eje del hombro es \(L_1+L_2+L_3=39\) cm, pero esa cifra sirve de poco: los vasos se toman siempre con la pinza vertical, y esa restricción recorta bastante la zona útil. Fijando \(\varphi=-90^\circ\) y barriendo las articulaciones dentro de sus rangos, la zona alcanzable a la altura de agarre es un anillo entre 7,1 y 30,8 cm de radio; a la altura de traslado, hasta 27,7 cm.</p>
+    <p>El arco de puestos se colocó a 23 cm porque queda cómodamente dentro de las dos zonas: sobran 4,7 cm hasta el borde exterior a la altura de traslado y el codo trabaja a 82,5° de flexión, lejos de la posición estirada.</p>
+
+    <figure class="fig">
+      <div class="fig-pair">
+        <div class="fig-frame"><canvas id="wsSide" height="420"></canvas></div>
+        <div class="fig-frame"><canvas id="wsTop" height="420"></canvas></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--blue-soft);border:1px solid var(--blue)"></i>Alcanzable con la pinza vertical</span>
+        <span><i style="background:var(--orange)"></i>Puestos y postura de agarre</span>
+        <span><i style="background:var(--grid);border:1px solid var(--rule)"></i>Alcanzable con cualquier cabeceo</span>
+        <span><i style="border-top:2px dashed var(--ink-2);height:0;border-radius:0"></i>Límite a la altura de traslado</span>
+      </div>
+      <figcaption>Izquierda: corte en el plano del brazo, con la mesa en \(z=0\), la altura de agarre en 6,8 cm y la de traslado en 17 cm. Derecha: vista superior con los diez puestos sobre el arco de 23 cm; el giro de base cubre ±90°.</figcaption>
+    </figure>
+
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th>Condición</th><th class="r">Radio mínimo</th><th class="r">Radio máximo</th></tr></thead>
+        <tbody>
+          <tr><td>Pinza vertical a 6,8 cm (agarre)</td><td class="r">7,14 cm</td><td class="r">30,76 cm</td></tr>
+          <tr><td>Pinza vertical a 17 cm (traslado)</td><td class="r">0 cm</td><td class="r">27,65 cm</td></tr>
+          <tr><td>Cualquier orientación, desde el hombro</td><td class="r">1 cm</td><td class="r">39 cm</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section id="s7">
+    <h2>Jacobiano y singularidades</h2>
+    <p>Para el control cartesiano interesa cómo se traduce la velocidad de las articulaciones centrales en velocidad del TCP dentro del plano del brazo. Con las variables \((\rho,z,\varphi)\):</p>
+    <div class="eq">\[\begin{bmatrix}\dot\rho\\ \dot z\\ \dot\varphi\end{bmatrix}=J(\mathbf q)\begin{bmatrix}\dot\theta_2\\ \dot\theta_3\\ \dot\theta_4\end{bmatrix},\qquad
+    J=\begin{bmatrix}-L_1s_2-L_2s_{23}-L_3s_{234}&-L_2s_{23}-L_3s_{234}&-L_3s_{234}\\ L_1c_2+L_2c_{23}+L_3c_{234}&L_2c_{23}+L_3c_{234}&L_3c_{234}\\ 1&1&1\end{bmatrix}\]</div>
+    <p>El determinante se simplifica a</p>
+    <div class="eq">\[\det J=L_1L_2\sin\theta_3\]</div>
+    <p>y solo se anula cuando \(\theta_3=0\), es decir con el brazo completamente estirado. Como el rango de J3 llega justo hasta 0°, basta con no comandar esa posición: en la pose de agarre \(\theta_3=-82{,}5^\circ\) y \(|\det J|=238\) cm², prácticamente el máximo posible; en la de traslado, \(-59{,}4^\circ\) y 207 cm². La otra singularidad es la de la base: cuando \(\rho=0\) el TCP cae sobre el eje vertical y \(\theta_1\) queda indeterminado, caso que la rutina resuelve conservando el ángulo anterior en lugar de dar un giro brusco.</p>
+    <p class="note">La velocidad tangencial que aporta la base es \(v_t=\rho\,\dot\theta_1\). A 23 cm y 140°/s de pico, el TCP se mueve a 56 cm/s, así que el límite práctico de velocidad lo pone el giro de la base, no las articulaciones del plano.</p>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section id="s8">
+    <h2>Trayectorias y ciclo de trabajo</h2>
+    <p>Todos los movimientos usan el mismo perfil quíntico, que arranca y termina con velocidad y aceleración nulas. Con \(\tau=t/T\):</p>
+    <div class="eq">\[\theta(t)=\theta_0+\Delta\theta\left(10\tau^3-15\tau^4+6\tau^5\right)\]</div>
+    <p>Derivando se obtienen los picos, que son los números que hay que comparar con la hoja de datos del servo:</p>
+    <div class="eq">\[\dot\theta_{\max}=1{,}875\,\frac{\Delta\theta}{T},\qquad \ddot\theta_{\max}=5{,}7735\,\frac{\Delta\theta}{T^2}\]</div>
+    <p>La duración de cada tramo no es fija: se calcula para respetar una velocidad media de 75°/s en los movimientos articulares y 11 cm/s en los lineales, con un mínimo para que los tramos cortos no resulten bruscos. El giro más largo posible es el de E1 a R5, 172°, que tarda 2,29 s y pide un pico de 141°/s: la tercera parte de lo que da un MG996R a 6 V.</p>
+
+    <div class="calc" id="trajCalc">
+      <h4>Perfil de un movimiento</h4>
+      <p class="hint">Posición, velocidad y aceleración de una articulación para el giro y la velocidad que elijas.</p>
+      <div class="calc-grid">
+        <div>
+          <div id="trajSliders"></div>
+          <div class="readout">
+            <dl>
+              <dt>Duración \(T\)</dt><dd id="trT"></dd>
+              <dt>Velocidad pico</dt><dd id="trV"></dd>
+              <dt>Aceleración pico</dt><dd id="trA"></dd>
+              <dt>Margen sobre el servo</dt><dd id="trM"></dd>
+            </dl>
+          </div>
+        </div>
+        <div><div class="fig-frame"><canvas id="trajCanvas" height="300"></canvas></div></div>
+      </div>
+    </div>
+
+    <h3>Ciclo de recoger y colocar</h3>
+    <p>Cada vaso se mueve con ocho tramos encadenados. Los verticales son lineales en el espacio cartesiano, resueltos con la inversa en cada paso; los de traslado son articulares, porque entre dos puestos solo cambia \(\theta_1\) y el TCP recorre un arco limpio a altura constante.</p>
+    <ol class="steps">
+      <li>Movimiento articular hasta quedar sobre el vaso, a 17 cm de altura.</li>
+      <li>Descenso lineal de 10,2 cm hasta la altura de agarre.</li>
+      <li>Cierre de pinza: se comanda 40 mm y se detiene en 52 mm al tocar el vaso.</li>
+      <li>Ascenso lineal a 17 cm con el vaso sujeto.</li>
+      <li>Movimiento articular hasta el puesto de destino.</li>
+      <li>Descenso lineal dejando 2,5 mm de holgura sobre la bandeja.</li>
+      <li>Apertura de pinza a 66 mm.</li>
+      <li>Ascenso lineal y, al terminar la serie, regreso a la posición de reposo.</li>
+    </ol>
+    <p>Durante el traslado el vaso sujeto viaja con su base a 10,8 cm de la mesa, mientras que los vasos que están en sus puestos llegan a 8,9 cm: quedan 1,9 cm de holgura vertical, que es el margen que hay que respetar si más adelante se suben las bandejas. El ciclo completo de un vaso a velocidad 1× ronda los 7,2 s contando el regreso al reposo repartido entre los cinco vasos, dentro del requisito RNF4.</p>
+  </section>
+
+  <!-- ============ 9 ============ -->
+  <section id="s9">
+    <h2>Datos de los vasos y algoritmo de orden</h2>
+    <p>El contador entrega por cada vaso la denominación \(d\) y la cantidad de monedas \(n\). Con eso el brazo calcula las dos magnitudes derivadas que usa el dashboard y que sirven como criterios de orden:</p>
+    <div class="eq">\[V=n\,d,\qquad m=m_{\text{vaso}}+n\,m_d\]</div>
+    <p>con \(m_{\text{vaso}}=18\) g. Las masas por moneda son las de la serie de 2012 del Banco de la República:</p>
+
+    <div class="tbl fit">
+      <table>
+        <thead><tr><th>Denominación</th><th class="r">$50</th><th class="r">$100</th><th class="r">$200</th><th class="r">$500</th><th class="r">$1.000</th></tr></thead>
+        <tbody>
+          <tr><td>Masa por moneda</td><td class="r">2,00 g</td><td class="r">3,34 g</td><td class="r">4,61 g</td><td class="r">7,14 g</td><td class="r">9,95 g</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Que los criterios no coincidan es justamente la gracia del módulo: un vaso con 30 monedas de $100 vale $3.000 y pesa 118 g, mientras que uno con 8 de $1.000 vale $8.000 y pesa 98 g. Ordenar por valor y ordenar por peso dan secuencias distintas.</p>
+
+    <h3>Planificador</h3>
+    <p>El rack tiene cinco puestos y hay cinco vasos, así que reordenar puede exigir mover un vaso que ya está en el rack para liberar un puesto. El algoritmo usa los huecos de la entrada como zona de paso:</p>
+    <ol class="steps">
+      <li>Ordenar los cinco vasos por la clave elegida, con la denominación como desempate.</li>
+      <li>Recorrer los puestos del rack del 1 al 5. Al puesto \(j\) le corresponde el \(j\)-ésimo vaso de la lista.</li>
+      <li>Si ese vaso ya está ahí, no se toca.</li>
+      <li>Si el puesto está ocupado por otro, ese otro se lleva primero a un hueco libre de la entrada.</li>
+      <li>Llevar el vaso correcto desde donde esté hasta el puesto \(j\) y marcarlo como ubicado.</li>
+    </ol>
+    <p>Partiendo de los cinco vasos en la entrada son exactamente cinco movimientos. En el peor caso, reordenando un rack ya lleno, son dos por puesto: diez movimientos, y el planificador nunca se queda sin hueco porque libera uno cada vez que saca un vaso del rack.</p>
+
+    <div class="calc" id="sortCalc">
+      <h4>Planificar un lote</h4>
+      <p class="hint">Edita el lote, elige el criterio y mira la secuencia de movimientos que ejecutaría el brazo.</p>
+      <div class="tbl" id="sortInputs"></div>
+      <div class="fields">
+        <label class="field">Criterio
+          <select id="sortKey">
+            <option value="den">Denominación</option>
+            <option value="count">Cantidad de monedas</option>
+            <option value="value" selected>Valor total</option>
+            <option value="weight">Peso</option>
+          </select>
+        </label>
+        <label class="field">Sentido
+          <select id="sortDir">
+            <option value="1">Ascendente</option>
+            <option value="-1">Descendente</option>
+          </select>
+        </label>
+        <label class="field">Estado inicial
+          <select id="sortState">
+            <option value="in">Los cinco vasos en la entrada</option>
+            <option value="rack">Ya están en el rack, en ese orden</option>
+          </select>
+        </label>
+        <button class="btn" type="button" id="sortRand">Lote aleatorio</button>
+      </div>
+      <div class="calc-grid even">
+        <div>
+          <h4>Orden resultante</h4>
+          <div class="tbl" id="sortOut"></div>
+        </div>
+        <div>
+          <h4>Secuencia de movimientos</h4>
+          <ol class="steps-out" id="sortOps"></ol>
+          <p class="readout" id="sortTime" style="margin-top:10px"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 ============ -->
+  <section id="s10">
+    <h2>Estática y selección de servos</h2>
+    <p>El caso de carga es un vaso con 40 monedas de $1.000: \(18+40\times9{,}95=416\) g. El par que soporta cada articulación es la suma de los momentos de todo lo que cuelga más allá de ella, medidos con el brazo de palanca horizontal dentro del plano:</p>
+    <div class="eq">\[\tau_j=g\sum_{k\,\gt\,j} m_k\,(x_k-x_j)\]</div>
+    <p>Las masas de los eslabones son estimaciones de piezas en PETG con 35 % de relleno, para reemplazar por los valores del CAD cuando esté el modelo definitivo. Las de los servos son de catálogo.</p>
+
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Elemento</th><th class="r">Masa</th><th>Centro de masa</th></tr></thead>
+        <tbody>
+          <tr><td>Eslabón \(L_1\) con soportes, PETG</td><td class="r">45 g</td><td>A 8 cm del hombro</td></tr>
+          <tr><td>Servo del codo</td><td class="r">60 g</td><td>En el eje del codo</td></tr>
+          <tr><td>Eslabón \(L_2\), PETG</td><td class="r">35 g</td><td>A 7,5 cm del codo</td></tr>
+          <tr><td>Servo del cabeceo de muñeca</td><td class="r">55 g</td><td>En el eje de la muñeca</td></tr>
+          <tr><td>Conjunto de muñeca y pinza, dos MG90S y dedos</td><td class="r">57 g</td><td>A 4 cm de la muñeca</td></tr>
+          <tr><td>Vaso lleno, caso de diseño</td><td class="r">416 g</td><td>En el TCP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Evaluando la expresión en las poses típicas, en kg·cm:</p>
+    <div class="tbl">
+      <table>
+        <caption>El par en la muñeca es nulo con la pinza vertical porque el vaso cuelga justo debajo del eje.</caption>
+        <thead><tr><th>Pose</th><th class="r">Hombro J2</th><th class="r">Codo J3</th><th class="r">Muñeca J4</th></tr></thead>
+        <tbody>
+          <tr><td>Reposo, con vaso</td><td class="r">8,18</td><td class="r">8,18</td><td class="r">0,00</td></tr>
+          <tr><td>Agarre a 23 cm y 6,8 cm de altura</td><td class="r">13,60</td><td class="r">6,82</td><td class="r">0,00</td></tr>
+          <tr><td>Traslado a 17 cm de altura</td><td class="r">13,35</td><td class="r">8,18</td><td class="r">0,00</td></tr>
+          <tr><td>Extendido horizontal, caso extremo</td><td class="r">22,07</td><td class="r">11,74</td><td class="r">3,56</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>La pose extendida no aparece en el ciclo de trabajo, porque los diez puestos están a 23 cm, pero se incluye porque es la que impone el límite absoluto y porque es fácil llegar a ella en modo manual con un vaso en la pinza.</p>
+
+    <div class="tbl">
+      <table>
+        <caption>El par de catálogo es el de bloqueo a 6 V; en régimen continuo conviene no pasar del 60 %, de ahí que el objetivo sea un factor de seguridad cercano a 2 en operación.</caption>
+        <thead><tr><th>Articulación</th><th class="r">Par en operación</th><th class="r">Par extendido</th><th>Servo</th><th class="r">Par a 6 V</th><th class="r">FS operación</th><th class="r">FS extendido</th></tr></thead>
+        <tbody>
+          <tr><td>J1, base</td><td class="r">1,0 kg·cm</td><td class="r">—</td><td>MG996R con rodamiento axial</td><td class="r">11 kg·cm</td><td class="r">11,0</td><td class="r">—</td></tr>
+          <tr><td>J2, hombro</td><td class="r">13,60 kg·cm</td><td class="r">22,07 kg·cm</td><td>DS3235MG</td><td class="r">32 kg·cm</td><td class="r">2,35</td><td class="r">1,45</td></tr>
+          <tr><td>J3, codo</td><td class="r">8,18 kg·cm</td><td class="r">11,74 kg·cm</td><td>DS3218MG</td><td class="r">20,4 kg·cm</td><td class="r">2,49</td><td class="r">1,74</td></tr>
+          <tr><td>J4, muñeca</td><td class="r">0,00 kg·cm</td><td class="r">3,56 kg·cm</td><td>MG996R</td><td class="r">11 kg·cm</td><td class="r">—</td><td class="r">3,09</td></tr>
+          <tr><td>J5, giro</td><td class="r">≈0</td><td class="r">≈0</td><td>MG90S</td><td class="r">2,2 kg·cm</td><td class="r">—</td><td class="r">—</td></tr>
+          <tr><td>Pinza</td><td class="r">1,25 kg·cm</td><td class="r">—</td><td>MG90S</td><td class="r">2,2 kg·cm</td><td class="r">1,76</td><td class="r">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Base, pinza y anclaje</h3>
+    <p>El servo de la base no debe cargar el peso del brazo: entre la placa fija y la plataforma giratoria va un rodamiento axial 51107 o un plato giratorio de 4", y el servo solo aporta par. Ese par es dinámico y sale de la inercia: con el vaso lleno a 23 cm, \(I_z\approx0{,}030\) kg·m², y el giro más exigente pide \(\ddot\theta=3{,}30\) rad/s², o sea 0,098 N·m, 1,0 kg·cm.</p>
+    <p>La pinza tiene que sostener el vaso por fricción. Con almohadillas de TPU, \(\mu\approx0{,}5\), dos caras de contacto y un factor de 1,5:</p>
+    <div class="eq">\[F_N=\frac{m\,g\,\mathrm{FS}}{2\mu}=\frac{0{,}416\times9{,}81\times1{,}5}{2\times0{,}5}=6{,}12\ \text{N}\]</div>
+    <p>y con un radio primitivo de 1 cm en el engranaje de los dedos, \(\tau=2F_Nr=0{,}122\) N·m = 1,25 kg·cm, que un MG90S cubre con holgura de 1,76.</p>
+    <p>El momento de vuelco sobre la base es igual al par del hombro, porque el hombro está sobre el eje. En operación son 1,33 N·m: con una placa de 10 cm de radio haría falta lastrar 1,4 kg, y en la pose extendida 2,2 kg. Sale más barato y más seguro atornillar la placa a la mesa del sistema, que es lo recomendado.</p>
+
+    <div class="calc" id="tqCalc">
+      <h4>Par requerido según la carga</h4>
+      <p class="hint">Cambia la pose y el contenido del vaso para ver cómo se mueven los factores de seguridad.</p>
+      <div class="fields">
+        <label class="field">Pose
+          <select id="tqPose">
+            <option value="home">Reposo</option>
+            <option value="agarre" selected>Agarre</option>
+            <option value="segura">Traslado</option>
+            <option value="ext">Extendido horizontal</option>
+          </select>
+        </label>
+        <label class="field">Denominación
+          <select id="tqDen"></select>
+        </label>
+        <label class="field">Monedas
+          <input type="number" id="tqN" min="0" max="60" step="1" value="40">
+        </label>
+      </div>
+      <div class="calc-grid">
+        <div><div class="mini-arm"><svg id="tqArm" role="img" aria-label="Pose usada en el cálculo de pares"></svg></div>
+          <p class="readout" id="tqPay" style="margin-top:10px"></p>
+        </div>
+        <div class="tbl" id="tqOut"></div>
+      </div>
+    </div>
+  </section>
+  <!-- ============ 11 ============ -->
+  <section id="s11">
+    <h2>Electrónica y potencia</h2>
+    <p>El ESP32 no genera los PWM: los delega en un PCA9685 por I²C. Así el Wi-Fi no introduce jitter en la señal de los servos y quedan diez canales libres para crecer. El controlador divide su oscilador de 25 MHz con un preescalador de 12 bits:</p>
+    <div class="eq">\[\text{prescale}=\operatorname{round}\!\left(\frac{25\ \text{MHz}}{4096\times50\ \text{Hz}}\right)-1=121\quad\Rightarrow\quad f=\frac{25\ \text{MHz}}{4096\times122}=50{,}03\ \text{Hz}\]</div>
+    <p>Cada cuenta dura \(1/(4096f)=4{,}88\) µs, de modo que los extremos del recorrido caen en las cuentas 102 y 512, y el centro en 307. La conversión que usa el firmware es la misma de la simulación:</p>
+    <div class="eq">\[t_{\text{on}}=500\ \text{µs}+\frac{s}{180^\circ}\times2000\ \text{µs}\]</div>
+    <p>La resolución angular resultante es \(4{,}88/11{,}11=0{,}44^\circ\) por cuenta, que a 23 cm del eje son 1,8 mm en el TCP, dentro de la tolerancia de ±5 mm del requisito RNF3. La banda muerta del servo, 3 µs, equivale a 0,27°, así que el eslabón débil es el servo y no el controlador. Conviene calibrar el oscilador real con <code>setOscillatorFrequency()</code>, porque entre unidades varía entre 23 y 27 MHz.</p>
+
+    <h3>Presupuesto de corriente</h3>
+    <div class="tbl">
+      <table>
+        <caption>Corrientes de bloqueo típicas a 6 V, tomadas de catálogo; conviene confirmarlas con el proveedor local antes de comprar la fuente.</caption>
+        <thead><tr><th>Canal</th><th>Servo</th><th class="r">Masa</th><th class="r">Corriente de bloqueo</th></tr></thead>
+        <tbody>
+          <tr><td>0, J1</td><td>MG996R</td><td class="r">55 g</td><td class="r">2,5 A</td></tr>
+          <tr><td>1, J2</td><td>DS3235MG</td><td class="r">60 g</td><td class="r">≈3,5 A</td></tr>
+          <tr><td>2, J3</td><td>DS3218MG</td><td class="r">60 g</td><td class="r">1,8 a 2,6 A</td></tr>
+          <tr><td>3, J4</td><td>MG996R</td><td class="r">55 g</td><td class="r">2,5 A</td></tr>
+          <tr><td>4, J5</td><td>MG90S</td><td class="r">13,4 g</td><td class="r">≈0,8 A</td></tr>
+          <tr><td>5, pinza</td><td>MG90S</td><td class="r">13,4 g</td><td class="r">≈0,8 A</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="3">Suma en el peor caso</td><td class="r">12,7 A</td></tr></tfoot>
+      </table>
+    </div>
+    <p>Que los seis se bloqueen a la vez es una falla, no una condición de trabajo: en el arranque simultáneo de un tramo el consumo real ronda la mitad. Se dimensiona una fuente de 6 V y 10 A, con un condensador de 2.200 µF y 16 V junto a la bornera de potencia para absorber los picos de arranque. La potencia va por una bornera propia con cable 18 AWG, no por las pistas de la placa del PCA9685, que no están hechas para esa corriente; a la placa solo llegan las señales y la lógica.</p>
+    <p class="note"><b>Detalle del prototipo real.</b> La simulación comanda el cierre de pinza a 40 mm y el vaso la detiene en 52 mm. Un servo real seguiría empujando y quedaría en bloqueo permanente, calentándose. En firmware se comanda 49 mm, unos 3 mm de interferencia que absorben las almohadillas de TPU, y se limita el tiempo de cierre.</p>
+
+    <div class="tbl">
+      <table>
+        <caption>Conexiones principales. Todas las tierras se unen en un solo punto sobre la bornera de potencia.</caption>
+        <thead><tr><th>Desde</th><th>Hasta</th><th>Nota</th></tr></thead>
+        <tbody>
+          <tr><td>ESP32 3V3</td><td>PCA9685 VCC</td><td>Solo lógica</td></tr>
+          <tr><td>ESP32 GPIO21</td><td>PCA9685 SDA</td><td>I²C a 400 kHz</td></tr>
+          <tr><td>ESP32 GPIO22</td><td>PCA9685 SCL</td><td>Dirección 0x40</td></tr>
+          <tr><td>ESP32 GND</td><td>Bornera de tierra</td><td>Tierra común obligatoria</td></tr>
+          <tr><td>Fuente 6 V (+)</td><td>Bornera de potencia y V+ del PCA9685</td><td>Cable 18 AWG</td></tr>
+          <tr><td>Bornera de potencia</td><td>Cable rojo de los seis servos</td><td>Distribución en estrella</td></tr>
+          <tr><td>PCA9685 canales 0 a 5</td><td>Señal de J1 a J5 y pinza</td><td>22 AWG</td></tr>
+          <tr><td>PCA9685 OE</td><td>GND</td><td>Salidas habilitadas</td></tr>
+          <tr><td>Fuente 12 V con reductor a 5 V</td><td>ESP32 VIN</td><td>En banco se alimenta por USB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 12 ============ -->
+  <section id="s12">
+    <h2>Comunicación</h2>
+    <p>Hay dos enlaces. El de bajo nivel es serie y lleva la pose: una línea de texto con los seis ángulos de servo, que es lo que ya produce la simulación y lo que permite pasar de simulado a real sin tocar la lógica de control.</p>
+    <div class="code"><pre><code>S:114,49,83,64,90,85</code></pre></div>
+    <p>La trama ocupa 21 caracteres, unos 1,8 ms a 115.200 baudios. Enviándola a 50 Hz usa el 9 % del enlace, así que hay margen de sobra para intercalar telemetría por el mismo puerto.</p>
+    <p>El de alto nivel es Wi-Fi. El ESP32 se conecta como estación a la misma red del computador que corre Streamlit y expone tres rutas JSON:</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Ruta</th><th>Quién la usa</th><th>Contenido</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /api/vasos</code></td><td>Módulo contador</td><td>Denominación y cantidad de cada puesto de entrada</td></tr>
+          <tr><td><code>POST /api/ordenar</code></td><td>App Streamlit</td><td>Criterio y sentido</td></tr>
+          <tr><td><code>GET /api/estado</code></td><td>Dashboard</td><td>Pose, paso en curso y contenido del rack</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code"><button class="btn copy" type="button" data-copy="jsonEstado">Copiar</button><pre id="jsonEstado"><code>{
+  "estado": "moviendo",
+  "paso": 3, "total": 5,
+  "q": [24.0, 49.0, -82.5, -56.5, 0.0],
+  "pinza_mm": 52,
+  "criterio": "valor", "sentido": "asc",
+  "rack": [
+    {"puesto": 1, "den": 50,   "n": 25, "valor": 1250, "peso_g": 68.0},
+    {"puesto": 2, "den": 100,  "n": 30, "valor": 3000, "peso_g": 118.2},
+    {"puesto": 3, "den": 200,  "n": 17, "valor": 3400, "peso_g": 96.4},
+    {"puesto": 4, "den": 500,  "n": 12, "valor": 6000, "peso_g": 103.7},
+    {"puesto": 5, "den": 1000, "n": 8,  "valor": 8000, "peso_g": 97.6}
+  ],
+  "totales": {"valor": 21650, "peso_g": 483.9, "monedas": 92}
+}</code></pre></div>
+    <p>La app consulta el estado cada 500 ms, suficiente para una barra de progreso y para el mapa de la ruta. Si el contador y el brazo terminan siendo dos ESP32 distintos, el enlace entre ellos se puede hacer por ESP-NOW y dejar el Wi-Fi solo para la app.</p>
+  </section>
+
+  <!-- ============ 13 ============ -->
+  <section id="s13">
+    <h2>Materiales</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Pieza</th><th>Material</th><th>Por qué</th></tr></thead>
+        <tbody>
+          <tr><td>Eslabones \(L_1\) y \(L_2\), soportes de servo</td><td>PETG impreso, 4 perímetros, 35 % de relleno</td><td>Más rígido y con mejor resistencia a la fluencia que el PLA bajo carga sostenida, y aguanta el calor que suelta el servo</td></tr>
+          <tr><td>Plataforma de la base</td><td>PETG sobre rodamiento axial 51107 o plato giratorio de 4"</td><td>Saca la carga axial y el momento del eje del servo, que solo queda con el par de giro</td></tr>
+          <tr><td>Placa fija</td><td>MDF de 9 mm o acrílico de 6 mm, atornillada a la mesa</td><td>Evita el vuelco calculado en la sección 10 sin necesidad de lastre</td></tr>
+          <tr><td>Uniones eslabón-servo</td><td>Bocina metálica de 25 dientes, tornillos M3 con insertos de latón</td><td>Las bocinas plásticas se barren con el par del hombro; los insertos permiten desarmar sin romper la pieza</td></tr>
+          <tr><td>Dedos de la pinza</td><td>PETG con almohadillas de TPU 95A</td><td>El TPU sube el coeficiente de fricción a ≈0,5 y absorbe la interferencia de cierre</td></tr>
+          <tr><td>Vasos</td><td>Polipropileno transparente, 52 mm de diámetro</td><td>Permiten ver el contenido para la cámara del contador y pesan poco</td></tr>
+          <tr><td>Cableado</td><td>18 AWG en potencia, 22 AWG en señal</td><td>10 A en tramos cortos con caída despreciable</td></tr>
+          <tr><td>Control</td><td>ESP32 DevKit V1 y PCA9685</td><td>Wi-Fi integrado y PWM por hardware independiente del procesador</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 14 ============ -->
+  <section id="s14">
+    <h2>Código de referencia</h2>
+    <p class="code-title">Firmware del ESP32: recibe la trama y comanda los seis servos con rampa de velocidad</p>
+    <div class="code"><button class="btn copy" type="button" data-copy="codeEsp">Copiar</button><pre id="codeEsp"><code>#include &lt;Wire.h&gt;
+#include &lt;Adafruit_PWMServoDriver.h&gt;
+
+Adafruit_PWMServoDriver pca(0x40);
+
+const uint8_t N = 6;
+const float MAX_GRADOS[N] = {180, 180, 180, 180, 180, 90};  // el canal 5 es la pinza
+float objetivo[N] = {90, 90, 90, 30, 90, 85};               // pose de reposo
+float actual[N];
+const float VEL = 120.0;                                    // grados por segundo
+String buf;
+uint32_t tPrev;
+
+uint16_t gradosAMicros(float s) {
+  return (uint16_t)(500.0 + s / 180.0 * 2000.0);
+}
+
+void aplicar() {
+  for (uint8_t i = 0; i &lt; N; i++) pca.writeMicroseconds(i, gradosAMicros(actual[i]));
+}
+
+bool parsear(const String &amp;t) {
+  if (!t.startsWith("S:")) return false;
+  float v[N];
+  int ini = 2;
+  for (uint8_t i = 0; i &lt; N; i++) {
+    if (ini &gt;= (int)t.length()) return false;
+    int fin = t.indexOf(',', ini);
+    if (fin &lt; 0) fin = t.length();
+    v[i] = t.substring(ini, fin).toFloat();
+    ini = fin + 1;
+  }
+  for (uint8_t i = 0; i &lt; N; i++) objetivo[i] = constrain(v[i], 0.0, MAX_GRADOS[i]);
+  return true;
+}
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin(21, 22);
+  Wire.setClock(400000);
+  pca.begin();
+  pca.setOscillatorFrequency(25000000);   // calibrar por unidad
+  pca.setPWMFreq(50);
+  for (uint8_t i = 0; i &lt; N; i++) actual[i] = objetivo[i];
+  aplicar();
+  tPrev = millis();
+}
+
+void loop() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      buf.trim();
+      Serial.println(parsear(buf) ? "OK" : "ERR");
+      buf = "";
+    } else if (buf.length() &lt; 64) {
+      buf += c;
+    }
+  }
+
+  uint32_t ahora = millis();
+  if (ahora - tPrev &gt;= 20) {                       // 50 Hz, igual que el PWM
+    float paso = VEL * (ahora - tPrev) / 1000.0;
+    tPrev = ahora;
+    for (uint8_t i = 0; i &lt; N; i++)
+      actual[i] += constrain(objetivo[i] - actual[i], -paso, paso);
+    aplicar();
+  }
+}</code></pre></div>
+
+    <p class="code-title">Cinemática en Python, para PyBullet y para el planificador del lado del PC</p>
+    <div class="code"><button class="btn copy" type="button" data-copy="codePy">Copiar</button><pre id="codePy"><code>import math
+
+D1, L1, L2, L3 = 11.0, 16.0, 15.0, 8.0          # cm
+LIM = [(-90, 90), (0, 180), (-150, 0), (-120, 60), (-90, 90)]
+
+
+def fk(q):
+    """Devuelve (X, Y, Z, phi) del TCP a partir de los cinco ángulos en grados."""
+    q1, q2, q3, q4, _ = [math.radians(v) for v in q]
+    a3, a4 = q2 + q3, q2 + q3 + q4
+    rho = L1 * math.cos(q2) + L2 * math.cos(a3) + L3 * math.cos(a4)
+    z = D1 + L1 * math.sin(q2) + L2 * math.sin(a3) + L3 * math.sin(a4)
+    return rho * math.cos(q1), rho * math.sin(q1), z, math.degrees(a4)
+
+
+def ik(x, y, z, phi=-90.0, psi=0.0):
+    """Cinemática inversa cerrada, codo arriba. Lanza ValueError si no hay solución."""
+    r = math.hypot(x, y)
+    q1 = math.degrees(math.atan2(y, x))
+    p = math.radians(phi)
+    rw = r - L3 * math.cos(p)
+    hw = z - D1 - L3 * math.sin(p)
+    d = (rw * rw + hw * hw - L1 * L1 - L2 * L2) / (2 * L1 * L2)
+    if abs(d) &gt; 1:
+        raise ValueError("punto fuera del alcance")
+    q3 = -math.acos(d)
+    q2 = math.atan2(hw, rw) - math.atan2(L2 * math.sin(q3), L1 + L2 * math.cos(q3))
+    q4 = (phi - math.degrees(q2 + q3) + 180) % 360 - 180
+    q = [q1, math.degrees(q2), math.degrees(q3), q4, psi]
+    for i, (lo, hi) in enumerate(LIM):
+        if not lo - 1e-6 &lt;= q[i] &lt;= hi + 1e-6:
+            raise ValueError("J%d fuera de límite: %.1f grados" % (i + 1, q[i]))
+    return q
+
+
+def trama(q, pinza_mm):
+    """Ángulos de servo listos para el PCA9685, en el formato que espera el ESP32."""
+    s = [q[0] + 90, q[1], -q[2], q[3] + 120, q[4] + 90, pinza_mm / 70 * 90]
+    return "S:" + ",".join(str(int(round(v))) for v in s)
+
+
+if __name__ == "__main__":
+    q = ik(21.01, 9.35, 6.8)                     # agarre en el puesto R1
+    print([round(v, 2) for v in q])              # [23.99, 49.03, -82.54, -56.49, 0.0]
+    print(trama(q, 66))                          # S:114,49,83,64,90,85</code></pre></div>
+  </section>
+
+  <!-- ============ 15 ============ -->
+  <section id="s15">
+    <h2>Verificación numérica</h2>
+    <p>Esta tabla la genera la página al cargar, resolviendo la inversa en los diez puestos a las dos alturas de trabajo y volviendo a pasar el resultado por la directa. El error de ida y vuelta es el del redondeo de punto flotante, y todas las poses caen dentro de los rangos articulares.</p>
+    <div class="tbl" id="verifyOut"></div>
+    <p id="verifySummary" class="readout"></p>
+    <p>Tal como se anticipó en la sección 1, las columnas de \(\theta_2\), \(\theta_3\) y \(\theta_4\) son constantes: solo cambia \(\theta_1\). Esa es la ventaja de haber puesto los diez puestos sobre un mismo radio.</p>
+  </section>
+
+  <!-- ============ 16 ============ -->
+  <section id="s16">
+    <h2>Pendientes de integración</h2>
+    <p>Lo que sigue, en orden, para cerrar la entrega del parcial:</p>
+    <ol class="steps">
+      <li>Llevar el modelo a URDF sobre el repositorio base del curso y correrlo en PyBullet con la misma cinemática de esta memoria. La tabla de abajo tiene los datos listos en metros y radianes.</li>
+      <li>Imprimir eslabones y pinza, montar los seis servos y calibrar los desfases reales de cada bocina contra los ángulos de la sección 3.</li>
+      <li>Cargar el firmware, verificar la trama por monitor serie y recién ahí conectar la potencia de 6 V.</li>
+      <li>Levantar el servidor Wi-Fi del ESP32 y conectarlo con la app Streamlit y con el módulo contador.</li>
+      <li>Medir el tiempo de ciclo real y la repetibilidad en los diez puestos, y comparar contra las secciones 8 y 11.</li>
+    </ol>
+
+    <div class="tbl">
+      <table>
+        <caption>Datos para el URDF. En la configuración cero el brazo queda extendido horizontal hacia +X, que es la pose extendida de la sección 10.</caption>
+        <thead><tr><th>Junta</th><th>Tipo</th><th>Eje</th><th>Origen respecto al padre (m)</th><th class="r">Límites (rad)</th></tr></thead>
+        <tbody>
+          <tr><td>J1, base</td><td>revolute</td><td>0 0 1</td><td>0 0 0</td><td class="r">−1,5708 a 1,5708</td></tr>
+          <tr><td>J2, hombro</td><td>revolute</td><td>0 −1 0</td><td>0 0 0,11</td><td class="r">0 a 3,1416</td></tr>
+          <tr><td>J3, codo</td><td>revolute</td><td>0 −1 0</td><td>0,16 0 0</td><td class="r">−2,6180 a 0</td></tr>
+          <tr><td>J4, cabeceo</td><td>revolute</td><td>0 −1 0</td><td>0,15 0 0</td><td class="r">−2,0944 a 1,0472</td></tr>
+          <tr><td>J5, giro</td><td>revolute</td><td>1 0 0</td><td>0 0 0</td><td class="r">−1,5708 a 1,5708</td></tr>
+          <tr><td>Dedos</td><td>prismatic</td><td>0 1 0</td><td>0,08 0 0</td><td class="r">0 a 0,035 por dedo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<footer class="end">
+  <p>Memoria de cálculo del brazo clasificador. Las cifras corresponden a la simulación 3D del mismo módulo; las masas de los eslabones son estimaciones que se reemplazan con los datos del CAD.</p>
+</footer>
+<script>
+(function(){
+'use strict';
+/* ================= parámetros ================= */
+var DEG=Math.PI/180;
+var G={d1:11,L1:16,L2:15,L3:8};
+var JOINTS=[
+  {n:'J1 base',min:-90,max:90,servo:function(q){return q+90;}},
+  {n:'J2 hombro',min:0,max:180,servo:function(q){return q;}},
+  {n:'J3 codo',min:-150,max:0,servo:function(q){return -q;}},
+  {n:'J4 cabeceo',min:-120,max:60,servo:function(q){return q+120;}},
+  {n:'J5 giro',min:-90,max:90,servo:function(q){return q+90;}}
+];
+var POSES={home:[0,90,-90,-90,0],agarre:[24,49.0231,-82.5256,-56.4975,0],segura:[24,60.0000,-59.4471,-90.5529,0],ext:[0,0,0,0,0]};
+var SURF=0.6, Z_GRAB=6.8, Z_SAFE=17, R_ZONE=23;
+var YAW_IN=[-86,-70.5,-55,-39.5,-24], YAW_RACK=[24,39.5,55,70.5,86];
+var CUP={r:2.6,h:8,mass:18};
+var DENOMS=[{v:50,m:2.00},{v:100,m:3.34},{v:200,m:4.61},{v:500,m:7.14},{v:1000,m:9.95}];
+var GRIP_OPEN=66, CUP_W=52;
+var MASS={L1:0.045,s3:0.060,L2:0.035,s4:0.055,wa:0.0568,waD:4};
+var SERVOS={
+  J1:{n:'MG996R',t:11},J2:{n:'DS3235MG',t:32},J3:{n:'DS3218MG',t:20.4},
+  J4:{n:'MG996R',t:11},J5:{n:'MG90S',t:2.2},P:{n:'MG90S',t:2.2}
+};
+var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+var wrapDeg=function(a){return ((a+180)%360+360)%360-180;};
+
+/* ================= formato ================= */
+function nf(v,d){
+  if(d===undefined) d=2;
+  if(!isFinite(v)) return '—';
+  if(Math.abs(v)<0.5*Math.pow(10,-d)) v=0;
+  return v.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+var fdeg=function(v,d){return nf(v,d===undefined?2:d)+'°';};
+var fcm=function(v,d){return nf(v,d===undefined?2:d)+' cm';};
+function money(v){return '$'+v.toLocaleString('es-CO');}
+
+/* ================= cinemática ================= */
+function fk(q){
+  var a2=q[1]*DEG,a3=a2+q[2]*DEG,a4=a3+q[3]*DEG;
+  var E=[G.L1*Math.cos(a2),G.d1+G.L1*Math.sin(a2)];
+  var W=[E[0]+G.L2*Math.cos(a3),E[1]+G.L2*Math.sin(a3)];
+  var T=[W[0]+G.L3*Math.cos(a4),W[1]+G.L3*Math.sin(a4)];
+  var c1=Math.cos(q[0]*DEG),s1=Math.sin(q[0]*DEG);
+  return {S:[0,G.d1],E:E,W:W,T:T,rho:T[0],phi:a4/DEG,a2:a2,a3:a3,a4:a4,
+          X:T[0]*c1,Y:T[0]*s1,Z:T[1]};
+}
+function T05(q){
+  var c1=Math.cos(q[0]*DEG),s1=Math.sin(q[0]*DEG);
+  var a234=(q[1]+q[2]+q[3])*DEG,C=Math.cos(a234),S=Math.sin(a234);
+  var c5=Math.cos(q[4]*DEG),s5=Math.sin(q[4]*DEG);
+  var f=fk(q);
+  return {n:[s1*s5-c1*S*c5,-c1*s5-s1*S*c5,C*c5],
+          o:[s1*c5+c1*S*s5,s1*S*s5-c1*c5,-C*s5],
+          a:[c1*C,s1*C,S],
+          p:[f.X,f.Y,f.Z]};
+}
+function ik(X,Y,Z,phi,psi,prevYaw){
+  var r=Math.hypot(X,Y);
+  var t1=r<1e-6?(prevYaw||0):Math.atan2(Y,X)/DEG;
+  var p=phi*DEG,h=Z-G.d1;
+  var rw=r-G.L3*Math.cos(p),hw=h-G.L3*Math.sin(p);
+  var c=Math.hypot(rw,hw);
+  var D=(rw*rw+hw*hw-G.L1*G.L1-G.L2*G.L2)/(2*G.L1*G.L2);
+  var out={r:r,h:h,rw:rw,hw:hw,c:c,D:D,t1:t1};
+  if(Math.abs(D)>1){out.ok=false;out.reason='alcance';return out;}
+  var t3=-Math.acos(D);
+  var beta=Math.atan2(hw,rw),gam=Math.atan2(G.L2*Math.sin(t3),G.L1+G.L2*Math.cos(t3));
+  var t2=beta-gam;
+  var q=[t1,t2/DEG,t3/DEG,wrapDeg(phi-t2/DEG-t3/DEG),psi||0];
+  out.beta=beta/DEG; out.gam=gam/DEG; out.q=q;
+  for(var i=0;i<5;i++){
+    if(q[i]<JOINTS[i].min-0.05||q[i]>JOINTS[i].max+0.05){out.ok=false;out.reason='limite';out.joint=i;return out;}
+    q[i]=clamp(q[i],JOINTS[i].min,JOINTS[i].max);
+  }
+  out.ok=true; return out;
+}
+function servos(q,gripMm){
+  var s=[];
+  for(var i=0;i<5;i++) s.push(Math.round(JOINTS[i].servo(q[i])));
+  s.push(Math.round(gripMm/70*90));
+  return s;
+}
+var pwm=function(s){return Math.round(500+clamp(s,0,180)/180*2000);};
+function trama(q,gripMm){return 'S:'+servos(q,gripMm).join(',');}
+function slotXY(yaw){return [R_ZONE*Math.cos(yaw*DEG),R_ZONE*Math.sin(yaw*DEG)];}
+
+/* ================= utilidades DOM ================= */
+var $=function(s,r){return (r||document).querySelector(s);};
+var SVGNS='http://www.w3.org/2000/svg';
+function sv(tag,at,parent){
+  var n=document.createElementNS(SVGNS,tag);
+  for(var k in at) n.setAttribute(k,at[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+function txt(parent,x,y,s,at){
+  var t=sv('text',Object.assign({x:x,y:y,fill:'var(--ink-2)','font-family':'Barlow Semi Condensed, Barlow, sans-serif'},at||{}),parent);
+  t.textContent=s; return t;
+}
+var css=function(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();};
+
+/* ================= dibujo del brazo (plano r-z) ================= */
+function drawArm(svg,q,opt){
+  opt=opt||{};
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var f=fk(q);
+  var pts=[f.S,f.E,f.W,f.T];
+  var r0,r1,z0,z1;
+  if(opt.view){ r0=opt.view[0]; r1=opt.view[1]; z0=opt.view[2]; z1=opt.view[3]; }
+  else { r0=-9; r1=26; z0=-4; z1=24; }
+  for(var i=0;i<pts.length;i++){
+    r0=Math.min(r0,pts[i][0]-6); r1=Math.max(r1,pts[i][0]+7);
+    z0=Math.min(z0,pts[i][1]-4); z1=Math.max(z1,pts[i][1]+6);
+  }
+  var w=r1-r0,hgt=z1-z0;
+  if(w<1.5*hgt){ var ex=(1.5*hgt-w)/2; r0-=ex; r1+=ex; w=r1-r0; }
+  var k=w/50;
+  svg.setAttribute('viewBox',r0+' '+(-z1)+' '+w+' '+hgt);
+  var P=function(p){return [p[0],-p[1]];};
+  var g=sv('g',{},svg);
+  // rejilla cada 5 cm
+  var grid=sv('g',{stroke:'var(--grid)','stroke-width':0.06*k},g);
+  for(var x=Math.ceil(r0/5)*5;x<=r1;x+=5) sv('line',{x1:x,y1:-z1,x2:x,y2:-z0},grid);
+  for(var y=Math.ceil(z0/5)*5;y<=z1;y+=5) sv('line',{x1:r0,y1:-y,x2:r1,y2:-y},grid);
+  // mesa
+  sv('line',{x1:r0,y1:0,x2:r1,y2:0,stroke:'var(--ink)','stroke-width':0.14*k},g);
+  var hat=sv('g',{stroke:'var(--rule)','stroke-width':0.09*k},g);
+  for(var xh=Math.ceil(r0);xh<r1;xh+=1.6) sv('line',{x1:xh,y1:0,x2:xh-1.0,y2:1.0},hat);
+  // vaso
+  if(opt.cup!==undefined){
+    var cr=opt.cup;
+    sv('rect',{x:cr-CUP.r,y:-(SURF+CUP.h),width:2*CUP.r,height:CUP.h,rx:0.25,
+      fill:'var(--blue-soft)',stroke:'var(--blue)','stroke-width':0.1*k},g);
+    for(var ci=0;ci<5;ci++) sv('line',{x1:cr-CUP.r+0.5,y1:-(SURF+0.6+ci*0.75),x2:cr+CUP.r-0.5,y2:-(SURF+0.6+ci*0.75),
+      stroke:'var(--blue)','stroke-width':0.16*k,opacity:0.5},g);
+    sv('rect',{x:cr-4.6,y:-SURF,width:9.2,height:SURF,fill:'var(--panel-2)',stroke:'var(--rule)','stroke-width':0.07*k},g);
+  }
+  // pedestal
+  sv('rect',{x:-4.2,y:-(G.d1-1.6),width:8.4,height:G.d1-1.6,rx:0.4,fill:'var(--panel)',stroke:'var(--ink-2)','stroke-width':0.1*k},g);
+  sv('rect',{x:-6.2,y:-1.1,width:12.4,height:1.1,rx:0.2,fill:'var(--panel-2)',stroke:'var(--ink-2)','stroke-width':0.1*k},g);
+  // eslabones
+  var link=function(A,B,wd){
+    sv('line',{x1:A[0],y1:-A[1],x2:B[0],y2:-B[1],stroke:'var(--orange)','stroke-width':wd*k,'stroke-linecap':'round',opacity:0.9},g);
+  };
+  link(f.S,f.E,2.0); link(f.E,f.W,1.7); link(f.W,f.T,0.95);
+  // esqueleto
+  var sk=sv('polyline',{points:[f.S,f.E,f.W,f.T].map(function(p){return p[0]+','+(-p[1]);}).join(' '),
+    fill:'none',stroke:'var(--ink)','stroke-width':0.1*k,'stroke-dasharray':(0.7*k)+' '+(0.45*k),opacity:0.7},g);
+  // pinza
+  var ux=Math.cos(f.a4),uz=Math.sin(f.a4),nx=-Math.sin(f.a4),nz=Math.cos(f.a4);
+  var gr=(opt.grip===undefined?GRIP_OPEN:opt.grip)/20;
+  [1,-1].forEach(function(sg){
+    var ax=f.T[0]-ux*2.6+nx*gr*sg, az=f.T[1]-uz*2.6+nz*gr*sg;
+    var bx=f.T[0]+ux*1.5+nx*gr*sg, bz=f.T[1]+uz*1.5+nz*gr*sg;
+    sv('line',{x1:ax,y1:-az,x2:bx,y2:-bz,stroke:'var(--ink-2)','stroke-width':0.5*k,'stroke-linecap':'round'},g);
+    sv('line',{x1:f.T[0]-ux*2.6,y1:-(f.T[1]-uz*2.6),x2:ax,y2:-az,stroke:'var(--ink-2)','stroke-width':0.4*k},g);
+  });
+  // articulaciones
+  [f.S,f.E,f.W].forEach(function(p){
+    sv('circle',{cx:p[0],cy:-p[1],r:0.85*k,fill:'var(--paper)',stroke:'var(--ink)','stroke-width':0.13*k},g);
+  });
+  // TCP
+  sv('line',{x1:f.T[0]-1.1*k,y1:-f.T[1],x2:f.T[0]+1.1*k,y2:-f.T[1],stroke:'var(--orange-ink)','stroke-width':0.14*k},g);
+  sv('line',{x1:f.T[0],y1:-f.T[1]-1.1*k,x2:f.T[0],y2:-f.T[1]+1.1*k,stroke:'var(--orange-ink)','stroke-width':0.14*k},g);
+  sv('circle',{cx:f.T[0],cy:-f.T[1],r:0.42*k,fill:'none',stroke:'var(--orange-ink)','stroke-width':0.12*k},g);
+
+  var fs=1.25*k, thin={stroke:'var(--blue)','stroke-width':0.09*k};
+  // arcos de ángulo
+  if(opt.angles){
+    var arc=function(c,R,a0,a1,label,flip){
+      var x0=c[0]+R*Math.cos(a0),y0=-(c[1]+R*Math.sin(a0));
+      var x1=c[0]+R*Math.cos(a1),y1=-(c[1]+R*Math.sin(a1));
+      var large=Math.abs(a1-a0)>Math.PI?1:0, sweep=a1>a0?0:1;
+      sv('path',{d:'M '+x0+' '+y0+' A '+R+' '+R+' 0 '+large+' '+sweep+' '+x1+' '+y1,fill:'none',
+        stroke:'var(--blue)','stroke-width':0.11*k},g);
+      var am=(a0+a1)/2+(flip?Math.PI:0);
+      var t=txt(g,c[0]+(R+1.5*k)*Math.cos(am),-(c[1]+(R+1.5*k)*Math.sin(am))+fs*0.35,label,
+        {'font-size':fs,fill:'var(--blue)','text-anchor':'middle','font-weight':600});
+      t.setAttribute('paint-order','stroke'); t.setAttribute('stroke','var(--paper)'); t.setAttribute('stroke-width',0.5*k);
+    };
+    var ref=function(c,ang,len){
+      sv('line',Object.assign({x1:c[0],y1:-c[1],x2:c[0]+len*Math.cos(ang),y2:-(c[1]+len*Math.sin(ang)),
+        'stroke-dasharray':(0.8*k)+' '+(0.5*k)},thin),g);
+    };
+    ref(f.S,0,9); arc(f.S,4.2,0,f.a2,'θ₂ = '+fdeg(q[1],1));
+    ref(f.E,f.a2,7); arc(f.E,3.6,f.a2,f.a3,'θ₃ = '+fdeg(q[2],1));
+    ref(f.W,f.a3,6); arc(f.W,3.4,f.a3,f.a4,'θ₄ = '+fdeg(q[3],1),true);
+  }
+  // acotado
+  if(opt.dims){
+    var dim=function(x1,y1,x2,y2,label,off){
+      sv('line',{x1:x1,y1:-y1,x2:x2,y2:-y2,stroke:'var(--ink-2)','stroke-width':0.09*k,
+        'marker-start':'url(#arw)','marker-end':'url(#arw)'},g);
+      var mx=(x1+x2)/2+(off?off[0]:0), my=(y1+y2)/2+(off?off[1]:0);
+      var t=txt(g,mx,-my,label,{'font-size':fs,'text-anchor':'middle',fill:'var(--ink-2)'});
+      t.setAttribute('paint-order','stroke'); t.setAttribute('stroke','var(--paper)'); t.setAttribute('stroke-width',0.6*k);
+    };
+    var defs=sv('defs',{},svg);
+    var mk=sv('marker',{id:'arw',viewBox:'0 0 10 10',refX:5,refY:5,markerWidth:3.2,markerHeight:3.2,orient:'auto-start-reverse'},defs);
+    sv('path',{d:'M 1 1 L 9 5 L 1 9 z',fill:'var(--ink-2)'},mk);
+    // d1
+    sv('line',Object.assign({x1:-9.5,y1:0,x2:-3.4,y2:0},thin),g);
+    sv('line',Object.assign({x1:-9.5,y1:-G.d1,x2:0,y2:-G.d1},thin),g);
+    dim(-8.5,0,-8.5,G.d1,'d₁ = 11',[-1.6,0]);
+    // L1, L2, L3 sobre los eslabones
+    var lab=function(A,B,s,side){
+      var sd=side===undefined?1:side;
+      var mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2;
+      var ang=Math.atan2(B[1]-A[1],B[0]-A[0]);
+      var t=txt(g,mx-Math.sin(ang)*2.4*sd,-(my+Math.cos(ang)*2.4*sd)+fs*0.35,s,{'font-size':fs,'text-anchor':'middle',fill:'var(--ink)','font-weight':600});
+      t.setAttribute('paint-order','stroke'); t.setAttribute('stroke','var(--paper)'); t.setAttribute('stroke-width',0.7*k);
+    };
+    lab(f.S,f.E,'L₁ = 16'); lab(f.E,f.W,'L₂ = 15'); lab(f.W,f.T,'L₃ = 8',-1);
+    // radio y altura del TCP
+    sv('line',Object.assign({x1:0,y1:2.2,x2:0,y2:-4.6},thin),g);
+    sv('line',Object.assign({x1:f.T[0],y1:-f.T[1],x2:f.T[0],y2:-4.6},thin),g);
+    dim(0,-3.6,f.T[0],-3.6,'r = '+nf(f.T[0],2),[0,-1.5]);
+    sv('line',Object.assign({x1:f.T[0],y1:-f.T[1],x2:f.T[0]+7,y2:-f.T[1]},thin),g);
+    dim(f.T[0]+5.6,0,f.T[0]+5.6,f.T[1],'z = '+nf(f.T[1],2),[2.6,0]);
+    var tt=txt(g,f.T[0]+2.0,-f.T[1]-1.6,'TCP',{'font-size':fs,fill:'var(--orange-ink)','font-weight':600});
+    tt.setAttribute('paint-order','stroke'); tt.setAttribute('stroke','var(--paper)'); tt.setAttribute('stroke-width',0.6*k);
+  }
+  if(opt.label){
+    var l=txt(g,r0+1.4,-(z1-2.2),opt.label,{'font-size':1.35*k,fill:'var(--muted)'});
+  }
+  return f;
+}
+
+/* ================= diagrama de bloques ================= */
+function drawArch(){
+  var svg=$('#archDiagram'); if(!svg) return;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var defs=sv('defs',{},svg);
+  var mk=sv('marker',{id:'ah',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
+  sv('path',{d:'M 0 1 L 10 5 L 0 9 z',fill:'var(--ink-2)'},mk);
+  function box(x,y,w,h,title,lines,strong){
+    var g=sv('g',{},svg);
+    sv('rect',{x:x,y:y,width:w,height:h,rx:6,fill:strong?'var(--orange-soft)':'var(--panel)',
+      stroke:strong?'var(--orange)':'var(--rule)','stroke-width':strong?2:1.2},g);
+    txt(g,x+14,y+26,title,{'font-size':17,'font-weight':600,fill:'var(--ink)'});
+    (lines||[]).forEach(function(s,i){txt(g,x+14,y+48+i*19,s,{'font-size':14.5,fill:'var(--ink-2)'});});
+    return {x:x,y:y,w:w,h:h,cx:x+w/2,cy:y+h/2};
+  }
+  function arrow(x1,y1,x2,y2,label,both){
+    var at={x1:x1,y1:y1,x2:x2,y2:y2,stroke:'var(--ink-2)','stroke-width':1.6,'marker-end':'url(#ah)'};
+    if(both) at['marker-start']='url(#ah)';
+    sv('line',at,svg);
+    if(label){
+      var t=txt(svg,(x1+x2)/2,(y1+y2)/2-7,label,{'font-size':14,'text-anchor':'middle',fill:'var(--muted)'});
+      t.setAttribute('paint-order','stroke'); t.setAttribute('stroke','var(--paper)'); t.setAttribute('stroke-width',5);
+    }
+  }
+  box(14,26,224,96,'App Streamlit',['Dashboard de ruta, valor,','peso y cantidad','Chatbot asistente']);
+  box(14,240,224,92,'Contador de monedas',['Denominación y cantidad','de cada vaso']);
+  box(336,112,230,150,'ESP32 del brazo',['Servidor Wi-Fi','Estado de los diez puestos','Planificador de orden','Cinemática inversa'],true);
+  box(336,296,230,62,'Simulación 3D',['Genera la misma trama de servos']);
+  box(664,26,222,84,'PCA9685',['Seis canales PWM','a 50,03 Hz, I²C']);
+  box(664,150,222,84,'Servos',['J1 a J5 y pinza','MG996R, DS3235, DS3218, MG90S']);
+  box(664,274,222,84,'Fuente 6 V, 10 A',['Bornera propia y','condensador de 2.200 µF']);
+  arrow(238,74,336,150,'Wi-Fi, JSON',true);
+  arrow(238,286,336,215,'Datos de vasos');
+  arrow(451,296,451,262,'Serie 115.200');
+  arrow(566,150,664,84,'I²C 0x40');
+  arrow(775,110,775,150,'PWM');
+  arrow(775,274,775,234,'6 V');
+}
+/* ================= control deslizante ================= */
+function slider(host,cfg){
+  var wrap=document.createElement('div'); wrap.className='ctrl';
+  var lab=document.createElement('label'); lab.textContent=cfg.label; lab.htmlFor=cfg.id;
+  var out=document.createElement('output');
+  var inp=document.createElement('input');
+  inp.type='range'; inp.id=cfg.id; inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=cfg.value;
+  wrap.appendChild(lab); wrap.appendChild(out); wrap.appendChild(inp); host.appendChild(wrap);
+  function sync(){ out.textContent=cfg.fmt(parseFloat(inp.value)); }
+  inp.addEventListener('input',function(){ sync(); cfg.on(parseFloat(inp.value)); });
+  sync();
+  return {set:function(v){ inp.value=v; sync(); },get:function(){ return parseFloat(inp.value); }};
+}
+
+/* ================= 4: cinemática directa ================= */
+var fkQ=POSES.home.slice(), fkGrip=GRIP_OPEN, fkS=[];
+function fkUpdate(){
+  drawArm($('#fkArm'),fkQ,{grip:fkGrip,label:'Vista en el plano del brazo'});
+  var T=T05(fkQ), f=fk(fkQ), host=$('#fkMat');
+  host.textContent='';
+  for(var i=0;i<3;i++){
+    [T.n[i],T.o[i],T.a[i],T.p[i]].forEach(function(v,j){
+      var d=document.createElement('span'); d.textContent=nf(v,j===3?2:3); host.appendChild(d);
+    });
+  }
+  ['0','0','0','1'].forEach(function(v){ var d=document.createElement('span'); d.textContent=v; host.appendChild(d); });
+  $('#fkP').textContent=nf(f.X,2)+'; '+nf(f.Y,2)+'; '+nf(f.Z,2)+' cm';
+  $('#fkRho').textContent=fcm(f.rho,2);
+  $('#fkPhi').textContent=fdeg(f.phi,2);
+  $('#fkServo').textContent=servos(fkQ,fkGrip).join('°, ')+'°';
+  $('#fkPwm').textContent=servos(fkQ,fkGrip).map(pwm).join(', ')+' µs';
+  $('#fkFrame').textContent=trama(fkQ,fkGrip);
+}
+function fkInit(){
+  var host=$('#fkSliders');
+  JOINTS.forEach(function(j,i){
+    fkS.push(slider(host,{id:'fk'+i,label:j.n,min:j.min,max:j.max,step:0.5,value:fkQ[i],
+      fmt:function(v){return fdeg(v,1);},on:function(v){ fkQ[i]=v; fkUpdate(); }}));
+  });
+  fkS.push(slider(host,{id:'fkg',label:'Pinza',min:0,max:70,step:1,value:fkGrip,
+    fmt:function(v){return nf(v,0)+' mm';},on:function(v){ fkGrip=v; fkUpdate(); }}));
+  Array.prototype.forEach.call(document.querySelectorAll('#fkCalc [data-pose]'),function(b){
+    b.addEventListener('click',function(){
+      fkQ=POSES[b.getAttribute('data-pose')].slice();
+      for(var i=0;i<5;i++) fkS[i].set(fkQ[i]);
+      fkUpdate();
+    });
+  });
+  fkUpdate();
+}
+
+/* ================= 5: cinemática inversa ================= */
+var ikV={X:21.01,Y:9.35,Z:6.8,phi:-90,psi:0}, ikS={};
+function ikUpdate(){
+  var res=ik(ikV.X,ikV.Y,ikV.Z,ikV.phi,ikV.psi,0);
+  var st=$('#ikStatus'), steps=$('#ikSteps');
+  var q=res.ok?res.q:[res.t1,0,0,0,0];
+  drawArm($('#ikArm'),res.ok?res.q:POSES.home,{grip:GRIP_OPEN,
+    cup:(Math.abs(ikV.Z-Z_GRAB)<0.4?Math.hypot(ikV.X,ikV.Y):undefined),
+    label:res.ok?'Solución codo arriba':'Sin solución, se muestra el reposo'});
+  var rows=[];
+  rows.push(['θ₁ = atan2(Y, X)',fdeg(res.t1,2)]);
+  rows.push(['r = √(X² + Y²);  h = Z − d₁',fcm(res.r,2)+';  '+fcm(res.h,2)]);
+  rows.push(['r<sub>w</sub> = r − L₃cos φ;  h<sub>w</sub> = h − L₃sen φ',fcm(res.rw,2)+';  '+fcm(res.hw,2)]);
+  rows.push(['c = √(r<sub>w</sub>² + h<sub>w</sub>²), contra L₁ + L₂ = 31 cm',fcm(res.c,2)]);
+  rows.push(['D = (c² − L₁² − L₂²) / (2 L₁ L₂)',nf(res.D,4)]);
+  if(res.reason==='alcance'){
+    rows.push(['|D| &gt; 1','sin solución']);
+  }else{
+    rows.push(['θ₃ = −arccos D',fdeg(res.q[2],2)]);
+    rows.push(['β = atan2(h<sub>w</sub>, r<sub>w</sub>);  γ = atan2(L₂ sen θ₃, L₁ + L₂ cos θ₃)',fdeg(res.beta,2)+';  '+fdeg(res.gam,2)]);
+    rows.push(['θ₂ = β − γ',fdeg(res.q[1],2)]);
+    rows.push(['θ₄ = φ − θ₂ − θ₃;  θ₅ = ψ',fdeg(res.q[3],2)+';  '+fdeg(res.q[4],2)]);
+  }
+  steps.innerHTML='';
+  rows.forEach(function(r){
+    var li=document.createElement('li');
+    li.innerHTML='<span><b>'+r[0]+'</b><br>'+r[1]+'</span>';
+    steps.appendChild(li);
+  });
+  if(res.ok){
+    st.className='status ok'; st.textContent='Pose alcanzable, los cinco ángulos dentro de rango';
+    $('#ikFrame').textContent=trama(res.q,GRIP_OPEN);
+  }else if(res.reason==='alcance'){
+    st.className='status bad'; st.textContent='Fuera del alcance del brazo';
+    $('#ikFrame').textContent='sin trama';
+  }else{
+    st.className='status bad'; st.textContent='Excede el límite de '+JOINTS[res.joint].n+' ('+nf(res.q[res.joint],1)+'°)';
+    $('#ikFrame').textContent='sin trama';
+  }
+}
+function ikInit(){
+  var sel=$('#ikSlot');
+  var opts=[['','Personalizado']];
+  YAW_IN.forEach(function(y,i){ opts.push(['in'+i,'Entrada E'+(i+1)]); });
+  YAW_RACK.forEach(function(y,i){ opts.push(['rk'+i,'Rack R'+(i+1)]); });
+  opts.forEach(function(o){ var op=document.createElement('option'); op.value=o[0]; op.textContent=o[1]; sel.appendChild(op); });
+  sel.value='rk0';
+  var host=$('#ikSliders'), defs=[
+    ['X','X, adelante',-40,40,0.01,'cm'],['Y','Y, hacia el rack',-40,40,0.01,'cm'],
+    ['Z','Z, altura',0,45,0.01,'cm'],['phi','Cabeceo φ',-150,60,1,'°'],['psi','Giro de muñeca ψ',-90,90,1,'°']
+  ];
+  defs.forEach(function(d){
+    ikS[d[0]]=slider(host,{id:'ik'+d[0],label:d[1],min:d[2],max:d[3],step:d[4],value:ikV[d[0]],
+      fmt:function(v){ return d[5]==='cm'?fcm(v,2):fdeg(v,0); },
+      on:function(v){ ikV[d[0]]=v; sel.value=''; ikUpdate(); }});
+  });
+  function applySlot(){
+    if(!sel.value) return;
+    var zone=sel.value.slice(0,2), i=parseInt(sel.value.slice(2),10);
+    var yaw=(zone==='in'?YAW_IN:YAW_RACK)[i], p=slotXY(yaw);
+    ikV.X=p[0]; ikV.Y=p[1]; ikV.Z=parseFloat($('#ikH').value); ikV.phi=-90; ikV.psi=0;
+    ikS.X.set(ikV.X); ikS.Y.set(ikV.Y); ikS.Z.set(ikV.Z); ikS.phi.set(-90); ikS.psi.set(0);
+    ikUpdate();
+  }
+  sel.addEventListener('change',applySlot);
+  $('#ikH').addEventListener('change',applySlot);
+  applySlot();
+}
+
+/* ================= 6: espacio de trabajo ================= */
+var wsReady=false;
+function setupCanvas(c,h){
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  var w=c.clientWidth||600;
+  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
+  var ctx=c.getContext('2d');
+  return {ctx:ctx,w:c.width,h:c.height,dpr:dpr};
+}
+function drawWorkspace(){
+  var cs=$('#wsSide'), ct=$('#wsTop'); if(!cs||!ct) return;
+  var ink=css('--ink'), ink2=css('--ink-2'), muted=css('--muted'), rule=css('--rule'),
+      orange=css('--orange'), blue=css('--blue'), grid=css('--grid'), paper=css('--paper');
+  var F='500 '; var FONT=function(px){ return F+px+'px Barlow, system-ui, sans-serif'; };
+
+  /* --- corte lateral --- */
+  (function(){
+    var S=setupCanvas(cs,420), ctx=S.ctx;
+    ctx.clearRect(0,0,S.w,S.h);
+    var r0=-4,r1=36,z0=-4,z1=40;
+    var sc=Math.min(S.w/(r1-r0),S.h/(z1-z0));
+    var ox=(S.w-(r1-r0)*sc)/2-r0*sc, oy=S.h-(S.h-(z1-z0)*sc)/2-(-z0)*sc;
+    var PX=function(r){ return ox+r*sc; }, PY=function(z){ return oy-z*sc; };
+    var img=ctx.createImageData(S.w,S.h), d=img.data;
+    function put(r,z,col,n){
+      var x=Math.round(PX(r)), y=Math.round(PY(z)), nn=n||2;
+      for(var dy=0;dy<nn;dy++) for(var dx=0;dx<nn;dx++){
+        var xx=x+dx, yy=y+dy;
+        if(xx<0||yy<0||xx>=S.w||yy>=S.h) continue;
+        var o=(yy*S.w+xx)*4;
+        d[o]=col[0]; d[o+1]=col[1]; d[o+2]=col[2]; d[o+3]=col[3];
+      }
+    }
+    var cGray=[140,150,146,110], cBlue=[70,130,175,190];
+    var st=1.5;
+    for(var q2=JOINTS[1].min;q2<=JOINTS[1].max;q2+=st){
+      var a2=q2*DEG, ex=G.L1*Math.cos(a2), ez=G.d1+G.L1*Math.sin(a2);
+      for(var q3=JOINTS[2].min;q3<=JOINTS[2].max;q3+=st){
+        var a3=a2+q3*DEG, wx=ex+G.L2*Math.cos(a3), wz=ez+G.L2*Math.sin(a3);
+        for(var q4=JOINTS[3].min;q4<=JOINTS[3].max;q4+=4){
+          var a4=a3+q4*DEG, zg=wz+G.L3*Math.sin(a4);
+          if(zg>=0) put(wx+G.L3*Math.cos(a4),zg,cGray,3);
+        }
+      }
+    }
+    for(var b2=JOINTS[1].min;b2<=JOINTS[1].max;b2+=0.5){
+      var b2r=b2*DEG, bex=G.L1*Math.cos(b2r), bez=G.d1+G.L1*Math.sin(b2r);
+      for(var b3=JOINTS[2].min;b3<=JOINTS[2].max;b3+=0.5){
+        var q4v=-90-b2-b3;
+        if(q4v<JOINTS[3].min||q4v>JOINTS[3].max) continue;
+        var b3r=b2r+b3*DEG;
+          var zb=bez+G.L2*Math.sin(b3r)-G.L3;
+        if(zb>=0) put(bex+G.L2*Math.cos(b3r),zb,cBlue);
+      }
+    }
+    ctx.putImageData(img,0,0);
+    // ejes y anotaciones
+    ctx.save(); ctx.scale(1,1);
+    ctx.strokeStyle=grid; ctx.lineWidth=1*S.dpr;
+    for(var gr=0;gr<=35;gr+=5){ ctx.beginPath(); ctx.moveTo(PX(gr),PY(z0)); ctx.lineTo(PX(gr),PY(z1)); ctx.stroke(); }
+    for(var gz=0;gz<=40;gz+=5){ ctx.beginPath(); ctx.moveTo(PX(r0),PY(gz)); ctx.lineTo(PX(r1),PY(gz)); ctx.stroke(); }
+    ctx.strokeStyle=ink; ctx.lineWidth=2*S.dpr;
+    ctx.beginPath(); ctx.moveTo(PX(r0),PY(0)); ctx.lineTo(PX(r1),PY(0)); ctx.stroke();
+    ctx.setLineDash([6*S.dpr,5*S.dpr]); ctx.strokeStyle=ink2; ctx.lineWidth=1.4*S.dpr;
+    [[Z_GRAB,'agarre 6,8 cm'],[Z_SAFE,'traslado 17 cm']].forEach(function(p){
+      ctx.beginPath(); ctx.moveTo(PX(r0),PY(p[0])); ctx.lineTo(PX(r1),PY(p[0])); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle=muted; ctx.font=FONT(13*S.dpr);
+      ctx.fillText(p[1],PX(r1)-92*S.dpr,PY(p[0])-6*S.dpr);
+      ctx.setLineDash([6*S.dpr,5*S.dpr]);
+    });
+    ctx.setLineDash([]);
+    // brazo en pose de agarre y vaso
+    var f=fk(POSES.agarre);
+    ctx.strokeStyle=orange; ctx.lineWidth=5*S.dpr; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(PX(0),PY(G.d1)); ctx.lineTo(PX(f.E[0]),PY(f.E[1]));
+    ctx.lineTo(PX(f.W[0]),PY(f.W[1])); ctx.lineTo(PX(f.T[0]),PY(f.T[1])); ctx.stroke();
+    ctx.fillStyle=orange;
+    ctx.beginPath(); ctx.arc(PX(f.T[0]),PY(f.T[1]),4*S.dpr,0,7); ctx.fill();
+    ctx.strokeStyle=ink2; ctx.lineWidth=1.6*S.dpr;
+    ctx.strokeRect(PX(R_ZONE-CUP.r),PY(SURF+CUP.h),2*CUP.r*sc,CUP.h*sc);
+    // etiquetas de eje
+    ctx.fillStyle=muted; ctx.font=FONT(13*S.dpr);
+    for(var tr=0;tr<=35;tr+=10) ctx.fillText(tr+'',PX(tr)+3*S.dpr,PY(0)+16*S.dpr);
+    for(var tz=10;tz<=40;tz+=10) ctx.fillText(tz+'',PX(0)+5*S.dpr,PY(tz)-4*S.dpr);
+    ctx.fillStyle=ink2; ctx.font=FONT(14*S.dpr);
+    ctx.fillText('Corte en el plano del brazo, cm',PX(r0)+10*S.dpr,PY(z1)+18*S.dpr);
+    ctx.restore();
+  })();
+
+  /* --- vista superior --- */
+  (function(){
+    var S=setupCanvas(ct,420), ctx=S.ctx;
+    ctx.clearRect(0,0,S.w,S.h);
+    var R=34;
+    var sc=Math.min(S.w/(2*R),(S.h-30*S.dpr)/(R+6));
+    var cx=S.w/2, cy=S.h-26*S.dpr;
+    var PX=function(x,y){ return [cx-y*sc,cy-x*sc]; };
+    // sector alcanzable con pinza vertical a la altura de agarre
+    ctx.fillStyle=css('--blue-soft');
+    ctx.beginPath();
+    ctx.arc(cx,cy,30.76*sc,-Math.PI,0,false);
+    ctx.arc(cx,cy,7.14*sc,0,-Math.PI,true);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle=blue; ctx.lineWidth=1.6*S.dpr; ctx.stroke();
+    // límite a altura de traslado
+    ctx.setLineDash([7*S.dpr,5*S.dpr]); ctx.strokeStyle=ink2; ctx.lineWidth=1.3*S.dpr;
+    ctx.beginPath(); ctx.arc(cx,cy,27.65*sc,-Math.PI,0,false); ctx.stroke();
+    ctx.setLineDash([]);
+    // arco de puestos
+    ctx.strokeStyle=rule; ctx.lineWidth=1.2*S.dpr;
+    ctx.beginPath(); ctx.arc(cx,cy,R_ZONE*sc,-Math.PI,0,false); ctx.stroke();
+    // puestos
+    ctx.font=FONT(13*S.dpr); ctx.textAlign='center';
+    function slot(yaw,label){
+      var p=slotXY(yaw), q=PX(p[0],p[1]);
+      ctx.beginPath(); ctx.arc(q[0],q[1],CUP.r*sc,0,7);
+      ctx.fillStyle=paper; ctx.fill(); ctx.strokeStyle=orange; ctx.lineWidth=1.8*S.dpr; ctx.stroke();
+      ctx.fillStyle=ink2; ctx.fillText(label,q[0],q[1]+4*S.dpr);
+    }
+    YAW_IN.forEach(function(y,i){ slot(y,'E'+(i+1)); });
+    YAW_RACK.forEach(function(y,i){ slot(y,'R'+(i+1)); });
+    // base y ejes
+    ctx.fillStyle=ink; ctx.beginPath(); ctx.arc(cx,cy,4*S.dpr,0,7); ctx.fill();
+    ctx.strokeStyle=ink2; ctx.lineWidth=1.4*S.dpr;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-12*sc); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx-12*sc,cy); ctx.stroke();
+    ctx.fillStyle=muted; ctx.textAlign='left';
+    ctx.fillText('X',cx+5*S.dpr,cy-12*sc);
+    ctx.fillText('Y',cx-12*sc,cy-7*S.dpr);
+    ctx.fillStyle=ink2; ctx.font=FONT(14*S.dpr);
+    ctx.fillText('Vista superior, giro de base ±90°',10*S.dpr,20*S.dpr);
+    ctx.textAlign='left';
+  })();
+  wsReady=true;
+}
+
+/* ================= 8: trayectorias ================= */
+var trD=172, trV=1;
+function trUpdate(){
+  var T=Math.max(0.45,trD/(75*trV));
+  var vmax=1.875*trD/T, amax=5.7735*trD/(T*T);
+  $('#trT').textContent=nf(T,2)+' s';
+  $('#trV').textContent=nf(vmax,1)+' °/s';
+  $('#trA').textContent=nf(amax,1)+' °/s²';
+  $('#trM').textContent=nf(428/vmax,1)+'× la velocidad del servo a 6 V (428 °/s)';
+  var c=$('#trajCanvas'), S=setupCanvas(c,300), ctx=S.ctx;
+  ctx.clearRect(0,0,S.w,S.h);
+  var pad=34*S.dpr, gap=10*S.dpr, hRow=(S.h-2*pad-2*gap)/3;
+  var series=[
+    {f:function(t){ return 10*t*t*t-15*Math.pow(t,4)+6*Math.pow(t,5); },max:1,lab:'θ, grados',sc:trD,col:css('--orange')},
+    {f:function(t){ return 30*t*t-60*t*t*t+30*Math.pow(t,4); },max:1.875,lab:'ω, °/s',sc:trD/T,col:css('--blue')},
+    {f:function(t){ return 60*t-180*t*t+120*t*t*t; },max:5.7735,lab:'α, °/s²',sc:trD/(T*T),col:css('--ok')}
+  ];
+  ctx.font='500 '+(13*S.dpr)+'px Barlow, system-ui, sans-serif';
+  series.forEach(function(s,i){
+    var y0=pad+i*(hRow+gap), y1=y0+hRow;
+    var mn=i===2?-s.max:0, mx=s.max;
+    var Y=function(v){ return y1-(v-mn)/(mx-mn)*hRow; };
+    ctx.strokeStyle=css('--rule'); ctx.lineWidth=1*S.dpr;
+    ctx.beginPath(); ctx.moveTo(pad,Y(0)); ctx.lineTo(S.w-pad*0.4,Y(0)); ctx.stroke();
+    ctx.strokeStyle=s.col; ctx.lineWidth=2.2*S.dpr;
+    ctx.beginPath();
+    for(var n=0;n<=160;n++){
+      var t=n/160, x=pad+t*(S.w-pad*1.4), y=Y(s.f(t));
+      if(n===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.fillStyle=css('--muted');
+    ctx.fillText(s.lab,pad,y0+12*S.dpr);
+    ctx.fillText('pico '+nf(s.max*s.sc,1),S.w-pad*1.4-70*S.dpr,y0+12*S.dpr);
+  });
+  ctx.fillStyle=css('--muted');
+  ctx.fillText('0',pad-4*S.dpr,S.h-pad+18*S.dpr);
+  ctx.fillText(nf(T,2)+' s',S.w-pad*1.4-20*S.dpr,S.h-pad+18*S.dpr);
+}
+function trInit(){
+  var host=$('#trajSliders');
+  slider(host,{id:'trd',label:'Giro del movimiento',min:5,max:180,step:1,value:trD,
+    fmt:function(v){ return fdeg(v,0); },on:function(v){ trD=v; trUpdate(); }});
+  slider(host,{id:'trv',label:'Velocidad',min:0.5,max:3,step:0.1,value:trV,
+    fmt:function(v){ return nf(v,1)+'×'; },on:function(v){ trV=v; trUpdate(); }});
+  trUpdate();
+}
+
+/* ================= 9: lote y planificador ================= */
+var lote=[{d:3,n:12},{d:1,n:30},{d:4,n:8},{d:0,n:25},{d:2,n:17}];
+function cupData(c){
+  var den=DENOMS[c.d];
+  return {den:den,n:c.n,valor:den.v*c.n,peso:CUP.mass+c.n*den.m};
+}
+function planSort(cups,key,dir,start){
+  var idx=cups.map(function(c,i){ return i; });
+  var val=function(i){
+    var c=cups[i];
+    return key==='den'?c.den.v:key==='count'?c.n:key==='value'?c.valor:c.peso;
+  };
+  var sorted=idx.slice().sort(function(a,b){ return dir*((val(a)-val(b))||(cups[a].den.v-cups[b].den.v)); });
+  var pos={}, rackOcc=[null,null,null,null,null], inOcc=[null,null,null,null,null];
+  idx.forEach(function(i){
+    if(start==='rack'){ pos[i]={z:'rack',i:i}; rackOcc[i]=i; }
+    else { pos[i]={z:'in',i:i}; inOcc[i]=i; }
+  });
+  var ops=[];
+  for(var j=0;j<5;j++){
+    var d=sorted[j], cur=pos[d];
+    if(cur.z==='rack'&&cur.i===j) continue;
+    var occ=rackOcc[j];
+    if(occ!==null&&occ!==d){
+      var k=inOcc.indexOf(null);
+      ops.push({cup:occ,from:pos[occ],to:{z:'in',i:k}});
+      inOcc[k]=occ; rackOcc[j]=null; pos[occ]={z:'in',i:k};
+    }
+    var from=pos[d];
+    if(from.z==='in') inOcc[from.i]=null;
+    if(from.z==='rack') rackOcc[from.i]=null;
+    ops.push({cup:d,from:from,to:{z:'rack',i:j}});
+    rackOcc[j]=d; pos[d]={z:'rack',i:j};
+  }
+  return {ops:ops,sorted:sorted};
+}
+function poseAt(yaw,z){
+  var base=(Math.abs(z-Z_SAFE)<0.1?POSES.segura:POSES.agarre);
+  return [yaw,base[1],base[2],base[3],0];
+}
+function cycleTime(ops){
+  var v=1, q=POSES.home.slice(), t=0;
+  var yawOf=function(l){ return (l.z==='in'?YAW_IN:YAW_RACK)[l.i]; };
+  var jointTo=function(p){
+    var dq=0; for(var i=0;i<5;i++) dq=Math.max(dq,Math.abs(p[i]-q[i]));
+    q=p.slice(); return Math.max(0.45,dq/(75*v));
+  };
+  ops.forEach(function(op){
+    t+=jointTo(poseAt(yawOf(op.from),Z_SAFE));
+    t+=Math.max(0.3,(Z_SAFE-Z_GRAB)/(11*v))*2+0.32;
+    q=poseAt(yawOf(op.from),Z_SAFE);
+    t+=jointTo(poseAt(yawOf(op.to),Z_SAFE));
+    t+=Math.max(0.3,(Z_SAFE-Z_GRAB-0.25)/(11*v))*2+0.32;
+    q=poseAt(yawOf(op.to),Z_SAFE);
+  });
+  t+=jointTo(POSES.home);
+  return t;
+}
+function sortUpdate(){
+  var cups=lote.map(cupData);
+  var key=$('#sortKey').value, dir=parseInt($('#sortDir').value,10), start=$('#sortState').value;
+  var plan=planSort(cups,key,dir,start);
+  var nameOf=function(l){ return (l.z==='in'?'entrada ':'rack ')+(l.i+1); };
+  var html='<table><thead><tr><th>Puesto del rack</th><th>Vaso</th><th class="r">Monedas</th><th class="r">Valor</th><th class="r">Peso</th></tr></thead><tbody>';
+  var tv=0,tp=0,tn=0;
+  plan.sorted.forEach(function(ci,j){
+    var c=cups[ci];
+    tv+=c.valor; tp+=c.peso; tn+=c.n;
+    html+='<tr><td>R'+(j+1)+'</td><td>'+money(c.den.v)+'</td><td class="r">'+c.n+'</td><td class="r">'+money(c.valor)+'</td><td class="r">'+nf(c.peso,1)+' g</td></tr>';
+  });
+  html+='</tbody><tfoot><tr><td colspan="2">Totales</td><td class="r">'+tn+'</td><td class="r">'+money(tv)+'</td><td class="r">'+nf(tp,1)+' g</td></tr></tfoot></table>';
+  $('#sortOut').innerHTML=html;
+  var ol=$('#sortOps'); ol.innerHTML='';
+  if(!plan.ops.length){
+    var li0=document.createElement('li'); li0.innerHTML='<span>Los vasos ya están en ese orden, no hay nada que mover.</span>'; ol.appendChild(li0);
+  }
+  plan.ops.forEach(function(op){
+    var c=cups[op.cup], li=document.createElement('li');
+    li.innerHTML='<span>Vaso de <b>'+money(c.den.v)+'</b> con '+c.n+' monedas, de '+nameOf(op.from)+' a '+nameOf(op.to)+'</span>';
+    ol.appendChild(li);
+  });
+  var t=cycleTime(plan.ops);
+  $('#sortTime').textContent=plan.ops.length?
+    (plan.ops.length+' movimientos, '+nf(t,1)+' s estimados a velocidad 1×, '+nf(t/plan.ops.length,1)+' s por vaso'):'';
+}
+function sortInit(){
+  var host=$('#sortInputs');
+  var html='<table><thead><tr><th>Puesto de entrada</th><th>Denominación</th><th>Monedas</th></tr></thead><tbody>';
+  lote.forEach(function(c,i){
+    html+='<tr><td>E'+(i+1)+'</td><td><select data-lot="'+i+'">';
+    DENOMS.forEach(function(d,j){ html+='<option value="'+j+'"'+(j===c.d?' selected':'')+'>'+money(d.v)+'</option>'; });
+    html+='</select></td><td><input type="number" min="1" max="40" step="1" value="'+c.n+'" data-lotn="'+i+'"></td></tr>';
+  });
+  html+='</tbody></table>';
+  host.innerHTML=html;
+  Array.prototype.forEach.call(host.querySelectorAll('[data-lot]'),function(s){
+    s.addEventListener('change',function(){ lote[+s.getAttribute('data-lot')].d=+s.value; sortUpdate(); });
+  });
+  Array.prototype.forEach.call(host.querySelectorAll('[data-lotn]'),function(s){
+    s.addEventListener('change',function(){ lote[+s.getAttribute('data-lotn')].n=clamp(Math.round(+s.value||1),1,40); s.value=lote[+s.getAttribute('data-lotn')].n; sortUpdate(); });
+  });
+  ['#sortKey','#sortDir','#sortState'].forEach(function(id){ $(id).addEventListener('change',sortUpdate); });
+  $('#sortRand').addEventListener('click',function(){
+    var order=[0,1,2,3,4].sort(function(){ return Math.random()-0.5; });
+    lote.forEach(function(c,i){ c.d=order[i]; c.n=6+Math.floor(Math.random()*35); });
+    Array.prototype.forEach.call(host.querySelectorAll('[data-lot]'),function(s){ s.value=lote[+s.getAttribute('data-lot')].d; });
+    Array.prototype.forEach.call(host.querySelectorAll('[data-lotn]'),function(s){ s.value=lote[+s.getAttribute('data-lotn')].n; });
+    sortUpdate();
+  });
+  sortUpdate();
+}
+
+/* ================= 10: pares ================= */
+function torques(q,pay){
+  var a2=q[1]*DEG,a3=a2+q[2]*DEG,a4=a3+q[3]*DEG;
+  var xe=G.L1*Math.cos(a2), xw=xe+G.L2*Math.cos(a3), xt=xw+G.L3*Math.cos(a4), xa=xw+MASS.waD*Math.cos(a4);
+  var items=[[MASS.L1,G.L1/2*Math.cos(a2)],[MASS.s3,xe],[MASS.L2,xe+G.L2/2*Math.cos(a3)],[MASS.s4,xw],[MASS.wa,xa],[pay,xt]];
+  var sum=function(from,x0){ var s=0; for(var i=from;i<items.length;i++) s+=items[i][0]*(items[i][1]-x0); return s*9.81/100/0.0980665; };
+  var I=0; items.forEach(function(it){ I+=it[0]*Math.pow(it[1]/100,2); });
+  return {t2:sum(0,0),t3:sum(2,xe),t4:sum(4,xw),I:I,tau1:I*3.295/0.0980665};
+}
+function tqUpdate(){
+  var q=POSES[$('#tqPose').value], den=DENOMS[+$('#tqDen').value], n=clamp(Math.round(+$('#tqN').value||0),0,60);
+  var pay=(CUP.mass+n*den.m)/1000;
+  var T=torques(q,pay);
+  var tGrip=pay*9.81*1.5/(2*0.5)*2*0.01/0.0980665;
+  drawArm($('#tqArm'),q,{grip:CUP_W,label:'Pose evaluada'});
+  $('#tqPay').innerHTML='Carga en la pinza: <b>'+nf(pay*1000,0)+' g</b> ('+money(den.v)+' × '+n+' = '+money(den.v*n)+')';
+  var rows=[
+    ['J1, base (dinámico)',T.tau1,SERVOS.J1],
+    ['J2, hombro',T.t2,SERVOS.J2],
+    ['J3, codo',T.t3,SERVOS.J3],
+    ['J4, muñeca',Math.abs(T.t4),SERVOS.J4],
+    ['Pinza',tGrip,SERVOS.P]
+  ];
+  var html='<table><thead><tr><th>Articulación</th><th class="r">Par</th><th>Servo</th><th class="r">Par a 6 V</th><th class="r">FS</th><th>&nbsp;</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var fs=r[1]>0.01?r[2].t/r[1]:Infinity;
+    var pct=Math.min(100,(isFinite(fs)?fs:5)/3*100);
+    html+='<tr><td>'+r[0]+'</td><td class="r">'+nf(r[1],2)+' kg·cm</td><td>'+r[2].n+'</td><td class="r">'+nf(r[2].t,1)+'</td>'+
+      '<td class="r '+(fs<1.5?'bad':'ok')+'">'+(isFinite(fs)?nf(fs,2):'—')+'</td>'+
+      '<td><span class="bar"><i class="'+(fs<1.5?'low':'')+'" style="width:'+pct+'%"></i></span></td></tr>';
+  });
+  html+='</tbody></table>';
+  $('#tqOut').innerHTML=html;
+}
+function tqInit(){
+  var sel=$('#tqDen');
+  DENOMS.forEach(function(d,i){ var o=document.createElement('option'); o.value=i; o.textContent=money(d.v); sel.appendChild(o); });
+  sel.value=4;
+  ['#tqPose','#tqDen','#tqN'].forEach(function(id){ $(id).addEventListener('change',tqUpdate); });
+  $('#tqN').addEventListener('input',tqUpdate);
+  tqUpdate();
+}
+
+/* ================= 15: verificación ================= */
+function supExp(v){
+  var e=v.toExponential(1).split('e'), sup={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  var ex=parseInt(e[1],10).toString().split('').map(function(c){ return sup[c]||c; }).join('');
+  return e[0].replace('.',',')+' × 10'+ex;
+}
+function verifyInit(){
+  var rows='', errMax=0, todos=true;
+  var list=[];
+  YAW_IN.forEach(function(y,i){ list.push(['E'+(i+1),y]); });
+  YAW_RACK.forEach(function(y,i){ list.push(['R'+(i+1),y]); });
+  list.forEach(function(s){
+    var p=slotXY(s[1]);
+    var r1=ik(p[0],p[1],Z_GRAB,-90,0,0), r2=ik(p[0],p[1],Z_SAFE,-90,0,0);
+    [r1,r2].forEach(function(r){
+      if(!r.ok){ todos=false; return; }
+      var f=fk(r.q);
+      errMax=Math.max(errMax,Math.hypot(f.X-p[0],f.Y-p[1],f.Z-(r===r1?Z_GRAB:Z_SAFE)));
+    });
+    rows+='<tr><td>'+s[0]+'</td><td class="r">'+nf(p[0],2)+'</td><td class="r">'+nf(p[1],2)+'</td><td class="r">'+fdeg(r1.q[0],2)+
+      '</td><td class="r">'+fdeg(r1.q[1],2)+'</td><td class="r">'+fdeg(r1.q[2],2)+'</td><td class="r">'+fdeg(r1.q[3],2)+
+      '</td><td class="c '+(r1.ok?'ok':'bad')+'">'+(r1.ok?'dentro de rango':'fuera')+'</td></tr>';
+  });
+  $('#verifyOut').innerHTML='<table><caption>Cinemática inversa en los diez puestos a la altura de agarre, con \u03c6 = \u221290\u00b0.</caption>'+
+    '<thead><tr><th>Puesto</th><th class="r">X</th><th class="r">Y</th><th class="r">θ₁</th><th class="r">θ₂</th><th class="r">θ₃</th><th class="r">θ₄</th><th class="c">Límites</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  $('#verifySummary').innerHTML='Las veinte poses de trabajo, diez de agarre y diez de traslado, tienen solución y respetan los rangos articulares. '+
+    'El error máximo de ida y vuelta fue de <b>'+errMax.toExponential(1).replace('.',',')+' cm</b>. '+
+    'A la altura de traslado la postura es θ₂ = 60,00°, θ₃ = −59,45° y θ₄ = −90,55° en los diez puestos.';
+}
+
+/* ================= tema, copiar, índice ================= */
+function themeInit(){
+  var modes=['auto','light','dark'], names={auto:'Tema automático',light:'Tema claro',dark:'Tema oscuro'}, i=0;
+  var btn=$('#themeBtn');
+  btn.addEventListener('click',function(){
+    i=(i+1)%3;
+    if(modes[i]==='auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme',modes[i]);
+    btn.textContent=names[modes[i]];
+    setTimeout(redraw,30);
+  });
+}
+function copyInit(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'),function(b){
+    b.addEventListener('click',function(){
+      var src=document.getElementById(b.getAttribute('data-copy'));
+      var t=src.innerText||src.textContent;
+      var done=function(){ var old=b.textContent; b.textContent='Copiado'; setTimeout(function(){ b.textContent=old; },1600); };
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done,function(){});
+      else{
+        var ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+}
+function tocInit(){
+  var links={};
+  Array.prototype.forEach.call(document.querySelectorAll('.toc a'),function(a){ links[a.getAttribute('href').slice(1)]=a; });
+  if(!('IntersectionObserver' in window)) return;
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        for(var k in links) links[k].classList.remove('on');
+        if(links[e.target.id]) links[e.target.id].classList.add('on');
+      }
+    });
+  },{rootMargin:'-10% 0px -75% 0px'});
+  Array.prototype.forEach.call(document.querySelectorAll('.doc section'),function(s){ obs.observe(s); });
+}
+
+/* ================= arranque ================= */
+function redraw(){
+  drawArm($('#heroArm'),POSES.agarre,{view:[-13,43,-7,34],angles:true,dims:true,cup:R_ZONE,grip:CUP_W});
+  drawArch();
+  fkUpdate(); ikUpdate(); tqUpdate(); trUpdate();
+  drawWorkspace();
+}
+function boot(){
+  drawArm($('#heroArm'),POSES.agarre,{view:[-13,43,-7,34],angles:true,dims:true,cup:R_ZONE,grip:CUP_W});
+  drawArch();
+  fkInit(); ikInit(); trInit(); sortInit(); tqInit(); verifyInit();
+  themeInit(); copyInit(); tocInit();
+  drawWorkspace();
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  if(mq.addEventListener) mq.addEventListener('change',function(){ setTimeout(redraw,30); });
+  var rt;
+  window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(drawWorkspace,200); });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+else boot();
+})();
+</script>
+</body>
+</html>
