@@ -1,0 +1,21 @@
+cantidad,componente,detalle,uso,nota
+1,ESP32 DevKit V1,38 pines,controlador principal,Wi-Fi integrado
+1,PCA9685,16 canales PWM 12 bits,generación de PWM,dirección I2C 0x40
+1,Servo DS3235MG,32 kg-cm a 6 V,J2 hombro,el más cargado
+1,Servo DS3218MG,20.4 kg-cm a 6 V,J3 codo,
+2,Servo MG996R,11 kg-cm a 6 V,J1 base y J4 muñeca,
+2,Servo MG90S,2.2 kg-cm a 6 V,J5 giro y pinza,
+1,Fuente conmutada 6 V 10 A,60 W,potencia de servos,separada de la lógica
+1,Convertidor reductor 5 V 3 A,LM2596 o similar,alimentación del ESP32,en banco se usa USB
+1,Condensador 2200 uF 16 V,electrolítico,bornera de potencia,absorbe picos de arranque
+1,Rodamiento axial 51107,35x52x12 mm,base giratoria,quita carga axial al servo J1
+1,Bornera de potencia,2 polos 20 A,distribución en estrella,
+2,Bocina metálica 25T,aluminio,uniones de hombro y codo,
+1,Filamento PETG,1 kg,eslabones y soportes,
+1,Filamento TPU 95A,250 g,almohadillas de la pinza,
+20,Tornillos M3,10 a 20 mm,ensamble,con insertos de latón
+20,Insertos de latón M3,5 mm,ensamble,se ponen con soldador
+1,Placa base MDF 9 mm,25x25 cm,anclaje a la mesa,
+5,Vasos de polipropileno,52 mm de diámetro y 80 mm de alto,contenedores de monedas,
+2,Cable 18 AWG,1 m rojo y 1 m negro,potencia,
+1,Juego de cables Dupont,hembra-hembra,señal,

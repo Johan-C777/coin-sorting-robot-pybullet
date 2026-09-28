@@ -1,0 +1,8 @@
+# Núcleo: el paquete brazo funciona solo con la librería estándar.
+# Estas dependencias son para la simulación, el dashboard y las figuras.
+pybullet>=3.2.5        # simulación física del brazo y la celda
+streamlit>=1.30        # dashboard del proyecto
+pandas>=2.0            # tablas del dashboard
+matplotlib>=3.7        # figuras de docs/img
+pyserial>=3.5          # enlace serie con el ESP32
+pytest>=7.4            # pruebas
