@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Logística de Monedas Inteligentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E2E3DE; --panel:#D9DBD4; --panel-2:#CBCFC6; --linea:#B7BCB2;
+  --ink:#1C2730; --ink-2:#44525A; --muted:#6C7A80;
+  --naranja:#EE7A1E; --naranja-ink:#A8530C; --acero:#34597A; --verde:#2C7A54; --rojo:#B23E0C;
+  --f-ui:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;
+  --f-num:"Barlow",system-ui,sans-serif;
+  --f-code:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#161E22; --panel:#1E282D; --panel-2:#27343A; --linea:#36454C;
+  --ink:#E3E8E5; --ink-2:#B5C0BC; --muted:#8B9A9E;
+  --naranja:#F79343; --naranja-ink:#F79343; --acero:#83AACB; --verde:#63C295; --rojo:#F08A5D;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-num);font-size:15px;overflow:hidden}
+button,select,input{font-family:inherit}
+:focus-visible{outline:2px solid var(--naranja);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 400px;height:100%}
+.escenario{position:relative;min-width:0}
+#lienzo{display:block;width:100%;height:100%}
+
+.encabezado{position:absolute;top:18px;left:22px;right:22px;display:flex;gap:16px;align-items:flex-start;pointer-events:none}
+.encabezado h1{font-family:var(--f-ui);font-weight:600;font-size:clamp(1.3rem,2.3vw,1.85rem);margin:0;line-height:1.04}
+.encabezado p{margin:6px 0 0;max-width:44ch;color:var(--ink-2);font-size:14px;line-height:1.45}
+.vistas{margin-left:auto;display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
+.pill{font:500 13.5px/1 var(--f-ui);color:var(--ink);background:var(--panel);border:1px solid var(--linea);
+  border-radius:999px;padding:8px 13px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.estado-flotante{position:absolute;left:22px;bottom:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  font-family:var(--f-ui);font-size:13.5px;color:var(--muted);pointer-events:none}
+.chip{background:var(--panel);border:1px solid var(--linea);border-radius:6px;padding:5px 10px;color:var(--ink-2)}
+.led{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px;vertical-align:0}
+.led.on{background:var(--verde)}
+.led.alerta{background:var(--naranja)}
+
+.panel{background:var(--panel);border-left:1px solid var(--linea);overflow-y:auto;padding:16px 18px 34px}
+.panel h2{font-family:var(--f-ui);font-size:1.02rem;font-weight:600;margin:0}
+.panel h3{font-family:var(--f-ui);font-size:.92rem;font-weight:600;color:var(--ink-2);margin:14px 0 6px}
+details{border-top:1px solid var(--linea);padding:12px 0}
+details:first-of-type{border-top:0;padding-top:4px}
+summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--f-ui);font-weight:600;font-size:1.02rem;color:var(--ink)}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--f-ui);font-weight:500;color:var(--muted);font-size:18px;line-height:1}
+details[open] summary::after{content:"–"}
+details > div.cuerpo{padding-top:12px}
+
+.fila{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:500 14px/1 var(--f-ui);color:var(--ink);background:var(--bg);border:1px solid var(--linea);
+  border-radius:6px;padding:9px 12px;cursor:pointer;min-height:36px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primario{background:var(--naranja);border-color:var(--naranja);color:#fff}
+.btn.primario:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.45;cursor:default}
+.campos{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.campo{display:flex;flex-direction:column;gap:4px;font-family:var(--f-ui);font-size:13.5px;color:var(--ink-2)}
+select,input[type=number]{font:500 14.5px/1.2 var(--f-num);color:var(--ink);background:var(--bg);
+  border:1px solid var(--linea);border-radius:5px;padding:7px 8px;min-height:34px}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:12px 0 0}
+.ctrl label{font-family:var(--f-ui);font-weight:500}
+.ctrl output{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--naranja);height:24px}
+
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:5px 0 5px 8px;border-bottom:1px solid var(--linea)}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th{font-family:var(--f-ui);font-weight:600;color:var(--ink-2);font-size:13.5px}
+tfoot td{font-weight:600;border-bottom:0}
+
+.lectura{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin-top:4px}
+.lectura dt{font-family:var(--f-ui);color:var(--ink-2)}
+.lectura dd{margin:0;font-variant-numeric:tabular-nums}
+.trama{font-family:var(--f-code);font-size:13px;background:var(--bg);border:1px solid var(--linea);
+  border-radius:6px;padding:9px 11px;margin-top:10px;word-break:break-all;color:var(--ink-2)}
+.consola{font-family:var(--f-code);font-size:11.8px;line-height:1.65;background:var(--bg);
+  border:1px solid var(--linea);border-radius:6px;padding:9px 11px;height:190px;overflow:auto;color:var(--ink-2);
+  white-space:pre-wrap;margin-top:10px}
+.consola b{color:var(--naranja-ink);font-weight:600}
+.obst{display:grid;gap:8px}
+.obst div{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--bg);
+  border:1px solid var(--linea);border-radius:6px;padding:8px 10px;font-family:var(--f-ui);font-size:13.5px}
+.obst b{font-weight:600}
+.obst span{color:var(--muted);font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.obst .dist{color:var(--ink-2)}
+.obst div.riesgo{border-color:var(--naranja);color:var(--naranja-ink)}
+.nota{font-size:13px;color:var(--muted);line-height:1.5;margin:10px 0 0}
+.check{display:flex;align-items:center;gap:9px;font-family:var(--f-ui);font-size:14px;color:var(--ink);
+  margin-top:12px;cursor:pointer}
+.check input{width:17px;height:17px;accent-color:var(--naranja);cursor:pointer}
+.sensores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-family:var(--f-ui);
+  font-size:12.5px;color:var(--muted);margin-top:10px}
+.sensores div{background:var(--bg);border:1px solid var(--linea);border-radius:6px;padding:6px 2px}
+.sensores b{display:block;font-size:13px;color:var(--ink)}
+.sensores div.on{border-color:var(--verde);color:var(--verde)}
+
+@media (max-width:1060px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .escenario{height:58svh;min-height:380px}
+  .panel{border-left:0;border-top:1px solid var(--linea)}
+  .encabezado p{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="escenario">
+    <canvas id="lienzo"></canvas>
+    <div class="encabezado">
+      <div>
+        <h1>Sistema de Logística de Monedas Inteligentes</h1>
+        <p>Etapa 1 y etapa 2 en un mismo entorno: la tolva alimenta el riel selector, la banda lleva los vasos llenos a la zona de entrega y el brazo de 5 GDL los ordena en el rack esquivando los obstáculos aéreos giratorios.</p>
+      </div>
+      <div class="vistas">
+        <button class="pill" id="vIso" aria-pressed="true" type="button">Isométrica</button>
+        <button class="pill" id="vBrazo" aria-pressed="false" type="button">Brazo</button>
+        <button class="pill" id="vSup" aria-pressed="false" type="button">Superior</button>
+        <button class="pill" id="vTema" aria-pressed="false" type="button">Tema</button>
+      </div>
+    </div>
+    <div class="estado-flotante">
+      <span class="chip" id="chipEstado"><span class="led" id="ledEstado"></span>En espera</span>
+      <span class="chip" id="chipFase">Fase: inicio</span>
+      <span class="chip" id="chipTolva">Tolva: 0 monedas</span>
+      <span class="chip">Arrastra para girar · rueda para acercar</span>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <details open>
+      <summary>Control</summary>
+      <div class="cuerpo">
+        <div class="fila">
+          <button class="btn primario" id="btnIniciar" type="button">Iniciar simulación completa</button>
+          <button class="btn" id="btnPausar" type="button" disabled>Pausar</button>
+          <button class="btn" id="btnReiniciar" type="button">Reiniciar</button>
+        </div>
+        <div class="campos">
+          <label class="campo">Criterio de orden
+            <select id="selCriterio">
+              <option value="denominacion">Denominación</option>
+              <option value="cantidad">Cantidad de monedas</option>
+              <option value="valor" selected>Valor total</option>
+              <option value="peso">Peso</option>
+            </select>
+          </label>
+          <label class="campo">Sentido
+            <select id="selSentido">
+              <option value="asc" selected>Ascendente</option>
+              <option value="desc">Descendente</option>
+            </select>
+          </label>
+        </div>
+        <p class="nota">El brazo calcula el puesto de cada vaso cuando la etapa 1 termina de contar, y lo lleva directo a su lugar en el rack.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Velocidades</summary>
+      <div class="cuerpo">
+        <div class="ctrl">
+          <label for="slBanda">Banda transportadora</label><output id="outBanda">6,0 cm/s</output>
+          <input type="range" id="slBanda" min="1" max="18" step="0.5" value="6">
+        </div>
+        <div class="ctrl">
+          <label for="slObst">Obstáculos aéreos</label><output id="outObst">45 °/s</output>
+          <input type="range" id="slObst" min="8" max="120" step="1" value="45">
+        </div>
+        <div class="ctrl">
+          <label for="slBrazo">Brazo</label><output id="outBrazo">1,0×</output>
+          <input type="range" id="slBrazo" min="0.4" max="3" step="0.1" value="1">
+        </div>
+        <div class="ctrl">
+          <label for="slAlim">Alimentación de la tolva</label><output id="outAlim">4,0 monedas/s</output>
+          <input type="range" id="slAlim" min="0.5" max="12" step="0.5" value="4">
+        </div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Conteo de monedas</summary>
+      <div class="cuerpo">
+        <table id="tablaConteo">
+          <thead><tr><th>Canal</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td colspan="2">Totales</td><td id="tN">0</td><td id="tV">$0</td><td id="tP">0,0 g</td></tr></tfoot>
+        </table>
+        <div class="sensores" id="sensores"></div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Obstáculos aéreos</summary>
+      <div class="cuerpo">
+        <div class="obst" id="listaObst"></div>
+        <p class="nota" id="notaObst">El planificador mide la distancia del vaso a cada esfera en el instante en que va a pasar. Si cabe por debajo baja la altura de tránsito; si no cabe, recoge el brazo hacia la base y rodea el móvil por dentro con una curva en el plano XY; y solo si ninguna maniobra sirve espera la ventana entre brazos. En todas, el cabeceo se mantiene en −90°.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Estado del brazo</summary>
+      <div class="cuerpo">
+        <dl class="lectura">
+          <dt>TCP (X, Y, Z)</dt><dd id="lecTCP">—</dd>
+          <dt>Cabeceo φ</dt><dd id="lecPhi">—</dd>
+          <dt>Altura de tránsito</dt><dd id="lecAlt">—</dd>
+          <dt>Radio ρ del TCP</dt><dd id="lecRho">—</dd>
+          <dt>Maniobra</dt><dd id="lecManiobra">directo</dd>
+          <dt>Vaso en la pinza</dt><dd id="lecVaso">ninguno</dd>
+        </dl>
+        <label class="check"><input type="checkbox" id="chkRuta" checked>Trayectoria del TCP</label>
+        <div class="trama" id="tramaServo">S:90,90,90,30,90,85</div>
+        <div class="trama" id="tramaVasos">VASOS:</div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Consola</summary>
+      <div class="cuerpo">
+        <div class="consola" id="consola"></div>
+      </div>
+    </details>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* =======================================================================
+   0. PARÁMETROS DEL SISTEMA (centímetros y grados, escala real)
+   ======================================================================= */
+var GR = Math.PI/180;
+
+// --- brazo de 5 GDL -----------------------------------------------------
+var D1 = 11, L1 = 16, L2 = 15, L3 = 8;        // hombro, brazo, antebrazo, muñeca
+var LIM = [[-90,90],[0,180],[-150,0],[-120,60],[-90,90]];
+var NOMBRE_J = ['J1 base','J2 hombro','J3 codo','J4 cabeceo','J5 giro'];
+var HOME = [0, 90, -90, -90, 0];
+var PINZA_ABIERTA = 66, PINZA_CERRADA = 49, PINZA_MAX = 70;
+var GRASP_DZ = 6.2;                            // del TCP a la base del vaso
+
+// --- celda --------------------------------------------------------------
+var R_ARCO = 23;                               // radio del arco de trabajo
+var Z_AGARRE = 6.8, Z_SEGURA = 20, Z_BAJO = 15.5, Z_ALTO = 23.2;
+var YAW_RACK = [24, 39.5, 55, 70.5, 86];
+var YAW_ENTREGA = -60;                          // zona de entrega sobre la banda
+
+// --- monedas colombianas (serie 2012) -----------------------------------
+var MONEDAS = [
+  {v:50,   d:1.70, e:0.14, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4},
+  {v:100,  d:2.03, e:0.16, m:3.34, aro:0xC7A33A, centro:0xC7A33A},
+  {v:200,  d:2.24, e:0.17, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC},
+  {v:500,  d:2.37, e:0.20, m:7.14, aro:0xB4B8B0, centro:0xC7A33A},
+  {v:1000, d:2.67, e:0.23, m:9.95, aro:0xC7A33A, centro:0xB4B8B0}
+];
+var LUZ = [1.76, 2.09, 2.30, 2.43, 2.73];      // luces del riel selector
+var LUZ_ENTRADA = 1.60;
+
+// --- riel selector ------------------------------------------------------
+var INC = 25*GR;                                // inclinación del riel
+var RIEL_X0 = -38, RIEL_Y0 = 36;                // punto alto del riel
+var PASO_MUNDO = 6.5;                           // separación de estaciones en X
+var PASO_LOCAL = PASO_MUNDO/Math.cos(INC);
+var EST_LOCAL0 = 8.83;                          // primera estación sobre el riel
+var LARGO_RIEL = EST_LOCAL0 + PASO_LOCAL*4 + 4;
+var ANCHO_RIEL = 3.0, ESP_RIEL = 1.0;
+
+// --- banda transportadora ----------------------------------------------
+var Z_BANDA = R_ARCO*Math.sin(-YAW_ENTREGA*GR);   // 19,92 cm: eje de la banda
+var X_ENTREGA = R_ARCO*Math.cos(YAW_ENTREGA*GR);  // 11,5 cm
+var BANDA_X0 = -42, BANDA_X1 = 18, BANDA_W = 7, BANDA_Y = 2.4;
+var VASO_R = 2.6, VASO_H = 8, VASO_Y = 2.7, MASA_VASO = 18;
+
+var EST = [];                                    // estaciones del selector
+for (var i=0;i<5;i++){
+  var xl = EST_LOCAL0 + PASO_LOCAL*i;
+  var xw = RIEL_X0 + xl*Math.cos(INC);
+  var yr = RIEL_Y0 - xl*Math.sin(INC);
+  EST.push({i:i, xLocal:xl, x:xw, yRiel:yr, yBoca:yr-ESP_RIEL,
+            yEmbudo:yr-ESP_RIEL-5.5, den:MONEDAS[i].v, luz:LUZ[i]});
+}
+
+// --- obstáculos aéreos giratorios ---------------------------------------
+// Cada móvil cuelga de la viga superior y gira sobre su eje Y. El primero
+// deja pasar el vaso por debajo; el segundo cuelga bajo y obliga a esperar
+// la ventana entre sus brazos.
+var OBST = [
+  {nombre:'O1', yaw:-22, brazos:3, radio:6.5, yEsfera:21.5, rEsfera:2.6, fase:0.0, giro:1},
+  {nombre:'O2', yaw:10,  brazos:2, radio:9.0, yEsfera:14.5, rEsfera:2.2, fase:1.1, giro:-1}
+];
+OBST.forEach(function(o){
+  o.x = R_ARCO*Math.cos(o.yaw*GR);
+  o.z = -R_ARCO*Math.sin(o.yaw*GR);
+  o.angulo = o.fase;
+});
+var MARGEN = 1.4;                                 // holgura mínima vaso-esfera
+
+/* =======================================================================
+   1. CINEMÁTICA
+   ======================================================================= */
+function fk(q){
+  var a2 = q[1]*GR, a3 = a2 + q[2]*GR, a4 = a3 + q[3]*GR;
+  var rho = L1*Math.cos(a2) + L2*Math.cos(a3) + L3*Math.cos(a4);
+  var z   = D1 + L1*Math.sin(a2) + L2*Math.sin(a3) + L3*Math.sin(a4);
+  return {X: rho*Math.cos(q[0]*GR), Y: rho*Math.sin(q[0]*GR), Z: z,
+          phi: a4/GR, rho: rho};
+}
+function envolver(a){ return ((a+180)%360+360)%360-180; }
+// Inversa cerrada de codo arriba: se descuenta el último eslabón para hallar
+// el centro de muñeca y se resuelve el triángulo L1-L2 con ley de cosenos.
+function ik(X, Y, Z, phi, psi, yawPrevio){
+  phi = (phi===undefined) ? -90 : phi;
+  var r = Math.hypot(X, Y);
+  var t1 = (r < 1e-6) ? (yawPrevio||0) : Math.atan2(Y, X)/GR;
+  var p = phi*GR;
+  var rw = r - L3*Math.cos(p), hw = Z - D1 - L3*Math.sin(p);
+  var D = (rw*rw + hw*hw - L1*L1 - L2*L2)/(2*L1*L2);
+  if (Math.abs(D) > 1) return {ok:false, motivo:'alcance'};
+  var t3 = -Math.acos(D);
+  var t2 = Math.atan2(hw, rw) - Math.atan2(L2*Math.sin(t3), L1 + L2*Math.cos(t3));
+  var q = [t1, t2/GR, t3/GR, envolver(phi - t2/GR - t3/GR), psi||0];
+  for (var k=0;k<5;k++){
+    if (q[k] < LIM[k][0]-0.05 || q[k] > LIM[k][1]+0.05)
+      return {ok:false, motivo:'limite', junta:k, q:q};
+    q[k] = Math.min(Math.max(q[k], LIM[k][0]), LIM[k][1]);
+  }
+  return {ok:true, q:q};
+}
+// ángulos de servo y trama que se enviaría al ESP32
+function servos(q, pinzaMm){
+  return [Math.round(q[0]+90), Math.round(q[1]), Math.round(-q[2]),
+          Math.round(q[3]+120), Math.round(q[4]+90),
+          Math.round(pinzaMm/PINZA_MAX*90)];
+}
+function trama(q, pinzaMm){ return 'S:' + servos(q, pinzaMm).join(','); }
+// punto del arco de trabajo: yaw en grados, altura del TCP
+function puntoArco(yaw, z, radio){
+  radio = radio===undefined ? R_ARCO : radio;
+  return {X: radio*Math.cos(yaw*GR), Y: radio*Math.sin(yaw*GR), Z: z};
+}
+// paso de coordenadas del robot (X adelante, Y a la izquierda) a la escena
+function aEscena(X, Y, Z){ return new THREE.Vector3(X, Z, -Y); }
+function quintico(t){ t = Math.min(Math.max(t,0),1); return t*t*t*(10 + t*(-15 + 6*t)); }
+
+/* =======================================================================
+   2. ESCENA, LUCES Y CÁMARA
+   ======================================================================= */
+var lienzo = document.getElementById('lienzo');
+var renderer = new THREE.WebGLRenderer({canvas:lienzo, antialias:true});
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+var escena = new THREE.Scene();
+var camara = new THREE.PerspectiveCamera(42, 1, 0.5, 500);
+var objetivo = new THREE.Vector3(0, 16, 2);
+var orbita = {r:152, theta:-0.62, phi:0.98};
+
+var sol = new THREE.DirectionalLight(0xffffff, 0.95);
+sol.position.set(34, 66, 40);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+sol.shadow.bias = -0.0009;
+var sc = sol.shadow.camera;
+sc.left = -70; sc.right = 70; sc.top = 70; sc.bottom = -70; sc.near = 1; sc.far = 190;
+sc.updateProjectionMatrix();
+escena.add(sol);
+escena.add(new THREE.HemisphereLight(0xffffff, 0x6d7a72, 0.58));
+var relleno = new THREE.DirectionalLight(0xffffff, 0.22);
+relleno.position.set(-40, 28, -34);
+escena.add(relleno);
+
+function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function color(n){ return new THREE.Color(css(n)); }
+
+var MAT = {
+  naranja:  new THREE.MeshStandardMaterial({color:0xE0761F, roughness:0.58, metalness:0.05}),
+  grafito:  new THREE.MeshStandardMaterial({color:0x36403F, roughness:0.68, metalness:0.08}),
+  acero:    new THREE.MeshStandardMaterial({color:0x34597A, roughness:0.45, metalness:0.25}),
+  metal:    new THREE.MeshStandardMaterial({color:0x9AA3A0, roughness:0.32, metalness:0.72}),
+  goma:     new THREE.MeshStandardMaterial({color:0x1F2626, roughness:0.9,  metalness:0.02}),
+  vidrio:   new THREE.MeshStandardMaterial({color:0xDCE6EA, roughness:0.16, metalness:0.0,
+                                            transparent:true, opacity:0.34, side:THREE.DoubleSide}),
+  mesa:     new THREE.MeshStandardMaterial({color:0xCED3CB, roughness:0.95, metalness:0.0}),
+  rack:     new THREE.MeshStandardMaterial({color:0x2F5878, roughness:0.6,  metalness:0.1}),
+  obstaculo:new THREE.MeshStandardMaterial({color:0xB23E0C, roughness:0.4,  metalness:0.2}),
+  obstaculo2:new THREE.MeshStandardMaterial({color:0x7A4BB8, roughness:0.4, metalness:0.2}),
+  hilo:     new THREE.MeshStandardMaterial({color:0x6C7A80, roughness:0.5,  metalness:0.4}),
+  placa:    new THREE.MeshStandardMaterial({color:0x1D4136, roughness:0.6,  metalness:0.1})
+};
+
+var raiz = new THREE.Group();
+escena.add(raiz);
+var etiquetas = new THREE.Group();
+raiz.add(etiquetas);
+
+function caja(sx, sy, sz, mat){
+  var m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function cil(r1, r2, h, mat, seg, abierto){
+  var m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, seg||28, 1, !!abierto), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function esfera(r, mat){
+  var m = new THREE.Mesh(new THREE.SphereGeometry(r, 26, 18), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+var ETIQUETAS = [];
+function pintarEtiqueta(sp, texto, sub){
+  var c = document.createElement('canvas');
+  c.width = 512; c.height = 144;
+  var g = c.getContext('2d');
+  g.scale(2,2);
+  g.fillStyle = css('--bg'); g.strokeStyle = css('--linea'); g.lineWidth = 2;
+  g.beginPath(); g.rect(2,2,252,68); g.fill(); g.stroke();
+  g.fillStyle = css('--ink'); g.textAlign = 'center';
+  g.font = '600 26px "Barlow Semi Condensed", sans-serif';
+  g.fillText(texto, 128, sub ? 32 : 44);
+  if (sub){
+    g.fillStyle = css('--muted');
+    g.font = '500 18px "Barlow Semi Condensed", sans-serif';
+    g.fillText(sub, 128, 55);
+  }
+  var t = new THREE.CanvasTexture(c);
+  t.anisotropy = 4;
+  if (sp.material.map) sp.material.map.dispose();
+  sp.material.map = t;
+  sp.material.needsUpdate = true;
+}
+function etiqueta(texto, sub, escala){
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({transparent:true}));
+  var k = escala || 1;
+  sp.scale.set(7.4*k, 2.1*k, 1);
+  pintarEtiqueta(sp, texto, sub);
+  ETIQUETAS.push({sp:sp, texto:texto, sub:sub});
+  return sp;
+}
+function repintarEtiquetas(){
+  ETIQUETAS.forEach(function(e){ pintarEtiqueta(e.sp, e.texto, e.sub); });
+}
+
+/* ---------- mesa ---------- */
+var mesa = caja(132, 1.4, 96, MAT.mesa);
+mesa.position.set(-2, -0.7, 0);
+mesa.castShadow = false;
+raiz.add(mesa);
+var rejilla = new THREE.GridHelper(132, 44, 0xA9B2AA, 0xBCC4BC);
+rejilla.position.set(-2, 0.03, 0);
+rejilla.material.opacity = 0.5; rejilla.material.transparent = true;
+raiz.add(rejilla);
+
+/* ---------- riel selector inclinado ---------- */
+var selector = new THREE.Group();
+selector.position.set(RIEL_X0, RIEL_Y0, Z_BANDA);
+selector.rotation.z = -INC;
+raiz.add(selector);
+
+function medioHueco(xl){
+  if (xl < EST_LOCAL0 - PASO_LOCAL/2) return LUZ_ENTRADA/2;
+  var k = Math.min(Math.floor((xl - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL), 4);
+  return LUZ[k]/2;
+}
+// Perfil en planta del riel: borde exterior recto y borde interior escalonado.
+// Se extruye una sola vez por lado, así cada riel es UNA pieza sólida lista
+// para exportar a STL, sin cajas superpuestas ni caras internas.
+function perfilRiel(lado){
+  var f = new THREE.Shape();
+  var cortes = [0, EST_LOCAL0 - PASO_LOCAL/2];
+  for (var c=1;c<=5;c++) cortes.push(EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*c);
+  var fin = cortes[cortes.length-1];
+  f.moveTo(0, -lado*medioHueco(0.1));
+  for (var k=0;k<cortes.length-1;k++){
+    var h = medioHueco((cortes[k]+cortes[k+1])/2);
+    f.lineTo(cortes[k],   -lado*h);          // escalón de la ranura
+    f.lineTo(cortes[k+1], -lado*h);
+  }
+  f.lineTo(fin, -lado*ANCHO_RIEL);           // borde exterior
+  f.lineTo(0,   -lado*ANCHO_RIEL);
+  f.lineTo(0,   -lado*medioHueco(0.1));
+  return f;
+}
+[1,-1].forEach(function(lado){
+  var geo = new THREE.ExtrudeGeometry(perfilRiel(lado),
+    {depth:ESP_RIEL, bevelEnabled:true, bevelThickness:0.12, bevelSize:0.12, bevelSegments:1, steps:1});
+  var riel = new THREE.Mesh(geo, MAT.naranja);
+  riel.rotation.x = -Math.PI/2;              // el perfil queda horizontal
+  riel.position.y = -ESP_RIEL;               // la cara superior en y = 0 del riel
+  riel.castShadow = true; riel.receiveShadow = true;
+  selector.add(riel);
+  // canal lateral: una sola pieza continua por lado, no segmentos sueltos
+  var canal = caja(LARGO_RIEL, 2.2, 1.4, MAT.grafito);
+  canal.position.set(LARGO_RIEL/2 - 1, -ESP_RIEL - 0.2, lado*(ANCHO_RIEL + 0.7));
+  selector.add(canal);
+});
+// columnas de soporte del riel, por fuera de la banda
+[[2.5,1],[2.5,-1],[LARGO_RIEL-4,1],[LARGO_RIEL-4,-1]].forEach(function(s){
+  var xw = RIEL_X0 + s[0]*Math.cos(INC), yr = RIEL_Y0 - s[0]*Math.sin(INC);
+  var alto = yr - ESP_RIEL - 0.6;
+  var col = cil(0.45, 0.45, alto, MAT.metal, 16);
+  col.position.set(xw, alto/2, Z_BANDA + s[1]*(BANDA_W/2 + 2.2));
+  raiz.add(col);
+  var brazoSop = caja(1.8, 0.7, BANDA_W/2 + 2.2 - ANCHO_RIEL, MAT.naranja);
+  brazoSop.position.set(xw, yr - ESP_RIEL - 0.4,
+                        Z_BANDA + s[1]*((ANCHO_RIEL + BANDA_W/2 + 2.2)/2));
+  raiz.add(brazoSop);
+  var pie = cil(1.2, 1.2, 0.6, MAT.grafito, 20);
+  pie.position.set(xw, 0.3, Z_BANDA + s[1]*(BANDA_W/2 + 2.2));
+  raiz.add(pie);
+});
+
+/* ---------- tolva y dosificador ---------- */
+var tolva = cil(5.6, 1.7, 8, MAT.naranja, 36, true);
+tolva.material = MAT.naranja.clone(); tolva.material.side = THREE.DoubleSide;
+tolva.position.set(RIEL_X0 - 0.6, RIEL_Y0 + 5.6, Z_BANDA);
+raiz.add(tolva);
+var boca = cil(1.7, 1.7, 2, MAT.naranja, 24, true);
+boca.material = tolva.material;
+boca.position.set(RIEL_X0 - 0.6, RIEL_Y0 + 0.8, Z_BANDA);
+raiz.add(boca);
+var servoTolva = caja(2.4, 2.4, 1.3, MAT.acero);
+servoTolva.position.set(RIEL_X0 - 0.6, RIEL_Y0 - 0.8, Z_BANDA + 2.8);
+raiz.add(servoTolva);
+var paleta = new THREE.Group();
+var pal = caja(0.8, 0.6, 4.6, MAT.grafito);
+pal.position.set(0, 0, -2.3);
+paleta.add(pal);
+paleta.position.set(RIEL_X0 - 0.6, RIEL_Y0 - 0.3, Z_BANDA + 2.8);
+raiz.add(paleta);
+
+/* ---------- embudos, bajantes y sensores ---------- */
+var leds = [];
+EST.forEach(function(est){
+  // embudo de una sola pieza: cono truncado que entrega directo al vaso
+  var alto = est.yBoca - (BANDA_Y + VASO_H + 0.9);
+  var emb = cil(2.9, 1.5, alto, MAT.grafito, 28, true);
+  emb.material = MAT.grafito.clone();
+  emb.material.side = THREE.DoubleSide;
+  emb.position.set(est.x, est.yBoca - alto/2, Z_BANDA);
+  raiz.add(emb);
+  // brida de sujeción del embudo al costado del riel
+  var brida = caja(6.4, 0.5, 1.2, MAT.grafito);
+  brida.position.set(est.x, est.yBoca - 0.25, Z_BANDA);
+  raiz.add(brida);
+
+  [1,-1].forEach(function(lado){
+    var sop = caja(1.5, 2.2, 0.5, MAT.naranja);
+    sop.position.set(est.x, est.yRiel - 0.3, Z_BANDA + lado*(est.luz/2 + 0.9));
+    raiz.add(sop);
+    var led = esfera(0.24, new THREE.MeshStandardMaterial({color:0x2C7A54,
+      emissive:0x2C7A54, emissiveIntensity:0.15, roughness:0.4}));
+    led.position.set(est.x, est.yRiel - 0.1, Z_BANDA + lado*(est.luz/2 + 0.55));
+    raiz.add(led);
+    if (lado === 1) leds.push(led);
+  });
+  var eti = etiqueta('$' + est.den.toLocaleString('es-CO'),
+                     'luz ' + est.luz.toFixed(2).replace('.',',') + ' cm', 0.82);
+  eti.position.set(est.x, est.yRiel + 2.6, Z_BANDA);
+  etiquetas.add(eti);
+});
+
+/* ---------- banda transportadora ----------
+   Marco rectangular sólido (una sola caja que ya incluye costados y patas),
+   dos rodillos y una cinta plana con textura animada: cuatro mallas en total
+   en lugar de las cuarenta que había antes. */
+var largoBanda = BANDA_X1 - BANDA_X0;
+var marcoBanda = caja(largoBanda + 3, 3.6, BANDA_W + 2.0, MAT.grafito);
+marcoBanda.position.set((BANDA_X0+BANDA_X1)/2, BANDA_Y - 1.9, Z_BANDA);
+raiz.add(marcoBanda);
+
+var texturaBanda = (function(){
+  var c = document.createElement('canvas');
+  c.width = 64; c.height = 16;
+  var g = c.getContext('2d');
+  g.fillStyle = '#20282A'; g.fillRect(0,0,64,16);
+  g.fillStyle = '#39454A'; g.fillRect(0,0,6,16);
+  var t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(largoBanda/2.2, 1);
+  return t;
+})();
+var cinta = caja(largoBanda, 0.4, BANDA_W, new THREE.MeshStandardMaterial(
+  {map:texturaBanda, roughness:0.85, metalness:0.04}));
+cinta.position.set((BANDA_X0+BANDA_X1)/2, BANDA_Y - 0.2, Z_BANDA);
+raiz.add(cinta);
+
+var rodillos = [];
+[BANDA_X0, BANDA_X1].forEach(function(x){
+  var rod = cil(1.6, 1.6, BANDA_W + 0.4, MAT.naranja, 26);
+  rod.rotation.x = Math.PI/2;
+  rod.position.set(x, BANDA_Y - 0.2, Z_BANDA);
+  raiz.add(rod);
+  rodillos.push(rod);
+});
+var motorBanda = cil(1.6, 1.6, 3.2, MAT.metal, 22);
+motorBanda.rotation.x = Math.PI/2;
+motorBanda.position.set(BANDA_X1 + 0.3, BANDA_Y - 0.2, Z_BANDA + BANDA_W/2 + 2.4);
+raiz.add(motorBanda);
+
+/* ---------- zona de entrega ---------- */
+var zona = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, BANDA_W + 1.6),
+  new THREE.MeshStandardMaterial({color:0xEE7A1E, roughness:0.6, transparent:true, opacity:0.55}));
+zona.position.set(X_ENTREGA, BANDA_Y + 0.06, Z_BANDA);
+raiz.add(zona);
+var etiZona = etiqueta('Zona de entrega', 'el brazo recoge aquí', 0.95);
+etiZona.position.set(X_ENTREGA, BANDA_Y + 6.4, Z_BANDA);
+etiquetas.add(etiZona);
+var etiTolva = etiqueta('Tolva', 'entrada de monedas', 0.9);
+etiTolva.position.set(RIEL_X0 - 0.6, RIEL_Y0 + 11.5, Z_BANDA);
+etiquetas.add(etiTolva);
+
+/* ---------- rack curvo de cinco puestos ---------- */
+var rackGrupo = new THREE.Group();
+raiz.add(rackGrupo);
+var arcoRack = new THREE.Mesh(
+  new THREE.RingGeometry(R_ARCO - 4.2, R_ARCO + 4.2, 64, 1,
+                         -(YAW_RACK[4]+9)*GR, (YAW_RACK[4]-YAW_RACK[0]+18)*GR),
+  new THREE.MeshStandardMaterial({color:0x2F5878, roughness:0.7, side:THREE.DoubleSide}));
+arcoRack.rotation.x = Math.PI/2;
+arcoRack.rotation.y = 0;
+arcoRack.position.y = 0.1;
+arcoRack.receiveShadow = true;
+rackGrupo.add(arcoRack);
+var puestosRack = [];
+YAW_RACK.forEach(function(yaw, idx){
+  var pos = aEscena(R_ARCO*Math.cos(yaw*GR), R_ARCO*Math.sin(yaw*GR), 0);
+  var aro = cil(VASO_R + 0.5, VASO_R + 0.5, 1.2, MAT.rack, 30, true);
+  aro.material = MAT.rack.clone(); aro.material.side = THREE.DoubleSide;
+  aro.position.set(pos.x, 0.7, pos.z);
+  raiz.add(aro);
+  var eti = etiqueta('R' + (idx+1), null, 0.6);
+  eti.position.set(pos.x, 3.4, pos.z);
+  etiquetas.add(eti);
+  puestosRack.push({yaw:yaw, x:pos.x, z:pos.z, ocupado:null});
+});
+
+/* ---------- brazo de 5 GDL ----------
+   Los eslabones son cajas sólidas achaflanadas (perfil extruido con bisel),
+   como saldrían impresas en PETG, y las articulaciones se representan con
+   esferas que hacen las veces de bujes o insertos metálicos. Nada de cilindros
+   cruzados con cajas: cada eslabón es un cuerpo cerrado. */
+function eslabon(largo, alto, ancho, mat){
+  var r = Math.min(alto, ancho)*0.32;                 // chaflán
+  var f = new THREE.Shape();
+  f.moveTo(-alto/2 + r, -alto/2);
+  f.lineTo(largo - r, -alto/2);
+  f.quadraticCurveTo(largo, -alto/2, largo, -alto/2 + r);
+  f.lineTo(largo, alto/2 - r);
+  f.quadraticCurveTo(largo, alto/2, largo - r, alto/2);
+  f.lineTo(-alto/2 + r, alto/2);
+  f.quadraticCurveTo(-alto/2, alto/2, -alto/2, alto/2 - r);
+  f.lineTo(-alto/2, -alto/2 + r);
+  f.quadraticCurveTo(-alto/2, -alto/2, -alto/2 + r, -alto/2);
+  var geo = new THREE.ExtrudeGeometry(f, {depth:ancho, bevelEnabled:true,
+    bevelThickness:0.18, bevelSize:0.18, bevelSegments:2, curveSegments:6, steps:1});
+  geo.translate(0, 0, -ancho/2);
+  var m = new THREE.Mesh(geo, mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function rotula(r, mat){
+  var m = esfera(r, mat);
+  return m;
+}
+
+var baseBrazo = cil(6.2, 7.0, 2.2, MAT.grafito, 32);
+baseBrazo.position.set(0, 1.1, 0);
+raiz.add(baseBrazo);
+
+var gBase = new THREE.Group();            // J1: giro sobre el eje vertical
+gBase.position.set(0, 2.2, 0);
+raiz.add(gBase);
+var columna = cil(3.4, 3.8, D1 - 2.2, MAT.naranja, 28);
+columna.position.set(0, (D1 - 2.2)/2, 0);
+gBase.add(columna);
+
+var gHombro = new THREE.Group();          // J2
+gHombro.position.set(0, D1 - 2.2, 0);
+gBase.add(gHombro);
+gHombro.add(rotula(2.0, MAT.metal));                 // buje del hombro
+gHombro.add(eslabon(L1, 3.2, 2.8, MAT.naranja));     // brazo L1, pieza única
+
+var gCodo = new THREE.Group();            // J3
+gCodo.position.set(L1, 0, 0);
+gHombro.add(gCodo);
+gCodo.add(rotula(1.7, MAT.metal));                   // buje del codo
+gCodo.add(eslabon(L2, 2.7, 2.3, MAT.naranja));       // antebrazo L2, pieza única
+
+var gMuneca = new THREE.Group();          // J4
+gMuneca.position.set(L2, 0, 0);
+gCodo.add(gMuneca);
+gMuneca.add(rotula(1.4, MAT.metal));                 // buje de la muñeca
+
+var gGiro = new THREE.Group();            // J5: giro sobre el eje de aproximación
+gMuneca.add(gGiro);
+gGiro.add(eslabon(L3 - 2.2, 2.0, 1.9, MAT.grafito)); // cuerpo de la muñeca
+var palma = caja(1.2, 2.6, 5.2, MAT.grafito);
+palma.position.set(L3 - 2.0, 0, 0);
+gGiro.add(palma);
+var dedos = [];
+[1,-1].forEach(function(lado){
+  var dedo = caja(4.0, 1.8, 0.7, MAT.grafito);
+  dedo.position.set(L3 - 0.2, 0, lado*3.3);
+  gGiro.add(dedo);
+  dedos.push({mesh:dedo, lado:lado});
+});
+var marcaTCP = esfera(0.28, new THREE.MeshStandardMaterial({color:0xEE7A1E,
+  emissive:0xEE7A1E, emissiveIntensity:0.5, roughness:0.4}));
+marcaTCP.position.set(L3, 0, 0);
+gGiro.add(marcaTCP);
+
+/* ---------- trayectoria del TCP (línea emisiva) ---------- */
+var MAX_RUTA = 1600;
+var rutaGeo = new THREE.BufferGeometry();
+rutaGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(MAX_RUTA*3), 3));
+rutaGeo.setDrawRange(0, 0);
+var rutaLinea = new THREE.Line(rutaGeo, new THREE.LineBasicMaterial({
+  color:0xFF8A2B, transparent:true, opacity:0.95, depthTest:false}));
+rutaLinea.frustumCulled = false;      // la línea se dibuja completa siempre
+rutaLinea.renderOrder = 999;          // y por encima de la escena, como un HUD
+raiz.add(rutaLinea);
+// puntos sobre la misma geometría: hacen legible la curva de evasión
+var rutaPuntos = new THREE.Points(rutaGeo, new THREE.PointsMaterial({
+  color:0xFFB067, size:0.5, sizeAttenuation:true, transparent:true, opacity:0.9, depthTest:false}));
+rutaPuntos.frustumCulled = false;
+rutaPuntos.renderOrder = 1000;
+raiz.add(rutaPuntos);
+
+/* ---------- pórtico y obstáculos aéreos giratorios ---------- */
+var portico = new THREE.Group();
+raiz.add(portico);
+var Y_VIGA = 40;
+[[-12, 26],[-12, -26],[32, 26],[32, -26]].forEach(function(p){
+  var poste = caja(1.6, Y_VIGA, 1.6, MAT.metal);
+  poste.position.set(p[0], Y_VIGA/2, p[1]);
+  portico.add(poste);
+});
+[26, -26].forEach(function(z){
+  var viga = caja(46, 1.4, 1.6, MAT.metal);
+  viga.position.set(10, Y_VIGA + 0.7, z);
+  portico.add(viga);
+});
+var travesano = caja(2.0, 1.6, 62, MAT.metal);
+travesano.position.set(22, Y_VIGA + 0.7, 0);
+portico.add(travesano);
+
+OBST.forEach(function(o, idx){
+  var g = new THREE.Group();
+  g.position.set(o.x, 0, o.z);
+  raiz.add(g);
+  o.grupo = g;
+  // hilo principal desde la viga hasta el cubo del móvil
+  var largoHilo = Y_VIGA - o.yEsfera - 1;
+  var hilo = cil(0.13, 0.13, largoHilo, MAT.hilo, 8);
+  hilo.position.set(0, o.yEsfera + 1 + largoHilo/2, 0);
+  g.add(hilo);
+  var cubo = cil(1.1, 1.1, 1.0, MAT.metal, 20);
+  cubo.position.set(0, o.yEsfera + 1.2, 0);
+  g.add(cubo);
+  var gGira = new THREE.Group();
+  gGira.position.set(0, 0, 0);
+  g.add(gGira);
+  o.gGira = gGira;
+  o.esferas = [];
+  var mat = idx === 0 ? MAT.obstaculo : MAT.obstaculo2;
+  for (var b=0;b<o.brazos;b++){
+    var ang = 2*Math.PI*b/o.brazos;
+    var varilla = caja(o.radio, 0.35, 0.35, MAT.hilo);
+    varilla.position.set(Math.cos(ang)*o.radio/2, o.yEsfera + 1.0, Math.sin(ang)*o.radio/2);
+    varilla.rotation.y = -ang;
+    gGira.add(varilla);
+    var colgante = cil(0.1, 0.1, 1.0, MAT.hilo, 8);
+    colgante.position.set(Math.cos(ang)*o.radio, o.yEsfera + 0.5, Math.sin(ang)*o.radio);
+    gGira.add(colgante);
+    var bola = (b % 2 === 0) ? esfera(o.rEsfera, mat)
+                             : cil(o.rEsfera*0.85, o.rEsfera*0.85, o.rEsfera*1.7, mat, 22);
+    bola.position.set(Math.cos(ang)*o.radio, o.yEsfera, Math.sin(ang)*o.radio);
+    gGira.add(bola);
+    o.esferas.push({mesh:bola, angBase:ang});
+  }
+  var eti = etiqueta('Obstáculo ' + (idx+1),
+                     o.brazos + ' brazos · ' + o.yEsfera.toFixed(1).replace('.',',') + ' cm', 0.85);
+  eti.position.set(o.x, o.yEsfera + 6.5, o.z);
+  etiquetas.add(eti);
+});
+
+/* ---------- electrónica de referencia ---------- */
+var placa = caja(8.0, 0.4, 5.0, MAT.placa);
+placa.position.set(-6, 0.2, -26);
+raiz.add(placa);
+var esp = caja(5.4, 1.0, 2.8, new THREE.MeshStandardMaterial({color:0x11161A, roughness:0.5}));
+esp.position.set(-6, 0.9, -26);
+raiz.add(esp);
+var etiEsp = etiqueta('ESP32 + PCA9685', 'conteo, banda y servos', 0.9);
+etiEsp.position.set(-6, 4.2, -26);
+etiquetas.add(etiEsp);
+
+/* ---------- vasos sobre la banda ---------- */
+var vasos = [];
+function crearVaso(est, idx){
+  var g = new THREE.Group();
+  var base = caja(2.9, 0.3, 2.9, MAT.naranja);
+  base.position.y = 0.15;
+  g.add(base);
+  var aro = cil(VASO_R + 0.22, VASO_R + 0.22, 1.2, MAT.naranja, 30, true);
+  aro.material = MAT.naranja.clone(); aro.material.side = THREE.DoubleSide;
+  aro.position.y = 0.9;
+  g.add(aro);
+  var cuerpo = cil(VASO_R, VASO_R*0.93, VASO_H, MAT.vidrio, 30, true);
+  cuerpo.position.y = 0.3 + VASO_H/2;
+  g.add(cuerpo);
+  var fondo = cil(VASO_R*0.93, VASO_R*0.93, 0.2, MAT.vidrio, 30);
+  fondo.position.y = 0.42;
+  g.add(fondo);
+  g.position.set(est.x, VASO_Y - 0.3, Z_BANDA);
+  raiz.add(g);
+  return {grupo:g, est:est, idx:idx, den:est.den, monedas:0, valor:0, peso:0,
+          pila:[], entregado:false, enPinza:false, puesto:null, destino:null};
+}
+EST.forEach(function(est, idx){ vasos.push(crearVaso(est, idx)); });
+
+/* =======================================================================
+   3. ESTADO DE LA SIMULACIÓN
+   ======================================================================= */
+var LOTE = [22, 18, 16, 13, 11];
+var sim = {
+  activo:false, t:0, fase:'inicio', desdeUltima:0,
+  vAlim:4.0, vBanda:6.0, vObst:45.0, vBrazo:1.0,
+  bolsa:[], monedas:[], flash:[0,0,0,0,0],
+  bandaActiva:false, vasoEnZona:null, criterio:'valor', sentido:'asc'
+};
+var A_RIEL = 981*(Math.sin(INC) - 0.30*Math.cos(INC));   // deslizamiento en el riel
+var G_CAIDA = 981;
+
+var brazo = {
+  q: HOME.slice(), pinza: PINZA_ABIERTA, plan: [], seg: null, tSeg: 0,
+  vaso: null, yaw: YAW_ENTREGA, altura: Z_SEGURA, rho: R_ARCO, destino: null,
+  bloqueadoPor: null, aviso: '', maniobra: null, cruzando: false
+};
+
+/* =======================================================================
+   4. PLANIFICADOR CON EVASIÓN DE OBSTÁCULOS
+   -----------------------------------------------------------------------
+   El tránsito entre la zona de entrega y el rack no es un tramo de tiempo
+   fijo: es un avance por el arco de radio 23 cm controlado paso a paso.
+   En cada paso se pregunta si el vaso cabe por el punto siguiente, tanto
+   ahora como 0,4 s más adelante (predicción con la velocidad de giro de
+   los móviles). Si no cabe, el brazo se queda esperando la ventana; si
+   cabe agachándose, baja la altura de tránsito y pasa por debajo.
+   ======================================================================= */
+function posEsfera(o, e, adelanto){
+  var giroActual = o.angulo + o.giro*(sim.vObst*GR)*(adelanto||0);
+  var a = e.angBase - giroActual;
+  return {x: o.x + o.radio*Math.cos(a), y: o.yEsfera, z: o.z + o.radio*Math.sin(a)};
+}
+// distancia libre entre el vaso sujeto (cilindro vertical) y una esfera
+function holgura(tcp, o, e, adelanto){
+  var p = posEsfera(o, e, adelanto);
+  var dh = Math.hypot(tcp.x - p.x, tcp.z - p.z);
+  var yBajo = tcp.y - (brazo.vaso ? GRASP_DZ : 1.2);
+  var yAlto = tcp.y + (brazo.vaso ? VASO_H - GRASP_DZ + 0.4 : 1.2);
+  var dv = (p.y < yBajo) ? (yBajo - p.y) : (p.y > yAlto ? p.y - yAlto : 0);
+  var radioCarga = brazo.vaso ? VASO_R : 1.4;
+  // distancia real entre la superficie del cilindro (vaso) y la de la esfera
+  var dhEfectiva = Math.max(0, dh - radioCarga);
+  return Math.hypot(dhEfectiva, dv) - o.rEsfera;
+}
+var RHO_MIN = 7.2;           // radio mínimo del TCP al recoger el brazo
+var RHO_MAX = 25.0;          // radio máximo con la pinza vertical
+
+function tcpDeArco(yaw, altura, rho){
+  var pr = puntoArco(yaw, altura, rho === undefined ? R_ARCO : rho);
+  var v = aEscena(pr.X, pr.Y, pr.Z);
+  return {x:v.x, y:v.y, z:v.z};
+}
+// holgura mínima contra un móvil, mirando también un poco hacia el futuro
+function holguraMinima(o, tcp, adelanto){
+  var m = Infinity;
+  o.esferas.forEach(function(e){ m = Math.min(m, holgura(tcp, o, e, adelanto)); });
+  return m;
+}
+// ¿cabe el vaso por debajo de este móvil?
+function alturaBajoObstaculo(o){
+  var techo = o.yEsfera - o.rEsfera - MARGEN;
+  var sobreTCP = brazo.vaso ? (VASO_H - GRASP_DZ + 0.4) : 1.4;
+  return techo - sobreTCP;
+}
+// ¿a qué radio hay que recogerse para pasar por dentro de su giro?
+function radioInterior(o){
+  return R_ARCO - o.radio - o.rEsfera - (brazo.vaso ? VASO_R : 1.4) - MARGEN;
+}
+// zona angular del arco que el móvil puede alcanzar
+function zonaAngular(o){
+  var alcance = o.radio + o.rEsfera + (brazo.vaso ? VASO_R : 1.4) + MARGEN;
+  return Math.min(60, Math.asin(Math.min(1, alcance/R_ARCO))/GR + 4);
+}
+
+/* -----------------------------------------------------------------------
+   Maniobra de evasión con los cinco grados de libertad.
+
+   Para cada ángulo del recorrido se decide qué altura y qué radio debe
+   tener el TCP. El peso es una campana suave centrada en el móvil, así que
+   el radio y la altura cambian de forma continua y el TCP describe una
+   curva en el plano XY (se recoge hacia la base y vuelve a extenderse) en
+   lugar de un escalón. El orden de preferencia es:
+
+     1. pasar por debajo bajando la altura de tránsito,
+     2. recoger el brazo (rho menor, theta3 más cerrado) y rodear el móvil
+        por dentro sin dejar de girar la base,
+     3. y solo si ninguna de las dos sirve, esperar la ventana.
+
+   En todos los casos la inversa se resuelve con phi = -90 grados, de modo
+   que theta4 compensa a theta2 y theta3 y el vaso nunca se inclina.
+   ----------------------------------------------------------------------- */
+function maniobra(yaw){
+  var r = {z:Z_SEGURA, rho:R_ARCO, modo:'directo', obst:null};
+  OBST.forEach(function(o){
+    var d = Math.abs(yaw - o.yaw), zona = zonaAngular(o);
+    if (d > zona*2.0) return;
+    // la maniobra está completa antes de entrar a la franja peligrosa y se
+    // desvanece suave al salir: eso es lo que dibuja la curva en el plano XY
+    var peso = (d <= zona*0.9) ? 1
+             : Math.max(0, (zona*2.0 - d)/(zona*1.1));
+    var bajo = alturaBajoObstaculo(o);
+    if (bajo >= Z_AGARRE + 5.5){                       // 1) por debajo
+      var zo = Math.max(Z_BAJO, bajo - 0.3);
+      r.z = Math.min(r.z, Z_SEGURA + (zo - Z_SEGURA)*peso);
+      if (peso > 0.12 && r.modo === 'directo'){ r.modo = 'bajo'; r.obst = o; }
+      return;
+    }
+    var rInt = radioInterior(o);
+    if (rInt >= RHO_MIN){                              // 2) rodeo por dentro
+      r.rho = Math.min(r.rho, R_ARCO + (rInt - R_ARCO)*peso);
+      if (peso > 0.12){ r.modo = 'rodeo'; r.obst = o; }
+      return;
+    }
+    if (peso > 0.12){ r.modo = 'espera'; r.obst = o; } // 3) sin maniobra
+  });
+  r.rho = Math.max(RHO_MIN, Math.min(RHO_MAX, r.rho));
+  return r;
+}
+function textoManiobra(m){
+  if (m.modo === 'bajo')  return 'paso por debajo de ' + m.obst.nombre;
+  if (m.modo === 'rodeo') return 'rodeo interior de ' + m.obst.nombre;
+  if (m.modo === 'espera') return 'sin maniobra para ' + m.obst.nombre;
+  return 'tránsito directo';
+}
+
+// decisión de avance: el vaso pasa ahora y dentro de 0,4 s
+function puedeAvanzar(yaw, altura, rho){
+  var tcp = tcpDeArco(yaw, altura, rho);
+  var bloqueo = null;
+  OBST.forEach(function(o){
+    var ahora = holguraMinima(o, tcp, 0);
+    var luego = holguraMinima(o, tcp, 0.4);
+    o.holgura = ahora;
+    if (Math.min(ahora, luego) < 0 && !bloqueo) bloqueo = o;
+  });
+  return {libre: !bloqueo, obstaculo: bloqueo};
+}
+
+// ¿alcanza la ventana para cruzar la franja aplicando la maniobra prevista?
+function ventanaCruce(yawIni, sentido, yawDestino){
+  var velYaw = 58*sim.vBrazo;
+  var franja = Math.abs(yawDestino - yawIni);
+  OBST.forEach(function(o){
+    var haciaEl = sentido*(o.yaw - yawIni);
+    if (haciaEl < -zonaAngular(o) || haciaEl > 70) return;
+    franja = Math.min(franja, Math.max(14, haciaEl + zonaAngular(o)*1.4 + 4));
+  });
+  franja = Math.min(franja, 60);
+  var muestras = 16;
+  for (var i=0;i<=muestras;i++){
+    var tau = (franja/velYaw)*(i/muestras);
+    var yaw = yawIni + sentido*velYaw*tau;
+    var m = maniobra(yaw);
+    var tcp = tcpDeArco(yaw, m.z, m.rho);
+    for (var k=0;k<OBST.length;k++){
+      if (holguraMinima(OBST[k], tcp, tau) < 0) return {libre:false, obstaculo:OBST[k]};
+    }
+  }
+  return {libre:true, obstaculo:null};
+}
+
+// el corredor de bajada al rack también tiene que estar despejado, porque el
+// descenso dura algo más de un segundo y el móvil sigue girando
+function corredorLibre(yaw){
+  var alturas = [Z_SEGURA, 17, 14, 11, Z_AGARRE + 0.25];
+  var adelantos = [0, 0.6, 1.2];
+  for (var i=0;i<alturas.length;i++){
+    var tcp = tcpDeArco(yaw, alturas[i], R_ARCO);
+    for (var a=0;a<adelantos.length;a++){
+      for (var o=0;o<OBST.length;o++){
+        if (holguraMinima(OBST[o], tcp, adelantos[a]) < 0) return OBST[o];
+      }
+    }
+  }
+  return null;
+}
+
+/* =======================================================================
+   5. TRAMOS DEL BRAZO
+   ======================================================================= */
+function qFinal(){
+  if (!brazo.plan.length && !brazo.seg) return brazo.q.slice();
+  var ult = brazo.plan.length ? brazo.plan[brazo.plan.length-1] : brazo.seg;
+  return ult.qFin ? ult.qFin.slice() : brazo.q.slice();
+}
+function tramoArticular(qDestino, pinza, etiqueta){
+  var q0 = qFinal();
+  var dq = 0;
+  for (var i=0;i<5;i++) dq = Math.max(dq, Math.abs(qDestino[i]-q0[i]));
+  var T = Math.max(0.45, dq/(75*sim.vBrazo));
+  return {tipo:'articular', T:T, etiqueta:etiqueta, qFin:qDestino.slice(),
+          evaluar:function(t){
+            var s = quintico(t/T), q = [];
+            for (var k=0;k<5;k++) q.push(q0[k] + (qDestino[k]-q0[k])*s);
+            return {q:q, pinza:pinza};
+          }};
+}
+function tramoLineal(yaw, z0, z1, pinza, etiqueta){
+  var T = Math.max(0.3, Math.abs(z1-z0)/(11*sim.vBrazo));
+  var sol = ik(puntoArco(yaw, z1).X, puntoArco(yaw, z1).Y, z1);
+  return {tipo:'lineal', T:T, etiqueta:etiqueta, yaw:yaw, zFin:z1,
+          qFin: sol.ok ? sol.q : qFinal(),
+          evaluar:function(t){
+            var s = quintico(t/T);
+            var z = z0 + (z1-z0)*s;
+            var pt = puntoArco(yaw, z);
+            var r = ik(pt.X, pt.Y, pt.Z);
+            return {q: r.ok ? r.q : brazo.q, pinza:pinza, altura:z};
+          }};
+}
+function tramoPinza(desde, hasta, etiqueta, alTerminar){
+  var T = Math.max(0.25, Math.abs(hasta-desde)/(90*sim.vBrazo));
+  return {tipo:'pinza', T:T, etiqueta:etiqueta, qFin:qFinal(), alTerminar:alTerminar,
+          evaluar:function(t){
+            return {q: qFinal(), pinza: desde + (hasta-desde)*quintico(t/T)};
+          }};
+}
+// tramo especial: recorre el arco esquivando. No tiene duración fija.
+function tramoTransito(yawDestino, pinza, etiqueta){
+  return {tipo:'transito', T:Infinity, etiqueta:etiqueta, yawDestino:yawDestino,
+          pinza:pinza, qFin:null};
+}
+
+function encolarCiclo(vaso, puesto){
+  limpiarRuta();                       // una traza nueva por cada vaso
+  var yawD = YAW_RACK[puesto];
+  var solAlto = ik(puntoArco(YAW_ENTREGA, Z_SEGURA).X, puntoArco(YAW_ENTREGA, Z_SEGURA).Y, Z_SEGURA);
+  brazo.plan.push(tramoArticular(solAlto.q, PINZA_ABIERTA, 'ir sobre la zona de entrega'));
+  brazo.plan.push(tramoLineal(YAW_ENTREGA, Z_SEGURA, Z_AGARRE, PINZA_ABIERTA, 'bajar al vaso'));
+  brazo.plan.push(tramoPinza(PINZA_ABIERTA, PINZA_CERRADA, 'cerrar pinza', function(){
+    tomarVaso(vaso);
+  }));
+  brazo.plan.push(tramoLineal(YAW_ENTREGA, Z_AGARRE, Z_SEGURA, PINZA_CERRADA, 'subir con el vaso'));
+  brazo.plan.push(tramoTransito(yawD, PINZA_CERRADA, 'tránsito esquivando obstáculos'));
+  brazo.plan.push(tramoLineal(yawD, Z_SEGURA, Z_AGARRE + 0.25, PINZA_CERRADA, 'bajar al puesto R' + (puesto+1)));
+  brazo.plan.push(tramoPinza(PINZA_CERRADA, PINZA_ABIERTA, 'abrir pinza', function(){
+    soltarVaso(puesto);
+  }));
+  brazo.plan.push(tramoLineal(yawD, Z_AGARRE + 0.25, Z_SEGURA, PINZA_ABIERTA, 'subir libre'));
+  brazo.plan.push(tramoTransito(YAW_ENTREGA, PINZA_ABIERTA, 'volver a la zona de entrega'));
+}
+
+function tomarVaso(vaso){
+  brazo.vaso = vaso;
+  vaso.enPinza = true;
+  consola('pinza cerrada sobre el vaso de ' + pesos(vaso.den) + ', ' +
+          vaso.monedas + ' monedas, ' + nf(vaso.peso + MASA_VASO,1) + ' g');
+}
+function soltarVaso(puesto){
+  var vaso = brazo.vaso;
+  if (!vaso) return;
+  var p = puestosRack[puesto];
+  vaso.grupo.position.set(p.x, VASO_Y - 0.3, p.z);
+  vaso.enPinza = false;
+  vaso.entregado = true;
+  vaso.puesto = puesto;
+  p.ocupado = vaso;
+  brazo.vaso = null;
+  consola('vaso de ' + pesos(vaso.den) + ' colocado en el puesto R' + (puesto+1), true);
+}
+
+/* ---------- traza del TCP ---------- */
+var ruta = {n:0, ultimo:new THREE.Vector3(1e9,0,0), visible:true};
+function limpiarRuta(){
+  ruta.n = 0;
+  rutaGeo.setDrawRange(0, 0);
+  rutaGeo.attributes.position.needsUpdate = true;
+}
+function registrarRuta(v){
+  if (!ruta.visible) return;
+  if (v.distanceTo(ruta.ultimo) < 0.25) return;
+  if (ruta.n >= MAX_RUTA) limpiarRuta();
+  var a = rutaGeo.attributes.position;
+  a.setXYZ(ruta.n, v.x, v.y, v.z);
+  ruta.n++;
+  a.needsUpdate = true;
+  rutaGeo.setDrawRange(0, ruta.n);
+  ruta.ultimo.copy(v);
+}
+
+function aplicarPose(q, pinza){
+  brazo.q = q.slice();
+  brazo.pinza = pinza;
+  gBase.rotation.y = q[0]*GR;
+  gHombro.rotation.z = q[1]*GR;
+  gCodo.rotation.z = q[2]*GR;
+  gMuneca.rotation.z = q[3]*GR;
+  gGiro.rotation.x = q[4]*GR;
+  var ap = Math.min(Math.max(pinza, 0), PINZA_MAX)/20;    // mm a cm entre dedos
+  dedos.forEach(function(d){ d.mesh.position.z = d.lado*(ap/2 + 0.35); });
+  // el vaso sujeto viaja bajo el TCP
+  var vTCP = new THREE.Vector3();
+  marcaTCP.getWorldPosition(vTCP);
+  if (brazo.vaso){
+    brazo.vaso.grupo.position.set(vTCP.x, vTCP.y - GRASP_DZ, vTCP.z);
+  }
+  if (brazo.seg || brazo.plan.length) registrarRuta(vTCP);
+}
+
+function avanzarBrazo(dt){
+  if (!brazo.seg){
+    if (!brazo.plan.length) return;
+    brazo.seg = brazo.plan.shift();
+    brazo.tSeg = 0;
+    brazo.aviso = '';
+    brazo.cruzando = false;
+    consola('brazo: ' + brazo.seg.etiqueta);
+  }
+  var seg = brazo.seg;
+
+  if (seg.tipo === 'transito'){
+    // ---- avance por el arco con evasión activa ----
+    var objetivoYaw = seg.yawDestino;
+    var sentido = Math.sign(objetivoYaw - brazo.yaw) || 1;
+    var cerca = Math.abs(objetivoYaw - brazo.yaw) < 0.25;
+    // maniobra prevista un poco más adelante del punto actual; al llegar al
+    // destino se recupera el radio y la altura nominales para bajar recto
+    var man = cerca ? {z:Z_SEGURA, rho:R_ARCO, modo:'directo', obst:null}
+                    : maniobra(brazo.yaw + sentido*3);
+    brazo.maniobra = man;
+    var pasoH = 14*sim.vBrazo*dt;
+    var pasoR = 26*sim.vBrazo*dt;
+    brazo.altura += Math.max(-pasoH, Math.min(pasoH, man.z - brazo.altura));
+    brazo.rho    += Math.max(-pasoR, Math.min(pasoR, man.rho - brazo.rho));
+
+    var pasoYaw = 58*sim.vBrazo*dt;
+    var siguiente = brazo.yaw + sentido*Math.min(pasoYaw, Math.abs(objetivoYaw - brazo.yaw));
+
+    if (!brazo.cruzando && !cerca){
+      var v = ventanaCruce(brazo.yaw, sentido, objetivoYaw);
+      if (v.libre){
+        if (brazo.bloqueadoPor){
+          consola(brazo.bloqueadoPor.nombre + ': ventana libre, cruzando', true);
+        }
+        brazo.cruzando = true;
+        brazo.bloqueadoPor = null;
+      } else if (brazo.bloqueadoPor !== v.obstaculo){
+        brazo.bloqueadoPor = v.obstaculo;
+        consola(v.obstaculo.nombre + ': esperando ventana entre brazos', true);
+      }
+    }
+
+    if (brazo.cruzando){
+      // durante el cruce se mantiene la vigilancia: si algo se mete de verdad
+      // en la trayectoria, el brazo frena y vuelve a esperar
+      var decision = puedeAvanzar(siguiente, brazo.altura, brazo.rho);
+      if (decision.libre){
+        brazo.yaw = siguiente;
+        brazo.aviso = (man.modo === 'bajo')
+          ? 'paso por debajo a ' + nf(brazo.altura,1) + ' cm'
+          : (man.modo === 'rodeo')
+            ? 'rodeo interior con ρ = ' + nf(brazo.rho,1) + ' cm'
+            : 'cruzando';
+      } else {
+        // el cruce ya está decidido: no se retrocede, solo se hace una pausa
+        // corta hasta que la esfera termine de pasar
+        brazo.bloqueadoPor = decision.obstaculo;
+        brazo.aviso = 'frenada momentánea por ' + decision.obstaculo.nombre;
+        if (!brazo.avisoFrenada || sim.t - brazo.avisoFrenada > 3){
+          brazo.avisoFrenada = sim.t;
+          consola(decision.obstaculo.nombre + ': frenada momentánea a media franja', true);
+        }
+      }
+    } else if (!cerca){
+      brazo.aviso = 'esperando ventana de ' +
+        (brazo.bloqueadoPor ? brazo.bloqueadoPor.nombre : 'los obstáculos');
+    }
+    // phi fijo en -90 grados: theta4 compensa a theta2 y theta3 en toda la maniobra
+    var pt = puntoArco(brazo.yaw, brazo.altura, brazo.rho);
+    var sol = ik(pt.X, pt.Y, pt.Z, -90);
+    if (sol.ok) aplicarPose(sol.q, seg.pinza);
+    if (cerca){
+      var bloqueo = corredorLibre(objetivoYaw);
+      if (bloqueo){
+        if (brazo.bloqueadoPor !== bloqueo){
+          brazo.bloqueadoPor = bloqueo;
+          consola(bloqueo.nombre + ': corredor de bajada ocupado, esperando', true);
+        }
+        brazo.aviso = 'esperando corredor de ' + bloqueo.nombre;
+      } else if (Math.abs(brazo.altura - Z_SEGURA) < 0.4 &&
+                 Math.abs(brazo.rho - R_ARCO) < 0.4){
+        brazo.yaw = objetivoYaw;
+        brazo.rho = R_ARCO;
+        brazo.bloqueadoPor = null;
+        brazo.cruzando = false;
+        brazo.seg = null;
+      }
+    }
+    // aviso si el móvil está tan lento que la espera se hace eterna
+    if (brazo.bloqueadoPor){
+      brazo.tBloqueo = (brazo.tBloqueo || 0) + dt;
+      if (brazo.tBloqueo > 20){
+        brazo.tBloqueo = 0;
+        consola('la ventana de ' + brazo.bloqueadoPor.nombre + ' está tardando: ' +
+                'sube la velocidad de los obstáculos o la del brazo', true);
+      }
+    } else {
+      brazo.tBloqueo = 0;
+    }
+    return;
+  }
+
+  // ---- tramos de duración fija ----
+  brazo.tSeg += dt;
+  var r = seg.evaluar(Math.min(brazo.tSeg, seg.T));
+  aplicarPose(r.q, r.pinza);
+  if (seg.yaw !== undefined) brazo.yaw = seg.yaw;
+  if (r.altura !== undefined) brazo.altura = r.altura;
+  brazo.rho = R_ARCO;
+  brazo.maniobra = null;
+  if (brazo.tSeg >= seg.T){
+    if (seg.alTerminar) seg.alTerminar();
+    brazo.seg = null;
+  }
+}
+
+/* =======================================================================
+   6. ETAPA 1: MONEDAS, RIEL Y BANDA
+   ======================================================================= */
+var geoMon = {};
+function mallaMoneda(k){
+  var d = MONEDAS[k];
+  if (!geoMon[k]) geoMon[k] = {
+    aro: new THREE.CylinderGeometry(d.d/2, d.d/2, d.e, 26),
+    centro: new THREE.CylinderGeometry(d.d*0.3, d.d*0.3, d.e*1.08, 22)
+  };
+  var g = new THREE.Group();
+  var aro = new THREE.Mesh(geoMon[k].aro, new THREE.MeshStandardMaterial(
+    {color:d.aro, roughness:0.32, metalness:0.78}));
+  aro.castShadow = true;
+  g.add(aro);
+  g.add(new THREE.Mesh(geoMon[k].centro, new THREE.MeshStandardMaterial(
+    {color:d.centro, roughness:0.3, metalness:0.82})));
+  return g;
+}
+function mezclar(a){
+  for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function cargarTolva(){
+  sim.bolsa = [];
+  LOTE.forEach(function(n, k){ for (var i=0;i<n;i++) sim.bolsa.push(k); });
+  mezclar(sim.bolsa);
+}
+function soltarMoneda(){
+  if (!sim.bolsa.length) return false;
+  var k = sim.bolsa.pop();
+  var obj = mallaMoneda(k);
+  obj.rotation.z = -INC;
+  raiz.add(obj);
+  sim.monedas.push({k:k, den:MONEDAS[k].v, d:MONEDAS[k].d, e:MONEDAS[k].e,
+                    m:MONEDAS[k].m, obj:obj, estado:'riel', x:0.5, v:5, canal:-1});
+  return true;
+}
+function avanzarMonedas(dt){
+  for (var i=sim.monedas.length-1;i>=0;i--){
+    var mo = sim.monedas[i];
+    if (mo.estado === 'riel'){
+      mo.v += A_RIEL*dt;
+      mo.x += mo.v*dt;
+      var xw = RIEL_X0 + mo.x*Math.cos(INC);
+      var yw = RIEL_Y0 - mo.x*Math.sin(INC) + mo.e/2 + 0.02;
+      mo.obj.position.set(xw, yw, Z_BANDA);
+      var k = Math.floor((mo.x - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL);
+      if (k >= 0 && k < 5 && mo.d < LUZ[k] &&
+          mo.x > EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*k + mo.d/2 + 0.2){
+        mo.estado = 'cae'; mo.canal = k; mo.vy = 0;
+        mo.obj.rotation.z = 0;
+        mo.obj.position.x = EST[k].x;
+        sim.flash[k] = 0.18;
+        contar(mo);
+      } else if (mo.x > LARGO_RIEL){
+        raiz.remove(mo.obj); sim.monedas.splice(i,1);
+      }
+    } else {
+      mo.vy += G_CAIDA*dt*0.45;
+      mo.obj.position.y -= mo.vy*dt;
+      mo.obj.rotation.x += dt*3;
+      var vaso = vasos[mo.canal];
+      var destino = vaso.grupo.position.y + 0.55 + vaso.pila.length*mo.e*1.05;
+      if (mo.obj.position.y <= destino){
+        raiz.remove(mo.obj);
+        var disco = mallaMoneda(mo.k);
+        disco.position.set((Math.random()-0.5)*0.5,
+                           0.55 + vaso.pila.length*mo.e*1.05 + mo.e/2,
+                           (Math.random()-0.5)*0.5);
+        disco.rotation.y = Math.random()*Math.PI;
+        vaso.grupo.add(disco);
+        vaso.pila.push(disco);
+        sim.monedas.splice(i,1);
+      }
+    }
+  }
+}
+function contar(mo){
+  var vaso = vasos[mo.canal];
+  vaso.monedas++; vaso.valor += mo.den; vaso.peso += mo.m;
+  consola('<b>M:' + mo.den + ',' + (mo.canal+1) + '</b>  canal ' + (mo.canal+1) +
+          ': ' + vaso.monedas + ' monedas');
+  actualizarTabla();
+}
+function avanzarBanda(dt){
+  if (!sim.bandaActiva) return;
+  var d = sim.vBanda*dt;
+  texturaBanda.offset.x -= d/2.2;                 // la cinta se mueve con la textura
+  rodillos.forEach(function(r){ r.rotation.y += d*0.6; });
+  var pendientes = vasos.filter(function(v){ return !v.entregado && !v.enPinza; });
+  if (!pendientes.length){ sim.bandaActiva = false; return; }
+  var lider = pendientes.reduce(function(a,b){
+    return a.grupo.position.x > b.grupo.position.x ? a : b; });
+  pendientes.forEach(function(v){ v.grupo.position.x += d; });
+  // barrera de la zona de entrega
+  if (lider.grupo.position.x >= X_ENTREGA){
+    pendientes.forEach(function(v){ v.grupo.position.x -= (lider.grupo.position.x - X_ENTREGA); });
+    sim.bandaActiva = false;
+    sim.vasoEnZona = lider;
+    consola('barrera de entrega cortada por el vaso de ' + pesos(lider.den), true);
+    if (lider.destino !== null && lider.destino !== undefined){
+      encolarCiclo(lider, lider.destino);
+      fase('recoleccion');
+    }
+  }
+}
+
+/* =======================================================================
+   7. MÁQUINA DE ESTADOS DEL SISTEMA
+   ======================================================================= */
+var CRITERIOS = {
+  denominacion: function(v){ return v.den; },
+  cantidad:     function(v){ return v.monedas; },
+  valor:        function(v){ return v.valor; },
+  peso:         function(v){ return v.peso + MASA_VASO; }
+};
+function asignarPuestos(){
+  var signo = sim.sentido === 'asc' ? 1 : -1;
+  var clave = CRITERIOS[sim.criterio];
+  var orden = vasos.slice().sort(function(a,b){
+    return signo*((clave(a)-clave(b)) || (a.den-b.den));
+  });
+  orden.forEach(function(v, j){ v.destino = j; });
+  consola('plan de ordenamiento por ' + sim.criterio + ' ' + sim.sentido, true);
+  orden.forEach(function(v, j){
+    consola('  R' + (j+1) + '  ' + pesos(v.den) + '  ' + v.monedas + ' monedas  ' +
+            pesos(v.valor) + '  ' + nf(v.peso + MASA_VASO,1) + ' g');
+  });
+}
+function fase(nueva){
+  sim.fase = nueva;
+  var texto = {inicio:'inicio', llenado:'llenado', transporte:'transporte',
+               recoleccion:'recolección', fin:'terminado'}[nueva] || nueva;
+  document.getElementById('chipFase').textContent = 'Fase: ' + texto;
+}
+function actualizarFSM(){
+  if (sim.fase === 'llenado'){
+    if (!sim.bolsa.length && !sim.monedas.length){
+      asignarPuestos();
+      actualizarTabla();
+      fase('transporte');
+      sim.bandaActiva = true;
+      consola('etapa 1 terminada: ' + tramaVasos(), true);
+    }
+  } else if (sim.fase === 'transporte'){
+    if (!sim.bandaActiva && !sim.vasoEnZona){
+      var quedan = vasos.filter(function(v){ return !v.entregado; });
+      if (quedan.length) sim.bandaActiva = true;
+      else fase('fin');
+    }
+  } else if (sim.fase === 'recoleccion'){
+    if (!brazo.seg && !brazo.plan.length){
+      sim.vasoEnZona = null;
+      var quedan2 = vasos.filter(function(v){ return !v.entregado; });
+      if (quedan2.length){
+        fase('transporte');
+        sim.bandaActiva = true;
+      } else {
+        fase('fin');
+        sim.activo = false;
+        estado('Rack ordenado', true);
+        botones(false);
+        consola('ciclo terminado: los cinco vasos quedaron ordenados', true);
+      }
+    }
+  }
+}
+
+/* =======================================================================
+   8. INTERFAZ
+   ======================================================================= */
+var $ = function(id){ return document.getElementById(id); };
+function nf(v, d){ if (d===undefined) d = 1;
+  return v.toLocaleString('es-CO', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+function pesos(v){ return '$' + Math.round(v).toLocaleString('es-CO'); }
+var lineas = [];
+function consola(txt, destacar){
+  lineas.push('<span>' + nf(sim.t,1) + ' s</span>  ' + (destacar ? '<b>'+txt+'</b>' : txt));
+  if (lineas.length > 300) lineas.shift();
+  var host = $('consola');
+  host.innerHTML = lineas.slice(-90).join('\n');
+  host.scrollTop = host.scrollHeight;
+}
+function estado(texto, on, alerta){
+  $('chipEstado').innerHTML = '<span class="led' + (on ? ' on' : (alerta ? ' alerta' : '')) +
+                              '"></span>' + texto;
+}
+function botones(corriendo){
+  $('btnIniciar').disabled = corriendo;
+  $('btnPausar').disabled = !corriendo;
+}
+function tramaVasos(){
+  return 'VASOS:' + vasos.map(function(v){ return v.den + 'x' + v.monedas; }).join(',');
+}
+(function construirTabla(){
+  var cuerpo = $('tablaConteo').querySelector('tbody');
+  MONEDAS.forEach(function(d, k){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + pesos(d.v) + '</td><td>' + nf(LUZ[k],2) + ' cm</td>' +
+                   '<td id="cN'+k+'">0</td><td id="cV'+k+'">$0</td><td id="cP'+k+'">0,0 g</td>';
+    cuerpo.appendChild(tr);
+  });
+  var sens = $('sensores');
+  MONEDAS.forEach(function(d, k){
+    var div = document.createElement('div');
+    div.innerHTML = '<b>S' + (k+1) + '</b>' + pesos(d.v);
+    sens.appendChild(div);
+  });
+  var lista = $('listaObst');
+  OBST.forEach(function(o, idx){
+    var div = document.createElement('div');
+    div.innerHTML = '<b>' + o.nombre + '</b><span class="dist" id="obsTexto'+idx+'">en reposo</span>' +
+                    '<span id="obsDist'+idx+'">—</span>';
+    lista.appendChild(div);
+  });
+})();
+function actualizarTabla(){
+  var tn = 0, tv = 0, tp = 0;
+  vasos.forEach(function(v, k){
+    $('cN'+k).textContent = v.monedas;
+    $('cV'+k).textContent = pesos(v.valor);
+    $('cP'+k).textContent = nf(v.peso + (v.monedas ? MASA_VASO : 0),1) + ' g';
+    tn += v.monedas; tv += v.valor; tp += v.peso + (v.monedas ? MASA_VASO : 0);
+  });
+  $('tN').textContent = tn;
+  $('tV').textContent = pesos(tv);
+  $('tP').textContent = nf(tp,1) + ' g';
+  $('tramaVasos').textContent = tramaVasos();
+  $('chipTolva').textContent = 'Tolva: ' + sim.bolsa.length + ' monedas';
+}
+function actualizarLecturas(){
+  var f = fk(brazo.q);
+  $('lecTCP').textContent = nf(f.X,1) + '; ' + nf(f.Y,1) + '; ' + nf(f.Z,1) + ' cm';
+  $('lecPhi').textContent = nf(f.phi,1) + '°';
+  $('lecAlt').textContent = nf(brazo.altura,1) + ' cm' +
+    (brazo.aviso ? '  (' + brazo.aviso + ')' : '');
+  $('lecRho').textContent = nf(brazo.rho,1) + ' cm' +
+    (brazo.rho < R_ARCO - 0.5 ? '  (brazo recogido)' : '');
+  $('lecManiobra').textContent = brazo.maniobra ? textoManiobra(brazo.maniobra)
+                                                : 'sin maniobra activa';
+  $('lecVaso').textContent = brazo.vaso
+    ? pesos(brazo.vaso.den) + ', ' + brazo.vaso.monedas + ' monedas'
+    : 'ninguno';
+  $('tramaServo').textContent = trama(brazo.q, brazo.pinza);
+  OBST.forEach(function(o, idx){
+    var h = (o.holgura === undefined) ? null : o.holgura;
+    var caja = $('obsDist'+idx).parentElement;
+    $('obsDist'+idx).textContent = (h === null) ? '—' : nf(h,1) + ' cm';
+    var texto = 'girando a ' + nf(sim.vObst,0) + ' °/s';
+    if (brazo.bloqueadoPor === o) texto = 'bloqueando el paso';
+    else if (h !== null && h < 3) texto = 'cerca del vaso';
+    $('obsTexto'+idx).textContent = texto;
+    caja.classList.toggle('riesgo', brazo.bloqueadoPor === o || (h !== null && h < 1.5));
+  });
+  var sens = $('sensores').children;
+  for (var k=0;k<5;k++) sens[k].classList.toggle('on', sim.flash[k] > 0);
+}
+
+/* ---------- botones y deslizadores ---------- */
+function reiniciar(){
+  sim.activo = false;
+  sim.t = 0; sim.desdeUltima = 0; sim.bandaActiva = false; sim.vasoEnZona = null;
+  sim.monedas.forEach(function(m){ raiz.remove(m.obj); });
+  sim.monedas = [];
+  cargarTolva();
+  vasos.forEach(function(v, i){
+    v.pila.forEach(function(d){ v.grupo.remove(d); });
+    v.pila = []; v.monedas = 0; v.valor = 0; v.peso = 0;
+    v.entregado = false; v.enPinza = false; v.puesto = null; v.destino = null;
+    v.grupo.position.set(v.est.x, VASO_Y - 0.3, Z_BANDA);
+  });
+  puestosRack.forEach(function(p){ p.ocupado = null; });
+  brazo.plan = []; brazo.seg = null; brazo.vaso = null;
+  brazo.yaw = YAW_ENTREGA; brazo.altura = Z_SEGURA; brazo.rho = R_ARCO;
+  brazo.bloqueadoPor = null; brazo.aviso = ''; brazo.maniobra = null;
+  brazo.cruzando = false;
+  limpiarRuta();
+  aplicarPose(HOME.slice(), PINZA_ABIERTA);
+  lineas = [];
+  fase('inicio');
+  actualizarTabla();
+  consola('sistema listo: ' + LOTE.reduce(function(a,b){return a+b;},0) + ' monedas en la tolva');
+  estado('En espera', false);
+  botones(false);
+}
+$('btnIniciar').addEventListener('click', function(){
+  if (sim.fase === 'fin' || sim.fase === 'inicio'){
+    if (sim.fase === 'fin') reiniciar();
+    fase('llenado');
+  }
+  sim.activo = true;
+  estado('En marcha', true);
+  botones(true);
+  consola('inicio de la simulación completa', true);
+});
+$('btnPausar').addEventListener('click', function(){
+  sim.activo = false;
+  estado('En pausa', false, true);
+  botones(false);
+});
+$('btnReiniciar').addEventListener('click', reiniciar);
+$('chkRuta').addEventListener('change', function(){
+  ruta.visible = this.checked;
+  rutaLinea.visible = this.checked;
+  rutaPuntos.visible = this.checked;
+  if (!this.checked) limpiarRuta();
+});
+$('selCriterio').addEventListener('change', function(){ sim.criterio = this.value; });
+$('selSentido').addEventListener('change', function(){ sim.sentido = this.value; });
+function slider(id, out, prop, fmt){
+  var el = $(id);
+  var pintar = function(){ $(out).textContent = fmt(parseFloat(el.value)); };
+  el.addEventListener('input', function(){ sim[prop] = parseFloat(el.value); pintar(); });
+  pintar();
+}
+slider('slBanda','outBanda','vBanda', function(v){ return nf(v,1) + ' cm/s'; });
+slider('slObst','outObst','vObst', function(v){ return nf(v,0) + ' °/s'; });
+slider('slBrazo','outBrazo','vBrazo', function(v){ return nf(v,1) + '×'; });
+slider('slAlim','outAlim','vAlim', function(v){ return nf(v,1) + ' monedas/s'; });
+
+/* ---------- cámara, vistas y tema ---------- */
+var vistas = {
+  iso:{theta:-0.62, phi:0.98, r:152, objetivo:new THREE.Vector3(0, 16, 2)},
+  brazo:{theta:-1.05, phi:1.05, r:88, objetivo:new THREE.Vector3(12, 15, 2)},
+  sup:{theta:-Math.PI/2, phi:0.14, r:128, objetivo:new THREE.Vector3(-2, 6, 2)}
+};
+var meta = null;
+function irA(v, id){
+  meta = vistas[v];
+  ['vIso','vBrazo','vSup'].forEach(function(b){
+    $(b).setAttribute('aria-pressed', String(b === id));
+  });
+}
+$('vIso').addEventListener('click', function(){ irA('iso','vIso'); });
+$('vBrazo').addEventListener('click', function(){ irA('brazo','vBrazo'); });
+$('vSup').addEventListener('click', function(){ irA('sup','vSup'); });
+$('vTema').addEventListener('click', function(){
+  var oscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', oscuro ? 'light' : 'dark');
+  aplicarTema();
+});
+function aplicarTema(){
+  escena.background = color('--bg');
+  escena.fog = new THREE.Fog(escena.background, 150, 300);
+  MAT.mesa.color = color('--panel-2');
+  rejilla.material.color = color('--linea');
+  repintarEtiquetas();
+}
+
+var arrastrando = false, ultimo = {x:0,y:0};
+lienzo.addEventListener('pointerdown', function(e){
+  arrastrando = true; ultimo.x = e.clientX; ultimo.y = e.clientY;
+  lienzo.setPointerCapture(e.pointerId);
+});
+lienzo.addEventListener('pointermove', function(e){
+  if (!arrastrando) return;
+  orbita.theta -= (e.clientX - ultimo.x)*0.006;
+  orbita.phi = Math.max(0.08, Math.min(1.5, orbita.phi - (e.clientY - ultimo.y)*0.005));
+  ultimo.x = e.clientX; ultimo.y = e.clientY;
+  meta = null;
+});
+lienzo.addEventListener('pointerup', function(e){
+  arrastrando = false;
+  try { lienzo.releasePointerCapture(e.pointerId); } catch(err){}
+});
+lienzo.addEventListener('wheel', function(e){
+  e.preventDefault();
+  orbita.r = Math.max(35, Math.min(210, orbita.r + e.deltaY*0.08));
+}, {passive:false});
+var pinch = 0;
+lienzo.addEventListener('touchstart', function(e){
+  if (e.touches.length === 2) pinch = Math.hypot(
+    e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+}, {passive:true});
+lienzo.addEventListener('touchmove', function(e){
+  if (e.touches.length === 2 && pinch){
+    var d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                       e.touches[0].clientY - e.touches[1].clientY);
+    orbita.r = Math.max(35, Math.min(210, orbita.r*(pinch/d)));
+    pinch = d;
+  }
+}, {passive:true});
+
+/* =======================================================================
+   9. BUCLE PRINCIPAL
+   ======================================================================= */
+var reloj = new THREE.Clock();
+var tTrama = 0;
+function medir(){
+  var caja = lienzo.parentElement.getBoundingClientRect();
+  var w = Math.max(320, caja.width), h = Math.max(320, caja.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(w, h, false);
+  camara.aspect = w/h;
+  camara.updateProjectionMatrix();
+}
+window.addEventListener('resize', medir);
+
+function avanzar(dt){
+  sim.t += dt;
+  // tolva
+  if (sim.fase === 'llenado'){
+    sim.desdeUltima += dt;
+    if (sim.desdeUltima >= 1/sim.vAlim){
+      sim.desdeUltima = 0;
+      soltarMoneda();
+      actualizarTabla();
+    }
+    paleta.rotation.y = Math.sin(sim.t*Math.PI*2*Math.min(sim.vAlim, 6))*0.45;
+  }
+  avanzarMonedas(dt);
+  avanzarBanda(dt);
+  avanzarBrazo(dt);
+  actualizarFSM();
+
+  // sensores
+  for (var k=0;k<5;k++){
+    if (sim.flash[k] > 0){
+      sim.flash[k] = Math.max(0, sim.flash[k] - dt);
+      leds[k].material.emissiveIntensity = 1.2;
+    } else {
+      leds[k].material.emissiveIntensity = 0.15;
+    }
+  }
+  // trama de servos cada medio segundo en la consola
+  tTrama += dt;
+  if (tTrama > 0.5 && (brazo.seg || brazo.plan.length)){
+    tTrama = 0;
+    consola('<b>' + trama(brazo.q, brazo.pinza) + '</b>');
+  }
+}
+
+function bucle(){
+  requestAnimationFrame(bucle);
+  var dt = Math.min(reloj.getDelta(), 0.05);
+  // los móviles giran siempre, esté o no corriendo el ciclo
+  OBST.forEach(function(o){
+    o.angulo += o.giro*sim.vObst*GR*dt;
+    o.gGira.rotation.y = o.angulo;
+  });
+  if (sim.activo) avanzar(dt);
+  actualizarLecturas();
+
+  if (meta){
+    orbita.theta += (meta.theta - orbita.theta)*0.08;
+    orbita.phi   += (meta.phi - orbita.phi)*0.08;
+    orbita.r     += (meta.r - orbita.r)*0.08;
+    objetivo.lerp(meta.objetivo, 0.08);
+    if (Math.abs(meta.theta - orbita.theta) < 0.002) meta = null;
+  }
+  camara.position.set(
+    objetivo.x + orbita.r*Math.sin(orbita.phi)*Math.cos(orbita.theta),
+    objetivo.y + orbita.r*Math.cos(orbita.phi),
+    objetivo.z + orbita.r*Math.sin(orbita.phi)*Math.sin(orbita.theta));
+  camara.lookAt(objetivo);
+  renderer.render(escena, camara);
+}
+
+medir();
+aplicarTema();
+reiniciar();
+bucle();
+})();
+</script>
+</body>
+</html>
