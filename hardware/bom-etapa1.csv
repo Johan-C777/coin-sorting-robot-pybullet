@@ -1,0 +1,21 @@
+cantidad,componente,detalle,uso,nota
+1,ESP32 DevKit V1,38 pines,controlador de la etapa,cuenta monedas y maneja banda y servo
+5,Barrera infrarroja,emisor y receptor 3 mm o modulo IR de ranura,conteo por canal,salida digital con colector abierto
+1,Servo SG90,9 g,paleta dosificadora,alimentacion de una moneda por ciclo
+1,Motorreductor 12 V,reductora 1:100 eje de 6 mm,banda transportadora,unos 60 rpm en la salida
+1,Puente H L298N,doble canal,control de la banda,se usa un solo canal
+1,Cinta transportadora,70 mm de ancho y 960 mm de largo,banda,banda de PVC o lona
+2,Eje de acero de 5 mm,80 mm,rodillos,uno motriz y uno tensor
+4,Rodamiento 625ZZ,5x16x5 mm,ejes de los rodillos,dos por eje
+4,Varilla roscada M5,longitud segun estacion,soporte del riel,con ocho tuercas y ocho arandelas
+1,Fuente 12 V 3 A,conmutada,motor y logica,con reductor a 5 V para el ESP32
+1,Reductor 12 V a 5 V,LM2596,alimentacion del ESP32,
+5,Vaso de polipropileno,52 mm de diametro y 80 mm de alto,contenedores,los mismos de la etapa 2
+5,Tubo de 28 mm,longitud segun estacion,bajante al vaso,PVC o impreso
+1,Filamento PETG,1 kg,piezas estructurales,
+1,Filamento PLA,500 g,tolva y embudos,
+1,Filamento TPU 95A,100 g,pies niveladores,
+30,Tornillo M3,10 a 16 mm,ensamble general,con tuercas o insertos de laton
+30,Inserto de laton M3,5 mm,ensamble general,se ponen con soldador
+1,Placa base,MDF de 9 mm 60x30 cm,soporte de todo el conjunto,
+1,Juego de cables,Dupont y 18 AWG,señal y potencia,
