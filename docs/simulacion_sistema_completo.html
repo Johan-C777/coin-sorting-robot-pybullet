@@ -301,12 +301,23 @@ for (var i=0;i<5;i++){
 // deja pasar el vaso por debajo; el segundo cuelga bajo y obliga a esperar
 // la ventana entre sus brazos.
 var OBST = [
-  {nombre:'O1', yaw:-22, brazos:3, radio:6.5, yEsfera:21.5, rEsfera:2.6, fase:0.0, giro:1},
-  {nombre:'O2', yaw:10,  brazos:2, radio:9.0, yEsfera:14.5, rEsfera:2.2, fase:1.1, giro:-1}
+  // 1) alto y sobre el arco: el vaso cabe por debajo  -> maniobra 'bajo'
+  {nombre:'O1 Guardián de banda', yaw:-40, rPivote:23, brazos:3, radio:6.5,
+   yEsfera:22.0, rEsfera:2.6, fase:0.0, giro:1,  vel:1.1, color:0xB23E0C},
+  // 2) bajo y rápido: no cabe por debajo pero sí por dentro -> maniobra 'rodeo'
+  {nombre:'O2 Muro giratorio',    yaw:-15, rPivote:23, brazos:2, radio:8.5,
+   yEsfera:13.5, rEsfera:2.2, fase:1.1, giro:-1, vel:1.8, color:0x7A4BB8},
+  // 3) colgado por dentro del arco: ninguna maniobra sirve -> espera de ventana
+  {nombre:'O3 Centinela',         yaw:10,  rPivote:14, brazos:3, radio:5.0,
+   yEsfera:14.0, rEsfera:1.9, fase:0.6, giro:1,  vel:0.7, color:0x2F5878},
+  // 4) alto y con esferas grandes: tapa R2, R3 y R4 -> paso por debajo justo
+  {nombre:'O4 Jefe de rack',      yaw:40,  rPivote:23, brazos:2, radio:7.0,
+   yEsfera:23.0, rEsfera:3.0, fase:2.0, giro:-1, vel:1.3, color:0x8C6D1F}
 ];
 OBST.forEach(function(o){
-  o.x = R_ARCO*Math.cos(o.yaw*GR);
-  o.z = -R_ARCO*Math.sin(o.yaw*GR);
+  var rp = o.rPivote || R_ARCO;
+  o.x = rp*Math.cos(o.yaw*GR);
+  o.z = -rp*Math.sin(o.yaw*GR);
   o.angulo = o.fase;
 });
 var MARGEN = 1.4;                                 // holgura mínima vaso-esfera
@@ -781,7 +792,7 @@ OBST.forEach(function(o, idx){
   g.add(gGira);
   o.gGira = gGira;
   o.esferas = [];
-  var mat = idx === 0 ? MAT.obstaculo : MAT.obstaculo2;
+  var mat = new THREE.MeshStandardMaterial({color:o.color, roughness:0.4, metalness:0.2});
   for (var b=0;b<o.brazos;b++){
     var ang = 2*Math.PI*b/o.brazos;
     var varilla = caja(o.radio, 0.35, 0.35, MAT.hilo);
@@ -797,7 +808,7 @@ OBST.forEach(function(o, idx){
     gGira.add(bola);
     o.esferas.push({mesh:bola, angBase:ang});
   }
-  var eti = etiqueta('Obstáculo ' + (idx+1),
+  var eti = etiqueta(o.nombre,
                      o.brazos + ' brazos · ' + o.yEsfera.toFixed(1).replace('.',',') + ' cm', 0.85);
   eti.position.set(o.x, o.yEsfera + 6.5, o.z);
   etiquetas.add(eti);
@@ -868,7 +879,7 @@ var brazo = {
    cabe agachándose, baja la altura de tránsito y pasa por debajo.
    ======================================================================= */
 function posEsfera(o, e, adelanto){
-  var giroActual = o.angulo + o.giro*(sim.vObst*GR)*(adelanto||0);
+  var giroActual = o.angulo + o.giro*(sim.vObst*(o.vel||1)*GR)*(adelanto||0);
   var a = e.angBase - giroActual;
   return {x: o.x + o.radio*Math.cos(a), y: o.yEsfera, z: o.z + o.radio*Math.sin(a)};
 }
@@ -906,7 +917,7 @@ function alturaBajoObstaculo(o){
 }
 // ¿a qué radio hay que recogerse para pasar por dentro de su giro?
 function radioInterior(o){
-  return R_ARCO - o.radio - o.rEsfera - (brazo.vaso ? VASO_R : 1.4) - MARGEN;
+  return (o.rPivote || R_ARCO) - o.radio - o.rEsfera - (brazo.vaso ? VASO_R : 1.4) - MARGEN;
 }
 // zona angular del arco que el móvil puede alcanzar
 function zonaAngular(o){
@@ -933,6 +944,7 @@ function zonaAngular(o){
    ----------------------------------------------------------------------- */
 function maniobra(yaw){
   var r = {z:Z_SEGURA, rho:R_ARCO, modo:'directo', obst:null};
+  var espera = null;
   OBST.forEach(function(o){
     var d = Math.abs(yaw - o.yaw), zona = zonaAngular(o);
     if (d > zona*2.0) return;
@@ -953,8 +965,14 @@ function maniobra(yaw){
       if (peso > 0.12){ r.modo = 'rodeo'; r.obst = o; }
       return;
     }
-    if (peso > 0.12){ r.modo = 'espera'; r.obst = o; } // 3) sin maniobra
+    if (peso > 0.12){ espera = o; }                    // 3) sin maniobra
   });
+  if (espera){
+    // recogerse no sirve contra este: en el arco sí hay ventana entre brazos
+    r.modo = 'espera';
+    r.obst = espera;
+    r.rho = R_ARCO;
+  }
   r.rho = Math.max(RHO_MIN, Math.min(RHO_MAX, r.rho));
   return r;
 }
@@ -1001,17 +1019,20 @@ function ventanaCruce(yawIni, sentido, yawDestino){
   return {libre:true, obstaculo:null};
 }
 
-// el corredor de bajada al rack también tiene que estar despejado, porque el
-// descenso dura algo más de un segundo y el móvil sigue girando
+// Corredor de bajada: en vez de exigir toda la columna libre a la vez, se
+// simula el descenso con su tiempo real y se compara cada altura con la
+// posición que tendrán las esferas en ese instante. Es menos conservador y
+// encuentra ventanas donde antes el brazo se quedaba esperando de más.
 function corredorLibre(yaw){
-  var alturas = [Z_SEGURA, 17, 14, 11, Z_AGARRE + 0.25];
-  var adelantos = [0, 0.6, 1.2];
-  for (var i=0;i<alturas.length;i++){
-    var tcp = tcpDeArco(yaw, alturas[i], R_ARCO);
-    for (var a=0;a<adelantos.length;a++){
-      for (var o=0;o<OBST.length;o++){
-        if (holguraMinima(OBST[o], tcp, adelantos[a]) < 0) return OBST[o];
-      }
+  var T = Math.max(0.3, (Z_SEGURA - Z_AGARRE)/(11*sim.vBrazo));
+  var pasos = 9;
+  for (var i=0;i<=pasos;i++){
+    var s = quintico(i/pasos);
+    var tau = T*(i/pasos);
+    var h = Z_SEGURA + (Z_AGARRE + 0.25 - Z_SEGURA)*s;
+    var tcp = tcpDeArco(yaw, h, R_ARCO);
+    for (var k=0;k<OBST.length;k++){
+      if (holguraMinima(OBST[k], tcp, tau) < 0) return OBST[k];
     }
   }
   return null;
@@ -1694,7 +1715,7 @@ function bucle(){
   var dt = Math.min(reloj.getDelta(), 0.05);
   // los móviles giran siempre, esté o no corriendo el ciclo
   OBST.forEach(function(o){
-    o.angulo += o.giro*sim.vObst*GR*dt;
+    o.angulo += o.giro*sim.vObst*(o.vel||1)*GR*dt;
     o.gGira.rotation.y = o.angulo;
   });
   if (sim.activo) avanzar(dt);
