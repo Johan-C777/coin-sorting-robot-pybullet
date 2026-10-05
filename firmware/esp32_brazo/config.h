@@ -1,15 +1,30 @@
 #pragma once
-// Parámetros del brazo clasificador. Son los mismos números de
-// software/brazo/config.py y de la memoria de cálculo: si cambias uno, cámbialo
-// en los dos lados. Longitudes en cm, ángulos en grados.
-
+// Parámetros del brazo clasificador. Son los mismos de software/brazo/config.py.
+// Longitudes en cm, ángulos en grados.
 #include <stdint.h>
 
-// ---- geometría --------------------------------------------------------------
-constexpr float D1 = 11.0f;   // altura del hombro
-constexpr float L1 = 16.0f;   // hombro -> codo
-constexpr float L2 = 15.0f;   // codo -> muñeca
-constexpr float L3 = 8.0f;    // muñeca -> TCP
+// ---- perfil de medidas ------------------------------------------------------
+// PERFIL_SIMULACION: geometría de las simulaciones y de la memoria de cálculo.
+// PERFIL_CAD: medidas del brazo real (PLANOS_BRACITO). Ver docs/06-medidas-cad.md.
+#define PERFIL_SIMULACION
+
+#ifdef PERFIL_SIMULACION
+constexpr float D1 = 11.0f;      // altura del hombro
+constexpr float L1 = 16.0f;      // hombro -> codo
+constexpr float L2 = 15.0f;      // codo -> muñeca
+constexpr float L3 = 8.0f;       // muñeca -> TCP
+constexpr float R_ARCO = 23.0f;  // radio del arco de puestos
+#endif
+
+// ---- medidas del CAD, pendientes de confirmar en SolidWorks -----------------
+// #define PERFIL_CAD
+// #ifdef PERFIL_CAD
+// constexpr float D1 = 8.7f;     // 50 mm de base + 36,61 mm del hombro
+// constexpr float L1 = 10.0f;    // brazo: 140 mm totales - cubos R17,5 y R22,5
+// constexpr float L2 = 9.5f;     // POR MEDIR entre ejes codo-muñeca
+// constexpr float L3 = 6.0f;     // POR MEDIR entre eje de muñeca y TCP
+// constexpr float R_ARCO = 9.7f; // de scripts/verificar_alcance.py --perfil cad
+// #endif
 
 // ---- articulaciones ---------------------------------------------------------
 constexpr uint8_t N_JUNTAS = 5;
@@ -25,7 +40,6 @@ constexpr float PINZA_CERRADA_MM = 49.0f;         // 3 mm de interferencia
 constexpr float VASO_ANCHO_MM = 52.0f;
 
 // ---- celda ------------------------------------------------------------------
-constexpr float R_ARCO = 23.0f;
 constexpr float Z_AGARRE = 6.8f;
 constexpr float Z_SEGURA = 17.0f;
 constexpr float CABECEO = -90.0f;
