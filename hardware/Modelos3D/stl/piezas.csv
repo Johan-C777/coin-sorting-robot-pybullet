@@ -1,0 +1,20 @@
+archivo,pieza,cantidad,medidas_mm,triangulos,material,impresion,nota
+E01_riel_tramo_a.stl,"Riel selector, tramo de entrada",2,200.0 x 22.0 x 10.0,48,PETG,"0,2 mm · 4 perímetros · 40 %",Cuerpo continuo extruido con el canal central liso. El riel derecho es la misma pieza volteada sobre su eje largo.
+E02_riel_tramo_b.stl,"Riel selector, tramo de salida",2,185.0 x 18.5 x 10.0,40,PETG,"0,2 mm · 4 perímetros · 40 %","Se une al tramo A a media madera, 20 mm de solapa y dos M3."
+E03_canal_costado.stl,Canal del costado,4,185.0 x 22.0 x 20.0,360,PETG,"0,2 mm · 3 perímetros · 30 %",Dos tramos por lado; el riel se apoya dentro del canal.
+E04_abrazadera_varilla.stl,Abrazadera de varilla M5,4,38.0 x 20.0 x 14.0,232,PETG,"0,2 mm · 4 perímetros · 40 %",Fija la altura y los 25 grados de inclinación sobre varilla roscada.
+E05_tolva.stl,Tolva de alimentación,1,124.0 x 110.0 x 93.0,1176,PLA o PETG,"0,25 mm · 3 perímetros · 15 %","Se imprime boca abajo, sin soportes. Capacidad aproximada de 300 monedas."
+E06_paleta_dosificadora.stl,Paleta dosificadora,1,18.0 x 60.0 x 9.0,420,PETG,"0,2 mm · 4 perímetros · 60 %",Va en el servo SG90: deja pasar una moneda por ciclo.
+E07_embudo_estacion1.stl,Embudo de la estación 1 ($50),1,72.0 x 72.0 x 205.7,1596,PLA,"0,25 mm · 3 perímetros · 12 %","Cono truncado que entrega directo al vaso; se imprime de pie, sin soportes."
+E07_embudo_estacion2.stl,Embudo de la estación 2 ($100),1,72.0 x 72.0 x 175.4,1596,PLA,"0,25 mm · 3 perímetros · 12 %","Misma pieza, más corta por la caída del riel."
+E07_embudo_estacion3.stl,Embudo de la estación 3 ($200),1,72.0 x 72.0 x 145.1,1596,PLA,"0,25 mm · 3 perímetros · 12 %","Misma pieza, más corta por la caída del riel."
+E07_embudo_estacion4.stl,Embudo de la estación 4 ($500),1,72.0 x 72.0 x 114.8,1596,PLA,"0,25 mm · 3 perímetros · 12 %","Misma pieza, más corta por la caída del riel."
+E07_embudo_estacion5.stl,Embudo de la estación 5 ($1.000),1,72.0 x 72.0 x 84.5,1596,PLA,"0,25 mm · 3 perímetros · 12 %","La más corta, junto a la salida del riel."
+E08_soporte_sensor.stl,Soporte de sensor infrarrojo,5,34.0 x 16.0 x 27.0,252,PETG,"0,2 mm · 3 perímetros · 30 %",Deja la barrera apuntando al centro de la ranura.
+E09_rodillo_banda.stl,Rodillo de la banda,2,35.0 x 35.0 x 70.0,2304,PETG,"0,2 mm · 4 perímetros · 30 %",Eje de 5 mm; el motriz se acopla con E12.
+E10_marco_banda.stl,"Marco de la banda, tramo",6,193.0 x 64.0 x 18.0,384,PETG,"0,2 mm · 3 perímetros · 25 %","Alma, pared lateral y pie en una sola pieza; tres tramos por lado."
+E11_portavaso.stl,Portavaso de la banda,5,58.0 x 58.0 x 15.0,1212,PETG,"0,2 mm · 3 perímetros · 20 %",Sujeta el vaso de 52 mm sobre la cinta.
+E12_acople_motor.stl,Acople motor a rodillo,1,18.0 x 18.0 x 24.0,1152,PETG,"0,2 mm · 5 perímetros · 60 %",De eje de 6 mm del motorreductor a 5 mm del rodillo.
+E13_pie_nivelador.stl,Pie nivelador,8,22.0 x 22.0 x 14.0,312,TPU o PETG,"0,2 mm · 3 perímetros · 30 %",Cuatro para el selector y cuatro para la banda.
+B11_puesto_rack.stl,Puesto del rack,5,64.0 x 64.0 x 18.0,1980,PETG,"0,2 mm · 3 perímetros · 20 %",Los cinco puestos del arco de 230 mm de radio.
+B12_bandeja_electronica.stl,Bandeja del ESP32 y el PCA9685,1,120.0 x 78.0 x 11.0,1620,PLA o PETG,"0,2 mm · 3 perímetros · 15 %","Separadores integrados, sin tornillería extra."
