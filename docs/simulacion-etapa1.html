@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Etapa 1: selección y transporte de monedas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1EC; --panel:#E3E9E2; --panel-2:#D6DED6; --line:#C6D0C8;
+  --ink:#1D2726; --ink-2:#47544F; --muted:#6B7772;
+  --naranja:#EE7A1E; --naranja-ink:#A8530C; --acero:#34597A; --verde:#2C7A54; --rojo:#B23E0C;
+  --f-ui:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;
+  --f-num:"Barlow",system-ui,sans-serif;
+  --f-code:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#151D1C; --panel:#1D2726; --panel-2:#26322F; --line:#33413E;
+    --ink:#E3E9E4; --ink-2:#B4C0BA; --muted:#8B9791;
+    --naranja:#F79343; --naranja-ink:#F79343; --acero:#83AACB; --verde:#63C295; --rojo:#F08A5D;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#151D1C; --panel:#1D2726; --panel-2:#26322F; --line:#33413E;
+  --ink:#E3E9E4; --ink-2:#B4C0BA; --muted:#8B9791;
+  --naranja:#F79343; --naranja-ink:#F79343; --acero:#83AACB; --verde:#63C295; --rojo:#F08A5D;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-num);font-size:15px;overflow:hidden}
+button,select,input{font-family:inherit}
+:focus-visible{outline:2px solid var(--naranja);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) 400px;height:100%}
+.stage{position:relative;min-width:0}
+#lienzo{display:block;width:100%;height:100%}
+.encabezado{position:absolute;top:18px;left:20px;right:20px;display:flex;gap:16px;align-items:flex-start;pointer-events:none}
+.encabezado h1{font-family:var(--f-ui);font-weight:600;font-size:clamp(1.35rem,2.4vw,1.9rem);margin:0;line-height:1.05}
+.encabezado p{margin:6px 0 0;max-width:46ch;color:var(--ink-2);font-size:14px;line-height:1.4}
+.vistas{margin-left:auto;display:flex;gap:6px;pointer-events:auto}
+.pill{font:500 13.5px/1 var(--f-ui);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 13px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.estado-flotante{position:absolute;left:20px;bottom:18px;display:flex;gap:10px;align-items:center;
+  font-family:var(--f-ui);font-size:13.5px;color:var(--muted);pointer-events:none}
+.led{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:6px}
+.led.on{background:var(--verde)}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px}
+
+.panel{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:18px 20px 32px;display:flex;flex-direction:column;gap:18px}
+.panel h2{font-family:var(--f-ui);font-size:1.05rem;font-weight:600;margin:0 0 8px;letter-spacing:.01em}
+.panel h3{font-family:var(--f-ui);font-size:.95rem;font-weight:600;margin:0 0 6px;color:var(--ink-2)}
+.bloque{border-top:1px solid var(--line);padding-top:14px}
+.bloque:first-child{border-top:0;padding-top:0}
+.seg{display:grid;grid-auto-flow:column;gap:4px;background:var(--panel-2);border-radius:8px;padding:4px}
+.seg button{font:500 14px/1 var(--f-ui);color:var(--ink-2);background:transparent;border:0;border-radius:6px;padding:9px 6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.fila{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.btn{font:500 14px/1 var(--f-ui);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:9px 12px;cursor:pointer;min-height:36px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primario{background:var(--naranja);border-color:var(--naranja);color:#fff}
+.btn.primario:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:12px 0 0}
+.ctrl label{font-family:var(--f-ui);font-weight:500}
+.ctrl output{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--naranja);height:24px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:5px 0 5px 8px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th{font-family:var(--f-ui);font-weight:600;color:var(--ink-2);font-size:13.5px}
+tfoot td{font-weight:600;border-bottom:0}
+.lote{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.lote input{width:64px;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:5px 7px;color:var(--ink);text-align:right}
+.trama{font-family:var(--f-code);font-size:12.5px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:8px 10px;word-break:break-all;color:var(--ink-2);line-height:1.5}
+.log{font-family:var(--f-code);font-size:12px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+  padding:8px 10px;height:110px;overflow:auto;color:var(--ink-2);line-height:1.6}
+.sensores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-family:var(--f-ui);font-size:12.5px;color:var(--muted)}
+.sensores div{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:7px 2px}
+.sensores b{display:block;font-size:13px;color:var(--ink)}
+.sensores.activo-1 div:nth-child(1),.sensores.activo-2 div:nth-child(2),.sensores.activo-3 div:nth-child(3),
+.sensores.activo-4 div:nth-child(4),.sensores.activo-5 div:nth-child(5){border-color:var(--verde);color:var(--verde)}
+.piezas{font-size:13.5px}
+.piezas button{display:grid;grid-template-columns:auto 1fr auto;gap:10px;width:100%;text-align:left;background:transparent;
+  border:0;border-bottom:1px solid var(--line);padding:8px 2px;cursor:pointer;color:var(--ink);font-family:inherit;font-size:13.5px}
+.piezas button:hover{background:var(--panel-2)}
+.piezas button[aria-pressed="true"]{background:var(--panel-2);color:var(--naranja-ink)}
+.piezas code{font-family:var(--f-ui);font-weight:600;color:var(--naranja-ink)}
+.piezas span{color:var(--muted);font-family:var(--f-num)}
+.nota{font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+.oculto{display:none !important}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--f-ui);font-size:13px;color:var(--ink-2);margin-top:8px}
+.leyenda i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+
+@media (max-width:1040px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{height:58svh;min-height:380px}
+  .panel{border-left:0;border-top:1px solid var(--line);max-height:none}
+  .encabezado p{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="stage">
+    <canvas id="lienzo"></canvas>
+    <div class="encabezado">
+      <div>
+        <h1>Selección y transporte de monedas</h1>
+        <p>Etapa 1 del Sistema de Logística de Monedas Inteligentes: la tolva suelta las monedas una a una, el riel escalonado las separa por diámetro y cada vaso viaja en la banda hasta el brazo clasificador.</p>
+      </div>
+      <div class="vistas">
+        <button class="pill" id="vIso" aria-pressed="true" type="button">Isométrica</button>
+        <button class="pill" id="vLat" aria-pressed="false" type="button">Lateral</button>
+        <button class="pill" id="vSup" aria-pressed="false" type="button">Superior</button>
+        <button class="pill" id="vTema" aria-pressed="false" type="button">Tema</button>
+      </div>
+    </div>
+    <div class="estado-flotante">
+      <span class="chip" id="chipEstado"><span class="led" id="ledEstado"></span>En espera</span>
+      <span class="chip" id="chipTolva">Tolva: 0 monedas</span>
+      <span class="chip">Arrastra para girar, rueda para acercar</span>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="bloque">
+      <div class="seg" role="group" aria-label="Vista">
+        <button id="modoOperacion" aria-pressed="true" type="button">Operación</button>
+        <button id="modoDespiece" aria-pressed="false" type="button">Despiece</button>
+      </div>
+    </div>
+
+    <!-- ===================== operación ===================== -->
+    <div id="panelOperacion">
+      <div class="bloque">
+        <h2>Control</h2>
+        <div class="fila">
+          <button class="btn primario" id="btnIniciar" type="button">Iniciar</button>
+          <button class="btn" id="btnPausar" type="button" disabled>Pausar</button>
+          <button class="btn" id="btnReiniciar" type="button">Reiniciar</button>
+        </div>
+        <div class="ctrl">
+          <label for="slAlim">Alimentación</label><output id="outAlim">3,0 monedas/s</output>
+          <input type="range" id="slAlim" min="0.5" max="8" step="0.1" value="3">
+        </div>
+        <div class="ctrl">
+          <label for="slBanda">Velocidad de la banda</label><output id="outBanda">6,0 cm/s</output>
+          <input type="range" id="slBanda" min="1" max="15" step="0.5" value="6">
+        </div>
+        <div class="fila">
+          <button class="btn" id="btnEnviar" type="button">Enviar vasos al brazo</button>
+          <button class="btn" id="btnLote" type="button">Lote aleatorio</button>
+        </div>
+      </div>
+
+      <div class="bloque">
+        <h2>Lote en la tolva</h2>
+        <div class="lote" id="loteEntrada"></div>
+        <p class="nota">Cantidad de monedas de cada denominación que se echan a la tolva. Se mezclan al azar antes de caer.</p>
+      </div>
+
+      <div class="bloque">
+        <h2>Conteo por canal</h2>
+        <table id="tablaConteo">
+          <thead><tr><th>Canal</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td colspan="2">Totales</td><td id="tTotN">0</td><td id="tTotV">$0</td><td id="tTotP">0,0 g</td></tr></tfoot>
+        </table>
+        <div class="sensores" id="sensores"></div>
+      </div>
+
+      <div class="bloque">
+        <h2>Salida hacia el ESP32</h2>
+        <h3>Evento por moneda</h3>
+        <div class="trama" id="tramaEvento">M:0,0</div>
+        <h3>Resumen de vasos para el brazo</h3>
+        <div class="trama" id="tramaVasos">VASOS:</div>
+        <div class="log" id="logSerie"></div>
+      </div>
+    </div>
+
+    <!-- ===================== despiece ===================== -->
+    <div id="panelDespiece" class="oculto">
+      <div class="bloque">
+        <h2>Despiece</h2>
+        <div class="ctrl">
+          <label for="slExplo">Separación de piezas</label><output id="outExplo">60 %</output>
+          <input type="range" id="slExplo" min="0" max="100" step="1" value="60">
+        </div>
+        <div class="fila">
+          <button class="btn" id="btnGirar" aria-pressed="true" type="button">Girar la vista</button>
+          <button class="btn" id="btnTodas" type="button">Mostrar todas</button>
+        </div>
+        <p class="nota">Toca una pieza de la lista para aislarla. Los nombres son los mismos de la carpeta <code>stl/</code>.</p>
+      </div>
+      <div class="bloque piezas" id="listaPiezas"></div>
+      <div class="bloque">
+        <h2>Ficha de la pieza</h2>
+        <div id="fichaPieza" class="nota">Selecciona una pieza de la lista.</div>
+      </div>
+      <div class="bloque">
+        <h2>Compra aparte</h2>
+        <p class="nota">Servo SG90 para la compuerta, motorreductor 12 V con reductora 1:100 para la banda, cinta transportadora de 70 mm, cinco barreras infrarrojas, ejes de 5 mm, tornillería M3 e insertos de latón. Detalle en <code>hardware/bom-etapa1.csv</code>.</p>
+      </div>
+    </div>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ==================== parámetros (cm, los mismos de los STL) ==================== */
+var GR = Math.PI/180;
+var MONEDAS = [
+  {v:50,   d:1.70, e:0.14, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4},
+  {v:100,  d:2.03, e:0.16, m:3.34, aro:0xC7A33A, centro:0xC7A33A},
+  {v:200,  d:2.24, e:0.17, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC},
+  {v:500,  d:2.37, e:0.20, m:7.14, aro:0xB4B8B0, centro:0xC7A33A},
+  {v:1000, d:2.67, e:0.23, m:9.95, aro:0xC7A33A, centro:0xB4B8B0}
+];
+var LUZ = [1.76, 2.09, 2.30, 2.43, 2.73];     // luces de las ranuras
+var LUZ_ENTRADA = 1.60;
+var PASO = 6.5, ENTRADA = 4.0, ANCHO_RIEL = 3.0, ESP_RIEL = 1.0;
+var LARGO_RIEL = ENTRADA + PASO*MONEDAS.length;         // 36,5 cm
+var INC = 25*GR, Y0 = 34.0;                             // altura del riel en x = 0
+var CORTE = 18.0;                                       // división de los tramos imprimibles
+var BANDA_Y = 2.4, BANDA_X0 = 0.5, BANDA_X1 = 46.0, BANDA_W = 7.0;
+var VASO_R = 2.6, VASO_H = 8.0, VASO_Y = 2.7;
+var Y_SALIDA = 11.65;                                   // boca del vaso, fin de la bajada
+var X_ENTREGA = 42.0;                                   // donde el brazo recoge el vaso
+var EST = [];                                           // datos de cada estación
+for (var i=0;i<5;i++){
+  var xl = ENTRADA + PASO*i + PASO/2;
+  var xw = xl*Math.cos(INC), yr = Y0 - xl*Math.sin(INC);
+  EST.push({i:i, xLocal:xl, x:xw, yRiel:yr, yBoca:yr-ESP_RIEL,
+            yEmbudo:yr-ESP_RIEL-6.3, luz:LUZ[i], den:MONEDAS[i].v});
+}
+
+/* ==================== catálogo de piezas ==================== */
+var PIEZAS = [
+  {cod:'P01', nombre:'Riel selector, tramo de entrada', cant:2, archivo:'P01_riel_tramo_a.stl',
+   material:'PETG', medidas:'200 x 22 x 10 mm', nota:'Lleva la entrada y las dos primeras ranuras. El riel derecho es la misma pieza volteada sobre su eje largo.'},
+  {cod:'P02', nombre:'Riel selector, tramo de salida', cant:2, archivo:'P02_riel_tramo_b.stl',
+   material:'PETG', medidas:'185 x 18,5 x 10 mm', nota:'Se une al tramo de entrada a media madera, con 20 mm de solapa y dos M3.'},
+  {cod:'P03', nombre:'Canal del costado', cant:4, archivo:'P03_canal_costado.stl',
+   material:'PETG', medidas:'185 x 22 x 20 mm', nota:'Dos tramos por lado. El riel se apoya dentro del canal y se fija con tres M3.'},
+  {cod:'P04', nombre:'Abrazadera de varilla M5', cant:4, archivo:'P04_abrazadera.stl',
+   material:'PETG', medidas:'38 x 20 x 14 mm', nota:'Fija la altura y mantiene los 25 grados de inclinación sobre varilla roscada M5.'},
+  {cod:'P05', nombre:'Tolva de alimentación', cant:1, archivo:'P05_tolva.stl',
+   material:'PLA o PETG', medidas:'124 x 110 x 93 mm', nota:'Se imprime boca abajo y no necesita soportes. Capacidad aproximada de 300 monedas.'},
+  {cod:'P06', nombre:'Paleta dosificadora', cant:1, archivo:'P06_compuerta.stl',
+   material:'PETG', medidas:'18 x 60 x 9 mm', nota:'Va montada en un servo SG90; cada ciclo deja pasar una sola moneda al riel.'},
+  {cod:'P07', nombre:'Embudo de estación', cant:5, archivo:'P07_canal_salida.stl',
+   material:'PLA', medidas:'66 x 66 x 63 mm', nota:'Boca de 56 mm bajo la ranura y salida de 28 mm hacia el vaso.'},
+  {cod:'P08', nombre:'Soporte de sensor infrarrojo', cant:5, archivo:'P08_soporte_sensor.stl',
+   material:'PETG', medidas:'34 x 16 x 27 mm', nota:'Deja la barrera apuntando al centro de la ranura, a 8 mm del borde.'},
+  {cod:'P09', nombre:'Rodillo de la banda', cant:2, archivo:'P09_rodillo.stl',
+   material:'PETG', medidas:'35 x 35 x 70 mm', nota:'Eje de 5 mm. El rodillo motriz se acopla al motorreductor con la pieza P12.'},
+  {cod:'P10', nombre:'Costado de la banda, tramo', cant:6, archivo:'P10_lateral_banda.stl',
+   material:'PETG', medidas:'188 x 62 x 9 mm', nota:'Tres tramos por lado, unidos por la solapa de 24 mm.'},
+  {cod:'P11', nombre:'Portavaso', cant:5, archivo:'P11_portavaso.stl',
+   material:'PETG', medidas:'58 x 58 x 15 mm', nota:'Sujeta el vaso de 52 mm sobre la cinta y lo entrega centrado al brazo.'},
+  {cod:'P12', nombre:'Acople motor a rodillo', cant:1, archivo:'P12_acople_motor.stl',
+   material:'PETG', medidas:'18 x 18 x 24 mm', nota:'De eje de 6 mm del motorreductor a eje de 5 mm del rodillo.'},
+  {cod:'P13', nombre:'Pie nivelador', cant:4, archivo:'P13_pie_nivelador.stl',
+   material:'TPU o PETG', medidas:'22 x 22 x 14 mm', nota:'Nivela la estructura y amortigua la vibración del motor.'},
+  {cod:'C01', nombre:'Servo SG90 (comprado)', cant:1, archivo:'-', material:'-',
+   medidas:'23 x 12 x 29 mm', nota:'Mueve la paleta dosificadora. Se comanda desde el ESP32 por PWM.'},
+  {cod:'C02', nombre:'Barrera infrarroja (comprada)', cant:5, archivo:'-', material:'-',
+   medidas:'-', nota:'Un canal por estación. Cada pulso es una moneda contada.'},
+  {cod:'C03', nombre:'Motorreductor 12 V y cinta (comprados)', cant:1, archivo:'-', material:'-',
+   medidas:'cinta de 70 mm', nota:'Mueve la banda. Se controla con un puente H desde el ESP32.'},
+  {cod:'C04', nombre:'Vaso de polipropileno (comprado)', cant:5, archivo:'-', material:'-',
+   medidas:'52 mm de diámetro, 80 mm de alto', nota:'Es el mismo vaso que recoge el brazo de la etapa 2.'},
+  {cod:'C05', nombre:'Varilla roscada M5 (comprada)', cant:4, archivo:'-', material:'-',
+   medidas:'longitud según estación', nota:'Da la altura del riel; las tuercas permiten ajustar la inclinación.'}
+];
+
+/* ==================== escena ==================== */
+var lienzo = document.getElementById('lienzo');
+var renderer = new THREE.WebGLRenderer({canvas:lienzo, antialias:true, alpha:false});
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+var escena = new THREE.Scene();
+var camara = new THREE.PerspectiveCamera(42, 1, 0.5, 400);
+var objetivo = new THREE.Vector3(19, 15, 0);
+var orbita = {r:102, theta:-0.72, phi:1.0};
+
+var luzSol = new THREE.DirectionalLight(0xffffff, 0.95);
+luzSol.position.set(28, 52, 34);
+luzSol.castShadow = true;
+luzSol.shadow.mapSize.set(2048, 2048);
+var s = luzSol.shadow.camera;
+s.left = -46; s.right = 46; s.top = 46; s.bottom = -46; s.near = 1; s.far = 130;
+s.updateProjectionMatrix();
+escena.add(luzSol);
+escena.add(new THREE.HemisphereLight(0xffffff, 0x6b7772, 0.55));
+var relleno = new THREE.DirectionalLight(0xffffff, 0.25);
+relleno.position.set(-30, 20, -25);
+escena.add(relleno);
+
+function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function color(n){ return new THREE.Color(css(n)); }
+
+var MAT = {
+  impreso: new THREE.MeshStandardMaterial({color:0xE0761F, roughness:0.62, metalness:0.04}),
+  impreso2: new THREE.MeshStandardMaterial({color:0x3E4A47, roughness:0.7, metalness:0.05}),
+  comprado: new THREE.MeshStandardMaterial({color:0x34597A, roughness:0.45, metalness:0.25}),
+  goma: new THREE.MeshStandardMaterial({color:0x22282A, roughness:0.9, metalness:0.02}),
+  metal: new THREE.MeshStandardMaterial({color:0x9AA3A0, roughness:0.35, metalness:0.7}),
+  vidrio: new THREE.MeshPhysicalMaterial({color:0xDCE6EA, roughness:0.18, metalness:0.0,
+    transparent:true, opacity:0.35, transmission:0.0, side:THREE.DoubleSide}),
+  led: new THREE.MeshStandardMaterial({color:0x2C7A54, emissive:0x2C7A54, emissiveIntensity:0.15, roughness:0.4}),
+  mesa: new THREE.MeshStandardMaterial({color:0xD9DFD8, roughness:0.95, metalness:0.0}),
+  placa: new THREE.MeshStandardMaterial({color:0x214A3C, roughness:0.6, metalness:0.1})
+};
+
+var raiz = new THREE.Group();
+escena.add(raiz);
+var etiquetasOp = new THREE.Group();
+raiz.add(etiquetasOp);
+var registro = {};          // código de pieza -> lista de mallas
+
+function anotar(malla, cod, dir){
+  malla.userData.cod = cod;
+  malla.userData.base = malla.position.clone();
+  malla.userData.dir = dir || new THREE.Vector3(0,1,0);
+  if (!registro[cod]) registro[cod] = [];
+  registro[cod].push(malla);
+  return malla;
+}
+function caja(sx, sy, sz, mat){
+  var m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function cilindro(r1, r2, h, mat, seg, abierto){
+  var m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, seg||32, 1, !!abierto), mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function etiqueta(texto, sub){
+  var c = document.createElement('canvas'), k = 4;
+  c.width = 256*k/2; c.height = 72*k/2;
+  var g = c.getContext('2d');
+  g.scale(k/2, k/2);
+  g.fillStyle = css('--paper'); g.strokeStyle = css('--line'); g.lineWidth = 2;
+  g.beginPath(); g.rect(2, 2, 252, 68); g.fill(); g.stroke();
+  g.fillStyle = css('--ink'); g.font = '600 26px "Barlow Semi Condensed", sans-serif';
+  g.textAlign = 'center'; g.fillText(texto, 128, sub ? 32 : 44);
+  if (sub){ g.fillStyle = css('--muted'); g.font = '500 18px "Barlow Semi Condensed", sans-serif';
+            g.fillText(sub, 128, 55); }
+  var t = new THREE.CanvasTexture(c);
+  t.anisotropy = 4;
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:t, transparent:true, depthTest:true}));
+  sp.scale.set(6.2, 1.75, 1);
+  return sp;
+}
+
+/* ---------- mesa ---------- */
+var mesa = new THREE.Mesh(new THREE.BoxGeometry(110, 1.2, 70), MAT.mesa);
+mesa.position.set(22, -0.6, 0);
+mesa.receiveShadow = true;
+raiz.add(mesa);
+var rejilla = new THREE.GridHelper(110, 44, 0xB9C3BB, 0xC9D2CA);
+rejilla.position.set(22, 0.02, 0);
+rejilla.material.opacity = 0.55; rejilla.material.transparent = true;
+raiz.add(rejilla);
+
+/* ---------- estructura del selector (grupo inclinado) ---------- */
+var selector = new THREE.Group();
+selector.position.set(0, Y0, 0);
+selector.rotation.z = -INC;
+raiz.add(selector);
+
+function medioHueco(x){
+  if (x < ENTRADA) return LUZ_ENTRADA/2;
+  var k = Math.min(Math.floor((x - ENTRADA)/PASO), LUZ.length-1);
+  return LUZ[k]/2;
+}
+// rieles: un bloque por tramo de luz constante, dos veces (izquierdo y derecho)
+var cortes = [0, ENTRADA];
+for (var e=1;e<=MONEDAS.length;e++) cortes.push(ENTRADA + PASO*e);
+[1, -1].forEach(function(lado){
+  for (var k=0;k<cortes.length-1;k++){
+    var x0 = cortes[k], x1 = cortes[k+1];
+    var hueco = medioHueco((x0+x1)/2);
+    var ancho = ANCHO_RIEL - hueco;
+    var b = caja(x1-x0, ESP_RIEL, ancho, MAT.impreso);
+    b.position.set((x0+x1)/2, -ESP_RIEL/2, lado*(hueco + ancho/2));
+    selector.add(b);
+    anotar(b, (x0 < CORTE ? 'P01' : 'P02'), new THREE.Vector3(0, 1, lado*0.9));
+  }
+});
+// canales del costado: dos tramos rectos por lado
+[1, -1].forEach(function(lado){
+  [[0, LARGO_RIEL/2], [LARGO_RIEL/2, LARGO_RIEL]].forEach(function(t){
+    var largo = t[1]-t[0];
+    var base = caja(largo-0.3, 0.6, 2.2, MAT.impreso2);
+    base.position.set((t[0]+t[1])/2, -ESP_RIEL-0.3, lado*(ANCHO_RIEL+0.2));
+    selector.add(base);
+    anotar(base, 'P03', new THREE.Vector3(0, -0.6, lado*1.8));
+    var pared = caja(largo-0.3, 1.4, 0.3, MAT.impreso2);
+    pared.position.set((t[0]+t[1])/2, -ESP_RIEL+0.4, lado*(ANCHO_RIEL+1.15));
+    selector.add(pared);
+    anotar(pared, 'P03', new THREE.Vector3(0, -0.6, lado*1.8));
+  });
+});
+// abrazaderas, varillas M5 y pies
+var Z_VARILLA = BANDA_W/2 + 2.0;                       // las varillas van por fuera de la banda
+[[4.5, 1], [4.5, -1], [LARGO_RIEL-5.0, 1], [LARGO_RIEL-5.0, -1]].forEach(function(p){
+  var xw = p[0]*Math.cos(INC), yc = Y0 - p[0]*Math.sin(INC) - ESP_RIEL - 0.6;
+  var brazo = caja(2.0, 0.8, Z_VARILLA - ANCHO_RIEL, MAT.impreso);
+  brazo.position.set(xw, yc - 0.4, p[1]*((ANCHO_RIEL + Z_VARILLA)/2));
+  raiz.add(brazo);
+  anotar(brazo, 'P04', new THREE.Vector3(0, -1.0, p[1]*1.6));
+  var abz = caja(2.4, 1.6, 1.8, MAT.impreso);
+  abz.position.set(xw, yc - 0.9, p[1]*Z_VARILLA);
+  raiz.add(abz);
+  anotar(abz, 'P04', new THREE.Vector3(0, -1.0, p[1]*1.6));
+  var alto = yc - 1.2;
+  var varilla = cilindro(0.25, 0.25, alto, MAT.metal, 16);
+  varilla.position.set(xw, alto/2 + 0.3, p[1]*Z_VARILLA);
+  raiz.add(varilla);
+  anotar(varilla, 'C05', new THREE.Vector3(0, -0.8, p[1]*0.6));
+  var pie = cilindro(1.1, 1.1, 0.6, MAT.impreso2, 24);
+  pie.position.set(xw, 0.3, p[1]*Z_VARILLA);
+  raiz.add(pie);
+  anotar(pie, 'P13', new THREE.Vector3(0, -1.6, p[1]*0.6));
+});
+
+/* ---------- tolva y dosificador ---------- */
+var tolva = cilindro(5.5, 1.6, 7.5, MAT.impreso, 40, true);
+tolva.material = MAT.impreso.clone();
+tolva.material.side = THREE.DoubleSide;
+tolva.position.set(-1.2, Y0 + 5.0, 0);
+raiz.add(tolva);
+anotar(tolva, 'P05', new THREE.Vector3(-0.4, 1.6, 0));
+var boca = cilindro(1.6, 1.6, 1.8, MAT.impreso, 28, true);
+boca.material = tolva.material;
+boca.position.set(-1.2, Y0 + 0.4, 0);
+raiz.add(boca);
+anotar(boca, 'P05', new THREE.Vector3(-0.4, 1.6, 0));
+
+var servo = caja(2.3, 2.3, 1.2, MAT.comprado);
+servo.position.set(-1.2, Y0 - 0.9, 2.6);
+raiz.add(servo);
+anotar(servo, 'C01', new THREE.Vector3(0, 0.4, 1.4));
+var paleta = new THREE.Group();
+var pal = caja(0.8, 0.6, 4.4, MAT.impreso2);
+pal.position.set(0, 0, -2.2);
+paleta.add(pal);
+paleta.position.set(-1.2, Y0 - 0.35, 2.6);
+raiz.add(paleta);
+anotar(pal, 'P06', new THREE.Vector3(0, 0.8, 1.2));
+
+/* ---------- embudos, bajantes, sensores ---------- */
+var sensoresLed = [];
+EST.forEach(function(est){
+  var emb = cilindro(2.8, 1.4, 6.3, MAT.impreso2, 28, true);
+  emb.material = MAT.impreso2.clone();
+  emb.material.side = THREE.DoubleSide;
+  emb.position.set(est.x, est.yBoca - 3.15, 0);
+  raiz.add(emb);
+  anotar(emb, 'P07', new THREE.Vector3(0, -1.5, 0));
+
+  var largoTubo = Math.max(0.4, est.yEmbudo - Y_SALIDA);
+  var tubo = cilindro(1.4, 1.4, largoTubo, MAT.comprado, 24, true);
+  tubo.material = MAT.comprado.clone();
+  tubo.material.side = THREE.DoubleSide;
+  tubo.material.transparent = true; tubo.material.opacity = 0.5;
+  tubo.position.set(est.x, est.yEmbudo - largoTubo/2, 0);
+  raiz.add(tubo);
+  anotar(tubo, 'C03', new THREE.Vector3(0, -1.2, 0));
+
+  [1, -1].forEach(function(lado){
+    var sop = caja(1.6, 2.4, 0.5, MAT.impreso);
+    sop.position.set(est.x, est.yRiel - 0.4, lado*(est.luz/2 + 0.9));
+    raiz.add(sop);
+    anotar(sop, 'P08', new THREE.Vector3(0, 0.5, lado*1.5));
+    var led = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), MAT.led.clone());
+    led.position.set(est.x, est.yRiel - 0.2, lado*(est.luz/2 + 0.6));
+    raiz.add(led);
+    anotar(led, 'C02', new THREE.Vector3(0, 0.5, lado*1.5));
+    if (lado === 1) sensoresLed.push(led);
+  });
+
+  var eti = etiqueta('$' + est.den.toLocaleString('es-CO'), 'luz ' + est.luz.toFixed(2).replace('.', ',') + ' cm');
+  eti.position.set(est.x, est.yRiel + 2.4, 0);
+  etiquetasOp.add(eti);
+});
+
+/* ---------- banda transportadora ---------- */
+var banda = new THREE.Group();
+raiz.add(banda);
+var largoBanda = BANDA_X1 - BANDA_X0;
+var cintaGeo = new THREE.BoxGeometry(largoBanda, 0.35, BANDA_W);
+var cintaMat = new THREE.MeshStandardMaterial({color:0x1F2626, roughness:0.85, metalness:0.05});
+var cinta = new THREE.Mesh(cintaGeo, cintaMat);
+cinta.position.set((BANDA_X0+BANDA_X1)/2, BANDA_Y - 0.18, 0);
+cinta.receiveShadow = true;
+banda.add(cinta);
+anotar(cinta, 'C03', new THREE.Vector3(0, 0.8, 0));
+// marcas que se mueven para dar sensación de avance
+var marcas = [];
+for (var mIdx=0; mIdx<26; mIdx++){
+  var marca = caja(0.5, 0.06, BANDA_W-0.6, MAT.goma);
+  marca.position.set(BANDA_X0 + mIdx*1.8, BANDA_Y + 0.02, 0);
+  banda.add(marca);
+  marcas.push(marca);
+}
+[BANDA_X0, BANDA_X1].forEach(function(x, idx){
+  var rod = cilindro(1.5, 1.5, BANDA_W, MAT.impreso, 28);
+  rod.rotation.x = Math.PI/2;
+  rod.position.set(x, BANDA_Y - 1.2, 0);
+  banda.add(rod);
+  anotar(rod, 'P09', new THREE.Vector3(idx ? 1.4 : -1.4, 0, 0));
+});
+[1, -1].forEach(function(lado){
+  for (var t=0;t<3;t++){
+    var largoT = largoBanda/3;
+    var lat = caja(largoT-0.3, 4.4, 0.6, MAT.impreso2);
+    lat.position.set(BANDA_X0 + largoT*(t+0.5), BANDA_Y - 1.2, lado*(BANDA_W/2 + 0.4));
+    banda.add(lat);
+    anotar(lat, 'P10', new THREE.Vector3(0, 0, lado*1.8));
+  }
+  var pataIzq = caja(1.2, BANDA_Y - 3.0 + 3.0, 1.2, MAT.impreso2);
+  pataIzq.geometry.dispose();
+  pataIzq.geometry = new THREE.BoxGeometry(1.2, 1.4, 1.2);
+  pataIzq.position.set(BANDA_X0 + 6, 0.7, lado*(BANDA_W/2 + 0.4));
+  banda.add(pataIzq);
+  anotar(pataIzq, 'P13', new THREE.Vector3(0, -1.4, 0));
+  var pataDer = caja(1.2, 1.4, 1.2, MAT.impreso2);
+  pataDer.position.set(BANDA_X1 - 6, 0.7, lado*(BANDA_W/2 + 0.4));
+  banda.add(pataDer);
+  anotar(pataDer, 'P13', new THREE.Vector3(0, -1.4, 0));
+});
+var motor = cilindro(1.6, 1.6, 3.2, MAT.metal, 24);
+motor.rotation.x = Math.PI/2;
+motor.position.set(BANDA_X1 + 0.2, BANDA_Y - 1.2, BANDA_W/2 + 2.6);
+banda.add(motor);
+anotar(motor, 'C03', new THREE.Vector3(0.4, 0, 1.6));
+var acople = cilindro(0.9, 0.9, 1.6, MAT.impreso, 20);
+acople.rotation.x = Math.PI/2;
+acople.position.set(BANDA_X1, BANDA_Y - 1.2, BANDA_W/2 + 0.7);
+banda.add(acople);
+anotar(acople, 'P12', new THREE.Vector3(0.4, 0, 1.6));
+
+/* ---------- zona de entrega hacia el brazo ---------- */
+var zona = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.2, BANDA_W+1.6),
+  new THREE.MeshStandardMaterial({color:0x34597A, roughness:0.6, transparent:true, opacity:0.5}));
+zona.position.set(X_ENTREGA, BANDA_Y + 0.05, 0);
+raiz.add(zona);
+var etiZona = etiqueta('Hacia el brazo', 'etapa 2');
+etiZona.position.set(X_ENTREGA, BANDA_Y + 5.2, 0);
+etiquetasOp.add(etiZona);
+var etiTolva = etiqueta('Tolva', 'entrada de monedas');
+etiTolva.position.set(-1.2, Y0 + 10.5, 0);
+etiquetasOp.add(etiTolva);
+
+/* ---------- electrónica de la etapa ---------- */
+var placa = caja(7.0, 0.3, 4.4, MAT.placa);
+placa.position.set(14, 0.25, -13.5);
+raiz.add(placa);
+var esp = caja(5.2, 0.9, 2.6, new THREE.MeshStandardMaterial({color:0x11161A, roughness:0.5}));
+esp.position.set(14, 0.85, -13.5);
+raiz.add(esp);
+var etiEsp = etiqueta('ESP32', 'conteo y banda');
+etiEsp.position.set(14, 3.4, -13.5);
+etiquetasOp.add(etiEsp);
+
+/* ---------- vasos ---------- */
+var vasos = [];
+function crearVaso(est){
+  var g = new THREE.Group();
+  var base = caja(2.9, 0.3, 2.9, MAT.impreso);
+  base.position.y = 0.15;
+  g.add(base);
+  anotar(base, 'P11', new THREE.Vector3(0, 1.2, 0));
+  var aro = cilindro(VASO_R+0.22, VASO_R+0.22, 1.2, MAT.impreso, 32, true);
+  aro.material = MAT.impreso.clone();
+  aro.material.side = THREE.DoubleSide;
+  aro.position.y = 0.9;
+  g.add(aro);
+  anotar(aro, 'P11', new THREE.Vector3(0, 1.2, 0));
+  var cuerpo = cilindro(VASO_R, VASO_R*0.92, VASO_H, MAT.vidrio, 32, true);
+  cuerpo.position.y = 0.3 + VASO_H/2;
+  g.add(cuerpo);
+  anotar(cuerpo, 'C04', new THREE.Vector3(0, 1.8, 0));
+  var fondo = cilindro(VASO_R*0.92, VASO_R*0.92, 0.2, MAT.vidrio, 32);
+  fondo.position.y = 0.4;
+  g.add(fondo);
+  g.position.set(est.x, VASO_Y - 0.3, 0);
+  raiz.add(g);
+  var v = {grupo:g, est:est, monedas:0, valor:0, peso:0, pila:[], x:est.x, entregado:false};
+  vasos.push(v);
+  return v;
+}
+EST.forEach(crearVaso);
+
+/* ==================== monedas ==================== */
+var geoMoneda = {};
+function mallaMoneda(k){
+  var d = MONEDAS[k];
+  if (!geoMoneda[k]){
+    geoMoneda[k] = {
+      aro: new THREE.CylinderGeometry(d.d/2, d.d/2, d.e, 28),
+      centro: new THREE.CylinderGeometry(d.d*0.31, d.d*0.31, d.e*1.06, 24)
+    };
+  }
+  var g = new THREE.Group();
+  var aro = new THREE.Mesh(geoMoneda[k].aro,
+    new THREE.MeshStandardMaterial({color:d.aro, roughness:0.35, metalness:0.75}));
+  aro.castShadow = true;
+  g.add(aro);
+  var c = new THREE.Mesh(geoMoneda[k].centro,
+    new THREE.MeshStandardMaterial({color:d.centro, roughness:0.32, metalness:0.8}));
+  g.add(c);
+  return g;
+}
+
+/* ==================== estado de la simulación ==================== */
+var LOTE_INICIAL = [24, 20, 18, 14, 12];
+var sim = {
+  activo:false, t:0, desdeUltima:0, tasa:3.0, vBanda:6.0,
+  bolsa:[], monedas:[], enviando:false, entregados:[], flash:[0,0,0,0,0]
+};
+var A_RIEL = 981*(Math.sin(INC) - 0.30*Math.cos(INC));   // aceleración neta en el riel
+var G = 981;
+
+function mezclar(a){
+  for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function cargarBolsa(cant){
+  sim.bolsa = [];
+  cant.forEach(function(n, k){ for (var i=0;i<n;i++) sim.bolsa.push(k); });
+  mezclar(sim.bolsa);
+}
+function limpiarMonedas(){
+  sim.monedas.forEach(function(mo){ mo.obj.parent.remove(mo.obj); });
+  sim.monedas = [];
+}
+function reiniciarVasos(){
+  vasos.forEach(function(v){
+    v.pila.forEach(function(o){ v.grupo.remove(o); });
+    v.pila = []; v.monedas = 0; v.valor = 0; v.peso = 0;
+    v.x = v.est.x; v.entregado = false;
+    v.grupo.visible = true;
+    v.grupo.position.x = v.est.x;
+  });
+}
+
+function soltarMoneda(){
+  if (!sim.bolsa.length) return false;
+  var k = sim.bolsa.pop();
+  var obj = mallaMoneda(k);
+  obj.rotation.z = -INC;
+  raiz.add(obj);
+  sim.monedas.push({k:k, den:MONEDAS[k].v, d:MONEDAS[k].d, e:MONEDAS[k].e, m:MONEDAS[k].m,
+                    obj:obj, estado:'riel', x:0.4, v:6, y:0, vy:0, xw:0});
+  return true;
+}
+
+function ponerEnRiel(mo){
+  var xw = mo.x*Math.cos(INC), yw = Y0 - mo.x*Math.sin(INC) + mo.e/2 + 0.02;
+  mo.obj.position.set(xw, yw, 0);
+  mo.xw = xw;
+}
+
+function caer(mo, k){
+  mo.estado = 'cae';
+  mo.canal = k;
+  mo.vy = 0;
+  mo.obj.rotation.z = 0;
+  mo.obj.position.x = EST[k].x;
+  mo.y = mo.obj.position.y;
+  sim.flash[k] = 0.16;
+  sim.conteoCanal = sim.conteoCanal || [];
+  var v = vasos[k];
+  v.monedas++; v.valor += mo.den; v.peso += mo.m;
+  registrarEvento(mo.den, k);
+  actualizarTabla();
+}
+
+function asentar(mo){
+  var v = vasos[mo.canal];
+  var n = v.pila.length;
+  mo.obj.parent.remove(mo.obj);
+  v.grupo.add(mo.obj);
+  mo.obj.position.set((Math.random()-0.5)*0.5, 0.55 + n*mo.e*1.04 + mo.e/2, (Math.random()-0.5)*0.5);
+  mo.obj.rotation.y = Math.random()*Math.PI;
+  v.pila.push(mo.obj);
+  mo.estado = 'quieta';
+}
+
+/* ==================== interfaz ==================== */
+var $ = function(id){ return document.getElementById(id); };
+var pesos = function(n){ return '$' + Math.round(n).toLocaleString('es-CO'); };
+var num = function(v, d){ return v.toLocaleString('es-CO', {minimumFractionDigits:d===undefined?1:d,
+                                                            maximumFractionDigits:d===undefined?1:d}); };
+
+// ---- lote
+var entradasLote = [];
+(function construirLote(){
+  var host = $('loteEntrada');
+  MONEDAS.forEach(function(d, k){
+    var et = document.createElement('label');
+    et.textContent = pesos(d.v);
+    et.setAttribute('for', 'lote'+k);
+    var barra = document.createElement('span');
+    barra.style.cssText = 'height:6px;border-radius:3px;background:var(--panel-2);display:block';
+    var inp = document.createElement('input');
+    inp.type = 'number'; inp.min = 0; inp.max = 60; inp.step = 1; inp.id = 'lote'+k;
+    inp.value = LOTE_INICIAL[k];
+    inp.addEventListener('change', function(){
+      inp.value = Math.max(0, Math.min(60, Math.round(+inp.value || 0)));
+      prepararLote();
+    });
+    host.appendChild(et); host.appendChild(barra); host.appendChild(inp);
+    entradasLote.push(inp);
+  });
+})();
+
+// ---- tabla de conteo
+(function construirTabla(){
+  var cuerpo = $('tablaConteo').querySelector('tbody');
+  MONEDAS.forEach(function(d, k){
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + pesos(d.v) + '</td><td>' + num(LUZ[k], 2) + ' cm</td>' +
+                   '<td id="cN'+k+'">0</td><td id="cV'+k+'">$0</td><td id="cP'+k+'">0,0 g</td>';
+    cuerpo.appendChild(tr);
+  });
+  var sens = $('sensores');
+  MONEDAS.forEach(function(d, k){
+    var div = document.createElement('div');
+    div.innerHTML = '<b>S' + (k+1) + '</b>' + pesos(d.v);
+    sens.appendChild(div);
+  });
+})();
+
+function actualizarTabla(){
+  var tn = 0, tv = 0, tp = 0;
+  vasos.forEach(function(v, k){
+    $('cN'+k).textContent = v.monedas;
+    $('cV'+k).textContent = pesos(v.valor);
+    $('cP'+k).textContent = num(v.peso + (v.monedas ? 18 : 0)) + ' g';
+    tn += v.monedas; tv += v.valor; tp += v.peso + (v.monedas ? 18 : 0);
+  });
+  $('tTotN').textContent = tn;
+  $('tTotV').textContent = pesos(tv);
+  $('tTotP').textContent = num(tp) + ' g';
+  $('chipTolva').textContent = 'Tolva: ' + sim.bolsa.length + ' monedas';
+  var trama = 'VASOS:' + vasos.map(function(v){ return v.est.den + 'x' + v.monedas; }).join(',');
+  $('tramaVasos').textContent = trama;
+}
+
+var lineas = [];
+function anotarLog(texto){
+  lineas.push(num(sim.t, 1) + ' s  ' + texto);
+  if (lineas.length > 60) lineas.shift();
+  var host = $('logSerie');
+  host.textContent = lineas.slice(-40).join('\n');
+  host.scrollTop = host.scrollHeight;
+}
+function registrarEvento(den, canal){
+  var t = 'M:' + den + ',' + (canal+1);
+  $('tramaEvento').textContent = t;
+  anotarLog(t + '   moneda de ' + pesos(den) + ' contada en el canal ' + (canal+1));
+}
+
+function prepararLote(){
+  var cant = entradasLote.map(function(i){ return +i.value || 0; });
+  cargarBolsa(cant);
+  limpiarMonedas();
+  reiniciarVasos();
+  sim.t = 0; sim.desdeUltima = 0; sim.enviando = false; sim.entregados = [];
+  actualizarTabla();
+  anotarLog('lote cargado: ' + cant.reduce(function(a,b){return a+b;}, 0) + ' monedas');
+}
+
+function estado(texto, encendido){
+  $('chipEstado').innerHTML = '<span class="led' + (encendido ? ' on' : '') + '"></span>' + texto;
+}
+
+$('btnIniciar').addEventListener('click', function(){
+  if (!sim.bolsa.length && !sim.monedas.length) prepararLote();
+  sim.activo = true;
+  $('btnIniciar').disabled = true; $('btnPausar').disabled = false;
+  estado('Contando', true);
+});
+$('btnPausar').addEventListener('click', function(){
+  sim.activo = false;
+  $('btnIniciar').disabled = false; $('btnPausar').disabled = true;
+  estado('En pausa', false);
+});
+$('btnReiniciar').addEventListener('click', function(){
+  sim.activo = false;
+  $('btnIniciar').disabled = false; $('btnPausar').disabled = true;
+  prepararLote();
+  estado('En espera', false);
+});
+$('btnLote').addEventListener('click', function(){
+  entradasLote.forEach(function(i){ i.value = 8 + Math.floor(Math.random()*24); });
+  prepararLote();
+});
+$('btnEnviar').addEventListener('click', function(){
+  if (sim.enviando) return;
+  sim.enviando = true;
+  anotarLog($('tramaVasos').textContent + '   enviado al ESP32 del brazo');
+  estado('Entregando vasos', true);
+});
+$('slAlim').addEventListener('input', function(){
+  sim.tasa = +this.value;
+  $('outAlim').textContent = num(sim.tasa) + ' monedas/s';
+});
+$('slBanda').addEventListener('input', function(){
+  sim.vBanda = +this.value;
+  $('outBanda').textContent = num(sim.vBanda) + ' cm/s';
+});
+
+/* ==================== despiece ==================== */
+var despiece = {activo:false, factor:0.6, sel:null, girar:true};
+function aplicarExplosion(){
+  var f = despiece.activo ? despiece.factor : 0;
+  Object.keys(registro).forEach(function(cod){
+    registro[cod].forEach(function(m){
+      var b = m.userData.base, d = m.userData.dir;
+      m.position.set(b.x + d.x*f*5, b.y + d.y*f*5, b.z + d.z*f*5);
+    });
+  });
+}
+function resaltar(cod){
+  despiece.sel = cod;
+  Object.keys(registro).forEach(function(c){
+    registro[c].forEach(function(m){
+      if (!m.material) return;
+      if (!m.userData.matBase) m.userData.matBase = m.material;
+      var apagado = cod && c !== cod;
+      m.material.transparent = apagado || m.userData.matBase.transparent;
+      m.material.opacity = apagado ? 0.12 : (m.userData.matBase.opacity !== undefined && m.userData.matBase.transparent ? m.userData.matBase.opacity : 1);
+      if (m.material.emissive) m.material.emissiveIntensity = (cod && c === cod) ? 0.35 : (m.userData.esLed ? 0.15 : 0);
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#listaPiezas button'), function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.cod === cod));
+  });
+  var p = PIEZAS.filter(function(x){ return x.cod === cod; })[0];
+  $('fichaPieza').innerHTML = p ?
+    ('<b>' + p.cod + ' · ' + p.nombre + '</b><br>Cantidad: ' + p.cant +
+     '<br>Archivo: <code>' + (p.archivo === '-' ? 'pieza comprada' : 'stl/' + p.archivo) + '</code>' +
+     '<br>Material: ' + p.material + '<br>Medidas: ' + p.medidas + '<br>' + p.nota)
+    : 'Selecciona una pieza de la lista.';
+}
+(function listaPiezas(){
+  var host = $('listaPiezas');
+  PIEZAS.forEach(function(p){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.cod = p.cod;
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<code>' + p.cod + '</code>' + p.nombre + '<span>x' + p.cant + '</span>';
+    b.addEventListener('click', function(){ resaltar(despiece.sel === p.cod ? null : p.cod); });
+    host.appendChild(b);
+  });
+})();
+$('slExplo').addEventListener('input', function(){
+  despiece.factor = +this.value/100;
+  $('outExplo').textContent = this.value + ' %';
+  aplicarExplosion();
+});
+$('btnTodas').addEventListener('click', function(){ resaltar(null); });
+$('btnGirar').addEventListener('click', function(){
+  despiece.girar = !despiece.girar;
+  this.setAttribute('aria-pressed', String(despiece.girar));
+});
+function cambiarModo(aDespiece){
+  despiece.activo = aDespiece;
+  $('modoOperacion').setAttribute('aria-pressed', String(!aDespiece));
+  $('modoDespiece').setAttribute('aria-pressed', String(aDespiece));
+  $('panelOperacion').classList.toggle('oculto', aDespiece);
+  $('panelDespiece').classList.toggle('oculto', !aDespiece);
+  etiquetasOp.visible = !aDespiece;
+  if (aDespiece){
+    sim.activo = false;
+    meta = {theta:orbita.theta, phi:0.95, r:108, objetivo:new THREE.Vector3(20, 15, 0)};
+    $('btnIniciar').disabled = false; $('btnPausar').disabled = true;
+    estado('Despiece', false);
+  } else {
+    resaltar(null);
+    meta = vistas.iso;
+    estado(sim.bolsa.length ? 'En espera' : 'Lote terminado', false);
+  }
+  aplicarExplosion();
+}
+$('modoOperacion').addEventListener('click', function(){ cambiarModo(false); });
+$('modoDespiece').addEventListener('click', function(){ cambiarModo(true); });
+
+/* ==================== cámara y vistas ==================== */
+var vistas = {
+  iso:{theta:-0.72, phi:1.0, r:102, objetivo:new THREE.Vector3(19, 15, 0)},
+  lat:{theta:-Math.PI/2, phi:1.32, r:92, objetivo:new THREE.Vector3(19, 16, 0)},
+  sup:{theta:-Math.PI/2, phi:0.12, r:88, objetivo:new THREE.Vector3(19, 6, 0)}
+};
+var meta = null;
+function irA(v, boton){
+  meta = vistas[v];
+  ['vIso','vLat','vSup'].forEach(function(id){ $(id).setAttribute('aria-pressed', String(id === boton)); });
+}
+$('vIso').addEventListener('click', function(){ irA('iso','vIso'); });
+$('vLat').addEventListener('click', function(){ irA('lat','vLat'); });
+$('vSup').addEventListener('click', function(){ irA('sup','vSup'); });
+$('vTema').addEventListener('click', function(){
+  var actual = document.documentElement.getAttribute('data-theme');
+  var oscuro = actual ? actual === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', oscuro ? 'light' : 'dark');
+  setTimeout(aplicarTema, 20);
+});
+function aplicarTema(){
+  escena.background = color('--paper');
+  escena.fog = new THREE.Fog(escena.background, 110, 210);
+  MAT.mesa.color = color('--panel-2');
+  rejilla.material.color = color('--line');
+}
+aplicarTema();
+
+var arrastrando = false, ultimo = {x:0, y:0};
+lienzo.addEventListener('pointerdown', function(e){
+  arrastrando = true; ultimo.x = e.clientX; ultimo.y = e.clientY;
+  lienzo.setPointerCapture(e.pointerId);
+});
+lienzo.addEventListener('pointermove', function(e){
+  if (!arrastrando) return;
+  orbita.theta -= (e.clientX - ultimo.x)*0.006;
+  orbita.phi = Math.max(0.08, Math.min(1.5, orbita.phi - (e.clientY - ultimo.y)*0.005));
+  ultimo.x = e.clientX; ultimo.y = e.clientY;
+  meta = null;
+});
+lienzo.addEventListener('pointerup', function(e){
+  arrastrando = false;
+  try { lienzo.releasePointerCapture(e.pointerId); } catch(err){}
+});
+lienzo.addEventListener('wheel', function(e){
+  e.preventDefault();
+  orbita.r = Math.max(28, Math.min(150, orbita.r + e.deltaY*0.06));
+}, {passive:false});
+var pinch = 0;
+lienzo.addEventListener('touchstart', function(e){
+  if (e.touches.length === 2) pinch = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                                                 e.touches[0].clientY-e.touches[1].clientY);
+}, {passive:true});
+lienzo.addEventListener('touchmove', function(e){
+  if (e.touches.length === 2 && pinch){
+    var d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                       e.touches[0].clientY-e.touches[1].clientY);
+    orbita.r = Math.max(28, Math.min(150, orbita.r * (pinch/d)));
+    pinch = d;
+  }
+}, {passive:true});
+
+/* ==================== bucle ==================== */
+var reloj = new THREE.Clock();
+function medir(){
+  var caja = lienzo.parentElement.getBoundingClientRect();
+  var w = Math.max(320, caja.width), h = Math.max(320, caja.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(w, h, false);
+  camara.aspect = w/h;
+  camara.updateProjectionMatrix();
+}
+window.addEventListener('resize', medir);
+medir();
+
+function avanzar(dt){
+  sim.t += dt;
+  // alimentación desde la tolva
+  sim.desdeUltima += dt;
+  if (sim.desdeUltima >= 1/sim.tasa && !sim.enviando){
+    sim.desdeUltima = 0;
+    if (!soltarMoneda() && !sim.monedas.length && sim.activo){
+      sim.activo = false;
+      $('btnIniciar').disabled = false; $('btnPausar').disabled = true;
+      estado('Lote terminado', false);
+      anotarLog('tolva vacía: ' + $('tramaVasos').textContent);
+    }
+  }
+  // monedas
+  for (var i=sim.monedas.length-1; i>=0; i--){
+    var mo = sim.monedas[i];
+    if (mo.estado === 'riel'){
+      mo.v += A_RIEL*dt;
+      mo.x += mo.v*dt;
+      ponerEnRiel(mo);
+      mo.obj.rotation.y += mo.v*dt*0.05;
+      var k = Math.floor((mo.x - ENTRADA)/PASO);
+      if (mo.x > ENTRADA && k >= 0 && k < LUZ.length &&
+          mo.x > ENTRADA + PASO*k + mo.d/2 + 0.2 && mo.d < LUZ[k]) caer(mo, k);
+      else if (mo.x > LARGO_RIEL){ mo.obj.parent.remove(mo.obj); sim.monedas.splice(i,1); }
+    } else if (mo.estado === 'cae'){
+      mo.vy += G*dt*0.45;
+      mo.obj.position.y -= mo.vy*dt;
+      mo.obj.rotation.x += dt*2;
+      var v = vasos[mo.canal];
+      var destino = v.grupo.position.y + 0.55 + v.pila.length*mo.e*1.04;
+      if (mo.obj.position.y <= destino){
+        mo.obj.rotation.x = 0;
+        asentar(mo);
+        sim.monedas.splice(i,1);
+      }
+    }
+  }
+  // sensores
+  sim.flash.forEach(function(v, k){
+    if (v > 0){
+      sim.flash[k] = Math.max(0, v - dt);
+      sensoresLed[k].material.emissiveIntensity = 1.2;
+    } else {
+      sensoresLed[k].material.emissiveIntensity = 0.15;
+    }
+  });
+  var activo = sim.flash.findIndex(function(v){ return v > 0; });
+  $('sensores').className = 'sensores' + (activo >= 0 ? ' activo-' + (activo+1) : '');
+
+  // banda
+  if (sim.enviando){
+    var d = sim.vBanda*dt;
+    marcas.forEach(function(m){
+      m.position.x += d;
+      if (m.position.x > BANDA_X1) m.position.x = BANDA_X0;
+    });
+    var quedan = 0;
+    vasos.forEach(function(v){
+      if (v.entregado) return;
+      quedan++;
+      v.x += d;
+      v.grupo.position.x = v.x;
+      if (v.x >= X_ENTREGA){
+        v.entregado = true;
+        v.grupo.visible = false;
+        sim.entregados.push({den:v.est.den, n:v.monedas});
+        anotarLog('vaso de ' + pesos(v.est.den) + ' con ' + v.monedas +
+                  ' monedas entregado al brazo');
+      }
+    });
+    if (quedan === 0){
+      sim.enviando = false;
+      reiniciarVasos();
+      actualizarTabla();
+      estado(sim.activo ? 'Contando' : 'En espera', sim.activo);
+      anotarLog('vasos nuevos en posición, listos para recibir');
+    }
+  }
+  // paleta del dosificador
+  paleta.rotation.y = Math.sin(sim.t*Math.PI*2*Math.min(sim.tasa, 6))*0.45;
+  // rodillos
+  banda.children.forEach(function(c){
+    if (c.geometry && c.geometry.type === 'CylinderGeometry' && c.rotation.x !== 0)
+      c.rotation.y += (sim.enviando ? sim.vBanda*dt*0.6 : 0);
+  });
+}
+
+function bucle(){
+  requestAnimationFrame(bucle);
+  var dt = Math.min(reloj.getDelta(), 0.05);
+  if (sim.activo || sim.enviando) avanzar(dt);
+  if (despiece.activo && despiece.girar) orbita.theta += dt*0.12;
+  if (meta){
+    orbita.theta += (meta.theta - orbita.theta)*0.08;
+    orbita.phi += (meta.phi - orbita.phi)*0.08;
+    orbita.r += (meta.r - orbita.r)*0.08;
+    objetivo.lerp(meta.objetivo, 0.08);
+    if (Math.abs(meta.theta - orbita.theta) < 0.002) meta = null;
+  }
+  camara.position.set(
+    objetivo.x + orbita.r*Math.sin(orbita.phi)*Math.cos(orbita.theta),
+    objetivo.y + orbita.r*Math.cos(orbita.phi),
+    objetivo.z + orbita.r*Math.sin(orbita.phi)*Math.sin(orbita.theta)
+  );
+  camara.lookAt(objetivo);
+  renderer.render(escena, camara);
+}
+
+prepararLote();
+estado('En espera', false);
+aplicarExplosion();
+bucle();
+})();
+</script>
+</body>
+</html>
