@@ -2,6 +2,8 @@
 
 Nivel bajo: una línea de texto por pose.
     S:j1,j2,j3,j4,j5,pinza    (ángulos de servo, grados enteros)
+Lote del contador al brazo, una línea:
+    VASOS:500x12,100x30a10,...  (denominación x monedas, aN = de ellas antiguas)
 Nivel alto: JSON por HTTP para la app Streamlit.
 """
 from __future__ import annotations
@@ -48,6 +50,31 @@ def parsear_trama(linea: str) -> List[int]:
     if len(partes) != 6:
         raise ValueError("la trama debe traer seis valores")
     return [int(round(float(p))) for p in partes]
+
+
+def trama_vasos(vasos: Sequence[Vaso]) -> str:
+    """Lote en el orden de la entrada: "VASOS:500x12,100x30a10,..."."""
+    partes = []
+    for v in vasos:
+        partes.append(f"{v.denominacion}x{v.monedas}" + (f"a{v.antiguas}" if v.antiguas else ""))
+    return "VASOS:" + ",".join(partes)
+
+
+def parsear_vasos(linea: str) -> List[Vaso]:
+    """Inversa de trama_vasos(): los vasos quedan en los puestos E1 a E5."""
+    linea = linea.strip()
+    if not linea.startswith("VASOS:"):
+        raise ValueError("el lote debe empezar con 'VASOS:'")
+    vasos = []
+    for i, parte in enumerate(linea[6:].split(",")):
+        den, _, resto = parte.partition("x")
+        n, _, antiguas = resto.partition("a")
+        try:
+            vasos.append(Vaso(int(den), int(n), Puesto("entrada", i),
+                              int(antiguas) if antiguas else 0))
+        except ValueError as e:
+            raise ValueError(f"vaso mal escrito: {parte!r}") from e
+    return vasos
 
 
 def estado_json(q: Sequence[float], pinza_mm: float, vasos: List[Vaso],

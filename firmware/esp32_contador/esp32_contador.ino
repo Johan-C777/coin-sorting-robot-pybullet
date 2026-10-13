@@ -2,13 +2,17 @@
   Etapa 1: selección, conteo y transporte de monedas.
   Sistema de Logística de Monedas Inteligentes (UMNG).
 
-  Hardware: ESP32 DevKit V1, cinco barreras infrarrojas, servo SG90 en la
+  La tolva recibe monedas colombianas de las dos familias (nueva de 2012 y
+  anterior de 1989-1996). El riel las separa por diámetro en ocho estaciones
+  y los colectores las juntan en cinco vasos, uno por denominación.
+
+  Hardware: ESP32 DevKit V1, ocho barreras infrarrojas, servo SG90 en la
   paleta dosificadora y motorreductor de banda sobre puente H L298N.
 
   Puerto serie a 115200:
     ALIM:3.5     monedas por segundo que suelta la tolva
     BANDA:0.6    velocidad de la banda, de 0 a 1
-    CONTEO       devuelve VASOS:50x24,100x20,...
+    CONTEO       devuelve VASOS:50x24a6,100x20a4,...  (aN = antiguas)
     ESTADO       JSON con conteo y estado de los actuadores
     ENVIAR       manda el lote al ESP32 del brazo
     REINICIAR    pone el conteo en cero
@@ -52,14 +56,14 @@ void loop() {
   comms.atender();
   dosificador.actualizar();
 
-  const int8_t canal = Sensores::atender(conteo);
-  if (canal >= 0) {
-    comms.anunciarMoneda(canal);
+  const int8_t estacion = Sensores::atender(conteo);
+  if (estacion >= 0) {
+    comms.anunciarMoneda(estacion);
     tUltimaMoneda = millis();
   }
 
-  // un vaso lleno o treinta segundos sin monedas cierran la tanda
-  const bool tandaLista = conteo.vasoLleno() ||
+  // ENVIAR, un vaso lleno o treinta segundos sin monedas cierran la tanda
+  const bool tandaLista = comms.pedirEnvio() || conteo.vasoLleno() ||
       (conteo.monedasTotal() > 0 && tUltimaMoneda && millis() - tUltimaMoneda > 30000);
 
   if (tandaLista && !entregando) {

@@ -96,6 +96,10 @@ tfoot td{font-weight:600;border-bottom:0}
 .obst div{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--bg);
   border:1px solid var(--linea);border-radius:6px;padding:8px 10px;font-family:var(--f-ui);font-size:13.5px}
 .obst b{font-weight:600}
+.obst .nivel{display:inline-block;min-width:26px;margin-right:4px;padding:1px 5px;border-radius:6px;
+  font-size:11px;font-weight:700;text-align:center;color:#fff;background:#6B7A72}
+.obst .nivel.n1{background:#2C7A54}.obst .nivel.n2{background:#B8860B}
+.obst .nivel.n3{background:#C2571A}.obst .nivel.n4{background:#A3262A}
 .obst span{color:var(--muted);font-family:var(--f-num);font-variant-numeric:tabular-nums}
 .obst .dist{color:var(--ink-2)}
 .obst div.riesgo{border-color:var(--naranja);color:var(--naranja-ink)}
@@ -103,11 +107,12 @@ tfoot td{font-weight:600;border-bottom:0}
 .check{display:flex;align-items:center;gap:9px;font-family:var(--f-ui);font-size:14px;color:var(--ink);
   margin-top:12px;cursor:pointer}
 .check input{width:17px;height:17px;accent-color:var(--naranja);cursor:pointer}
-.sensores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-family:var(--f-ui);
+.sensores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-family:var(--f-ui);
   font-size:12.5px;color:var(--muted);margin-top:10px}
 .sensores div{background:var(--bg);border:1px solid var(--linea);border-radius:6px;padding:6px 2px}
 .sensores b{display:block;font-size:13px;color:var(--ink)}
 .sensores div.on{border-color:var(--verde);color:var(--verde)}
+.sensores div.ant b{color:#B4560F}
 
 @media (max-width:1060px){
   body{overflow:auto}
@@ -125,7 +130,7 @@ tfoot td{font-weight:600;border-bottom:0}
     <div class="encabezado">
       <div>
         <h1>Sistema de Logística de Monedas Inteligentes</h1>
-        <p>Etapa 1 y etapa 2 en un mismo entorno: la tolva alimenta el riel selector, la banda lleva los vasos llenos a la zona de entrega y el brazo de 5 GDL los ordena en el rack esquivando los obstáculos aéreos giratorios.</p>
+        <p>La tolva alimenta el riel selector, la banda lleva los vasos llenos hasta el punto A y el brazo de 5 GDL los lleva al rack (punto B) esquivando cuatro obstáculos giratorios de dificultad creciente, para dejarlos ordenados según el criterio elegido.</p>
       </div>
       <div class="vistas">
         <button class="pill" id="vIso" aria-pressed="true" type="button">Isométrica</button>
@@ -158,6 +163,7 @@ tfoot td{font-weight:600;border-bottom:0}
               <option value="cantidad">Cantidad de monedas</option>
               <option value="valor" selected>Valor total</option>
               <option value="peso">Peso</option>
+              <option value="antiguas">Monedas antiguas</option>
             </select>
           </label>
           <label class="campo">Sentido
@@ -197,7 +203,7 @@ tfoot td{font-weight:600;border-bottom:0}
       <summary>Conteo de monedas</summary>
       <div class="cuerpo">
         <table id="tablaConteo">
-          <thead><tr><th>Canal</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
+          <thead><tr><th>Estación</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
           <tbody></tbody>
           <tfoot><tr><td colspan="2">Totales</td><td id="tN">0</td><td id="tV">$0</td><td id="tP">0,0 g</td></tr></tfoot>
         </table>
@@ -209,7 +215,7 @@ tfoot td{font-weight:600;border-bottom:0}
       <summary>Obstáculos aéreos</summary>
       <div class="cuerpo">
         <div class="obst" id="listaObst"></div>
-        <p class="nota" id="notaObst">El planificador mide la distancia del vaso a cada esfera en el instante en que va a pasar. Si cabe por debajo baja la altura de tránsito; si no cabe, recoge el brazo hacia la base y rodea el móvil por dentro con una curva en el plano XY; y solo si ninguna maniobra sirve espera la ventana entre brazos. En todas, el cabeceo se mantiene en −90°.</p>
+        <p class="nota" id="notaObst">Del punto A al B, en orden de dificultad: N1 se pasa bajando la altura, N2 recogiendo el brazo para rodearlo por dentro, N3 esperando la ventana entre sus brazos y N4 pasando por debajo y cronometrando la bajada al rack. El planificador mide la distancia del vaso a cada esfera en el instante en que va a pasar. Si cabe por debajo baja la altura de tránsito; si no cabe, recoge el brazo hacia la base y rodea el móvil por dentro con una curva en el plano XY; y solo si ninguna maniobra sirve espera la ventana entre brazos. En todas, el cabeceo se mantiene en −90°.</p>
       </div>
     </details>
 
@@ -261,24 +267,31 @@ var Z_AGARRE = 6.8, Z_SEGURA = 20, Z_BAJO = 15.5, Z_ALTO = 23.2;
 var YAW_RACK = [24, 39.5, 55, 70.5, 86];
 var YAW_ENTREGA = -60;                          // zona de entrega sobre la banda
 
-// --- monedas colombianas (serie 2012) -----------------------------------
+// --- monedas colombianas: familia nueva (2012) y anterior ----------------
+// En el orden en que el riel las deja caer, estación E1 a E8. La $500 es igual
+// en las dos familias y comparte estación; 'vaso' es el de su denominación.
 var MONEDAS = [
-  {v:50,   d:1.70, e:0.14, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4},
-  {v:100,  d:2.03, e:0.16, m:3.34, aro:0xC7A33A, centro:0xC7A33A},
-  {v:200,  d:2.24, e:0.17, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC},
-  {v:500,  d:2.37, e:0.20, m:7.14, aro:0xB4B8B0, centro:0xC7A33A},
-  {v:1000, d:2.67, e:0.23, m:9.95, aro:0xC7A33A, centro:0xB4B8B0}
+  {v:50,   s:'nueva',   d:1.700, e:0.130, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4, vaso:0},
+  {v:100,  s:'nueva',   d:2.030, e:0.150, m:3.34, aro:0xC7A33A, centro:0xC7A33A, vaso:1},
+  {v:50,   s:'antigua', d:2.150, e:0.140, m:4.50, aro:0xD0D3CB, centro:0xD0D3CB, vaso:0},
+  {v:200,  s:'nueva',   d:2.240, e:0.170, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC, vaso:2},
+  {v:100,  s:'antigua', d:2.300, e:0.155, m:5.31, aro:0xD9B44A, centro:0xD9B44A, vaso:1},
+  {v:500,  s:'ambas',   d:2.370, e:0.205, m:7.14, aro:0xB4B8B0, centro:0xC7A33A, vaso:3},
+  {v:200,  s:'antigua', d:2.440, e:0.170, m:7.08, aro:0xC6C9C0, centro:0xC6C9C0, vaso:2},
+  {v:1000, s:'nueva',   d:2.670, e:0.230, m:9.95, aro:0xC7A33A, centro:0xB4B8B0, vaso:4}
 ];
-var LUZ = [1.76, 2.09, 2.30, 2.43, 2.73];      // luces del riel selector
+var LUZ = [1.760, 2.090, 2.195, 2.270, 2.335, 2.405, 2.500, 2.730];   // luces del riel
 var LUZ_ENTRADA = 1.60;
+var DEN_VASO = [50, 100, 200, 500, 1000];
+function abrev(serie){ return serie === 'nueva' ? 'N' : (serie === 'antigua' ? 'A' : 'N/A'); }
 
 // --- riel selector ------------------------------------------------------
 var INC = 25*GR;                                // inclinación del riel
 var RIEL_X0 = -38, RIEL_Y0 = 36;                // punto alto del riel
-var PASO_MUNDO = 6.5;                           // separación de estaciones en X
+var PASO_MUNDO = 4.0*Math.cos(25*Math.PI/180);  // 40 mm sobre el riel, como los STL
 var PASO_LOCAL = PASO_MUNDO/Math.cos(INC);
 var EST_LOCAL0 = 8.83;                          // primera estación sobre el riel
-var LARGO_RIEL = EST_LOCAL0 + PASO_LOCAL*4 + 4;
+var LARGO_RIEL = EST_LOCAL0 + PASO_LOCAL*(MONEDAS.length - 1) + 4;
 var ANCHO_RIEL = 3.0, ESP_RIEL = 1.0;
 
 // --- banda transportadora ----------------------------------------------
@@ -286,32 +299,37 @@ var Z_BANDA = R_ARCO*Math.sin(-YAW_ENTREGA*GR);   // 19,92 cm: eje de la banda
 var X_ENTREGA = R_ARCO*Math.cos(YAW_ENTREGA*GR);  // 11,5 cm
 var BANDA_X0 = -42, BANDA_X1 = 18, BANDA_W = 7, BANDA_Y = 2.4;
 var VASO_R = 2.6, VASO_H = 8, VASO_Y = 2.7, MASA_VASO = 18;
+var X_VASO = [-30, -23, -16, -9, -2];            // vasos de $50 a $1.000 sobre la banda
+var Y_SALIDA = BANDA_Y + VASO_H + 1.2;           // boca de los tubos, sobre el vaso
 
 var EST = [];                                    // estaciones del selector
-for (var i=0;i<5;i++){
+for (var i=0;i<MONEDAS.length;i++){
   var xl = EST_LOCAL0 + PASO_LOCAL*i;
   var xw = RIEL_X0 + xl*Math.cos(INC);
   var yr = RIEL_Y0 - xl*Math.sin(INC);
   EST.push({i:i, xLocal:xl, x:xw, yRiel:yr, yBoca:yr-ESP_RIEL,
-            yEmbudo:yr-ESP_RIEL-5.5, den:MONEDAS[i].v, luz:LUZ[i]});
+            yEmbudo:yr-ESP_RIEL-3.2, den:MONEDAS[i].v, luz:LUZ[i],
+            serie:MONEDAS[i].s, vaso:MONEDAS[i].vaso});
 }
 
 // --- obstáculos aéreos giratorios ---------------------------------------
-// Cada móvil cuelga de la viga superior y gira sobre su eje Y. El primero
-// deja pasar el vaso por debajo; el segundo cuelga bajo y obliga a esperar
-// la ventana entre sus brazos.
+// Cuatro móviles cuelgan de la viga y giran sobre su eje Y entre el punto A
+// (fin de la banda) y el punto B (rack). Están puestos en orden de dificultad:
+// cada nivel le exige al planificador una capacidad nueva. El mismo modelo,
+// con pruebas, está en software/brazo/obstaculos.py.
+var NIVELES = ['', 'Básico', 'Intermedio', 'Avanzado', 'Experto'];
 var OBST = [
   // 1) alto y sobre el arco: el vaso cabe por debajo  -> maniobra 'bajo'
-  {nombre:'O1 Guardián de banda', yaw:-40, rPivote:23, brazos:3, radio:6.5,
+  {nombre:'O1 Guardián de banda', nivel:1, yaw:-40, rPivote:23, brazos:3, radio:6.5,
    yEsfera:22.0, rEsfera:2.6, fase:0.0, giro:1,  vel:1.1, color:0xB23E0C},
   // 2) bajo y rápido: no cabe por debajo pero sí por dentro -> maniobra 'rodeo'
-  {nombre:'O2 Muro giratorio',    yaw:-15, rPivote:23, brazos:2, radio:8.5,
+  {nombre:'O2 Muro giratorio', nivel:2,    yaw:-15, rPivote:23, brazos:2, radio:8.5,
    yEsfera:13.5, rEsfera:2.2, fase:1.1, giro:-1, vel:1.8, color:0x7A4BB8},
   // 3) colgado por dentro del arco: ninguna maniobra sirve -> espera de ventana
-  {nombre:'O3 Centinela',         yaw:10,  rPivote:14, brazos:3, radio:5.0,
+  {nombre:'O3 Centinela', nivel:3,         yaw:10,  rPivote:14, brazos:3, radio:5.0,
    yEsfera:14.0, rEsfera:1.9, fase:0.6, giro:1,  vel:0.7, color:0x2F5878},
   // 4) alto y con esferas grandes: tapa R2, R3 y R4 -> paso por debajo justo
-  {nombre:'O4 Jefe de rack',      yaw:40,  rPivote:23, brazos:2, radio:7.0,
+  {nombre:'O4 Jefe de rack', nivel:4,      yaw:40,  rPivote:23, brazos:2, radio:7.0,
    yEsfera:23.0, rEsfera:3.0, fase:2.0, giro:-1, vel:1.3, color:0x8C6D1F}
 ];
 OBST.forEach(function(o){
@@ -488,7 +506,7 @@ raiz.add(selector);
 
 function medioHueco(xl){
   if (xl < EST_LOCAL0 - PASO_LOCAL/2) return LUZ_ENTRADA/2;
-  var k = Math.min(Math.floor((xl - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL), 4);
+  var k = Math.min(Math.floor((xl - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL), LUZ.length - 1);
   return LUZ[k]/2;
 }
 // Perfil en planta del riel: borde exterior recto y borde interior escalonado.
@@ -497,7 +515,7 @@ function medioHueco(xl){
 function perfilRiel(lado){
   var f = new THREE.Shape();
   var cortes = [0, EST_LOCAL0 - PASO_LOCAL/2];
-  for (var c=1;c<=5;c++) cortes.push(EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*c);
+  for (var c=1;c<=LUZ.length;c++) cortes.push(EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*c);
   var fin = cortes[cortes.length-1];
   f.moveTo(0, -lado*medioHueco(0.1));
   for (var k=0;k<cortes.length-1;k++){
@@ -558,34 +576,46 @@ paleta.add(pal);
 paleta.position.set(RIEL_X0 - 0.6, RIEL_Y0 - 0.3, Z_BANDA + 2.8);
 raiz.add(paleta);
 
-/* ---------- embudos, bajantes y sensores ---------- */
+/* ---------- embudos, tubos colectores y sensores ----------
+   Cada estación tiene un embudo corto y un tubo flexible que lleva la moneda
+   al vaso de su denominación. Los tubos de las antiguas van por detrás y los
+   de las nuevas por delante, así no se cruzan. */
 var leds = [];
+var matTubo = new THREE.MeshStandardMaterial({color:0x34597A, roughness:0.4, metalness:0.1,
+  transparent:true, opacity:0.35, side:THREE.DoubleSide});
 EST.forEach(function(est){
-  // embudo de una sola pieza: cono truncado que entrega directo al vaso
-  var alto = est.yBoca - (BANDA_Y + VASO_H + 0.9);
-  var emb = cil(2.9, 1.5, alto, MAT.grafito, 28, true);
+  var emb = cil(1.65, 0.95, 2.8, MAT.grafito, 28, true);
   emb.material = MAT.grafito.clone();
   emb.material.side = THREE.DoubleSide;
-  emb.position.set(est.x, est.yBoca - alto/2, Z_BANDA);
+  emb.position.set(est.x, est.yBoca - 1.4, Z_BANDA);
   raiz.add(emb);
-  // brida de sujeción del embudo al costado del riel
-  var brida = caja(6.4, 0.5, 1.2, MAT.grafito);
-  brida.position.set(est.x, est.yBoca - 0.25, Z_BANDA);
-  raiz.add(brida);
 
-  [1,-1].forEach(function(lado){
-    var sop = caja(1.5, 2.2, 0.5, MAT.naranja);
-    sop.position.set(est.x, est.yRiel - 0.3, Z_BANDA + lado*(est.luz/2 + 0.9));
+  var xv = X_VASO[est.vaso];
+  var lado = est.serie === 'antigua' ? -1 : (est.serie === 'nueva' ? 1 : 0);
+  var dz = lado*1.15;
+  est.curva = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(est.x, est.yBoca - 0.2, Z_BANDA),
+    new THREE.Vector3(est.x, est.yEmbudo, Z_BANDA),
+    new THREE.Vector3(est.x + (xv - est.x)*0.35, est.yEmbudo - 1.0, Z_BANDA + dz),
+    new THREE.Vector3(xv - (xv - est.x)*0.1, Y_SALIDA + 0.9, Z_BANDA + dz*0.55),
+    new THREE.Vector3(xv + lado*0.2, Y_SALIDA - 0.6, Z_BANDA + lado*0.55)]);
+  est.largoCurva = est.curva.getLength();
+  var tubo = new THREE.Mesh(new THREE.TubeGeometry(est.curva, 48, 0.75, 12, false), matTubo);
+  raiz.add(tubo);
+
+  [1,-1].forEach(function(l){
+    var sop = caja(1.3, 2.2, 0.5, MAT.naranja);
+    sop.position.set(est.x, est.yRiel - 0.3, Z_BANDA + l*(est.luz/2 + 0.9));
     raiz.add(sop);
     var led = esfera(0.24, new THREE.MeshStandardMaterial({color:0x2C7A54,
       emissive:0x2C7A54, emissiveIntensity:0.15, roughness:0.4}));
-    led.position.set(est.x, est.yRiel - 0.1, Z_BANDA + lado*(est.luz/2 + 0.55));
+    led.position.set(est.x, est.yRiel - 0.1, Z_BANDA + l*(est.luz/2 + 0.55));
     raiz.add(led);
-    if (lado === 1) leds.push(led);
+    if (l === 1) leds.push(led);
   });
-  var eti = etiqueta('$' + est.den.toLocaleString('es-CO'),
-                     'luz ' + est.luz.toFixed(2).replace('.',',') + ' cm', 0.82);
-  eti.position.set(est.x, est.yRiel + 2.6, Z_BANDA);
+  var eti = etiqueta('E' + (est.i+1) + ' $' + est.den.toLocaleString('es-CO') + ' ' + abrev(est.serie),
+                     'luz ' + (est.luz*10).toFixed(2).replace('.',',') + ' mm', 0.62);
+  eti.position.set(est.x, est.yRiel + (est.i % 2 ? 4.3 : 2.4), Z_BANDA);
   etiquetas.add(eti);
 });
 
@@ -632,7 +662,7 @@ var zona = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, BANDA_W + 1.6),
   new THREE.MeshStandardMaterial({color:0xEE7A1E, roughness:0.6, transparent:true, opacity:0.55}));
 zona.position.set(X_ENTREGA, BANDA_Y + 0.06, Z_BANDA);
 raiz.add(zona);
-var etiZona = etiqueta('Zona de entrega', 'el brazo recoge aquí', 0.95);
+var etiZona = etiqueta('Punto A', 'fin de la banda: el brazo recoge aquí', 1.0);
 etiZona.position.set(X_ENTREGA, BANDA_Y + 6.4, Z_BANDA);
 etiquetas.add(etiZona);
 var etiTolva = etiqueta('Tolva', 'entrada de monedas', 0.9);
@@ -663,6 +693,11 @@ YAW_RACK.forEach(function(yaw, idx){
   etiquetas.add(eti);
   puestosRack.push({yaw:yaw, x:pos.x, z:pos.z, ocupado:null});
 });
+var yawB = (YAW_RACK[0] + YAW_RACK[4])/2;
+var posB = aEscena((R_ARCO + 7.5)*Math.cos(yawB*GR), (R_ARCO + 7.5)*Math.sin(yawB*GR), 0);
+var etiB = etiqueta('Punto B', 'rack ordenado R1 a R5', 1.0);
+etiB.position.set(posB.x, 4.2, posB.z);
+etiquetas.add(etiB);
 
 /* ---------- brazo de 5 GDL ----------
    Los eslabones son cajas sólidas achaflanadas (perfil extruido con bisel),
@@ -808,8 +843,9 @@ OBST.forEach(function(o, idx){
     gGira.add(bola);
     o.esferas.push({mesh:bola, angBase:ang});
   }
-  var eti = etiqueta(o.nombre,
-                     o.brazos + ' brazos · ' + o.yEsfera.toFixed(1).replace('.',',') + ' cm', 0.85);
+  var eti = etiqueta('Nivel ' + o.nivel + ' · ' + o.nombre,
+                     NIVELES[o.nivel] + ' · ' + o.brazos + ' brazos · ' +
+                     o.yEsfera.toFixed(1).replace('.',',') + ' cm', 0.95);
   eti.position.set(o.x, o.yEsfera + 6.5, o.z);
   etiquetas.add(eti);
 });
@@ -844,19 +880,21 @@ function crearVaso(est, idx){
   g.add(fondo);
   g.position.set(est.x, VASO_Y - 0.3, Z_BANDA);
   raiz.add(g);
-  return {grupo:g, est:est, idx:idx, den:est.den, monedas:0, valor:0, peso:0,
+  return {grupo:g, est:est, idx:idx, den:est.den, monedas:0, antiguas:0, valor:0, peso:0,
           pila:[], entregado:false, enPinza:false, puesto:null, destino:null};
 }
-EST.forEach(function(est, idx){ vasos.push(crearVaso(est, idx)); });
+DEN_VASO.forEach(function(den, idx){ vasos.push(crearVaso({den:den, x:X_VASO[idx]}, idx)); });
 
 /* =======================================================================
    3. ESTADO DE LA SIMULACIÓN
    ======================================================================= */
-var LOTE = [22, 18, 16, 13, 11];
+// monedas por estación: N50, N100, A50, N200, A100, $500, A200, N1000
+var LOTE = [16, 12, 6, 10, 6, 13, 6, 11];
 var sim = {
   activo:false, t:0, fase:'inicio', desdeUltima:0,
   vAlim:4.0, vBanda:6.0, vObst:45.0, vBrazo:1.0,
-  bolsa:[], monedas:[], flash:[0,0,0,0,0],
+  bolsa:[], monedas:[], flash:MONEDAS.map(function(){ return 0; }),
+  cuenta:MONEDAS.map(function(){ return 0; }),
   bandaActiva:false, vasoEnZona:null, criterio:'valor', sentido:'asc'
 };
 var A_RIEL = 981*(Math.sin(INC) - 0.30*Math.cos(INC));   // deslizamiento en el riel
@@ -1088,19 +1126,19 @@ function encolarCiclo(vaso, puesto){
   limpiarRuta();                       // una traza nueva por cada vaso
   var yawD = YAW_RACK[puesto];
   var solAlto = ik(puntoArco(YAW_ENTREGA, Z_SEGURA).X, puntoArco(YAW_ENTREGA, Z_SEGURA).Y, Z_SEGURA);
-  brazo.plan.push(tramoArticular(solAlto.q, PINZA_ABIERTA, 'ir sobre la zona de entrega'));
+  brazo.plan.push(tramoArticular(solAlto.q, PINZA_ABIERTA, 'ir sobre el punto A'));
   brazo.plan.push(tramoLineal(YAW_ENTREGA, Z_SEGURA, Z_AGARRE, PINZA_ABIERTA, 'bajar al vaso'));
   brazo.plan.push(tramoPinza(PINZA_ABIERTA, PINZA_CERRADA, 'cerrar pinza', function(){
     tomarVaso(vaso);
   }));
   brazo.plan.push(tramoLineal(YAW_ENTREGA, Z_AGARRE, Z_SEGURA, PINZA_CERRADA, 'subir con el vaso'));
-  brazo.plan.push(tramoTransito(yawD, PINZA_CERRADA, 'tránsito esquivando obstáculos'));
+  brazo.plan.push(tramoTransito(yawD, PINZA_CERRADA, 'de A a B esquivando obstáculos'));
   brazo.plan.push(tramoLineal(yawD, Z_SEGURA, Z_AGARRE + 0.25, PINZA_CERRADA, 'bajar al puesto R' + (puesto+1)));
   brazo.plan.push(tramoPinza(PINZA_CERRADA, PINZA_ABIERTA, 'abrir pinza', function(){
     soltarVaso(puesto);
   }));
   brazo.plan.push(tramoLineal(yawD, Z_AGARRE + 0.25, Z_SEGURA, PINZA_ABIERTA, 'subir libre'));
-  brazo.plan.push(tramoTransito(YAW_ENTREGA, PINZA_ABIERTA, 'volver a la zona de entrega'));
+  brazo.plan.push(tramoTransito(YAW_ENTREGA, PINZA_ABIERTA, 'volver al punto A'));
 }
 
 function tomarVaso(vaso){
@@ -1319,27 +1357,39 @@ function avanzarMonedas(dt){
   for (var i=sim.monedas.length-1;i>=0;i--){
     var mo = sim.monedas[i];
     if (mo.estado === 'riel'){
-      mo.v += A_RIEL*dt;
-      mo.x += mo.v*dt;
-      var xw = RIEL_X0 + mo.x*Math.cos(INC);
-      var yw = RIEL_Y0 - mo.x*Math.sin(INC) + mo.e/2 + 0.02;
-      mo.obj.position.set(xw, yw, Z_BANDA);
-      var k = Math.floor((mo.x - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL);
-      if (k >= 0 && k < 5 && mo.d < LUZ[k] &&
-          mo.x > EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*k + mo.d/2 + 0.2){
-        mo.estado = 'cae'; mo.canal = k; mo.vy = 0;
-        mo.obj.rotation.z = 0;
-        mo.obj.position.x = EST[k].x;
-        sim.flash[k] = 0.18;
-        contar(mo);
-      } else if (mo.x > LARGO_RIEL){
-        raiz.remove(mo.obj); sim.monedas.splice(i,1);
+      // sub-pasos de 3 mm como máximo para que ninguna moneda salte su ranura
+      var pasos = Math.max(1, Math.ceil(mo.v*dt/0.3)), h = dt/pasos, cayo = false;
+      for (var ps=0; ps<pasos && !cayo; ps++){
+        mo.v += A_RIEL*h;
+        mo.x += mo.v*h;
+        var k = Math.floor((mo.x - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL);
+        if (k >= 0 && k < LUZ.length && mo.d < LUZ[k] &&
+            mo.x > EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*k + mo.d/2 + 0.2){
+          mo.estado = 'tubo'; mo.canal = k; mo.vaso = MONEDAS[k].vaso; mo.vy = 0; mo.s = 0;
+          mo.obj.rotation.z = 0;
+          sim.flash[k] = 0.18;
+          contar(mo);
+          cayo = true;
+        }
       }
+      if (!cayo){
+        var xw = RIEL_X0 + mo.x*Math.cos(INC);
+        var yw = RIEL_Y0 - mo.x*Math.sin(INC) + mo.e/2 + 0.02;
+        mo.obj.position.set(xw, yw, Z_BANDA);
+        if (mo.x > LARGO_RIEL){ raiz.remove(mo.obj); sim.monedas.splice(i,1); }
+      }
+    } else if (mo.estado === 'tubo'){
+      var est = EST[mo.canal];
+      mo.vy = Math.min(mo.vy + G_CAIDA*dt*0.18, 60);
+      mo.s = Math.min(1, mo.s + mo.vy*dt/est.largoCurva);
+      mo.obj.position.copy(est.curva.getPointAt(mo.s));
+      mo.obj.rotation.x += dt*6;
+      if (mo.s >= 1){ mo.estado = 'cae'; mo.vy = 8; }
     } else {
       mo.vy += G_CAIDA*dt*0.45;
       mo.obj.position.y -= mo.vy*dt;
       mo.obj.rotation.x += dt*3;
-      var vaso = vasos[mo.canal];
+      var vaso = vasos[mo.vaso];
       var destino = vaso.grupo.position.y + 0.55 + vaso.pila.length*mo.e*1.05;
       if (mo.obj.position.y <= destino){
         raiz.remove(mo.obj);
@@ -1355,10 +1405,13 @@ function avanzarMonedas(dt){
     }
   }
 }
+// como el sensor real, se cuenta por estación: ella dice denominación y familia
 function contar(mo){
-  var vaso = vasos[mo.canal];
-  vaso.monedas++; vaso.valor += mo.den; vaso.peso += mo.m;
-  consola('<b>M:' + mo.den + ',' + (mo.canal+1) + '</b>  canal ' + (mo.canal+1) +
+  var est = MONEDAS[mo.canal], vaso = vasos[mo.vaso];
+  sim.cuenta[mo.canal]++;
+  vaso.monedas++; vaso.valor += est.v; vaso.peso += est.m;
+  if (est.s === 'antigua') vaso.antiguas++;
+  consola('<b>M:' + est.v + ',' + (mo.canal+1) + ',' + est.s + '</b>  vaso de ' + pesos(est.v) +
           ': ' + vaso.monedas + ' monedas');
   actualizarTabla();
 }
@@ -1392,7 +1445,8 @@ var CRITERIOS = {
   denominacion: function(v){ return v.den; },
   cantidad:     function(v){ return v.monedas; },
   valor:        function(v){ return v.valor; },
-  peso:         function(v){ return v.peso + MASA_VASO; }
+  peso:         function(v){ return v.peso + MASA_VASO; },
+  antiguas:     function(v){ return v.antiguas; }
 };
 function asignarPuestos(){
   var signo = sim.sentido === 'asc' ? 1 : -1;
@@ -1403,7 +1457,7 @@ function asignarPuestos(){
   orden.forEach(function(v, j){ v.destino = j; });
   consola('plan de ordenamiento por ' + sim.criterio + ' ' + sim.sentido, true);
   orden.forEach(function(v, j){
-    consola('  R' + (j+1) + '  ' + pesos(v.den) + '  ' + v.monedas + ' monedas  ' +
+    consola('  R' + (j+1) + '  ' + pesos(v.den) + '  ' + v.monedas + ' monedas (' + v.antiguas + ' antiguas)  ' +
             pesos(v.valor) + '  ' + nf(v.peso + MASA_VASO,1) + ' g');
   });
 }
@@ -1470,36 +1524,45 @@ function botones(corriendo){
   $('btnPausar').disabled = !corriendo;
 }
 function tramaVasos(){
-  return 'VASOS:' + vasos.map(function(v){ return v.den + 'x' + v.monedas; }).join(',');
+  return 'VASOS:' + vasos.map(function(v){
+    return v.den + 'x' + v.monedas + (v.antiguas ? 'a' + v.antiguas : '');
+  }).join(',');
 }
 (function construirTabla(){
   var cuerpo = $('tablaConteo').querySelector('tbody');
   MONEDAS.forEach(function(d, k){
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + pesos(d.v) + '</td><td>' + nf(LUZ[k],2) + ' cm</td>' +
+    tr.innerHTML = '<td>E' + (k+1) + ' ' + pesos(d.v) + ' ' + abrev(d.s) + '</td><td>' +
+                   nf(LUZ[k]*10,2) + ' mm</td>' +
                    '<td id="cN'+k+'">0</td><td id="cV'+k+'">$0</td><td id="cP'+k+'">0,0 g</td>';
     cuerpo.appendChild(tr);
   });
   var sens = $('sensores');
   MONEDAS.forEach(function(d, k){
     var div = document.createElement('div');
-    div.innerHTML = '<b>S' + (k+1) + '</b>' + pesos(d.v);
+    div.innerHTML = '<b>E' + (k+1) + '</b>' + pesos(d.v) + ' ' + abrev(d.s);
+    if (d.s === 'antigua') div.className = 'ant';
     sens.appendChild(div);
   });
   var lista = $('listaObst');
   OBST.forEach(function(o, idx){
     var div = document.createElement('div');
-    div.innerHTML = '<b>' + o.nombre + '</b><span class="dist" id="obsTexto'+idx+'">en reposo</span>' +
+    div.innerHTML = '<b><span class="nivel n' + o.nivel + '">N' + o.nivel + '</span> ' + o.nombre +
+                    '</b><span class="dist" id="obsTexto'+idx+'">en reposo</span>' +
                     '<span id="obsDist'+idx+'">—</span>';
+    div.title = 'Nivel ' + o.nivel + ' (' + NIVELES[o.nivel] + ')';
     lista.appendChild(div);
   });
 })();
 function actualizarTabla(){
   var tn = 0, tv = 0, tp = 0;
-  vasos.forEach(function(v, k){
-    $('cN'+k).textContent = v.monedas;
-    $('cV'+k).textContent = pesos(v.valor);
-    $('cP'+k).textContent = nf(v.peso + (v.monedas ? MASA_VASO : 0),1) + ' g';
+  MONEDAS.forEach(function(d, k){
+    var n = sim.cuenta[k];
+    $('cN'+k).textContent = n;
+    $('cV'+k).textContent = pesos(n*d.v);
+    $('cP'+k).textContent = nf(n*d.m,1) + ' g';
+  });
+  vasos.forEach(function(v){
     tn += v.monedas; tv += v.valor; tp += v.peso + (v.monedas ? MASA_VASO : 0);
   });
   $('tN').textContent = tn;
@@ -1533,7 +1596,7 @@ function actualizarLecturas(){
     caja.classList.toggle('riesgo', brazo.bloqueadoPor === o || (h !== null && h < 1.5));
   });
   var sens = $('sensores').children;
-  for (var k=0;k<5;k++) sens[k].classList.toggle('on', sim.flash[k] > 0);
+  for (var k=0;k<sens.length;k++) sens[k].classList.toggle('on', sim.flash[k] > 0);
 }
 
 /* ---------- botones y deslizadores ---------- */
@@ -1542,10 +1605,11 @@ function reiniciar(){
   sim.t = 0; sim.desdeUltima = 0; sim.bandaActiva = false; sim.vasoEnZona = null;
   sim.monedas.forEach(function(m){ raiz.remove(m.obj); });
   sim.monedas = [];
+  sim.cuenta = MONEDAS.map(function(){ return 0; });
   cargarTolva();
   vasos.forEach(function(v, i){
     v.pila.forEach(function(d){ v.grupo.remove(d); });
-    v.pila = []; v.monedas = 0; v.valor = 0; v.peso = 0;
+    v.pila = []; v.monedas = 0; v.antiguas = 0; v.valor = 0; v.peso = 0;
     v.entregado = false; v.enPinza = false; v.puesto = null; v.destino = null;
     v.grupo.position.set(v.est.x, VASO_Y - 0.3, Z_BANDA);
   });
@@ -1694,7 +1758,7 @@ function avanzar(dt){
   actualizarFSM();
 
   // sensores
-  for (var k=0;k<5;k++){
+  for (var k=0;k<leds.length;k++){
     if (sim.flash[k] > 0){
       sim.flash[k] = Math.max(0, sim.flash[k] - dt);
       leds[k].material.emissiveIntensity = 1.2;

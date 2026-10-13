@@ -1,0 +1,34 @@
+name: pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: Python (monedas, obstáculos, cinemática, planificador, protocolo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Instalar pytest
+        run: pip install pytest
+      - name: Correr las pruebas
+        run: pytest software/tests -q
+      - name: Alcance de los puestos
+        run: python scripts/verificar_alcance.py
+
+  firmware:
+    name: Núcleo de los firmwares en el PC
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compilar y correr
+        run: make -C firmware/tests

@@ -82,11 +82,13 @@ tfoot td{font-weight:600;border-bottom:0}
   padding:8px 10px;word-break:break-all;color:var(--ink-2);line-height:1.5}
 .log{font-family:var(--f-code);font-size:12px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
   padding:8px 10px;height:110px;overflow:auto;color:var(--ink-2);line-height:1.6}
-.sensores{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center;font-family:var(--f-ui);font-size:12.5px;color:var(--muted)}
+.sensores{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;font-family:var(--f-ui);font-size:12.5px;color:var(--muted)}
 .sensores div{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:7px 2px}
 .sensores b{display:block;font-size:13px;color:var(--ink)}
 .sensores.activo-1 div:nth-child(1),.sensores.activo-2 div:nth-child(2),.sensores.activo-3 div:nth-child(3),
 .sensores.activo-4 div:nth-child(4),.sensores.activo-5 div:nth-child(5){border-color:var(--verde);color:var(--verde)}
+.sensores div.on{border-color:var(--verde);color:var(--verde)}
+.sensores div.ant b,.lote label.ant{color:var(--naranja-ink)}
 .piezas{font-size:13.5px}
 .piezas button{display:grid;grid-template-columns:auto 1fr auto;gap:10px;width:100%;text-align:left;background:transparent;
   border:0;border-bottom:1px solid var(--line);padding:8px 2px;cursor:pointer;color:var(--ink);font-family:inherit;font-size:13.5px}
@@ -115,7 +117,7 @@ tfoot td{font-weight:600;border-bottom:0}
     <div class="encabezado">
       <div>
         <h1>Selección y transporte de monedas</h1>
-        <p>Etapa 1 del Sistema de Logística de Monedas Inteligentes: la tolva suelta las monedas una a una, el riel escalonado las separa por diámetro y cada vaso viaja en la banda hasta el brazo clasificador.</p>
+        <p>Etapa 1 del Sistema de Logística de Monedas Inteligentes: la tolva recibe monedas colombianas antiguas y nuevas, el riel de ocho ranuras las separa por diámetro, cada tubo lleva su moneda al vaso de su denominación y la banda entrega los vasos al brazo en el punto A.</p>
       </div>
       <div class="vistas">
         <button class="pill" id="vIso" aria-pressed="true" type="button">Isométrica</button>
@@ -165,13 +167,13 @@ tfoot td{font-weight:600;border-bottom:0}
       <div class="bloque">
         <h2>Lote en la tolva</h2>
         <div class="lote" id="loteEntrada"></div>
-        <p class="nota">Cantidad de monedas de cada denominación que se echan a la tolva. Se mezclan al azar antes de caer.</p>
+        <p class="nota">Monedas de cada tipo que se echan a la tolva, de la familia nueva (2012) y de la anterior. Se mezclan al azar antes de caer. La $500 es igual en las dos familias y la $1.000 de 1996 no se admite.</p>
       </div>
 
       <div class="bloque">
-        <h2>Conteo por canal</h2>
+        <h2>Conteo por estación</h2>
         <table id="tablaConteo">
-          <thead><tr><th>Canal</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
+          <thead><tr><th>Estación</th><th>Luz</th><th>Monedas</th><th>Valor</th><th>Peso</th></tr></thead>
           <tbody></tbody>
           <tfoot><tr><td colspan="2">Totales</td><td id="tTotN">0</td><td id="tTotV">$0</td><td id="tTotP">0,0 g</td></tr></tfoot>
         </table>
@@ -209,7 +211,7 @@ tfoot td{font-weight:600;border-bottom:0}
       </div>
       <div class="bloque">
         <h2>Compra aparte</h2>
-        <p class="nota">Servo SG90 para la compuerta, motorreductor 12 V con reductora 1:100 para la banda, cinta transportadora de 70 mm, cinco barreras infrarrojas, ejes de 5 mm, tornillería M3 e insertos de latón. Detalle en <code>hardware/bom-etapa1.csv</code>.</p>
+        <p class="nota">Servo SG90 para la compuerta, motorreductor 12 V con reductora 1:100 para la banda, cinta transportadora de 70 mm, ocho barreras infrarrojas, tubo flexible de 3/4 pulgada para los colectores, ejes de 5 mm, tornillería M3 e insertos de latón. Detalle en <code>hardware/bom-etapa1.csv</code>.</p>
       </div>
     </div>
   </aside>
@@ -220,69 +222,82 @@ tfoot td{font-weight:600;border-bottom:0}
 'use strict';
 /* ==================== parámetros (cm, los mismos de los STL) ==================== */
 var GR = Math.PI/180;
+// Monedas en el orden en que el riel las deja caer: estación E1 a E8.
+// Familia nueva (2012) y anterior (1989-1996); la $500 es igual en las dos y
+// comparte estación. 'vaso' es el vaso de su denominación. Los mismos datos,
+// con pruebas, están en software/brazo/monedas.py.
 var MONEDAS = [
-  {v:50,   d:1.70, e:0.14, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4},
-  {v:100,  d:2.03, e:0.16, m:3.34, aro:0xC7A33A, centro:0xC7A33A},
-  {v:200,  d:2.24, e:0.17, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC},
-  {v:500,  d:2.37, e:0.20, m:7.14, aro:0xB4B8B0, centro:0xC7A33A},
-  {v:1000, d:2.67, e:0.23, m:9.95, aro:0xC7A33A, centro:0xB4B8B0}
+  {v:50,   s:'nueva',   d:1.700, e:0.130, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4, vaso:0},
+  {v:100,  s:'nueva',   d:2.030, e:0.150, m:3.34, aro:0xC7A33A, centro:0xC7A33A, vaso:1},
+  {v:50,   s:'antigua', d:2.150, e:0.140, m:4.50, aro:0xD0D3CB, centro:0xD0D3CB, vaso:0},
+  {v:200,  s:'nueva',   d:2.240, e:0.170, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC, vaso:2},
+  {v:100,  s:'antigua', d:2.300, e:0.155, m:5.31, aro:0xD9B44A, centro:0xD9B44A, vaso:1},
+  {v:500,  s:'ambas',   d:2.370, e:0.205, m:7.14, aro:0xB4B8B0, centro:0xC7A33A, vaso:3},
+  {v:200,  s:'antigua', d:2.440, e:0.170, m:7.08, aro:0xC6C9C0, centro:0xC6C9C0, vaso:2},
+  {v:1000, s:'nueva',   d:2.670, e:0.230, m:9.95, aro:0xC7A33A, centro:0xB4B8B0, vaso:4}
 ];
-var LUZ = [1.76, 2.09, 2.30, 2.43, 2.73];     // luces de las ranuras
+var LUZ = [1.760, 2.090, 2.195, 2.270, 2.335, 2.405, 2.500, 2.730];   // luces de las ranuras
 var LUZ_ENTRADA = 1.60;
-var PASO = 6.5, ENTRADA = 4.0, ANCHO_RIEL = 3.0, ESP_RIEL = 1.0;
-var LARGO_RIEL = ENTRADA + PASO*MONEDAS.length;         // 36,5 cm
-var INC = 25*GR, Y0 = 34.0;                             // altura del riel en x = 0
+var DEN_VASO = [50, 100, 200, 500, 1000];
+var PASO = 4.0, ENTRADA = 4.0, ANCHO_RIEL = 3.0, ESP_RIEL = 1.0;
+var LARGO_RIEL = ENTRADA + PASO*MONEDAS.length;         // 36 cm, como los STL
+var INC = 25*GR, Y0 = 36.0;                             // altura del riel en x = 0
 var CORTE = 18.0;                                       // división de los tramos imprimibles
 var BANDA_Y = 2.4, BANDA_X0 = 0.5, BANDA_X1 = 46.0, BANDA_W = 7.0;
 var VASO_R = 2.6, VASO_H = 8.0, VASO_Y = 2.7;
 var Y_SALIDA = 11.65;                                   // boca del vaso, fin de la bajada
-var X_ENTREGA = 42.0;                                   // donde el brazo recoge el vaso
+var X_ENTREGA = 42.0;                                   // punto A: donde el brazo recoge el vaso
+var X_VASO = [6.0, 12.5, 19.0, 25.5, 32.0];             // vasos de $50 a $1.000 sobre la banda
 var EST = [];                                           // datos de cada estación
-for (var i=0;i<5;i++){
+for (var i=0;i<MONEDAS.length;i++){
   var xl = ENTRADA + PASO*i + PASO/2;
   var xw = xl*Math.cos(INC), yr = Y0 - xl*Math.sin(INC);
   EST.push({i:i, xLocal:xl, x:xw, yRiel:yr, yBoca:yr-ESP_RIEL,
-            yEmbudo:yr-ESP_RIEL-6.3, luz:LUZ[i], den:MONEDAS[i].v});
+            yEmbudo:yr-ESP_RIEL-3.2, luz:LUZ[i], den:MONEDAS[i].v,
+            serie:MONEDAS[i].s, vaso:MONEDAS[i].vaso});
 }
+function abrev(serie){ return serie === 'nueva' ? 'N' : (serie === 'antigua' ? 'A' : 'N/A'); }
 
 /* ==================== catálogo de piezas ==================== */
 var PIEZAS = [
-  {cod:'P01', nombre:'Riel selector, tramo de entrada', cant:2, archivo:'P01_riel_tramo_a.stl',
-   material:'PETG', medidas:'200 x 22 x 10 mm', nota:'Lleva la entrada y las dos primeras ranuras. El riel derecho es la misma pieza volteada sobre su eje largo.'},
-  {cod:'P02', nombre:'Riel selector, tramo de salida', cant:2, archivo:'P02_riel_tramo_b.stl',
-   material:'PETG', medidas:'185 x 18,5 x 10 mm', nota:'Se une al tramo de entrada a media madera, con 20 mm de solapa y dos M3.'},
-  {cod:'P03', nombre:'Canal del costado', cant:4, archivo:'P03_canal_costado.stl',
-   material:'PETG', medidas:'185 x 22 x 20 mm', nota:'Dos tramos por lado. El riel se apoya dentro del canal y se fija con tres M3.'},
-  {cod:'P04', nombre:'Abrazadera de varilla M5', cant:4, archivo:'P04_abrazadera.stl',
+  {cod:'P01', nombre:'Riel selector, tramo de entrada', cant:2, archivo:'E01_riel_tramo_a.stl',
+   material:'PETG', medidas:'200 x 22 x 10 mm', nota:'Lleva la entrada y las cuatro primeras ranuras. El riel derecho es la misma pieza volteada sobre su eje largo.'},
+  {cod:'P02', nombre:'Riel selector, tramo de salida', cant:2, archivo:'E02_riel_tramo_b.stl',
+   material:'PETG', medidas:'160 x 18,6 x 10 mm', nota:'Se une al tramo de entrada a media madera, con 20 mm de solapa y dos M3.'},
+  {cod:'P03', nombre:'Canal del costado', cant:4, archivo:'E03_canal_costado.stl',
+   material:'PETG', medidas:'180 x 22 x 20 mm', nota:'Dos tramos por lado. El riel se apoya dentro del canal y se fija con tres M3.'},
+  {cod:'P04', nombre:'Abrazadera de varilla M5', cant:4, archivo:'E04_abrazadera_varilla.stl',
    material:'PETG', medidas:'38 x 20 x 14 mm', nota:'Fija la altura y mantiene los 25 grados de inclinación sobre varilla roscada M5.'},
-  {cod:'P05', nombre:'Tolva de alimentación', cant:1, archivo:'P05_tolva.stl',
+  {cod:'P05', nombre:'Tolva de alimentación', cant:1, archivo:'E05_tolva.stl',
    material:'PLA o PETG', medidas:'124 x 110 x 93 mm', nota:'Se imprime boca abajo y no necesita soportes. Capacidad aproximada de 300 monedas.'},
-  {cod:'P06', nombre:'Paleta dosificadora', cant:1, archivo:'P06_compuerta.stl',
+  {cod:'P06', nombre:'Paleta dosificadora', cant:1, archivo:'E06_paleta_dosificadora.stl',
    material:'PETG', medidas:'18 x 60 x 9 mm', nota:'Va montada en un servo SG90; cada ciclo deja pasar una sola moneda al riel.'},
-  {cod:'P07', nombre:'Embudo de estación', cant:5, archivo:'P07_canal_salida.stl',
-   material:'PLA', medidas:'66 x 66 x 63 mm', nota:'Boca de 56 mm bajo la ranura y salida de 28 mm hacia el vaso.'},
-  {cod:'P08', nombre:'Soporte de sensor infrarrojo', cant:5, archivo:'P08_soporte_sensor.stl',
+  {cod:'P07', nombre:'Embudo de estación', cant:8, archivo:'E07_embudo_estacion.stl',
+   material:'PLA', medidas:'35 x 35 x 44 mm', nota:'Boca de 33 mm bajo la ranura y salida para tubo de 3/4 pulgada; el tubo lleva la moneda al vaso de su denominación.'},
+  {cod:'P08', nombre:'Soporte de sensor infrarrojo', cant:8, archivo:'E08_soporte_sensor.stl',
    material:'PETG', medidas:'34 x 16 x 27 mm', nota:'Deja la barrera apuntando al centro de la ranura, a 8 mm del borde.'},
-  {cod:'P09', nombre:'Rodillo de la banda', cant:2, archivo:'P09_rodillo.stl',
+  {cod:'P09', nombre:'Rodillo de la banda', cant:2, archivo:'E09_rodillo_banda.stl',
    material:'PETG', medidas:'35 x 35 x 70 mm', nota:'Eje de 5 mm. El rodillo motriz se acopla al motorreductor con la pieza P12.'},
-  {cod:'P10', nombre:'Costado de la banda, tramo', cant:6, archivo:'P10_lateral_banda.stl',
+  {cod:'P10', nombre:'Costado de la banda, tramo', cant:6, archivo:'E10_marco_banda.stl',
    material:'PETG', medidas:'188 x 62 x 9 mm', nota:'Tres tramos por lado, unidos por la solapa de 24 mm.'},
-  {cod:'P11', nombre:'Portavaso', cant:5, archivo:'P11_portavaso.stl',
+  {cod:'P11', nombre:'Portavaso', cant:5, archivo:'E11_portavaso.stl',
    material:'PETG', medidas:'58 x 58 x 15 mm', nota:'Sujeta el vaso de 52 mm sobre la cinta y lo entrega centrado al brazo.'},
-  {cod:'P12', nombre:'Acople motor a rodillo', cant:1, archivo:'P12_acople_motor.stl',
+  {cod:'P12', nombre:'Acople motor a rodillo', cant:1, archivo:'E12_acople_motor.stl',
    material:'PETG', medidas:'18 x 18 x 24 mm', nota:'De eje de 6 mm del motorreductor a eje de 5 mm del rodillo.'},
-  {cod:'P13', nombre:'Pie nivelador', cant:4, archivo:'P13_pie_nivelador.stl',
+  {cod:'P13', nombre:'Pie nivelador', cant:4, archivo:'E13_pie_nivelador.stl',
    material:'TPU o PETG', medidas:'22 x 22 x 14 mm', nota:'Nivela la estructura y amortigua la vibración del motor.'},
   {cod:'C01', nombre:'Servo SG90 (comprado)', cant:1, archivo:'-', material:'-',
    medidas:'23 x 12 x 29 mm', nota:'Mueve la paleta dosificadora. Se comanda desde el ESP32 por PWM.'},
-  {cod:'C02', nombre:'Barrera infrarroja (comprada)', cant:5, archivo:'-', material:'-',
-   medidas:'-', nota:'Un canal por estación. Cada pulso es una moneda contada.'},
+  {cod:'C02', nombre:'Barrera infrarroja (comprada)', cant:8, archivo:'-', material:'-',
+   medidas:'-', nota:'Una por estación. Cada pulso es una moneda, y la estación dice su denominación y su familia.'},
   {cod:'C03', nombre:'Motorreductor 12 V y cinta (comprados)', cant:1, archivo:'-', material:'-',
    medidas:'cinta de 70 mm', nota:'Mueve la banda. Se controla con un puente H desde el ESP32.'},
   {cod:'C04', nombre:'Vaso de polipropileno (comprado)', cant:5, archivo:'-', material:'-',
    medidas:'52 mm de diámetro, 80 mm de alto', nota:'Es el mismo vaso que recoge el brazo de la etapa 2.'},
   {cod:'C05', nombre:'Varilla roscada M5 (comprada)', cant:4, archivo:'-', material:'-',
-   medidas:'longitud según estación', nota:'Da la altura del riel; las tuercas permiten ajustar la inclinación.'}
+   medidas:'longitud según estación', nota:'Da la altura del riel; las tuercas permiten ajustar la inclinación.'},
+  {cod:'C06', nombre:'Tubo flexible de PVC cristal (comprado)', cant:8, archivo:'-', material:'-',
+   medidas:'3/4 pulgada, 15 a 25 cm', nota:'Colector: lleva cada estación al vaso de su denominación. Los de las monedas antiguas van por detrás para no cruzarse.'}
 ];
 
 /* ==================== escena ==================== */
@@ -463,39 +478,51 @@ paleta.position.set(-1.2, Y0 - 0.35, 2.6);
 raiz.add(paleta);
 anotar(pal, 'P06', new THREE.Vector3(0, 0.8, 1.2));
 
-/* ---------- embudos, bajantes, sensores ---------- */
+/* ---------- embudos, tubos colectores, sensores ---------- */
+// Cada estación tiene un embudo corto y un tubo flexible que lleva la moneda
+// al vaso de su denominación. Los tubos de las antiguas van por detrás (z < 0)
+// y los de las nuevas por delante, así no se cruzan.
 var sensoresLed = [];
+var matTubo = MAT.comprado.clone();
+matTubo.transparent = true; matTubo.opacity = 0.38; matTubo.side = THREE.DoubleSide;
 EST.forEach(function(est){
-  var emb = cilindro(2.8, 1.4, 6.3, MAT.impreso2, 28, true);
+  var emb = cilindro(1.65, 0.95, 2.8, MAT.impreso2, 28, true);
   emb.material = MAT.impreso2.clone();
   emb.material.side = THREE.DoubleSide;
-  emb.position.set(est.x, est.yBoca - 3.15, 0);
+  emb.position.set(est.x, est.yBoca - 1.4, 0);
   raiz.add(emb);
   anotar(emb, 'P07', new THREE.Vector3(0, -1.5, 0));
 
-  var largoTubo = Math.max(0.4, est.yEmbudo - Y_SALIDA);
-  var tubo = cilindro(1.4, 1.4, largoTubo, MAT.comprado, 24, true);
-  tubo.material = MAT.comprado.clone();
-  tubo.material.side = THREE.DoubleSide;
-  tubo.material.transparent = true; tubo.material.opacity = 0.5;
-  tubo.position.set(est.x, est.yEmbudo - largoTubo/2, 0);
+  var xv = X_VASO[est.vaso];
+  var lado = est.serie === 'antigua' ? -1 : (est.serie === 'nueva' ? 1 : 0);
+  var dz = lado*1.15;
+  var puntos = [new THREE.Vector3(est.x, est.yBoca - 0.2, 0),
+                new THREE.Vector3(est.x, est.yEmbudo, 0),
+                new THREE.Vector3(est.x + (xv - est.x)*0.35, est.yEmbudo - 1.4, dz),
+                new THREE.Vector3(xv - (xv - est.x)*0.1, Y_SALIDA + 1.3, dz*0.55),
+                new THREE.Vector3(xv + lado*0.2, Y_SALIDA - 0.6, lado*0.55)];
+  est.curva = new THREE.CatmullRomCurve3(puntos);
+  est.largoCurva = est.curva.getLength();
+  var tubo = new THREE.Mesh(new THREE.TubeGeometry(est.curva, 48, 0.75, 12, false), matTubo);
+  tubo.castShadow = true;
   raiz.add(tubo);
-  anotar(tubo, 'C03', new THREE.Vector3(0, -1.2, 0));
+  anotar(tubo, 'C06', new THREE.Vector3(0, -1.0, lado*1.2));
 
-  [1, -1].forEach(function(lado){
-    var sop = caja(1.6, 2.4, 0.5, MAT.impreso);
-    sop.position.set(est.x, est.yRiel - 0.4, lado*(est.luz/2 + 0.9));
+  [1, -1].forEach(function(l){
+    var sop = caja(1.4, 2.4, 0.5, MAT.impreso);
+    sop.position.set(est.x, est.yRiel - 0.4, l*(est.luz/2 + 0.9));
     raiz.add(sop);
-    anotar(sop, 'P08', new THREE.Vector3(0, 0.5, lado*1.5));
+    anotar(sop, 'P08', new THREE.Vector3(0, 0.5, l*1.5));
     var led = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), MAT.led.clone());
-    led.position.set(est.x, est.yRiel - 0.2, lado*(est.luz/2 + 0.6));
+    led.position.set(est.x, est.yRiel - 0.2, l*(est.luz/2 + 0.6));
     raiz.add(led);
-    anotar(led, 'C02', new THREE.Vector3(0, 0.5, lado*1.5));
-    if (lado === 1) sensoresLed.push(led);
+    anotar(led, 'C02', new THREE.Vector3(0, 0.5, l*1.5));
+    if (l === 1) sensoresLed.push(led);
   });
 
-  var eti = etiqueta('$' + est.den.toLocaleString('es-CO'), 'luz ' + est.luz.toFixed(2).replace('.', ',') + ' cm');
-  eti.position.set(est.x, est.yRiel + 2.4, 0);
+  var eti = etiqueta('E' + (est.i+1) + ' $' + est.den.toLocaleString('es-CO') + ' ' + abrev(est.serie),
+                     'luz ' + (est.luz*10).toFixed(2).replace('.', ',') + ' mm', 0.62);
+  eti.position.set(est.x, est.yRiel + (est.i % 2 ? 4.4 : 2.3), 0);
   etiquetasOp.add(eti);
 });
 
@@ -560,7 +587,7 @@ var zona = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.2, BANDA_W+1.6),
   new THREE.MeshStandardMaterial({color:0x34597A, roughness:0.6, transparent:true, opacity:0.5}));
 zona.position.set(X_ENTREGA, BANDA_Y + 0.05, 0);
 raiz.add(zona);
-var etiZona = etiqueta('Hacia el brazo', 'etapa 2');
+var etiZona = etiqueta('Punto A', 'el brazo recoge aquí');
 etiZona.position.set(X_ENTREGA, BANDA_Y + 5.2, 0);
 etiquetasOp.add(etiZona);
 var etiTolva = etiqueta('Tolva', 'entrada de monedas');
@@ -579,7 +606,7 @@ etiEsp.position.set(14, 3.4, -13.5);
 etiquetasOp.add(etiEsp);
 
 /* ---------- vasos ---------- */
-var vasos = [];
+var vasos = [], etiquetasVaso = [];
 function crearVaso(est){
   var g = new THREE.Group();
   var base = caja(2.9, 0.3, 2.9, MAT.impreso);
@@ -601,11 +628,16 @@ function crearVaso(est){
   g.add(fondo);
   g.position.set(est.x, VASO_Y - 0.3, 0);
   raiz.add(g);
-  var v = {grupo:g, est:est, monedas:0, valor:0, peso:0, pila:[], x:est.x, entregado:false};
+  var v = {grupo:g, est:est, monedas:0, antiguas:0, valor:0, peso:0, pila:[], x:est.x,
+           entregado:false};
   vasos.push(v);
+  var eti = etiqueta('Vaso $' + est.den.toLocaleString('es-CO'), null, 0.6);
+  eti.position.set(0, 0.9, BANDA_W/2 + 2.2);      // al frente de la banda, a la vista
+  g.add(eti);
+  etiquetasVaso.push(eti);
   return v;
 }
-EST.forEach(crearVaso);
+DEN_VASO.forEach(function(den, i){ crearVaso({den:den, x:X_VASO[i], i:i}); });
 
 /* ==================== monedas ==================== */
 var geoMoneda = {};
@@ -629,10 +661,13 @@ function mallaMoneda(k){
 }
 
 /* ==================== estado de la simulación ==================== */
-var LOTE_INICIAL = [24, 20, 18, 14, 12];
+// monedas por estación: N50, N100, A50, N200, A100, $500, A200, N1000
+var LOTE_INICIAL = [18, 14, 6, 12, 6, 14, 6, 12];
 var sim = {
   activo:false, t:0, desdeUltima:0, tasa:3.0, vBanda:6.0,
-  bolsa:[], monedas:[], enviando:false, entregados:[], flash:[0,0,0,0,0]
+  bolsa:[], monedas:[], enviando:false, entregados:[],
+  flash:MONEDAS.map(function(){ return 0; }),
+  cuenta:MONEDAS.map(function(){ return 0; })
 };
 var A_RIEL = 981*(Math.sin(INC) - 0.30*Math.cos(INC));   // aceleración neta en el riel
 var G = 981;
@@ -653,7 +688,7 @@ function limpiarMonedas(){
 function reiniciarVasos(){
   vasos.forEach(function(v){
     v.pila.forEach(function(o){ v.grupo.remove(o); });
-    v.pila = []; v.monedas = 0; v.valor = 0; v.peso = 0;
+    v.pila = []; v.monedas = 0; v.antiguas = 0; v.valor = 0; v.peso = 0;
     v.x = v.est.x; v.entregado = false;
     v.grupo.visible = true;
     v.grupo.position.x = v.est.x;
@@ -667,7 +702,8 @@ function soltarMoneda(){
   obj.rotation.z = -INC;
   raiz.add(obj);
   sim.monedas.push({k:k, den:MONEDAS[k].v, d:MONEDAS[k].d, e:MONEDAS[k].e, m:MONEDAS[k].m,
-                    obj:obj, estado:'riel', x:0.4, v:6, y:0, vy:0, xw:0});
+                    serie:MONEDAS[k].s, vaso:MONEDAS[k].vaso,
+                    obj:obj, estado:'riel', x:0.4, v:6, y:0, vy:0, xw:0, s:0});
   return true;
 }
 
@@ -677,23 +713,25 @@ function ponerEnRiel(mo){
   mo.xw = xw;
 }
 
+// la moneda cae por la ranura k: se cuenta y entra al tubo de su estación
 function caer(mo, k){
-  mo.estado = 'cae';
+  mo.estado = 'tubo';
   mo.canal = k;
-  mo.vy = 0;
+  mo.vaso = MONEDAS[k].vaso;
+  mo.vy = 0; mo.s = 0;
   mo.obj.rotation.z = 0;
-  mo.obj.position.x = EST[k].x;
-  mo.y = mo.obj.position.y;
   sim.flash[k] = 0.16;
-  sim.conteoCanal = sim.conteoCanal || [];
-  var v = vasos[k];
-  v.monedas++; v.valor += mo.den; v.peso += mo.m;
-  registrarEvento(mo.den, k);
+  sim.cuenta[k]++;
+  // como el sensor real, se cuenta por estación: ella dice denominación y familia
+  var est = MONEDAS[k], v = vasos[mo.vaso];
+  v.monedas++; v.valor += est.v; v.peso += est.m;
+  if (est.s === 'antigua') v.antiguas++;
+  registrarEvento(est.v, k, est.s);
   actualizarTabla();
 }
 
 function asentar(mo){
-  var v = vasos[mo.canal];
+  var v = vasos[mo.vaso];
   var n = v.pila.length;
   mo.obj.parent.remove(mo.obj);
   v.grupo.add(mo.obj);
@@ -715,7 +753,8 @@ var entradasLote = [];
   var host = $('loteEntrada');
   MONEDAS.forEach(function(d, k){
     var et = document.createElement('label');
-    et.textContent = pesos(d.v);
+    et.textContent = pesos(d.v) + (d.s === 'ambas' ? ' (las dos)' : ' ' + d.s);
+    if (d.s === 'antigua') et.className = 'ant';
     et.setAttribute('for', 'lote'+k);
     var barra = document.createElement('span');
     barra.style.cssText = 'height:6px;border-radius:3px;background:var(--panel-2);display:block';
@@ -736,31 +775,37 @@ var entradasLote = [];
   var cuerpo = $('tablaConteo').querySelector('tbody');
   MONEDAS.forEach(function(d, k){
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + pesos(d.v) + '</td><td>' + num(LUZ[k], 2) + ' cm</td>' +
+    tr.innerHTML = '<td>E' + (k+1) + ' ' + pesos(d.v) + ' ' + abrev(d.s) + '</td><td>' + num(LUZ[k]*10, 2) + ' mm</td>' +
                    '<td id="cN'+k+'">0</td><td id="cV'+k+'">$0</td><td id="cP'+k+'">0,0 g</td>';
     cuerpo.appendChild(tr);
   });
   var sens = $('sensores');
   MONEDAS.forEach(function(d, k){
     var div = document.createElement('div');
-    div.innerHTML = '<b>S' + (k+1) + '</b>' + pesos(d.v);
+    div.innerHTML = '<b>E' + (k+1) + '</b>' + pesos(d.v) + ' ' + abrev(d.s);
+    if (d.s === 'antigua') div.className = 'ant';
     sens.appendChild(div);
   });
 })();
 
 function actualizarTabla(){
   var tn = 0, tv = 0, tp = 0;
-  vasos.forEach(function(v, k){
-    $('cN'+k).textContent = v.monedas;
-    $('cV'+k).textContent = pesos(v.valor);
-    $('cP'+k).textContent = num(v.peso + (v.monedas ? 18 : 0)) + ' g';
+  MONEDAS.forEach(function(d, k){
+    var n = sim.cuenta[k];
+    $('cN'+k).textContent = n;
+    $('cV'+k).textContent = pesos(n*d.v);
+    $('cP'+k).textContent = num(n*d.m) + ' g';
+  });
+  vasos.forEach(function(v){
     tn += v.monedas; tv += v.valor; tp += v.peso + (v.monedas ? 18 : 0);
   });
   $('tTotN').textContent = tn;
   $('tTotV').textContent = pesos(tv);
   $('tTotP').textContent = num(tp) + ' g';
   $('chipTolva').textContent = 'Tolva: ' + sim.bolsa.length + ' monedas';
-  var trama = 'VASOS:' + vasos.map(function(v){ return v.est.den + 'x' + v.monedas; }).join(',');
+  var trama = 'VASOS:' + vasos.map(function(v){
+    return v.est.den + 'x' + v.monedas + (v.antiguas ? 'a' + v.antiguas : '');
+  }).join(',');
   $('tramaVasos').textContent = trama;
 }
 
@@ -772,10 +817,11 @@ function anotarLog(texto){
   host.textContent = lineas.slice(-40).join('\n');
   host.scrollTop = host.scrollHeight;
 }
-function registrarEvento(den, canal){
-  var t = 'M:' + den + ',' + (canal+1);
+function registrarEvento(den, estacion, serie){
+  var t = 'M:' + den + ',' + (estacion+1) + ',' + serie;
   $('tramaEvento').textContent = t;
-  anotarLog(t + '   moneda de ' + pesos(den) + ' contada en el canal ' + (canal+1));
+  anotarLog(t + '   ' + pesos(den) + (serie === 'ambas' ? '' : ' ' + serie) +
+            ' en la estación ' + (estacion+1));
 }
 
 function prepararLote(){
@@ -784,6 +830,7 @@ function prepararLote(){
   limpiarMonedas();
   reiniciarVasos();
   sim.t = 0; sim.desdeUltima = 0; sim.enviando = false; sim.entregados = [];
+  sim.cuenta = MONEDAS.map(function(){ return 0; });
   actualizarTabla();
   anotarLog('lote cargado: ' + cant.reduce(function(a,b){return a+b;}, 0) + ' monedas');
 }
@@ -810,7 +857,10 @@ $('btnReiniciar').addEventListener('click', function(){
   estado('En espera', false);
 });
 $('btnLote').addEventListener('click', function(){
-  entradasLote.forEach(function(i){ i.value = 8 + Math.floor(Math.random()*24); });
+  entradasLote.forEach(function(i, k){
+    i.value = MONEDAS[k].s === 'antigua' ? Math.floor(Math.random()*13)
+                                         : 6 + Math.floor(Math.random()*19);
+  });
   prepararLote();
 });
 $('btnEnviar').addEventListener('click', function(){
@@ -890,6 +940,7 @@ function cambiarModo(aDespiece){
   $('panelOperacion').classList.toggle('oculto', aDespiece);
   $('panelDespiece').classList.toggle('oculto', !aDespiece);
   etiquetasOp.visible = !aDespiece;
+  etiquetasVaso.forEach(function(e){ e.visible = !aDespiece; });
   if (aDespiece){
     sim.activo = false;
     meta = {theta:orbita.theta, phi:0.95, r:108, objetivo:new THREE.Vector3(20, 15, 0)};
@@ -997,19 +1048,33 @@ function avanzar(dt){
   for (var i=sim.monedas.length-1; i>=0; i--){
     var mo = sim.monedas[i];
     if (mo.estado === 'riel'){
-      mo.v += A_RIEL*dt;
-      mo.x += mo.v*dt;
-      ponerEnRiel(mo);
-      mo.obj.rotation.y += mo.v*dt*0.05;
-      var k = Math.floor((mo.x - ENTRADA)/PASO);
-      if (mo.x > ENTRADA && k >= 0 && k < LUZ.length &&
-          mo.x > ENTRADA + PASO*k + mo.d/2 + 0.2 && mo.d < LUZ[k]) caer(mo, k);
-      else if (mo.x > LARGO_RIEL){ mo.obj.parent.remove(mo.obj); sim.monedas.splice(i,1); }
+      // sub-pasos de 3 mm como máximo: con las ranuras a 4,6 cm, un cuadro
+      // lento haría que la moneda saltara la suya
+      var pasos = Math.max(1, Math.ceil(mo.v*dt/0.3)), h = dt/pasos, cayo = false;
+      for (var ps=0; ps<pasos && !cayo; ps++){
+        mo.v += A_RIEL*h;
+        mo.x += mo.v*h;
+        var k = Math.floor((mo.x - ENTRADA)/PASO);
+        if (mo.x > ENTRADA && k >= 0 && k < LUZ.length &&
+            mo.x > ENTRADA + PASO*k + mo.d/2 + 0.2 && mo.d < LUZ[k]){ caer(mo, k); cayo = true; }
+      }
+      if (!cayo){
+        ponerEnRiel(mo);
+        mo.obj.rotation.y += mo.v*dt*0.05;
+        if (mo.x > LARGO_RIEL){ mo.obj.parent.remove(mo.obj); sim.monedas.splice(i,1); }
+      }
+    } else if (mo.estado === 'tubo'){
+      var est = EST[mo.canal];
+      mo.vy = Math.min(mo.vy + G*dt*0.18, 60);
+      mo.s = Math.min(1, mo.s + mo.vy*dt/est.largoCurva);
+      mo.obj.position.copy(est.curva.getPointAt(mo.s));
+      mo.obj.rotation.x += dt*6;
+      if (mo.s >= 1){ mo.estado = 'cae'; mo.vy = 8; }
     } else if (mo.estado === 'cae'){
       mo.vy += G*dt*0.45;
       mo.obj.position.y -= mo.vy*dt;
       mo.obj.rotation.x += dt*2;
-      var v = vasos[mo.canal];
+      var v = vasos[mo.vaso];
       var destino = v.grupo.position.y + 0.55 + v.pila.length*mo.e*1.04;
       if (mo.obj.position.y <= destino){
         mo.obj.rotation.x = 0;
@@ -1027,8 +1092,8 @@ function avanzar(dt){
       sensoresLed[k].material.emissiveIntensity = 0.15;
     }
   });
-  var activo = sim.flash.findIndex(function(v){ return v > 0; });
-  $('sensores').className = 'sensores' + (activo >= 0 ? ' activo-' + (activo+1) : '');
+  var celdas = $('sensores').children;
+  for (var c=0;c<celdas.length;c++) celdas[c].classList.toggle('on', sim.flash[c] > 0);
 
   // banda
   if (sim.enviando){
@@ -1046,9 +1111,9 @@ function avanzar(dt){
       if (v.x >= X_ENTREGA){
         v.entregado = true;
         v.grupo.visible = false;
-        sim.entregados.push({den:v.est.den, n:v.monedas});
-        anotarLog('vaso de ' + pesos(v.est.den) + ' con ' + v.monedas +
-                  ' monedas entregado al brazo');
+        sim.entregados.push({den:v.est.den, n:v.monedas, antiguas:v.antiguas});
+        anotarLog('vaso de ' + pesos(v.est.den) + ' con ' + v.monedas + ' monedas (' +
+                  v.antiguas + ' antiguas) entregado al brazo en el punto A');
       }
     });
     if (quedan === 0){

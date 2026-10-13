@@ -24,6 +24,8 @@ from brazo.config import (D1, HOME, L1, L2, L3, LIMITES, R_ARCO, YAW_ENTRADA,
 from brazo.kinematics import ik, pose_puesto, puntos             # noqa: E402
 from brazo.statics import factores_seguridad, pares              # noqa: E402
 from brazo.trajectory import perfil                              # noqa: E402
+from brazo import monedas as mon                                 # noqa: E402
+from brazo import obstaculos as obs                              # noqa: E402
 
 SALIDA = RAIZ / "docs" / "img"
 PAPEL = "#F1F4EF"
@@ -31,6 +33,8 @@ TINTA = "#1E2928"
 NARANJA = "#E06E17"
 AZUL = "#2F5878"
 GRIS = "#9AA6A1"
+VERDE = "#2C7A54"
+COLOR_NIVEL = {1: "#2C7A54", 2: "#B8860B", 3: "#C2571A", 4: "#A3262A"}
 
 plt.rcParams.update({
     "figure.facecolor": PAPEL, "axes.facecolor": PAPEL,
@@ -189,12 +193,136 @@ def pose_acotada():
     plt.close(fig)
 
 
+def selector_monedas():
+    """Diámetros de las dos familias y luces de las ocho ranuras del riel."""
+    fig, ax = plt.subplots(figsize=(11, 4.0))
+    filas = {mon.NUEVA: 1.0, mon.ANTIGUA: 0.0}
+    for e in mon.SELECTOR:
+        ax.axvline(e.luz_mm, color=GRIS, lw=1, ls="--", zorder=1)
+        ax.text(e.luz_mm, 1.62, f"E{e.numero}\n{e.luz_mm:.2f}".replace(".", ","),
+                ha="center", va="bottom", fontsize=8, color=TINTA)
+    for m in mon.CATALOGO:
+        fuera = m.clave in mon.FUERA_DE_ALCANCE
+        y = filas[m.familia] - (0.0 if not fuera else 0.0)
+        color = GRIS if fuera else (AZUL if m.familia == mon.NUEVA else NARANJA)
+        ax.scatter([m.diametro_mm], [y], s=(m.diametro_mm * 1.05) ** 2,
+                   facecolors="none" if fuera else color, edgecolors=color,
+                   linewidths=1.5, linestyle=":" if fuera else "-", zorder=3 if not fuera else 4)
+        texto = f"${m.denominacion:,}".replace(",", ".")
+        if fuera:
+            ax.text(m.diametro_mm - 0.35, y - 0.68, "$1.000 de 1996: no admitida\n(0,17 mm de la $50)",
+                    ha="right", va="top", fontsize=8, color=GRIS)
+        else:
+            ax.text(m.diametro_mm, y - 0.36, texto, ha="center", va="top", fontsize=8.5, color=TINTA)
+    e4 = mon.SELECTOR[3]
+    ax.annotate("ranura crítica E4:\n0,30 mm a cada lado", xy=(e4.luz_mm, -0.8),
+                xytext=(25.25, -0.8), fontsize=8.5, color="#A3262A", va="center",
+                arrowprops=dict(arrowstyle="->", color="#A3262A", lw=1))
+    ax.text(15.9, 1.0, "Familia nueva\n(2012)", ha="right", va="center", color=AZUL, fontsize=9)
+    ax.text(15.9, 0.0, "Familia anterior\n(1989-1996)", ha="right", va="center", color=NARANJA,
+            fontsize=9)
+    ax.set_xlim(13.2, 28.2)
+    ax.set_ylim(-1.15, 2.05)
+    ax.set_yticks([])
+    ax.set_xlabel("diámetro (mm); cada línea punteada es la luz de una ranura")
+    ax.set_title("Riel selector: ocho estaciones para monedas antiguas y nuevas", loc="left")
+    for lado in ("left", "right", "top"):
+        ax.spines[lado].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(SALIDA / "selector-monedas.png")
+    plt.close(fig)
+
+
+def ruta_obstaculos():
+    """Vista superior de la celda de A a B y altura del TCP a lo largo del arco."""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.5, 5.0),
+                                   gridspec_kw={"width_ratios": [1.0, 1.05]})
+    yaws = [obs.YAW_A + i * 0.5 for i in range(int((obs.YAW_B[-1] - obs.YAW_A) / 0.5) + 1)]
+    plan = [obs.plan_en(y) for y in yaws]
+
+    # --- vista superior: X adelante, Y a la izquierda (se dibuja Y hacia arriba)
+    ax1.add_patch(Circle((0, 0), 3.0, color=TINTA, zorder=4))
+    ax1.text(0, -4.8, "base", ha="center", fontsize=8.5)
+    arco = [(obs.R_ARCO * math.cos(math.radians(y)), obs.R_ARCO * math.sin(math.radians(y)))
+            for y in yaws]
+    ax1.plot(*zip(*arco), color=TINTA, lw=1.6, ls="--", zorder=3)
+    ax1.text(25.5, 3.0, "arco de tránsito\nρ = 23 cm", fontsize=8, color=TINTA)
+    pos_texto = {"O1": (31.0, -16.5), "O2": (34.0, -5.0), "O3": (2.5, 9.5), "O4": (31.5, 18.0)}
+    for o in obs.OBSTACULOS:
+        a = math.radians(o.yaw)
+        px, py = o.r_pivote * math.cos(a), o.r_pivote * math.sin(a)
+        c = COLOR_NIVEL[o.nivel]
+        ax1.add_patch(Circle((px, py), o.radio + o.r_esfera, facecolor=c, alpha=0.15,
+                             edgecolor=c, lw=1.4, zorder=2))
+        ax1.add_patch(Circle((px, py), 0.6, color=c, zorder=3))
+        tx, ty = pos_texto[o.codigo]
+        ax1.text(tx, ty, f"N{o.nivel} · {o.codigo}\n{o.nombre}", ha="center", va="center",
+                 fontsize=8.5, color=c, fontweight="bold")
+    ya = math.radians(obs.YAW_A)
+    xa, ya_ = obs.R_ARCO * math.cos(ya), obs.R_ARCO * math.sin(ya)
+    ax1.add_patch(Rectangle((xa - 2.6, ya_ - 2.6), 5.2, 5.2, color=NARANJA, zorder=5))
+    ax1.text(xa - 4.0, ya_, "A\nfin de\nla banda", ha="right", va="center", fontsize=8.5,
+             fontweight="bold", color=NARANJA)
+    for i, y in enumerate(obs.YAW_B):
+        b = math.radians(y)
+        ax1.add_patch(Circle((obs.R_ARCO * math.cos(b), obs.R_ARCO * math.sin(b)), 2.6,
+                             facecolor=AZUL, edgecolor="white", lw=1, zorder=5))
+        ax1.text(obs.R_ARCO * math.cos(b) * 0.78, obs.R_ARCO * math.sin(b) * 0.78, f"R{i + 1}",
+                 ha="center", va="center", fontsize=8, color=AZUL)
+    ax1.text(-4.5, 27.5, "B\nrack", ha="center", va="center", fontsize=8.5,
+             fontweight="bold", color=AZUL)
+    ax1.set_aspect("equal")
+    ax1.set_xlim(-9, 41)
+    ax1.set_ylim(-27, 31)
+    ax1.set_xlabel("X (cm)")
+    ax1.set_ylabel("Y (cm)")
+    ax1.set_title("Celda vista desde arriba", loc="left")
+
+    # --- altura del TCP a lo largo del arco y maniobra que manda en cada tramo
+    ax2.plot(yaws, [p[0] for p in plan], color=TINTA, lw=2.2, label="altura del TCP")
+    ax2.axhline(obs.Z_TRANSITO, color=GRIS, lw=1, ls="--", label="tránsito nominal, 20 cm")
+    for o in obs.OBSTACULOS:
+        c = COLOR_NIVEL[o.nivel]
+        ax2.plot([o.yaw - 7, o.yaw + 7], [o.y_esfera - o.r_esfera] * 2, color=c, lw=3.5)
+        ax2.text(o.yaw, o.y_esfera - o.r_esfera + 0.55, f"N{o.nivel} {o.codigo}",
+                 ha="center", fontsize=8.5, color=c, fontweight="bold")
+    nombres = {"bajo": "bajar", "rodeo": "recogerse", "espera": "esperar ventana",
+               "directo": "directo"}
+    inicio = 0
+    for k in range(1, len(plan) + 1):
+        if k == len(plan) or plan[k][2:] != plan[inicio][2:]:
+            modo, quien = plan[inicio][2], plan[inicio][3]
+            c = COLOR_NIVEL[int(quien[1])] if quien else GRIS
+            ax2.add_patch(Rectangle((yaws[inicio], 6.0), yaws[k - 1] - yaws[inicio] + 0.5, 1.1,
+                                    color=c, alpha=0.85))
+            if yaws[k - 1] - yaws[inicio] > 10:
+                ax2.text((yaws[inicio] + yaws[k - 1]) / 2, 7.55, f"{nombres[modo]} ({quien})",
+                         ha="center", fontsize=8, color=c)
+            inicio = k
+    ax2.axvline(obs.YAW_A, color=NARANJA, lw=1.2)
+    ax2.axvspan(obs.YAW_B[0] - 2.6, obs.YAW_B[-1] + 2.6, color=AZUL, alpha=0.07)
+    ax2.text(obs.YAW_A + 1.2, 25.0, "A", color=NARANJA, fontweight="bold")
+    ax2.text(obs.YAW_B[0] + 1, 25.0, "B: R1 a R5", color=AZUL, fontweight="bold")
+    ax2.set_xlabel("yaw de la base (°)")
+    ax2.set_ylabel("altura (cm)")
+    ax2.set_ylim(5.5, 26.5)
+    ax2.legend(loc="upper left", bbox_to_anchor=(0.06, 0.93), fontsize=8, frameon=False)
+    ax2.set_title("Altura que pide el planificador de A a B", loc="left")
+    ax2.text(obs.YAW_A, 9.3, "franja inferior: maniobra que manda en cada tramo;\n"
+             "barras de color: borde inferior de las esferas", fontsize=7.5, color=GRIS)
+    fig.tight_layout()
+    fig.savefig(SALIDA / "ruta-obstaculos.png")
+    plt.close(fig)
+
+
 def main() -> int:
     SALIDA.mkdir(parents=True, exist_ok=True)
     pose_acotada()
     espacio_trabajo()
     perfil_quintico()
     pares_y_seguridad()
+    selector_monedas()
+    ruta_obstaculos()
     print(f"Figuras guardadas en {SALIDA}")
     return 0
 

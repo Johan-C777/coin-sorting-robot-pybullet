@@ -7,7 +7,10 @@ sus STL salen de ahí. Este script cubre riel, tolva, embudos, banda, portavasos
 puestos del rack y bandeja de electrónica, con los criterios de impresión FDM:
 
   * riel continuo extruido, canal central liso, sin bloques apilados;
-  * embudos cónicos que entregan directo al vaso, sin tubos de bajada;
+  * ocho ranuras para monedas antiguas y nuevas, diseñadas en
+    software/brazo/monedas.py (este script las lee de ahí);
+  * embudo corto por estación con espiga para tubo flexible de 3/4": el tubo
+    lleva la moneda al vaso de su denominación;
   * marco de banda de perfil único por tramo, con dos rodillos.
 
 Todo en milímetros y en la orientación de impresión (Z = capas).
@@ -20,9 +23,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "software"))
 
-from geometria_stl import (Malla, anillo_variable, caja, cilindro,
+from geometria_stl import (Malla, anillo_variable, caja, cilindro,  # noqa: E402
                            escribir_stl, placa_agujereada, prisma, tubo)
+from brazo.monedas import SELECTOR                                 # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
 SALIDA = RAIZ / "hardware" / "Modelos3D" / "stl"
@@ -30,20 +35,19 @@ SALIDA = RAIZ / "hardware" / "Modelos3D" / "stl"
 # =====================================================================
 # Parámetros maestros (mm). Son los mismos de la simulación HTML.
 # =====================================================================
-MONEDAS = [(50, 17.0, 2.00), (100, 20.3, 3.34), (200, 22.4, 4.61),
-           (500, 23.7, 7.14), (1000, 26.7, 9.95)]
-LUZ_EXTRA = 0.6
-LUCES = [round(d + LUZ_EXTRA, 1) for _, d, _ in MONEDAS]      # 17,6 ... 27,3
+# estaciones del riel: monedas antiguas y nuevas ordenadas por diámetro
+MONEDAS = [(e.denominacion, e.diametro_mm, e.masa_g) for e in SELECTOR]
+LUCES = [e.luz_mm for e in SELECTOR]                       # 17,60 ... 27,30
 LUZ_ENTRADA = 16.0
-PASO = 65.0
+PASO = 40.0
 ENTRADA = 40.0
-LARGO_RIEL = ENTRADA + PASO * 5              # 365
+LARGO_RIEL = ENTRADA + PASO * len(LUCES)                   # 360
 CORTE = 180.0
 SOLAPA = 20.0
 ANCHO_RIEL = 30.0
 ESP_RIEL = 10.0
 INCLINACION = 25.0
-LARGO_CANAL = 185.0
+LARGO_CANAL = 180.0
 
 # celda del brazo
 R_ARCO = 230.0
@@ -51,8 +55,10 @@ DIAM_VASO = 52.0
 ANCHO_BANDA = 70.0
 TRAMO_BANDA = 145.0
 
-# alturas de caída de cada estación, medidas en la simulación
-ALTURA_EMBUDO = [199.7, 169.4, 139.1, 108.8, 78.5]
+# embudo corto y espiga para tubo flexible de 3/4" (diámetro interior 19 mm)
+ALTO_EMBUDO = 28.0
+R_BOCA = 16.5                    # 33 mm: cabe la de $1.000 y no choca con el vecino a 36 mm
+R_ESPIGA = 9.4
 
 PIEZAS = []
 
@@ -145,18 +151,19 @@ def paleta_dosificadora() -> Malla:
     return cubo.mas(brazo, diente, asiento)
 
 
-def embudo(alto: float) -> Malla:
-    """Cono truncado que baja de la ranura hasta la boca del vaso."""
+def embudo(alto: float = ALTO_EMBUDO) -> Malla:
+    """Embudo corto bajo la ranura, con espiga para el tubo flexible del colector."""
     seg = 48
-    arriba = [(29.0 * math.cos(2 * math.pi * i / seg), 29.0 * math.sin(2 * math.pi * i / seg))
+    arriba = [(R_BOCA * math.cos(2 * math.pi * i / seg), R_BOCA * math.sin(2 * math.pi * i / seg))
               for i in range(seg)]
-    abajo = [(15.0 * math.cos(2 * math.pi * i / seg), 15.0 * math.sin(2 * math.pi * i / seg))
+    abajo = [(R_ESPIGA * math.cos(2 * math.pi * i / seg), R_ESPIGA * math.sin(2 * math.pi * i / seg))
              for i in range(seg)]
-    cuerpo = anillo_variable(abajo, 0.0, arriba, alto, 2.4)
-    brida = placa_agujereada(-36, -36, 36, 36, alto - 3.0, alto,
-                             [(-30, -30, 2.2), (30, -30, 2.2), (-30, 30, 2.2), (30, 30, 2.2)])
-    collar = tubo(0, 0, alto - 3.2, alto + 6.0, 31.4, 29.0, seg)
-    return cuerpo.mas(brida, collar)
+    espiga = tubo(0, 0, 0.0, 16.0, R_ESPIGA, R_ESPIGA - 2.0, seg)
+    cuerpo = anillo_variable(abajo, 16.0, arriba, 16.0 + alto, 2.0)
+    brida = placa_agujereada(-17.5, -17.5, 17.5, 17.5, 13.0 + alto, 16.0 + alto,
+                             [(-14.5, -14.5, 1.5), (14.5, -14.5, 1.5), (-14.5, 14.5, 1.5),
+                              (14.5, 14.5, 1.5)])
+    return espiga.mas(cuerpo, brida)
 
 
 def soporte_sensor() -> Malla:
@@ -236,10 +243,10 @@ def main() -> int:
         # ---------------- etapa 1 ----------------
         ("E01_riel_tramo_a.stl", "Riel selector, tramo de entrada", 2, riel_tramo_a(),
          "PETG", "0,2 mm · 4 perímetros · 40 %",
-         "Cuerpo continuo extruido con el canal central liso. El riel derecho es la misma pieza volteada sobre su eje largo."),
+         "Cuerpo continuo extruido con el canal central liso y las cuatro primeras ranuras. El riel derecho es la misma pieza volteada sobre su eje largo."),
         ("E02_riel_tramo_b.stl", "Riel selector, tramo de salida", 2, riel_tramo_b(),
          "PETG", "0,2 mm · 4 perímetros · 40 %",
-         "Se une al tramo A a media madera, 20 mm de solapa y dos M3."),
+         "Lleva las ranuras 5 a 8. Se une al tramo A a media madera, 20 mm de solapa y dos M3."),
         ("E03_canal_costado.stl", "Canal del costado", 4, canal_costado(),
          "PETG", "0,2 mm · 3 perímetros · 30 %",
          "Dos tramos por lado; el riel se apoya dentro del canal."),
@@ -252,18 +259,10 @@ def main() -> int:
         ("E06_paleta_dosificadora.stl", "Paleta dosificadora", 1, paleta_dosificadora(),
          "PETG", "0,2 mm · 4 perímetros · 60 %",
          "Va en el servo SG90: deja pasar una moneda por ciclo."),
-        ("E07_embudo_estacion1.stl", "Embudo de la estación 1 ($50)", 1, embudo(ALTURA_EMBUDO[0]),
-         "PLA", "0,25 mm · 3 perímetros · 12 %",
-         "Cono truncado que entrega directo al vaso; se imprime de pie, sin soportes."),
-        ("E07_embudo_estacion2.stl", "Embudo de la estación 2 ($100)", 1, embudo(ALTURA_EMBUDO[1]),
-         "PLA", "0,25 mm · 3 perímetros · 12 %", "Misma pieza, más corta por la caída del riel."),
-        ("E07_embudo_estacion3.stl", "Embudo de la estación 3 ($200)", 1, embudo(ALTURA_EMBUDO[2]),
-         "PLA", "0,25 mm · 3 perímetros · 12 %", "Misma pieza, más corta por la caída del riel."),
-        ("E07_embudo_estacion4.stl", "Embudo de la estación 4 ($500)", 1, embudo(ALTURA_EMBUDO[3]),
-         "PLA", "0,25 mm · 3 perímetros · 12 %", "Misma pieza, más corta por la caída del riel."),
-        ("E07_embudo_estacion5.stl", "Embudo de la estación 5 ($1.000)", 1, embudo(ALTURA_EMBUDO[4]),
-         "PLA", "0,25 mm · 3 perímetros · 12 %", "La más corta, junto a la salida del riel."),
-        ("E08_soporte_sensor.stl", "Soporte de sensor infrarrojo", 5, soporte_sensor(),
+        ("E07_embudo_estacion.stl", "Embudo de estación con espiga", 8, embudo(),
+         "PLA", "0,2 mm · 3 perímetros · 15 %",
+         "Uno por ranura. La espiga recibe el tubo flexible de 3/4\" que lleva la moneda al vaso de su denominación; se imprime de pie, sin soportes."),
+        ("E08_soporte_sensor.stl", "Soporte de sensor infrarrojo", 8, soporte_sensor(),
          "PETG", "0,2 mm · 3 perímetros · 30 %",
          "Deja la barrera apuntando al centro de la ranura."),
         ("E09_rodillo_banda.stl", "Rodillo de la banda", 2, rodillo(),
