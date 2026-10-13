@@ -15,7 +15,9 @@ class Comms {
   void atender();
   void estadoJson(char *destino, size_t capacidad) const;
   bool enviarAlBrazo(const char *ipBrazo);     // POST /api/vasos
-  void anunciarMoneda(int8_t canal);           // "M:500,4" por el serie
+  void anunciarMoneda(int8_t estacion);        // "M:100,5,antigua" por el serie
+  // true una sola vez después de recibir ENVIAR por el serie
+  bool pedirEnvio() { const bool p = envio_; envio_ = false; return p; }
 
  private:
   void procesarLinea(char *linea);
@@ -27,4 +29,5 @@ class Comms {
   char buf_[80];
   uint8_t largo_ = 0;
   bool wifi_ = false;
+  bool envio_ = false;
 };

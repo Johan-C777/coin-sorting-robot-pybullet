@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Firmware
+firmware/esp32_brazo/secrets.h
+firmware/esp32_contador/secrets.h
+firmware/tests/test_core
+firmware/tests/test_conteo
+*.o
+build/
+
+# Salidas
+*.mp4
+*.log
+.DS_Store
+Thumbs.db

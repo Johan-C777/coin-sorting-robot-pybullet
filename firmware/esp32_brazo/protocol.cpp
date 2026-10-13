@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 namespace {
 int16_t redondear(float v) { return (int16_t)lroundf(v); }
@@ -45,6 +46,45 @@ bool leerTrama(const char *linea, int16_t salida[N_CANALES]) {
     p = (*fin == ',') ? fin + 1 : fin;
   }
   return true;
+}
+
+uint8_t leerVasos(const char *linea, Vaso vasos[N_PUESTOS]) {
+  if (linea == nullptr || strncmp(linea, "VASOS:", 6) != 0) return 0;
+  const char *p = linea + 6;
+  uint8_t leidos = 0;
+  while (leidos < N_PUESTOS && *p) {
+    char *fin = nullptr;
+    const long den = strtol(p, &fin, 10);
+    if (fin == p || *fin != 'x') return 0;
+    p = fin + 1;
+    const long n = strtol(p, &fin, 10);
+    if (fin == p || n < 0 || n > 255) return 0;
+    p = fin;
+    long antiguas = 0;
+    if (*p == 'a') {
+      antiguas = strtol(p + 1, &fin, 10);
+      if (fin == p + 1 || antiguas < 0 || antiguas > n) return 0;
+      p = fin;
+    }
+    Vaso &v = vasos[leidos++];
+    v.denominacion = (uint16_t)den;
+    v.monedas = (uint8_t)n;
+    v.antiguas = (uint8_t)antiguas;
+    v.zona = ZONA_ENTRADA;
+    v.puesto = (int8_t)(leidos - 1);
+    if (*p == ',') p++;
+    else if (*p != '\0') return 0;
+  }
+  return leidos;
+}
+
+uint8_t criterioDeTexto(const char *t) {
+  if (t == nullptr) return POR_VALOR;
+  if (strncmp(t, "den", 3) == 0) return POR_DENOMINACION;
+  if (strncmp(t, "can", 3) == 0) return POR_CANTIDAD;
+  if (strncmp(t, "pes", 3) == 0) return POR_PESO;
+  if (strncmp(t, "ant", 3) == 0) return POR_ANTIGUAS;
+  return POR_VALOR;
 }
 
 }  // namespace Protocolo

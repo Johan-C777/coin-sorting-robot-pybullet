@@ -13,14 +13,7 @@ namespace {
 WebServer servidor(80);
 Comms *instancia = nullptr;
 
-int8_t zonaDeTexto(const char *t) { return (t[0] == 'r' || t[0] == 'R') ? ZONA_RACK : ZONA_ENTRADA; }
-
-uint8_t criterioDeTexto(const char *t) {
-  if (strncmp(t, "den", 3) == 0) return POR_DENOMINACION;
-  if (strncmp(t, "can", 3) == 0) return POR_CANTIDAD;
-  if (strncmp(t, "pes", 3) == 0) return POR_PESO;
-  return POR_VALOR;
-}
+using Protocolo::criterioDeTexto;
 }  // namespace
 
 void Comms::iniciarSerie(unsigned long baudios) {
@@ -57,9 +50,10 @@ void Comms::estadoJson(char *destino, size_t capacidad) const {
       q[0], q[1], q[2], q[3], q[4], bus_.pinza(), trama);
   for (uint8_t i = 0; i < N_PUESTOS && n > 0 && (size_t)n < capacidad; i++) {
     n += snprintf(destino + n, capacidad - n,
-        "%s{\"zona\":\"%s\",\"puesto\":%d,\"den\":%u,\"n\":%u,\"valor\":%lu,\"peso_g\":%.1f}",
+        "%s{\"zona\":\"%s\",\"puesto\":%d,\"den\":%u,\"n\":%u,\"antiguas\":%u,"
+        "\"valor\":%lu,\"peso_g\":%.1f}",
         i ? "," : "", vasos_[i].zona == ZONA_RACK ? "rack" : "entrada",
-        vasos_[i].puesto + 1, vasos_[i].denominacion, vasos_[i].monedas,
+        vasos_[i].puesto + 1, vasos_[i].denominacion, vasos_[i].monedas, vasos_[i].antiguas,
         (unsigned long)Vasos::valor(vasos_[i]), Vasos::pesoG(vasos_[i]));
   }
   snprintf(destino + n, capacidad - n, "]}");
@@ -76,6 +70,7 @@ void Comms::rutasHttp() {
     const String cuerpo = servidor.arg("plain");
     const uint8_t criterio = criterioDeTexto(cuerpo.indexOf("peso") > 0 ? "pes" :
                               cuerpo.indexOf("cantidad") > 0 ? "can" :
+                              cuerpo.indexOf("antiguas") > 0 ? "ant" :
                               cuerpo.indexOf("denominacion") > 0 ? "den" : "val");
     const int8_t sentido = (cuerpo.indexOf("desc") > 0) ? -1 : 1;
     const bool ok = instancia->sec_.iniciar(instancia->vasos_, criterio, sentido);
@@ -84,17 +79,24 @@ void Comms::rutasHttp() {
   });
 
   servidor.on("/api/vasos", HTTP_POST, []() {
-    // Formato esperado: {"entrada":[{"den":500,"n":12}, ...]} en orden de puesto.
+    // Formato esperado: {"entrada":[{"den":500,"n":12,"antiguas":0}, ...]} en
+    // orden de puesto. "antiguas" es opcional.
     String cuerpo = servidor.arg("plain");
     int desde = 0;
     for (uint8_t i = 0; i < N_PUESTOS; i++) {
       const int posDen = cuerpo.indexOf("\"den\"", desde);
       const int posN = cuerpo.indexOf("\"n\"", posDen);
       if (posDen < 0 || posN < 0) break;
-      instancia->vasos_[i].denominacion = (uint16_t)cuerpo.substring(posDen + 6).toInt();
-      instancia->vasos_[i].monedas = (uint8_t)cuerpo.substring(posN + 4).toInt();
-      instancia->vasos_[i].zona = ZONA_ENTRADA;
-      instancia->vasos_[i].puesto = (int8_t)i;
+      const int siguiente = cuerpo.indexOf("\"den\"", posN);
+      const int posA = cuerpo.indexOf("\"antiguas\"", posN);
+      Vaso &v = instancia->vasos_[i];
+      v.denominacion = (uint16_t)cuerpo.substring(posDen + 6).toInt();
+      v.monedas = (uint8_t)cuerpo.substring(posN + 4).toInt();
+      v.antiguas = (posA > 0 && (siguiente < 0 || posA < siguiente))
+                   ? (uint8_t)cuerpo.substring(posA + 11).toInt() : 0;
+      if (v.antiguas > v.monedas) v.antiguas = v.monedas;
+      v.zona = ZONA_ENTRADA;
+      v.puesto = (int8_t)i;
       desde = posN + 4;
     }
     servidor.send(200, "application/json", "{\"ok\":true}");
@@ -108,8 +110,15 @@ void Comms::rutasHttp() {
     cuerpo.substring(pos).toCharArray(linea, sizeof(linea));
     int16_t s[N_CANALES];
     const bool ok = Protocolo::leerTrama(linea, s);
+    if (ok) instancia->aplicarTrama(s);               // antes se validaba y no se movía
     servidor.send(ok ? 200 : 400, "application/json", ok ? "{\"ok\":true}" : "{\"ok\":false}");
   });
+}
+
+void Comms::aplicarTrama(const int16_t s[N_CANALES]) {
+  const float q[N_JUNTAS] = {(float)s[0] - 90.0f, (float)s[1], -(float)s[2],
+                             (float)s[3] - 120.0f, (float)s[4] - 90.0f};
+  bus_.comandar(q, (float)s[5] / 90.0f * PINZA_MAX_MM);
 }
 
 void Comms::procesarLinea(char *linea) {
@@ -118,9 +127,7 @@ void Comms::procesarLinea(char *linea) {
   if (linea[0] == 'S' && linea[1] == ':') {          // pose directa, modo manual
     int16_t s[N_CANALES];
     if (!Protocolo::leerTrama(linea, s)) { Serial.println(F("ERR trama")); return; }
-    float q[N_JUNTAS] = {(float)s[0] - 90.0f, (float)s[1], -(float)s[2],
-                         (float)s[3] - 120.0f, (float)s[4] - 90.0f};
-    bus_.comandar(q, (float)s[5] / 90.0f * PINZA_MAX_MM);
+    aplicarTrama(s);
     Serial.println(F("OK"));
     return;
   }
@@ -134,17 +141,9 @@ void Comms::procesarLinea(char *linea) {
     return;
   }
 
-  if (strncmp(linea, "VASOS:", 6) == 0) {            // VASOS:500x12,100x30,...
-    char *p = linea + 6;
-    for (uint8_t i = 0; i < N_PUESTOS && p && *p; i++) {
-      vasos_[i].denominacion = (uint16_t)strtol(p, &p, 10);
-      if (*p == 'x') p++;
-      vasos_[i].monedas = (uint8_t)strtol(p, &p, 10);
-      vasos_[i].zona = ZONA_ENTRADA;
-      vasos_[i].puesto = (int8_t)i;
-      if (*p == ',') p++;
-    }
-    Serial.println(F("OK"));
+  if (strncmp(linea, "VASOS:", 6) == 0) {            // VASOS:500x12,100x30a10,...
+    const bool ok = Protocolo::leerVasos(linea, vasos_) == N_PUESTOS;
+    Serial.println(ok ? F("OK") : F("ERR vasos"));
     return;
   }
 

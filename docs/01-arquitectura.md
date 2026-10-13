@@ -1,16 +1,31 @@
-# Arquitectura del módulo
+# Arquitectura del sistema
 
-El brazo es un nodo del Sistema de Logística de Monedas Inteligentes. Recibe los
-datos de cada vaso que produce el contador y la orden de clasificar; devuelve su
-estado para el dashboard.
+La celda tiene dos etapas. La primera recibe monedas colombianas antiguas y
+nuevas, las separa, las cuenta y las embala en cinco vasos sobre una banda. La
+segunda es el brazo: toma cada vaso en el punto A, lo lleva al punto B
+esquivando cuatro obstáculos y deja el rack ordenado según la orden de la app.
+
+```mermaid
+flowchart LR
+    T["Tolva<br/>monedas antiguas y nuevas"] --> R["Riel de 8 ranuras<br/>separa por diámetro"]
+    R --> IR["8 barreras IR<br/>denominación y familia"]
+    IR --> C["Tubos colectores<br/>5 vasos, uno por denominación"]
+    C --> B["Banda transportadora"]
+    B --> A(["Punto A<br/>fin de la banda"])
+    A --> O1["N1 · O1<br/>por debajo"] --> O2["N2 · O2<br/>rodeo"] --> O3["N3 · O3<br/>ventana"] --> O4["N4 · O4<br/>por debajo y bajada cronometrada"]
+    O4 --> Bp(["Punto B<br/>rack R1 a R5"])
+    APP["App Streamlit"] -. "orden: criterio y sentido" .-> Bp
+```
 
 ## Requisitos
 
 | Código | Requisito | Dónde se verifica |
 | --- | --- | --- |
-| RF1 | Recoger vasos en los cinco puestos de entrada y depositarlos en los cinco del rack | `software/tests/test_trajectory.py`, `firmware/tests` |
-| RF2 | Ordenar por denominación, cantidad, valor o peso, en ambos sentidos | `software/tests/test_planner.py` |
-| RF3 | Recibir órdenes y datos de vasos desde la app | `docs/04-protocolo.md` |
+| RF0 | Separar monedas de la familia nueva (2012) y de la anterior, contarlas por denominación y por familia | `software/tests/test_monedas.py`, `firmware/tests/test_conteo.cpp` |
+| RF1 | Recoger vasos en el punto A y depositarlos en los cinco puestos del rack (punto B) | `software/tests/test_trajectory.py`, `firmware/tests` |
+| RF1b | Llegar de A a B esquivando cuatro obstáculos de dificultad creciente | `software/tests/test_obstaculos.py`, [08-obstaculos.md](08-obstaculos.md) |
+| RF2 | Ordenar por denominación, cantidad, valor, peso o cantidad de antiguas, en ambos sentidos | `software/tests/test_planner.py`, `test_monedas.py` |
+| RF3 | Recibir órdenes y datos de vasos (con sus antiguas) desde la app y el contador | `docs/04-protocolo.md` |
 | RF4 | Reportar pose, estado y contenido del rack | `brazo/protocol.py::estado_json` |
 | RF5 | Modo manual articular y cartesiano para calibrar | simulación 3D y comando `S:` |
 | RNF1 | Mínimo 4 GDL | 5 GDL más pinza |
@@ -20,7 +35,7 @@ estado para el dashboard.
 | RNF5 | Potencia de servos separada de la lógica, con tierra común | `docs/03-electronica.md` |
 | RNF6 | Piezas imprimibles en 3D y componentes de bajo costo | `hardware/bom.csv` |
 
-## Bloques
+## Bloques del brazo
 
 ```mermaid
 flowchart LR
