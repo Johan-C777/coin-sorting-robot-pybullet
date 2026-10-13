@@ -10,8 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "software"))
 
 import pybullet as p                                    # noqa: E402
 
-from brazo.config import (MASA_MONEDA_G, MASA_VASO_G, R_ARCO, SUPERFICIE,
-                          YAW_ENTRADA, YAW_RACK)         # noqa: E402
+from brazo.config import (R_ARCO, SUPERFICIE, YAW_ENTRADA, YAW_RACK)  # noqa: E402
 from brazo.cups import Vaso                              # noqa: E402
 
 COLOR_DEN = {50: [0.31, 0.49, 0.69, 0.75], 100: [0.23, 0.58, 0.40, 0.75],
@@ -44,7 +43,7 @@ def crear_bandejas() -> List[int]:
 
 def crear_vaso(vaso: Vaso) -> int:
     """Un vaso con la masa real de su contenido, en su puesto de entrada."""
-    masa = (MASA_VASO_G + vaso.monedas * MASA_MONEDA_G[vaso.denominacion]) / 1000.0
+    masa = vaso.peso_g / 1000.0           # cuenta también las monedas antiguas
     x, y = xy_puesto(vaso.puesto.yaw)
     z = SUPERFICIE / 100.0 + ALTO_VASO / 2
     vis = p.createVisualShape(p.GEOM_CYLINDER, radius=RADIO_VASO, length=ALTO_VASO,

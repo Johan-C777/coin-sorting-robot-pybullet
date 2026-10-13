@@ -1,340 +1,232 @@
 # Sistema de Logística de Monedas Inteligentes
 
-Celda robótica que recibe monedas colombianas a granel, las separa por
-denominación, las cuenta, las embala en vasos y los ordena en un rack con un
-brazo de 5 GDL que esquiva obstáculos aéreos en movimiento.
+Celda robótica que recibe monedas colombianas **antiguas y nuevas** en una tolva,
+las separa por denominación, las cuenta y las embala en vasos sobre una banda.
+Al final de la banda un **brazo de 5 GDL** toma cada vaso, lo lleva del **punto A
+al punto B esquivando cuatro obstáculos giratorios de dificultad creciente** y
+deja el rack **ordenado según la orden que recibe**: por valor, peso, cantidad,
+denominación o monedas antiguas.
 
-Proyecto de Ingeniería Mecatrónica, Universidad Militar Nueva Granada.
+Proyecto de Micros y Laboratorio, Ingeniería Mecatrónica, Universidad Militar
+Nueva Granada.
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
 
-![ESP32](https://img.shields.io/badge/control-ESP32%20%2B%20PCA9685-E06E17)
+[![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
+![ESP32](https://img.shields.io/badge/control-2%20ESP32%20%2B%20PCA9685-E06E17)
 ![Simulación](https://img.shields.io/badge/simulaci%C3%B3n-Three.js%20%2B%20PyBullet-2F5878)
-![Dashboard](https://img.shields.io/badge/app-Streamlit-2C7A54)
-![Pruebas](https://img.shields.io/badge/pruebas-36%20Python%20%2B%2032%20C%2B%2B-2C7A54)
-![Impresión](https://img.shields.io/badge/piezas-19%20STL%20%2B%20proyecto%203MF-7A4BB8)
+![Pruebas](https://img.shields.io/badge/pruebas-60%20Python%20%2B%2043%20C%2B%2B-2C7A54)
+![Piezas](https://img.shields.io/badge/piezas-15%20STL%20%2B%203MF-7A4BB8)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-687572)
 
----
-
-## Qué hace, en una pasada
-
-| | |
-| --- | --- |
-| **Entrada** | Monedas mezcladas de $50, $100, $200, $500 y $1.000 en una tolva |
-| **Separación** | Riel inclinado 25° con cinco ranuras que se abren por escalones |
-| **Conteo** | Una barrera infrarroja por canal; cada pulso es una moneda |
-| **Embalaje** | Cinco vasos de 52 mm sobre una banda transportadora |
-| **Ordenamiento** | Brazo de 5 GDL + pinza: rack de cinco puestos, por denominación, cantidad, valor o peso |
-| **Reto añadido** | Cuatro móviles giratorios sobre la trayectoria, que el brazo esquiva con tres maniobras distintas |
-| **Cifras** | 80 monedas por lote, $23.600, 470 g · ciclo de 7,1 s por vaso · carga de diseño 416 g |
-
-Todo el sistema está simulado, calculado y probado antes de construirlo: la
-misma cinemática corre en el navegador, en PyBullet, en Python y en el ESP32.
+> **Entrega de avances del segundo parcial.** Qué pide el enunciado, dónde está
+> cada cosa en el repositorio y qué falta: [docs/00-entrega-avances.md](docs/00-entrega-avances.md).
 
 ---
 
-## Demos que se abren en el navegador
-
-Publicadas con GitHub Pages sobre la carpeta `docs/`:
+## Demos en el navegador
 
 | Demo | Qué muestra |
 | --- | --- |
-| [**Sistema completo**](docs/simulacion_sistema_completo.html) | Las dos etapas en un entorno, los cuatro obstáculos y la evasión en 5 GDL, con consola de tramas |
-| [**Etapa 1**](docs/simulacion-etapa1.html) | Riel selector, conteo por canal y banda, con modo despiece de las piezas |
-| [**Memoria de cálculo**](docs/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias y pares, con calculadoras en vivo |
+| [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las dos etapas juntas: tolva, riel de 8 ranuras, banda, punto A, los cuatro obstáculos por nivel, punto B y el rack ordenado |
+| [**Etapa 1: selección**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) | Monedas antiguas y nuevas por el riel, conteo por estación, tubos colectores y vista de despiece |
+| [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y selección de servos, con calculadoras |
 
-Ninguna necesita instalación: son archivos HTML autónomos con Three.js.
+Son archivos HTML autónomos (Three.js), sin instalación. También se abren desde
+la carpeta [`docs/`](docs) del repositorio.
 
 ---
 
-## Arquitectura
+## Cómo funciona, de punta a punta
 
 ```mermaid
 flowchart LR
-    TOL["Tolva + servo dosificador<br/>una moneda por ciclo"]
-    RIEL["Riel selector<br/>5 luces por diámetro"]
-    IR["5 barreras IR"]
-    C["ESP32 contador<br/>conteo · dosificador · banda"]
+    T["Tolva<br/>antiguas y nuevas"] --> R["Riel de 8 ranuras<br/>por diámetro"]
+    R --> IR["8 barreras IR<br/>denominación y familia"]
+    IR --> C["Tubos colectores<br/>5 vasos"]
+    C --> B["Banda"]
+    B --> A(["Punto A"])
+    A --> O1["Nivel 1<br/>O1"] --> O2["Nivel 2<br/>O2"] --> O3["Nivel 3<br/>O3"] --> O4["Nivel 4<br/>O4"]
+    O4 --> Bp(["Punto B<br/>rack ordenado"])
+    APP["App Streamlit<br/>Wi-Fi"] -. "criterio y sentido" .-> Bp
+```
+
+| Paso | Qué pasa | Dónde se ve |
+| --- | --- | --- |
+| 1. Selección | El riel inclinado 25° tiene 8 ranuras que se abren por escalones; cada moneda cae en la primera que supera su diámetro | [07-monedas.md](docs/07-monedas.md) |
+| 2. Conteo | Una barrera IR por ranura; como cada ranura recibe un solo tipo de moneda, la estación dice denominación **y familia** | `firmware/esp32_contador` |
+| 3. Embalaje | Un tubo por estación lleva la moneda al vaso de su denominación: 5 vasos sobre la banda | [despiece.md](docs/despiece.md) |
+| 4. Punto A | La banda deja cada vaso en el límite del alcance del brazo | simulación |
+| 5. De A a B | El brazo cruza cuatro móviles giratorios, cada uno más difícil que el anterior | [08-obstaculos.md](docs/08-obstaculos.md) |
+| 6. Orden | Deja los vasos en el rack según la orden: valor, peso, cantidad, denominación o antiguas, ascendente o descendente | `software/brazo/planner.py` |
+
+---
+
+## Etapa 1: monedas antiguas y nuevas
+
+En Colombia circulan dos familias de monedas: la nueva (2012) y la anterior
+(1989-1996). Ordenadas por diámetro quedan ocho grupos, y el riel tiene una
+ranura para cada uno:
+
+![Riel selector de ocho estaciones](docs/img/selector-monedas.png)
+
+| Estación | Moneda | Diámetro | Luz de la ranura | Masa | Vaso |
+| --- | --- | --- | --- | --- | --- |
+| E1 | $50 nueva | 17,00 mm | 17,60 mm | 2,00 g | $50 |
+| E2 | $100 nueva | 20,30 mm | 20,90 mm | 3,34 g | $100 |
+| E3 | $50 antigua | 21,50 mm | 21,95 mm | 4,50 g | $50 |
+| E4 | $200 nueva | 22,40 mm | 22,70 mm | 4,61 g | $200 |
+| E5 | $100 antigua | 23,00 mm | 23,35 mm | 5,31 g | $100 |
+| E6 | $500, las dos familias | 23,70 mm | 24,05 mm | 7,14 g | $500 |
+| E7 | $200 antigua | 24,40 mm | 25,00 mm | 7,08 g | $200 |
+| E8 | $1.000 nueva | 26,70 mm | 27,30 mm | 9,95 g | $1.000 |
+
+- **La $500 es idéntica en las dos familias** (23,70 mm y 7,14 g): comparte
+  estación, y no hace falta distinguirla porque vale y pesa lo mismo.
+- **La $1.000 de 1996 queda fuera**: mide 21,67 mm, a 0,17 mm de la $50 antigua.
+  El diseñador del riel lo detecta solo y la rechaza; se propone un sensor de
+  color para la siguiente etapa.
+- **La ranura crítica es la E4**, con 0,30 mm a cada lado. Antes de imprimir el
+  riel completo se imprime y se mide una probeta de las estaciones 3 a 6.
+- **Las antiguas pesan más** ($200 antigua 7,08 g contra 4,61 g la nueva), así
+  que el vaso guarda cuántas tiene y eso cambia el orden cuando se clasifica por
+  peso.
+
+El contador entrega el lote al brazo en una línea, donde `aN` son las antiguas:
+
+```
+VASOS:50x30a6,100x24a4,200x21a3,500x14,1000x12
+```
+
+![Etapa 1 en la simulación](docs/img/etapa1-selector.png)
+
+---
+
+## Etapa 2: del punto A al punto B entre cuatro obstáculos
+
+![Ruta de A a B](docs/img/ruta-obstaculos.png)
+
+| Nivel | Obstáculo | Qué le exige al brazo | Maniobra | Cifras |
+| --- | --- | --- | --- | --- |
+| **1 · Básico** | O1 Guardián de banda | Una sola variable: la altura | Paso por debajo | baja de 20 a 15,5 cm, quedan 2,1 cm libres |
+| **2 · Intermedio** | O2 Muro giratorio | Mover hombro, codo y muñeca a la vez sin inclinar el vaso | Rodeo interior | recoge el TCP hasta ρ = 8,3 cm |
+| **3 · Avanzado** | O3 Centinela | Predecir: no hay hueco geométrico | Espera de ventana | tapa el paso el 49 % de cada vuelta |
+| **4 · Experto** | O4 Jefe de rack | Las dos cosas a la vez, encima del destino | Por debajo y bajada cronometrada | tránsito a 16,1 cm; su giro cubre R1 a R4 |
+
+El planificador decide en cada punto del arco: primero intenta pasar por debajo,
+después recogerse y rodear, y solo si nada sirve simula el cruce contra la
+posición **futura** de las esferas y espera la ventana. En toda la maniobra el
+cabeceo se mantiene en −90° para que el vaso no se incline.
+
+El mismo planificador está en la simulación web y en
+[`software/brazo/obstaculos.py`](software/brazo/obstaculos.py). Una prueba corre
+el JavaScript de la página en Node y lo compara con Python en 147 puntos del
+recorrido y 400 poses aleatorias: la diferencia máxima es de 10⁻¹⁴ cm.
+
+---
+
+## El brazo
+
+Cadena antropomórfica de 5 GDL más pinza, con los tres ejes centrales
+paralelos, así que la inversa es cerrada y el ESP32 la resuelve sin iterar.
+
+| Parámetro | Valor | | Articulación | Rango | Servo |
+| --- | --- | --- | --- | --- | --- |
+| d₁ | 110 mm | | J1 base | −90° a 90° | MG996R + rodamiento axial |
+| L₁ | 160 mm | | J2 hombro | 0° a 180° | DS3235MG |
+| L₂ | 150 mm | | J3 codo | −150° a 0° | DS3218MG |
+| L₃ | 80 mm | | J4 cabeceo | −120° a 60° | MG996R |
+| Pinza | 0 a 70 mm | | J5 giro | −90° a 90° | MG90S |
+
+```
+directa:  ρ = L₁c₂ + L₂c₂₃ + L₃c₂₃₄     p = (c₁ρ, s₁ρ, d₁ + L₁s₂ + L₂s₂₃ + L₃s₂₃₄)
+inversa:  r_w = r − L₃cos φ    h_w = h − L₃sen φ    D = (r_w² + h_w² − L₁² − L₂²)/(2L₁L₂)
+          θ₃ = −arccos D    θ₂ = atan2(h_w, r_w) − atan2(L₂ sen θ₃, L₁ + L₂ cos θ₃)    θ₄ = φ − θ₂ − θ₃
+```
+
+| Resultado | Valor |
+| --- | --- |
+| Agarre en R1 | θ = (24,00°, 49,02°, −82,53°, −56,50°), trama `S:114,49,83,64,90,85` |
+| Espacio de trabajo con pinza vertical | anillo de 7,1 a 30,8 cm |
+| Singularidad | `det J = L₁L₂ sen θ₃`, solo con el brazo estirado (límite de J3) |
+| Trayectorias | perfil quíntico; el giro más largo (172°) en 2,29 s con pico de 141 °/s |
+| Carga de diseño | 416 g (40 monedas de $1.000); par en el hombro 13,6 kg·cm, FS 2,35 |
+| PWM | PCA9685 a 50,03 Hz, 0,44° por cuenta, 1,8 mm en el TCP |
+
+Desarrollo completo en [02-cinematica.md](docs/02-cinematica.md), la
+[memoria de cálculo](docs/memoria-calculo.html) y
+[03-electronica.md](docs/03-electronica.md).
+
+![Espacio de trabajo](docs/img/espacio-trabajo.png)
+
+---
+
+## Arquitectura y comunicación
+
+```mermaid
+flowchart LR
+    C["ESP32 contador<br/>8 IR · dosificador · banda"]
     B["ESP32 brazo<br/>planificador · cinemática inversa"]
-    PCA["PCA9685<br/>6 PWM a 50,03 Hz"]
+    PCA["PCA9685<br/>6 PWM"]
     SRV["Servos J1 a J5 + pinza"]
     APP["App Streamlit<br/>dashboard y asistente"]
-
-    TOL --> RIEL --> IR --> C
     C -->|"POST /api/vasos"| B
     APP <-->|"Wi-Fi JSON"| C
     APP <-->|"Wi-Fi JSON"| B
     B -->|"I²C 0x40"| PCA --> SRV
 ```
 
-| Bloque | Responsabilidad | No hace |
-| --- | --- | --- |
-| Riel selector | Separa por geometría, sin motores ni sensores de decisión | No cuenta |
-| ESP32 contador | Cuenta por interrupción, dosifica y mueve la banda | No decide el orden |
-| ESP32 brazo | Guarda el estado de los puestos, planifica, resuelve la inversa y comanda | No calcula el valor del lote |
-| PCA9685 | Genera los seis PWM por hardware | No conoce la geometría |
-| App Streamlit | Elige criterio y sentido, muestra ruta, valor, peso y cantidad | No calcula cinemática |
-
----
-
-## Etapa 1: separar y contar
-
-La selección es puramente geométrica. Dos rieles paralelos dejan entre sí una
-ranura que se abre por escalones; la moneda desliza plana y cae en cuanto la luz
-supera su diámetro, así que el orden de las estaciones es el de los diámetros.
-
-| Estación | Moneda | Diámetro | Luz de la ranura | Masa | Margen con la siguiente |
-| --- | --- | --- | --- | --- | --- |
-| 1 | $50 | 17,0 mm | 17,6 mm | 2,00 g | 2,7 mm |
-| 2 | $100 | 20,3 mm | 20,9 mm | 3,34 g | 1,5 mm |
-| 3 | $200 | 22,4 mm | 23,0 mm | 4,61 g | **0,7 mm** |
-| 4 | $500 | 23,7 mm | 24,3 mm | 7,14 g | 2,4 mm |
-| 5 | $1.000 | 26,7 mm | 27,3 mm | 9,95 g | — |
-
-La inclinación de 25° vence la fricción del PETG: con µ ≈ 0,30 la aceleración
-neta es a = g(sen α − µ cos α) = 1,48 m/s², suficiente para que la moneda deslice
-sola. El canal más crítico es el de $200 y $500, separados por 1,3 mm de
-diámetro; por eso el despiece pide imprimir una probeta y medirla con calibrador
-antes del riel completo.
-
-El ESP32 contador cuenta por interrupción con antirrebote de 25 ms, calcula valor
-y peso con las masas de la serie 2012 del Banco de la República, y al cerrar la
-tanda entrega el lote al brazo:
-
-```
-M:500,4                                        evento por moneda
-VASOS:50x24,100x20,200x18,500x14,1000x12       resumen de la tanda
-```
-
----
-
-## Etapa 2: ordenar con 5 GDL
-
-Cadena antropomórfica con los tres ejes centrales paralelos, así que la inversa
-tiene solución cerrada y el ESP32 la resuelve con seis llamadas trigonométricas,
-sin iterar.
-
-| Parámetro | Valor | | Articulación | Rango | Home |
-| --- | --- | --- | --- | --- | --- |
-| d₁ | 110 mm | | J1 base | −90° a 90° | 0° |
-| L₁ | 160 mm | | J2 hombro | 0° a 180° | 90° |
-| L₂ | 150 mm | | J3 codo | −150° a 0° | −90° |
-| L₃ | 80 mm | | J4 cabeceo | −120° a 60° | −90° |
-| Pinza | 0 a 70 mm | | J5 giro | −90° a 90° | 0° |
-
-**Directa** (notación c₁ = cos θ₁, s₂₃ = sen(θ₂+θ₃)):
-
-```
-ρ = L₁c₂ + L₂c₂₃ + L₃c₂₃₄
-p = (c₁ρ, s₁ρ, d₁ + L₁s₂ + L₂s₂₃ + L₃s₂₃₄)      φ = θ₂ + θ₃ + θ₄
-```
-
-**Inversa**, descontando el último eslabón para hallar el centro de muñeca:
-
-```
-r_w = r − L₃cos φ          h_w = h − L₃sen φ
-D   = (r_w² + h_w² − L₁² − L₂²) / (2L₁L₂)
-θ₃  = −arccos D            (codo arriba; la raíz positiva viola el rango de J3)
-θ₂  = atan2(h_w, r_w) − atan2(L₂ sen θ₃, L₁ + L₂ cos θ₃)
-θ₄  = φ − θ₂ − θ₃
-```
-
-Ejemplo verificado en las pruebas, agarre en el puesto R1:
-
-| X | Y | Z | φ | θ₁ | θ₂ | θ₃ | θ₄ | Trama de servos |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 21,01 | 9,35 | 6,80 cm | −90° | 24,00° | 49,02° | −82,53° | −56,50° | `S:114,49,83,64,90,85` |
-
-El producto de las cinco matrices DH coincide con la forma cerrada en 500 poses
-aleatorias y con el URDF de PyBullet en otras 200: el error máximo es ruido de
-punto flotante (10⁻⁹ cm). `det J = L₁L₂ sen θ₃` solo se anula con el brazo
-estirado, que es justo el límite de J3, así que la celda trabaja lejos de la
-singularidad.
-
-![Espacio de trabajo](docs/img/espacio-trabajo.png)
-
-**Trayectorias.** Perfil quíntico en todos los tramos, con velocidad y
-aceleración nulas en los extremos:
-
-```
-θ(t) = θ₀ + Δθ(10τ³ − 15τ⁴ + 6τ⁵)     θ̇max = 1,875Δθ/T     θ̈max = 5,7735Δθ/T²
-```
-
-El giro más largo (E1 a R5, 172°) tarda 2,29 s con un pico de 141 °/s: la tercera
-parte de lo que da un MG996R a 6 V. El ciclo completo de un vaso ronda los 7,1 s.
-
-**Planificador de orden.** Ordena por denominación, cantidad, valor o peso, en
-ambos sentidos, y usa los huecos de la entrada como zona de paso cuando hay que
-reordenar un rack lleno: cinco movimientos desde la entrada, diez en el peor caso.
-
----
-
-## Lo diferencial: evasión con los cinco grados de libertad
-
-Sobre la trayectoria que une la banda con el rack cuelgan cuatro móviles que
-giran constantemente. El brazo no se limita a esperar: el planificador decide,
-ángulo por ángulo, qué altura y qué radio debe tener el TCP, y encadena tres
-maniobras según lo que permita cada móvil.
-
-| Móvil | Posición | Geometría | Maniobra que fuerza |
-| --- | --- | --- | --- |
-| O1 Guardián de banda | yaw −40° | 3 brazos, esferas a 22,0 cm | **Paso por debajo**: baja la altura de tránsito de 20 a 15,5 cm |
-| O2 Muro giratorio | yaw −15° | 2 brazos rápidos, esferas a 13,5 cm | **Rodeo interior**: recoge el brazo hasta ρ ≈ 8,3 cm y pasa por dentro |
-| O3 Centinela | yaw 10°, colgado a 14 cm del eje | 3 brazos, esferas a 14,0 cm | **Espera de ventana**: no hay por dónde, se cruza en el hueco entre brazos |
-| O4 Jefe de rack | yaw 40° | 2 brazos, esferas grandes a 23,0 cm | Paso por debajo **justo**: 16,1 cm de tránsito, 2,1 cm de holgura |
-
-Cómo se decide, en orden de preferencia:
-
-1. **Por debajo** si `yEsfera − rEsfera − margen − alto del vaso ≥ 12,3 cm`.
-2. **Rodeo interior** si al recogerse queda radio suficiente: `ρ ≥ 7,2 cm`,
-   el mínimo que la inversa admite con la pinza vertical.
-3. **Esperar la ventana**, simulando el cruce completo contra la posición
-   **futura** de las esferas y comprometiéndose solo si cabe entero.
-
-Dos reglas más que salieron de ver al brazo trabarse en las pruebas: ante un
-móvil que no admite maniobra, recogerse empeora las cosas, así que se vuelve al
-arco donde sí hay ventana; y el corredor de bajada al rack se verifica con el
-descenso parametrizado en el tiempo, no exigiendo toda la columna libre a la vez.
-
-Durante toda la maniobra el cabeceo se mantiene en φ = −90°, con θ₄ compensando
-a θ₂ y θ₃, para que el vaso nunca se incline. La casilla *Trayectoria del TCP*
-dibuja la curva de evasión en la escena.
-
----
-
-## Diseño mecánico y eléctrico
-
-**Cargas y servos.** Caso de diseño: vaso con 40 monedas de $1.000, 416 g.
-
-| Articulación | Par en operación | Par extendido | Servo | Par a 6 V | FS operación |
-| --- | --- | --- | --- | --- | --- |
-| J1 base | 1,00 kg·cm | — | MG996R + rodamiento axial 51107 | 11 kg·cm | 11,0 |
-| J2 hombro | 13,60 kg·cm | 22,07 kg·cm | DS3235MG | 32 kg·cm | 2,35 |
-| J3 codo | 6,82 kg·cm | 11,74 kg·cm | DS3218MG | 20,4 kg·cm | 2,99 |
-| J4 muñeca | 0,00 kg·cm | 3,56 kg·cm | MG996R | 11 kg·cm | — |
-| Pinza | 1,25 kg·cm | — | MG90S | 2,2 kg·cm | 1,76 |
-
-![Pares y factores de seguridad](docs/img/pares.png)
-
-Con la pinza vertical la muñeca no carga nada porque el vaso cuelga bajo el eje.
-El momento de vuelco en operación es de 1,33 N·m, que se resuelve atornillando la
-base a la mesa en lugar de lastrarla.
-
-**Electrónica.** El ESP32 no genera los PWM: los delega en un PCA9685, así el
-Wi-Fi no mete jitter en la señal.
-
-```
-prescale = round(25 MHz / (4096 × 50 Hz)) − 1 = 121   →   f = 50,03 Hz
-t_on = 500 µs + (s/180°) × 2000 µs                    →   0,44°/cuenta = 1,8 mm en el TCP
-```
-
-Presupuesto de corriente de 12,7 A en el peor caso (bloqueo simultáneo, que es
-una falla), fuente de 6 V y 10 A, condensador de 2.200 µF y potencia por bornera
-propia con 18 AWG, no por las pistas del PCA9685.
-
-**Piezas impresas.** Las del brazo salen del CAD (`hardware/Modelos3D/PLANOS
-BRACITO.pdf`); las de la celda las genera el código:
-
-![Piezas generadas](docs/img/piezas-impresas.png)
-
-```bash
-python scripts/generar_stl.py      # 19 STL en hardware/Modelos3D/stl
-python scripts/generar_3mf.py      # 52 piezas en 9 bandejas, con ajustes dentro
-```
-
-Criterios de diseño FDM: riel de un solo cuerpo extruido con el canal liso,
-embudos cónicos que entregan directo al vaso, marco de banda de perfil único y
-eslabones sólidos con cubos de buje para insertos metálicos. Ninguna pieza pasa
-de 220 mm, todas se imprimen sin soportes.
-
----
-
-## Comunicación
-
 | Nivel | Formato | Quién habla |
 | --- | --- | --- |
-| Pose | `S:j1,j2,j3,j4,j5,pinza` a 115200 baudios, 21 caracteres, 1,8 ms | PC o simulación → ESP32 del brazo |
-| Evento | `M:<denominación>,<canal>` | ESP32 contador → consola |
-| Lote | `VASOS:50x24,100x20,…` o `POST /api/vasos` | ESP32 contador → ESP32 del brazo |
-| Órdenes | `POST /api/ordenar {"criterio":"valor","sentido":"asc"}` | App → ESP32 |
-| Estado | `GET /api/estado` cada 500 ms | ESP32 → dashboard |
+| Moneda | `M:100,5,antigua` | Contador → consola |
+| Lote | `VASOS:50x30a6,…` o `POST /api/vasos` | Contador → brazo |
+| Orden | `POST /api/ordenar {"criterio":"antiguas","sentido":"desc"}` | App → brazo |
+| Estado | `GET /api/estado` cada 500 ms | Brazo → app |
+| Pose | `S:j1,j2,j3,j4,j5,pinza`, 21 caracteres a 115200 baudios | PC o simulación → brazo |
 
-```mermaid
-sequenceDiagram
-    participant C as Contador
-    participant A as App
-    participant E as ESP32 brazo
-    participant S as Servos
-    C->>E: POST /api/vasos
-    A->>E: POST /api/ordenar
-    E->>E: planificar y resolver la inversa
-    loop cada 20 ms
-        E->>S: seis pulsos por I2C y PWM
-        A->>E: GET /api/estado
-    end
-    E-->>A: estado "listo"
+La app ([`streamlit_app.py`](software/apps/streamlit_app.py)) corre en modo
+simulación o contra los ESP32 por Wi-Fi; muestra valor, peso, cantidad y
+antiguas, la ruta del brazo, la tabla de obstáculos y un asistente que responde
+con los datos del lote. Detalle en [04-protocolo.md](docs/04-protocolo.md).
+
+---
+
+## Hardware
+
+- **Brazo:** planos en SolidWorks en
+  [`hardware/Modelos3D/PLANOS BRACITO.pdf`](hardware/Modelos3D/PLANOS%20BRACITO.pdf).
+- **Celda:** 15 STL generados por código (riel de 8 ranuras, tolva, embudos con
+  espiga para tubo, banda, portavasos, rack) y un proyecto 3MF con 58 piezas en
+  9 bandejas. Ninguna pieza pasa de 204 mm y ninguna necesita soportes.
+- **Listas de materiales:** [`bom.csv`](hardware/bom.csv) del brazo y
+  [`bom-etapa1.csv`](hardware/bom-etapa1.csv) de la etapa 1, con la
+  justificación en [`materiales.md`](hardware/materiales.md).
+
+```bash
+python scripts/generar_stl.py      # lee las luces de software/brazo/monedas.py
+python scripts/generar_3mf.py
+python scripts/generar_figuras.py
 ```
+
+![Despiece de la etapa 1](docs/img/etapa1-despiece.png)
 
 ---
 
 ## Validación
 
-Nada de lo que afirma esta documentación se sostiene solo en el texto: hay una
-prueba automática detrás de cada número.
-
 ```bash
-pytest software/tests -q      # 36 pruebas: cinemática, plan, trayectorias, estática, URDF
-make -C firmware/tests        # 32 comprobaciones del núcleo de los dos firmwares en C++
-python scripts/verificar_alcance.py
+pytest software/tests -q              # 60 pruebas
+make -C firmware/tests                # 43 comprobaciones de los dos firmwares
+python scripts/verificar_alcance.py   # los diez puestos y el punto A dentro del alcance
 ```
 
-```
-36 passed in 0.11s
-
-  ok   ik del puesto R1 coincide con la memoria de calculo
-  ok   los diez puestos resuelven ida y vuelta a las dos alturas
-  ok   trama del puesto R1
-  ok   el rack queda ordenado de $50 a $1000
-  ok   cada luz deja pasar su moneda y retiene la siguiente
-  ciclo simulado: 37.0 s en 1851 vueltas de control
-
-todos los puestos quedan dentro del espacio de trabajo
-```
-
-Las pruebas de C++ corren el firmware completo en el PC con un `BusServos` de
-banco, así que la máquina de estados se valida sin tener el hardware montado.
-
----
-
-## Estructura del repositorio
-
-```
-docs/                     documentación y demos web
-├── 01-arquitectura.md … 05-pruebas.md
-├── 06-medidas-cad.md     cotas del CAD frente a las del código
-├── despiece.md           piezas impresas, tolerancias y orden de impresión
-├── img/                  figuras generadas por scripts/generar_figuras.py
-├── memoria-calculo.html  memoria con calculadoras
-├── simulacion-etapa1.html
-└── simulacion_sistema_completo.html
-
-firmware/
-├── esp32_brazo/          cinemática, trayectorias, planificador, secuenciador, PCA9685, Wi-Fi
-├── esp32_contador/       sensores IR, dosificador, banda, conteo y Wi-Fi
-└── tests/                núcleo de los dos firmwares compilado y probado en el PC
-
-hardware/
-├── bom.csv bom-etapa1.csv materiales.md
-└── Modelos3D/            planos del brazo, 19 STL de la celda y el proyecto 3MF
-
-scripts/                  generadores de STL, 3MF y figuras, y verificador de alcance
-sim/pybullet/             URDF, celda, simulación del brazo y orquestador integrado
-software/
-├── brazo/                cinemática, planificador, trayectorias, estática, protocolo
-├── apps/                 cli_demo.py y streamlit_app.py
-└── tests/                36 pruebas con pytest
-```
+Hay una prueba detrás de cada número de este README: las luces del riel, el
+peso con antiguas, las cifras de cada maniobra, la inversa de R1, los pares. Dos
+pruebas cruzan lenguajes: una verifica que el firmware del contador usa las
+mismas luces y masas que el diseño en Python, y otra que el planificador de la
+página web y el de Python dan lo mismo. Las pruebas de C++ corren el firmware
+completo en el PC con un `BusServos` de banco. Detalle en
+[05-pruebas.md](docs/05-pruebas.md).
 
 ---
 
@@ -343,58 +235,71 @@ software/
 ```bash
 pip install -r requirements.txt
 
-python software/apps/cli_demo.py --criterio valor --sentido asc   # ciclo completo sin hardware
-python sim/pybullet/run_sim_integrada.py                          # las dos etapas con física
-streamlit run software/apps/streamlit_app.py                      # dashboard y asistente
+python software/apps/cli_demo.py --criterio peso --sentido asc   # lote, ruta A→B y orden
+python sim/pybullet/run_sim_integrada.py                         # las dos etapas con física
+streamlit run software/apps/streamlit_app.py                     # dashboard y asistente
 ```
 
 Para el hardware: copiar `secrets_example.h` como `secrets.h` en los dos
-firmwares, subirlos con el IDE de Arduino y probar por monitor serie antes de
-conectar la potencia de 6 V.
+firmwares, subirlos con el IDE de Arduino (librería Adafruit PWM Servo Driver en
+el brazo) y probar por monitor serie antes de conectar la potencia de 6 V:
 
 ```
-VASOS:500x12,100x30,1000x8,50x25,200x17
-ORDEN:valor,asc
+VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6
+ORDEN:antiguas,desc
 ESTADO
 ```
 
 ---
 
-## Medidas: dos perfiles
+## Estructura
 
-El brazo construido (SolidWorks) no tiene las mismas cotas que la simulación, así
-que las medidas viven en un perfil que se cambia en un solo sitio:
-
-| Perfil | d₁ | L₁ | L₂ | L₃ | Arco |
-| --- | --- | --- | --- | --- | --- |
-| `simulacion` | 110 mm | 160 mm | 150 mm | 80 mm | 230 mm |
-| `cad` | 87 mm | 100 mm | 95 mm (por medir) | 60 mm (por medir) | 97 mm |
-
-```bash
-BRAZO_PERFIL=cad python scripts/verificar_alcance.py --perfil cad
 ```
-
-En el firmware se cambia con `#define PERFIL_CAD`. El detalle de qué cota sale de
-qué hoja del plano y qué falta medir está en
-[`docs/06-medidas-cad.md`](docs/06-medidas-cad.md).
+docs/
+├── 00-entrega-avances.md   qué pide el parcial y dónde está cada cosa
+├── 01-arquitectura.md … 06-medidas-cad.md
+├── 07-monedas.md           monedas antiguas y nuevas, diseño del riel
+├── 08-obstaculos.md        ruta de A a B y niveles de dificultad
+├── despiece.md             piezas, armado y calibración de la etapa 1
+├── index.html              portada de las demos (GitHub Pages)
+└── simulacion_sistema_completo.html, simulacion-etapa1.html, memoria-calculo.html
+firmware/
+├── esp32_brazo/            cinemática, trayectorias, planificador, secuenciador, PCA9685, Wi-Fi
+├── esp32_contador/         8 barreras IR, dosificador, banda, conteo por familia, Wi-Fi
+└── tests/                  núcleo de los dos firmwares compilado y probado en el PC
+hardware/                   planos del brazo, STL, 3MF y listas de materiales
+scripts/                    generadores de STL, 3MF y figuras; verificadores
+sim/pybullet/               URDF, celda y orquestador integrado
+software/
+├── brazo/                  monedas, cinemática, obstáculos, planificador, trayectorias, protocolo
+├── apps/                   cli_demo.py y streamlit_app.py
+└── tests/                  60 pruebas con pytest
+```
 
 ---
 
 ## Estado
 
+- [x] Selector de monedas antiguas y nuevas: 8 estaciones calculadas, STL y firmware
+- [x] Conteo por estación y por familia, con trama hacia el brazo
 - [x] Cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
-- [x] Planificador de orden por cuatro criterios y en los dos sentidos
-- [x] Evasión en 5 GDL: paso por debajo, rodeo interior y espera de ventana
-- [x] Simulación de las dos etapas en el navegador y orquestador en PyBullet
+- [x] Ruta de A a B con cuatro obstáculos por nivel y tres maniobras
+- [x] Orden por cinco criterios en los dos sentidos
+- [x] Simulación web de las dos etapas y orquestador en PyBullet
 - [x] Firmware modular de los dos ESP32, con pruebas que corren en el PC
-- [x] Memoria de cálculo con cinemática, espacio de trabajo, trayectorias y pares
-- [x] Piezas de la celda generadas por código: 19 STL y proyecto 3MF en 9 bandejas
-- [ ] Medir L₂ y L₃ en el CAD y cerrar el perfil real del brazo construido
-- [ ] Imprimir y montar la celda; calibrar luces del riel y barreras IR
-- [ ] Integrar los dos ESP32 en la misma red con la app y medir el ciclo real
+- [x] App Streamlit con modo simulación y modo Wi-Fi
+- [ ] Imprimir la probeta del riel (estaciones 3 a 6) y medir las luces
+- [ ] Medir L₂ y L₃ en el CAD y cerrar el perfil real del brazo
+- [ ] Llevar la evasión de obstáculos al firmware del brazo
+- [ ] Montar la celda, integrar los dos ESP32 con la app y medir el ciclo real
+
+El brazo construido tiene cotas distintas de las de la simulación; el código
+trae los dos perfiles (`BRAZO_PERFIL=cad`) y lo que falta medir está en
+[06-medidas-cad.md](docs/06-medidas-cad.md). El historial de cambios está en
+[CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-Universidad Militar Nueva Granada, Ingeniería Mecatrónica.
-Licencia [MIT](LICENSE). Repositorio base del curso:
-[dialejobv/U_Militar](https://github.com/dialejobv/U_Militar).
+Autor: Johan Andrés Canchala Arenas ([@Johan-C777](https://github.com/Johan-C777)).
+Universidad Militar Nueva Granada, Ingeniería Mecatrónica. Licencia [MIT](LICENSE).
+Repositorio base del curso: [dialejobv/U_Militar](https://github.com/dialejobv/U_Militar).

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logística de Monedas</title>
+<meta name="description" content="Celda robótica que separa monedas colombianas antiguas y nuevas, las embala y las ordena con un brazo de 5 GDL que esquiva cuatro obstáculos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E2E3DE; --panel:#ECEDE8; --panel-2:#D9DBD4; --linea:#C3C8BE;
+  --ink:#1C2730; --ink-2:#44525A; --muted:#66747A;
+  --naranja:#EE7A1E; --naranja-ink:#A8530C; --acero:#34597A; --verde:#2C7A54;
+  --n1:#2C7A54; --n2:#9A6F0A; --n3:#C2571A; --n4:#A3262A;
+  --f-ui:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;
+  --f-num:"Barlow",system-ui,sans-serif;
+  --f-code:ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#161E22; --panel:#1E282D; --panel-2:#27343A; --linea:#36454C;
+    --ink:#E3E8E5; --ink-2:#B5C0BC; --muted:#8B9A9E;
+    --naranja:#F79343; --naranja-ink:#F79343; --acero:#83AACB; --verde:#63C295;
+    --n1:#63C295; --n2:#E0B44A; --n3:#F0905A; --n4:#F07A7A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161E22; --panel:#1E282D; --panel-2:#27343A; --linea:#36454C;
+  --ink:#E3E8E5; --ink-2:#B5C0BC; --muted:#8B9A9E;
+  --naranja:#F79343; --naranja-ink:#F79343; --acero:#83AACB; --verde:#63C295;
+  --n1:#63C295; --n2:#E0B44A; --n3:#F0905A; --n4:#F07A7A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-num);font-size:16px;line-height:1.55}
+a{color:var(--acero);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--naranja);outline-offset:3px;border-radius:4px}
+.envoltura{max-width:1120px;margin:0 auto;padding:40px 24px 64px}
+header{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:36px;align-items:center}
+.etiqueta{font-family:var(--f-ui);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--naranja-ink)}
+h1{font-family:var(--f-ui);font-weight:700;font-size:clamp(2rem,4.4vw,3.2rem);line-height:1.02;margin:8px 0 14px}
+.bajada{font-size:18px;color:var(--ink-2);margin:0 0 20px;max-width:46ch}
+.acciones{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;font-family:var(--f-ui);
+  font-weight:600;font-size:17px;text-decoration:none;border:1px solid var(--linea);color:var(--ink);background:var(--panel)}
+.btn.primario{background:var(--naranja);border-color:var(--naranja);color:#fff}
+.btn:hover{filter:brightness(1.04)}
+header img{width:100%;height:auto;border-radius:12px;border:1px solid var(--linea);display:block}
+
+h2{font-family:var(--f-ui);font-weight:600;font-size:26px;margin:56px 0 16px}
+.flujo{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:0;padding:0;list-style:none}
+.flujo li{flex:1 1 92px;background:var(--panel);border:1px solid var(--linea);border-radius:10px;padding:12px 14px;min-width:0}
+.flujo b{display:block;font-family:var(--f-ui);font-size:16px;line-height:1.25}
+.flujo span{color:var(--muted);font-size:14px}
+.flujo .punto{background:var(--panel-2)}
+.flujo .n1{border-top:4px solid var(--n1)} .flujo .n2{border-top:4px solid var(--n2)}
+.flujo .n3{border-top:4px solid var(--n3)} .flujo .n4{border-top:4px solid var(--n4)}
+
+.demos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.demo{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--linea);border-radius:12px;overflow:hidden;
+  text-decoration:none;color:inherit}
+.demo:hover{border-color:var(--ink-2)}
+.demo img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--linea)}
+.demo div{padding:14px 16px 18px}
+.demo b{font-family:var(--f-ui);font-size:20px;display:block;margin-bottom:4px}
+.demo p{margin:0;color:var(--ink-2);font-size:15px}
+
+.cifras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cifra{background:var(--panel);border:1px solid var(--linea);border-radius:10px;padding:14px 16px}
+.cifra b{display:block;font-family:var(--f-ui);font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.cifra span{color:var(--muted);font-size:14px}
+
+.docs{columns:2;column-gap:32px;padding:0;margin:0;list-style:none}
+.docs li{break-inside:avoid;padding:9px 0;border-bottom:1px solid var(--linea)}
+.docs a{font-family:var(--f-ui);font-weight:600;font-size:17px}
+.docs span{display:block;color:var(--muted);font-size:14px}
+code{font-family:var(--f-code);font-size:.9em;background:var(--panel-2);padding:1px 6px;border-radius:5px}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:var(--muted);font-size:14px}
+
+@media (max-width:860px){
+  header{grid-template-columns:1fr}
+  .demos{grid-template-columns:1fr}
+  .cifras{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .docs{columns:1}
+}
+@media (max-width:480px){ .envoltura{padding:28px 16px 48px} .flujo li{flex-basis:100%} }
+</style>
+</head>
+<body>
+<main class="envoltura">
+  <header>
+    <div>
+      <div class="etiqueta">Micros y Laboratorio · UMNG</div>
+      <h1>Sistema de Logística de Monedas Inteligentes</h1>
+      <p class="bajada">Monedas colombianas antiguas y nuevas entran a una tolva, se separan y cuentan, viajan en vasos por una banda y un brazo de 5 GDL las lleva del punto A al punto B esquivando cuatro obstáculos, para dejarlas ordenadas según la orden que recibe.</p>
+      <div class="acciones">
+        <a class="btn primario" href="simulacion_sistema_completo.html">Abrir la simulación</a>
+        <a class="btn" href="https://github.com/Johan-C777/coin-sorting-robot-pybullet">Repositorio</a>
+      </div>
+    </div>
+    <img src="img/sistema-completo.png" alt="Simulación 3D de la celda: tolva, riel selector, banda, brazo de 5 GDL, cuatro obstáculos giratorios y rack de cinco puestos" width="1400" height="1145">
+  </header>
+
+  <h2>El recorrido</h2>
+  <ol class="flujo">
+    <li><b>Tolva</b><span>antiguas y nuevas</span></li>
+    <li><b>Riel de 8 ranuras</b><span>separa y cuenta por familia</span></li>
+    <li><b>5 vasos en la banda</b><span>uno por denominación</span></li>
+    <li class="punto"><b>Punto A</b><span>fin de la banda</span></li>
+    <li class="n1"><b>Nivel 1</b><span>pasar por debajo</span></li>
+    <li class="n2"><b>Nivel 2</b><span>recogerse y rodear</span></li>
+    <li class="n3"><b>Nivel 3</b><span>esperar la ventana</span></li>
+    <li class="n4"><b>Nivel 4</b><span>por debajo y bajada cronometrada</span></li>
+    <li class="punto"><b>Punto B</b><span>rack ordenado</span></li>
+  </ol>
+
+  <h2>Demos</h2>
+  <div class="demos">
+    <a class="demo" href="simulacion_sistema_completo.html">
+      <img src="img/sistema-completo.png" alt="" loading="lazy" width="1400" height="1145">
+      <div><b>Sistema completo</b><p>Las dos etapas juntas, los cuatro obstáculos por nivel y el rack ordenado por el criterio que elijas.</p></div>
+    </a>
+    <a class="demo" href="simulacion-etapa1.html">
+      <img src="img/etapa1-selector.png" alt="" loading="lazy" width="1400" height="1145">
+      <div><b>Etapa 1: selección</b><p>Monedas antiguas y nuevas por el riel, conteo por estación, tubos colectores y vista de despiece.</p></div>
+    </a>
+    <a class="demo" href="memoria-calculo.html">
+      <img src="img/memoria-portada.png" alt="" loading="lazy">
+      <div><b>Memoria de cálculo</b><p>Cinemática, espacio de trabajo, trayectorias, pares y servos, con calculadoras en vivo.</p></div>
+    </a>
+  </div>
+
+  <h2>En números</h2>
+  <div class="cifras">
+    <div class="cifra"><b>8</b><span>estaciones para 9 tipos de moneda</span></div>
+    <div class="cifra"><b>4</b><span>obstáculos entre A y B, niveles 1 a 4</span></div>
+    <div class="cifra"><b>5</b><span>criterios de orden, en los dos sentidos</span></div>
+    <div class="cifra"><b>103</b><span>pruebas: 60 en Python y 43 en C++</span></div>
+  </div>
+
+  <h2>Documentación</h2>
+  <ul class="docs">
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/00-entrega-avances.md">Entrega de avances</a><span>Lo que pide el parcial y dónde está cada cosa</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/07-monedas.md">Monedas antiguas y nuevas</a><span>Catálogo del Banco de la República y diseño del riel</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/08-obstaculos.md">De A a B entre obstáculos</a><span>Niveles, maniobras y cómo decide el planificador</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/01-arquitectura.md">Arquitectura</a><span>Requisitos, bloques y algoritmo de orden</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/02-cinematica.md">Cinemática</a><span>Denavit-Hartenberg, directa, inversa y trayectorias</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/03-electronica.md">Electrónica</a><span>Pines, PCA9685 y presupuesto de corriente</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/04-protocolo.md">Protocolo</a><span>Tramas serie y rutas HTTP</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/despiece.md">Despiece</a><span>Piezas, armado y calibración de la etapa 1</span></li>
+  </ul>
+
+  <footer>Johan Andrés Canchala Arenas · Ingeniería Mecatrónica, Universidad Militar Nueva Granada · Licencia MIT</footer>
+</main>
+</body>
+</html>

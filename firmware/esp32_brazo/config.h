@@ -68,4 +68,4 @@ constexpr uint8_t CANAL[N_CANALES] = {0, 1, 2, 3, 4, 5};
 constexpr float VEL_SERVO_MAX = 180.0f;           // grados/s de la rampa
 
 // ---- criterios de orden -----------------------------------------------------
-enum Criterio : uint8_t { POR_DENOMINACION = 0, POR_CANTIDAD, POR_VALOR, POR_PESO };
+enum Criterio : uint8_t { POR_DENOMINACION = 0, POR_CANTIDAD, POR_VALOR, POR_PESO, POR_ANTIGUAS };

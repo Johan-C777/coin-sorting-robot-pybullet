@@ -37,7 +37,7 @@ bool Comms::iniciarWifi(const char *ssid, const char *clave, uint16_t segundos) 
 }
 
 void Comms::estadoJson(char *destino, size_t capacidad) const {
-  char cuerpo[512];
+  char cuerpo[768];
   conteo_.json(cuerpo, sizeof(cuerpo));
   snprintf(destino, capacidad,
            "{\"etapa\":1,\"alimentando\":%s,\"banda\":%s,\"conteo\":%s}",
@@ -52,7 +52,7 @@ bool Comms::enviarAlBrazo(const char *ipBrazo) {
     Serial.println(trama);
     return false;
   }
-  char cuerpo[512];
+  char cuerpo[768];
   conteo_.json(cuerpo, sizeof(cuerpo));
   HTTPClient http;
   char url[64];
@@ -66,17 +66,21 @@ bool Comms::enviarAlBrazo(const char *ipBrazo) {
   return codigo == 200;
 }
 
-void Comms::anunciarMoneda(int8_t canal) {
-  if (canal < 0) return;
+// "M:<denominación>,<estación>,<familia>", por ejemplo "M:100,5,antigua"
+void Comms::anunciarMoneda(int8_t estacion) {
+  if (estacion < 0 || estacion >= (int8_t)N_ESTACIONES) return;
+  static const char *const NOMBRE[] = {"nueva", "antigua", "ambas"};
   Serial.print(F("M:"));
-  Serial.print(DENOMINACION[canal]);
+  Serial.print(DENOMINACION_VASO[VASO_DE_ESTACION[estacion]]);
   Serial.print(',');
-  Serial.println(canal + 1);
+  Serial.print(estacion + 1);
+  Serial.print(',');
+  Serial.println(NOMBRE[FAMILIA[estacion]]);
 }
 
 void Comms::rutasHttp() {
   servidor.on("/api/estado", HTTP_GET, []() {
-    char json[768];
+    char json[1024];
     instancia->estadoJson(json, sizeof(json));
     servidor.send(200, "application/json", json);
   });
@@ -124,9 +128,14 @@ void Comms::procesarLinea(char *linea) {
     return;
   }
   if (strcmp(linea, "ESTADO") == 0) {
-    char json[768];
+    char json[1024];
     estadoJson(json, sizeof(json));
     Serial.println(json);
+    return;
+  }
+  if (strcmp(linea, "ENVIAR") == 0) {             // cierra la tanda ya
+    envio_ = true;
+    Serial.println(F("OK"));
     return;
   }
   if (strcmp(linea, "REINICIAR") == 0) {
