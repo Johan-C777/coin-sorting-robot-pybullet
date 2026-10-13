@@ -2,6 +2,8 @@
 // Dos canales de comunicación sobre el mismo estado:
 //   * Serie a 115200: tramas "S:..." y comandos de texto (modo banco).
 //   * HTTP JSON por Wi-Fi: lo que consume la app Streamlit.
+#include <stddef.h>
+
 #include "cups.h"
 #include "sequencer.h"
 #include "servo_bus.h"
@@ -17,6 +19,7 @@ class Comms {
 
  private:
   void procesarLinea(char *linea);
+  void aplicarTrama(const int16_t s[N_CANALES]);    // pose "S:" -> servos
   void rutasHttp();
 
   BusServos &bus_;

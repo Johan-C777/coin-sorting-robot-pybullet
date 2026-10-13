@@ -22,6 +22,7 @@ from brazo.controller import Controlador                     # noqa: E402
 from brazo.cups import CRITERIOS, Vaso, lote_aleatorio, lote_demo, totales  # noqa: E402
 from brazo.kinematics import fk                              # noqa: E402
 from brazo.links import EnlaceHTTP, EnlaceNulo               # noqa: E402
+from brazo.obstaculos import NIVELES, YAW_A, ruta             # noqa: E402
 from brazo.planner import planificar                         # noqa: E402
 from brazo.protocol import trama                             # noqa: E402
 
@@ -29,7 +30,8 @@ st.set_page_config(page_title="Brazo clasificador de monedas", page_icon="🦾",
                    layout="wide")
 
 NOMBRE_CRITERIO = {"denominacion": "Denominación", "cantidad": "Cantidad de monedas",
-                   "valor": "Valor total", "peso": "Peso"}
+                   "valor": "Valor total", "peso": "Peso",
+                   "antiguas": "Monedas antiguas"}
 
 
 def estado_inicial():
@@ -53,6 +55,14 @@ def responder(pregunta: str, ctrl: Controlador) -> str:
         mas = max(ctrl.vasos, key=lambda v: v.peso_g)
         return (f"El lote pesa {t['peso_g']:.1f} g. El más pesado es el de "
                 f"{mas} con {mas.peso_g:.1f} g.")
+    if "antigua" in q or "vieja" in q:
+        con = [v for v in ctrl.vasos if v.antiguas]
+        detalle = ", ".join(f"{v.antiguas} de ${v.denominacion}" for v in con) or "ninguna"
+        return f"Hay {t['antiguas']} monedas de la familia anterior: {detalle}."
+    if "obstáculo" in q or "obstaculo" in q or "esquiva" in q:
+        pasos = "; ".join(f"nivel {r.obstaculo.nivel}, {r.obstaculo.nombre}: "
+                          f"{r.maniobra.descripcion}" for r in ruta())
+        return f"De A a B el brazo cruza cuatro obstáculos. {pasos}."
     if "cuántos vasos" in q or "cuantos vasos" in q:
         return f"Hay {len(ctrl.vasos)} vasos, uno por puesto."
     if "pose" in q or "dónde" in q or "donde" in q:
@@ -64,8 +74,9 @@ def responder(pregunta: str, ctrl: Controlador) -> str:
         return (f"El último orden fue por {NOMBRE_CRITERIO[ctrl.criterio].lower()} "
                 f"{'ascendente' if ctrl.sentido == 'asc' else 'descendente'}.")
     if "ayuda" in q or "puedes" in q:
-        return ("Puedo contarte el valor, el peso, la cantidad de monedas, la pose del "
-                "brazo, la última trama de servos y el criterio de orden aplicado.")
+        return ("Puedo contarte el valor, el peso, la cantidad de monedas, cuántas son "
+                "antiguas, cómo esquiva los obstáculos, la pose del brazo, la última "
+                "trama de servos y el criterio de orden aplicado.")
     return ("No tengo ese dato todavía. Prueba con: cuánto vale el lote, cuánto pesa, "
             "dónde está el brazo o cuál fue el último orden.")
 
@@ -74,6 +85,8 @@ def tabla(vasos):
     filas = [{"Puesto": v.puesto.etiqueta if v.puesto else "-",
               "Denominación": f"${v.denominacion:,}".replace(",", "."),
               "Monedas": v.monedas,
+              "Nuevas": v.nuevas,
+              "Antiguas": v.antiguas,
               "Valor": v.valor,
               "Peso (g)": round(v.peso_g, 1)} for v in vasos]
     return pd.DataFrame(filas).sort_values("Puesto")
@@ -107,11 +120,12 @@ st.title("Brazo clasificador de vasos de monedas")
 st.caption("Módulo 6 del Sistema de Logística de Monedas Inteligentes")
 
 t = totales(ctrl.vasos)
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Vasos", len(ctrl.vasos))
 c2.metric("Monedas", t["monedas"])
-c3.metric("Valor total", f"${t['valor']:,}".replace(",", "."))
-c4.metric("Peso total", f"{t['peso_g']:.1f} g")
+c3.metric("Antiguas", t["antiguas"])
+c4.metric("Valor total", f"${t['valor']:,}".replace(",", "."))
+c5.metric("Peso total", f"{t['peso_g']:.1f} g")
 
 # ----------------------------------------------------------------- ejecución
 if ejecutar:
@@ -147,7 +161,8 @@ with izq:
                  hide_index=True)
     if rack:
         df = tabla(rack).set_index("Puesto")
-        st.bar_chart(df[["Valor"]] if criterio != "peso" else df[["Peso (g)"]])
+        columna = {"peso": "Peso (g)", "cantidad": "Monedas", "antiguas": "Antiguas"}
+        st.bar_chart(df[[columna.get(criterio, "Valor")]])
 
 with der:
     st.subheader("Ruta del brazo")
@@ -156,6 +171,15 @@ with der:
             st.write(f"{i}. {m}")
     else:
         st.info("Pulsa «Ordenar» para generar la secuencia de movimientos.")
+
+    st.subheader("Obstáculos de A a B")
+    st.caption(f"Punto A: final de la banda (yaw {YAW_A:.0f}°). Punto B: rack R1 a R5.")
+    st.dataframe(pd.DataFrame([{
+        "Nivel": f"{r.obstaculo.nivel} · {NIVELES[r.obstaculo.nivel][0]}",
+        "Obstáculo": f"{r.obstaculo.codigo} {r.obstaculo.nombre}",
+        "Maniobra": r.maniobra.descripcion,
+        "Tapa la ruta": f"{r.bloqueo_directo:.0%}",
+    } for r in ruta()]), use_container_width=True, hide_index=True)
 
     st.subheader("Estado del robot")
     x, y, z, phi = fk(ctrl.q)

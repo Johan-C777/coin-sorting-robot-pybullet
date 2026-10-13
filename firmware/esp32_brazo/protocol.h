@@ -3,6 +3,7 @@
 // Sin dependencias de Arduino para poder probarlo en el PC.
 #include <stdint.h>
 #include "config.h"
+#include "cups.h"
 
 namespace Protocolo {
 
@@ -17,5 +18,14 @@ uint8_t armarTrama(const float q[N_JUNTAS], float pinzaMm, char *destino, uint8_
 
 // Lee una trama recibida. Devuelve false si el formato no cuadra.
 bool leerTrama(const char *linea, int16_t salida[N_CANALES]);
+
+// Lee el lote que manda el contador: "VASOS:50x30a9,100x20,..." donde
+// "a9" (opcional) dice cuántas de las monedas son antiguas. Llena los vasos en
+// la zona de entrada y devuelve cuántos leyó (0 si el formato no cuadra).
+uint8_t leerVasos(const char *linea, Vaso vasos[N_PUESTOS]);
+
+// Criterio de orden a partir de su nombre: "valor", "peso", "cantidad",
+// "denominacion" o "antiguas". Si no lo reconoce devuelve POR_VALOR.
+uint8_t criterioDeTexto(const char *texto);
 
 }  // namespace Protocolo

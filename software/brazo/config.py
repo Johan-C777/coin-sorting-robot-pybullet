@@ -60,10 +60,14 @@ YAW_ENTRADA = [-86.0, -70.5, -55.0, -39.5, -24.0]
 YAW_RACK = [24.0, 39.5, 55.0, 70.5, 86.0]
 CABECEO_AGARRE = -90.0
 
-# --- vasos y monedas (serie 2012 del Banco de la República) ------------------
+# --- vasos y monedas (Banco de la República) ---------------------------------
+# Familia nueva (2012) y familia anterior (1989-1996). El catálogo completo,
+# con diámetros, fuentes y el diseño del selector, está en brazo/monedas.py.
 MASA_VASO_G = 18.0
 MASA_MONEDA_G = {50: 2.00, 100: 3.34, 200: 4.61, 500: 7.14, 1000: 9.95}
+MASA_MONEDA_ANTIGUA_G = {50: 4.50, 100: 5.31, 200: 7.08, 500: 7.14}
 DENOMINACIONES = [50, 100, 200, 500, 1000]
+MONEDAS_POR_VASO = 40          # capacidad de un vaso lleno
 
 # --- movimiento --------------------------------------------------------------
 VEL_ARTICULAR = 75.0           # grados/s promedio

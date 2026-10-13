@@ -4,7 +4,7 @@
 
 Qué hace:
   * lee los STL de stl/, une vértices repetidos y deja cada malla apoyada en z = 0;
-  * reparte las 52 piezas en bandejas de 220 x 220 mm por material y por familia,
+  * reparte las 58 piezas en bandejas de 220 x 220 mm por material y por familia,
     con un acomodo por estanterías y 6 mm de separación;
   * escribe un 3MF con el modelo (norma 3MF) más los metadatos de bandejas y de
     ajustes de impresión que leen OrcaSlicer y Bambu Studio;
@@ -45,7 +45,7 @@ GRUPOS = [
         ("E03_canal_costado.stl", 4, {"wall_loops": "3", "sparse_infill_density": "30%"}),
         ("E04_abrazadera_varilla.stl", 4, {"wall_loops": "4", "sparse_infill_density": "40%"}),
         ("E06_paleta_dosificadora.stl", 1, {"wall_loops": "4", "sparse_infill_density": "60%"}),
-        ("E08_soporte_sensor.stl", 5, {"wall_loops": "3", "sparse_infill_density": "30%"}),
+        ("E08_soporte_sensor.stl", 8, {"wall_loops": "3", "sparse_infill_density": "30%"}),
         ("E09_rodillo_banda.stl", 2, {"wall_loops": "4", "sparse_infill_density": "30%"}),
         ("E10_marco_banda.stl", 6, {"wall_loops": "3", "sparse_infill_density": "25%"}),
         ("E11_portavaso.stl", 5, {"wall_loops": "3", "sparse_infill_density": "20%"}),
@@ -53,11 +53,7 @@ GRUPOS = [
     ]),
     ("PLA · tolva y embudos", [
         ("E05_tolva.stl", 1, {"wall_loops": "3", "sparse_infill_density": "15%"}),
-        ("E07_embudo_estacion1.stl", 1, {"wall_loops": "3", "sparse_infill_density": "12%"}),
-        ("E07_embudo_estacion2.stl", 1, {"wall_loops": "3", "sparse_infill_density": "12%"}),
-        ("E07_embudo_estacion3.stl", 1, {"wall_loops": "3", "sparse_infill_density": "12%"}),
-        ("E07_embudo_estacion4.stl", 1, {"wall_loops": "3", "sparse_infill_density": "12%"}),
-        ("E07_embudo_estacion5.stl", 1, {"wall_loops": "3", "sparse_infill_density": "12%"}),
+        ("E07_embudo_estacion.stl", 8, {"wall_loops": "3", "sparse_infill_density": "15%"}),
         ("B12_bandeja_electronica.stl", 1, {"wall_loops": "3", "sparse_infill_density": "15%"}),
     ]),
     ("PETG · celda del brazo", [

@@ -77,6 +77,24 @@ int main() {
             leidos[5] == 85, "lectura de trama");
   comprobar(!Protocolo::leerTrama("X:1,2,3", leidos), "trama invalida se rechaza");
 
+  // --- lote del contador con monedas antiguas y nuevas
+  Vaso leido[N_PUESTOS] = {};
+  const uint8_t nv = Protocolo::leerVasos("VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6", leido);
+  comprobar(nv == 5 && leido[1].denominacion == 100 && leido[1].monedas == 30 &&
+            leido[1].antiguas == 10 && leido[0].antiguas == 0 && leido[4].puesto == 4,
+            "lectura del lote VASOS con antiguas");
+  comprobar(Protocolo::leerVasos("VASOS:500x12a20", leido) == 0 &&
+            Protocolo::leerVasos("VASOS:abc", leido) == 0 &&
+            Protocolo::leerVasos("S:1,2,3", leido) == 0, "lote invalido se rechaza");
+  comprobar(Protocolo::leerVasos("VASOS:50x24,100x20,200x18,500x14,1000x12", leido) == 5 &&
+            leido[2].antiguas == 0, "la trama sin antiguas sigue siendo valida");
+  const Vaso mezcla = {100, 30, ZONA_ENTRADA, 0, 10};
+  comprobar(cerca(Vasos::pesoG(mezcla), 137.9f, 0.05f) && Vasos::valor(mezcla) == 3000u,
+            "peso con 20 nuevas y 10 antiguas de $100");
+  comprobar(Protocolo::criterioDeTexto("antiguas") == POR_ANTIGUAS &&
+            Protocolo::criterioDeTexto("peso") == POR_PESO &&
+            Protocolo::criterioDeTexto("otro") == POR_VALOR, "criterios de orden por nombre");
+
   // --- perfil quintico
   comprobar(cerca(Trayectoria::quintico(0.0f), 0.0f, 1e-6f) &&
             cerca(Trayectoria::quintico(1.0f), 1.0f, 1e-6f) &&
@@ -88,8 +106,8 @@ int main() {
 
   // --- planificador
   Vaso vasos[N_PUESTOS] = {
-      {500, 12, ZONA_ENTRADA, 0}, {100, 30, ZONA_ENTRADA, 1}, {1000, 8, ZONA_ENTRADA, 2},
-      {50, 25, ZONA_ENTRADA, 3}, {200, 17, ZONA_ENTRADA, 4}};
+      {500, 12, ZONA_ENTRADA, 0, 0}, {100, 30, ZONA_ENTRADA, 1, 10}, {1000, 8, ZONA_ENTRADA, 2, 0},
+      {50, 25, ZONA_ENTRADA, 3, 9}, {200, 17, ZONA_ENTRADA, 4, 6}};
   Movimiento movs[10];
   uint8_t n = Planificador::planificar(vasos, POR_VALOR, 1, movs);
   comprobar(n == 5, "desde la entrada son cinco movimientos");
@@ -112,10 +130,21 @@ int main() {
   comprobar(n > 0 && n <= 10 && usaHueco,
             "reordenar el rack lleno usa los huecos de la entrada");
 
+  // --- por peso, las monedas antiguas cambian el orden
+  Vaso porPeso[N_PUESTOS] = {
+      {500, 12, ZONA_ENTRADA, 0, 0}, {100, 30, ZONA_ENTRADA, 1, 10}, {1000, 8, ZONA_ENTRADA, 2, 0},
+      {50, 25, ZONA_ENTRADA, 3, 9}, {200, 17, ZONA_ENTRADA, 4, 6}};
+  n = Planificador::planificar(porPeso, POR_PESO, 1, movs);
+  const uint8_t esperadoPeso[5] = {3, 2, 0, 4, 1};   // 90,5 / 97,6 / 103,7 / 111,2 / 137,9 g
+  bool pesoOk = (n == 5);
+  for (uint8_t i = 0; i < n && pesoOk; i++)
+    if (movs[i].vaso != esperadoPeso[i]) pesoOk = false;
+  comprobar(pesoOk, "orden por peso con monedas antiguas");
+
   // --- secuenciador completo: se ejecuta el ciclo entero en el PC
   Vaso lote[N_PUESTOS] = {
-      {500, 12, ZONA_ENTRADA, 0}, {100, 30, ZONA_ENTRADA, 1}, {1000, 8, ZONA_ENTRADA, 2},
-      {50, 25, ZONA_ENTRADA, 3}, {200, 17, ZONA_ENTRADA, 4}};
+      {500, 12, ZONA_ENTRADA, 0, 0}, {100, 30, ZONA_ENTRADA, 1, 10}, {1000, 8, ZONA_ENTRADA, 2, 0},
+      {50, 25, ZONA_ENTRADA, 3, 9}, {200, 17, ZONA_ENTRADA, 4, 6}};
   BusServos bus;
   bus.iniciar();
   Secuenciador sec;

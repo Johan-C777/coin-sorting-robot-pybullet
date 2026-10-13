@@ -7,8 +7,8 @@
 
   Puerto serie a 115200, comandos:
     S:114,49,83,64,90,85     pose directa (ángulos de servo)
-    VASOS:500x12,100x30,...  carga el lote de la entrada
-    ORDEN:valor,asc          clasifica (valor | peso | cantidad | denominacion)
+    VASOS:500x12,100x30a10,...  carga el lote (aN = cuántas son antiguas)
+    ORDEN:valor,asc          clasifica (valor | peso | cantidad | denominacion | antiguas)
     ESTADO | HOME | STOP | PAUSA | SIGUE | TORQUE0 | TORQUE1
 
   Con Wi-Fi levanta además GET /api/estado, POST /api/ordenar, /api/vasos y /api/pose.
@@ -29,12 +29,13 @@ BusServos bus;
 Secuenciador secuenciador;
 
 // Lote por defecto: se sobrescribe con VASOS: o con POST /api/vasos.
+// {denominación, monedas, zona, puesto, de ellas antiguas}
 Vaso vasos[N_PUESTOS] = {
-    {500, 12, ZONA_ENTRADA, 0},
-    {100, 30, ZONA_ENTRADA, 1},
-    {1000, 8, ZONA_ENTRADA, 2},
-    {50, 25, ZONA_ENTRADA, 3},
-    {200, 17, ZONA_ENTRADA, 4},
+    {500, 12, ZONA_ENTRADA, 0, 0},
+    {100, 30, ZONA_ENTRADA, 1, 10},
+    {1000, 8, ZONA_ENTRADA, 2, 0},
+    {50, 25, ZONA_ENTRADA, 3, 9},
+    {200, 17, ZONA_ENTRADA, 4, 6},
 };
 
 Comms comms(bus, secuenciador, vasos);

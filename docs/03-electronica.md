@@ -1,5 +1,43 @@
 # Electrónica y potencia
 
+Dos ESP32: uno para la etapa 1 (conteo, dosificador y banda) y otro para el
+brazo. Hablan entre sí y con la app por Wi-Fi.
+
+```mermaid
+flowchart LR
+    subgraph E1["ESP32 contador"]
+        IR["8 barreras IR<br/>GPIO 32 33 25 26 27 14 13 4"]
+        SG["Servo SG90 dosificador<br/>GPIO 18, LEDC"]
+        LH["L298N banda<br/>GPIO 19 21 23"]
+    end
+    subgraph E2["ESP32 brazo"]
+        I2C["I²C GPIO 21 / 22"]
+        PCA["PCA9685 0x40"]
+        SV["6 servos J1 a J5 + pinza"]
+    end
+    F12["Fuente 12 V 3 A"] --> LH
+    F12 --> R5["LM2596 a 5 V"] --> E1
+    F6["Fuente 6 V 10 A"] -->|"bornera, 18 AWG"| SV
+    I2C --> PCA --> SV
+    E1 -->|"Wi-Fi, POST /api/vasos"| E2
+    APP["App Streamlit"] <-->|"Wi-Fi, JSON"| E1
+    APP <-->|"Wi-Fi, JSON"| E2
+```
+
+## ESP32 del contador
+
+| Elemento | Pines | Nota |
+| --- | --- | --- |
+| Barreras IR, estaciones E1 a E8 | 32, 33, 25, 26, 27, 14, 13, 4 | Una por ranura, interrupción en flanco de bajada, antirrebote de 25 ms |
+| Servo SG90 de la paleta | 18 | PWM por LEDC, canal 0 |
+| Puente H L298N de la banda | 19 (IN1), 21 (IN2), 23 (ENA) | PWM por LEDC, canal 1 |
+
+Se evitan los pines de arranque del ESP32 (0, 2, 5, 12 y 15): el GPIO 12 en alto
+al encender cambia la tensión de la flash y el módulo no arranca. También se
+evitan los 34 a 39, que son solo de entrada y no tienen resistencia de pull-up.
+
+## ESP32 del brazo
+
 ## Por qué un PCA9685
 
 El ESP32 no genera los PWM: los delega en un PCA9685 por I²C. Así el Wi-Fi no
