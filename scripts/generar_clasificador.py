@@ -68,11 +68,11 @@ HOLGURA_CAIDA = 0.4
 INCLINACION = 22.0      # pista respecto a la horizontal
 PERALTE = 10.0          # inclinación lateral del piso hacia la pared guía
 B = 30.0                # ancho útil del canal (moneda mayor 26,7)
-ESP_BASE = 7.0
-ALTO_PARED = 12.0
-ESP_PARED = 3.0
-ALTO_LABIO = 5.0
-ALA = 26.0              # ala a cada lado del canal: tornillos de ductos y cuñas
+ESP_BASE = 5.0
+ALTO_PARED = 10.0
+ESP_PARED = 2.4
+ALTO_LABIO = 4.0
+ALA = 20.0              # ala a cada lado del canal: tornillos de ductos y cuñas
 ENTRADA = 35.0          # zona donde cae la moneda de la tolva
 ALMA = 12.0             # material entre ranuras
 EXTRA_LARGO = 4.0       # largo de ranura = ancho + 4 (la moneda cabe entera)
@@ -80,10 +80,10 @@ LARGO_FINAL = 32.0
 PARED_FINAL = 4.0
 INICIO_B = 24.0         # el módulo B arranca después de la cola
 MAX_PIEZA = 210.0
-COLA_LARGO, COLA_CUELLO, COLA_BOCA, COLA_ALTO = 20.0, 9.0, 13.0, 4.0
+COLA_LARGO, COLA_CUELLO, COLA_BOCA, COLA_ALTO = 14.0, 9.0, 13.0, 3.0
 Y_TORN_COLA = 6.5
 Y_TORN_DUCTO = 8.0
-Y_TORN_CUNA = 19.0
+Y_TORN_CUNA = 14.0
 
 # ductos estándar
 T_GARGANTA = 24.0       # del riel a la garganta, sobre el eje vertical
@@ -95,6 +95,7 @@ PARED_DUCTO = 2.2
 G = 4.2                 # ranura donde la moneda rueda de canto ($500 ≤ 2,2 mm)
 PARED_BIF = 3.0
 PARED_SENSOR = 6.0
+ALTO_BIF_PARED = 16.0   # altura de las paredes del canal; la moneda sobresale
 RAMPA = 25.0            # pendiente de rodadura de canto
 ZS = -26.0              # salida del embudo (boca de la ranura)
 S_SENSOR = 50.0         # posición del sensor a lo largo del piso
@@ -111,8 +112,8 @@ SG90 = dict(largo=22.8, ancho=12.2, orejas=27.8, eje_off=5.5,
 TOLVA_SEMIANGULO = 40.0     # pared a 40° de la vertical (criterio de tolvas)
 DISCO_D, DISCO_ESP = 80.0, 3.0
 CAVIDAD_D, CAVIDAD_R, N_CAVIDADES = 28.0, 24.0, 4
-BOCA_SUP_D = 160.0
-BASE_D, BASE_ESP = 120.0, 5.0
+BOCA_SUP_D = 130.0
+BASE_D, BASE_ESP = 100.0, 4.0
 ANILLO_RE = 49.0
 R_TORN_CONO = 44.7
 R_TORN_BASE = 55.0
@@ -302,10 +303,10 @@ def riel_modulo(x0, x1, ranuras, macho=False, hembra=False, final=False):
     if hembra:
         huecos.append(cola(x0, HOLGURA, COLA_ALTO + HOLGURA))
         for yy in (-Y_TORN_COLA, B + Y_TORN_COLA):
-            huecos.append(cil_z(x0 + 12, yy, -1, 60, M3_PASO))
+            huecos.append(cil_z(x0 + 8, yy, -1, 60, M3_PASO))
     if macho:
         for yy in (-Y_TORN_COLA, B + Y_TORN_COLA):
-            huecos.append(cil_z(x1 + 12, yy, -1, COLA_ALTO + 1, M3_ROSCA))
+            huecos.append(cil_z(x1 + 8, yy, -1, COLA_ALTO + 1, M3_ROSCA))
     return m - union(huecos)
 
 
@@ -317,30 +318,47 @@ ABAJO = np.array([S22, 0.0, -C22])          # vertical de mundo vista desde el r
 Y_EJE = np.array([0.0, 1.0, 0.0])
 
 
-def brida(r: Ranura, z0=-4.0, z1=0.0):
-    return caja(r.xc - (r.largo + 8) / 2, r.xc + (r.largo + 8) / 2, -11.5, B + 11.5, z0, z1)
+E_DUCTO = 2.0
+L_DUCTO = 32.0          # largo del tubo siguiendo la caída
+T_IR = 20.0             # barrera IR, medida desde el plano de la ranura
+IR_PAD = 3.5            # espesor extra de pared donde asienta el LED
+
+
+def caja_eje(p, a, hy, hu, largo):
+    """Prisma recto desde p siguiendo a: medio ancho hy en Y y hu en el plano XZ."""
+    a = _unit(a)
+    u = np.array([-a[2], 0.0, a[0]])
+    m = np.column_stack([[0.0, 1.0, 0.0], u, a, np.asarray(p, float)])
+    return Manifold.cube((2 * hy, 2 * hu, largo)).translate((-hy, -hu, 0)).transform(m)
+
+
+def brida(r: Ranura, z0=-3.5, z1=0.0):
+    """Placa mínima: alrededor del tubo y dos orejas para los M3."""
+    ex = (r.largo + 6) / 2
+    return union([caja(r.xc - ex, r.xc + ex, -1, B + 1, z0, z1),
+                  caja(r.xc - 5.5, r.xc + 5.5, -(Y_TORN_DUCTO + 5.5), 0, z0, z1),
+                  caja(r.xc - 5.5, r.xc + 5.5, B, B + Y_TORN_DUCTO + 5.5, z0, z1)])
 
 
 def ducto(r: Ranura) -> Manifold:
-    """Ducto en coordenadas del riel: brida contra la cara inferior (Z=0)."""
-    rt = (r.ancho + 2.5) / 2
+    """Tubo recto bajo la ranura, siguiendo la vertical de mundo, con la barrera IR."""
     c0 = np.array([r.xc, r.ancho / 2, 0.0])
-    P = lambda t: c0 + t * ABAJO
-    p_ir = P(T_GARGANTA + T_IR)
-    ext = hull(caja(r.x0 - PARED_DUCTO, r.x0 + r.largo + PARED_DUCTO, -PARED_DUCTO,
-                    r.ancho + PARED_DUCTO, -4, 0), disco(P(T_GARGANTA), ABAJO, rt + PARED_DUCTO))
-    cuerpo = union([brida(r), ext,
-                    cil_eje(P(T_GARGANTA), ABAJO, LARGO_TUBO, rt + PARED_DUCTO),
-                    cil_eje(p_ir - Y_EJE * (rt + PARED_DUCTO + 6), Y_EJE, 2 * (rt + PARED_DUCTO + 6),
-                            IR_BOSS / 2)])
-    huecos = [hull(caja(r.x0, r.x0 + r.largo, 0, r.ancho, -5, 1), disco(P(T_GARGANTA), ABAJO, rt)),
-              cil_eje(P(T_GARGANTA - 1), ABAJO, LARGO_TUBO + 2, rt)]
+    hy = r.ancho / 2 + 0.8
+    hu = r.largo * C22 / 2 + 0.8
+    arriba = c0 - ABAJO * (hu + 2.0)            # arranca sobre el plano del riel y se recorta
+    corte = caja(-1000, 1000, -1000, 1000, -1000, 0)
+    cuerpo = caja_eje(arriba, ABAJO, hy + E_DUCTO, hu + E_DUCTO, L_DUCTO + hu + 2.0) ^ corte
+    p_ir = c0 + ABAJO * T_IR
+    pads = caja_eje(p_ir - ABAJO * 5.5, ABAJO, hy + E_DUCTO + IR_PAD, 5.5, 11.0)
+    m = union([cuerpo, pads, brida(r)])
+    huecos = [caja_eje(arriba - ABAJO * 1.0, ABAJO, hy, hu, L_DUCTO + hu + 4.0)]
     for s in (1, -1):
-        huecos.append(cil_eje(p_ir + s * Y_EJE * (rt + 1.0), s * Y_EJE, 30, IR_D / 2))
-        huecos.append(cil_eje(p_ir, s * Y_EJE, rt + 1.5, IR_VENTANA / 2))
+        y_ext = hy + E_DUCTO + IR_PAD
+        huecos.append(cil_eje(p_ir + s * Y_EJE * (y_ext + 1.0), -s * Y_EJE, E_DUCTO + IR_PAD, IR_D / 2))
+        huecos.append(cil_eje(p_ir + s * Y_EJE * (hy + 2.0), -s * Y_EJE, 4.0, IR_VENTANA / 2))
     for yy in (-Y_TORN_DUCTO, B + Y_TORN_DUCTO):
         huecos.append(cil_z(r.xc, yy, -6, 1, M3_PASO))
-    return cuerpo - union(huecos)
+    return m - union(huecos)
 
 
 def imprimir_boca_abajo(m):
@@ -375,14 +393,14 @@ def rot_x(m, grados):
 def geometria_bif(r: Ranura):
     d500 = r.dmax
     alto = d500 + 3.3
-    s_fin = S_AGUJA + 32.0 + 20.0
+    s_fin = S_AGUJA + 32.0 + 10.0
     piv = pt(S_AGUJA, -PIVOTE_BAJO)
     yn0, yn1 = pt(S_AGUJA, 0)[0], pt(S_AGUJA + 32.0, 0)[0]
     ya0 = pt(s_fin, 0)[0]
     ya1 = ya0 + d500 + 4.5
-    z_bot = pt(s_fin, 0)[1] - 36.0
+    z_bot = pt(s_fin, 0)[1] - 26.0
     return dict(alto=alto, s_fin=s_fin, piv=piv, yn=(yn0, yn1), ya=(ya0, ya1), z_bot=z_bot,
-                z_ir=z_bot + 14.0, h_sensor=d500 - 1.9)
+                z_ir=z_bot + 12.0, h_sensor=d500 - 1.9)
 
 
 def bifurcacion(r: Ranura, sensor="tcs34725") -> Manifold:
@@ -393,44 +411,52 @@ def bifurcacion(r: Ranura, sensor="tcs34725") -> Manifold:
     (yn0, yn1), (ya0, ya1) = g["yn"], g["ya"]
     ztope = pt(g["s_fin"], alto)[1]
 
-    cav = (seccion([(-15, zf(-15)), (15, zf(15)), (15, ZS + 2), (-15, ZS + 2)])
-           + seccion([pt(0, 0), pt(g["s_fin"], 0), pt(g["s_fin"], alto), pt(0, alto)])
-           + seccion([(yn0, z_bot - 1), (yn1, z_bot - 1), (yn1, zf(yn1) + 0.5), (yn0, zf(yn0) + 0.5)])
-           + seccion([(ya0, z_bot - 1), (ya1, z_bot - 1), (ya1, ztope), (ya0, ztope)])
-           + CrossSection.circle(5.5).translate(piv))
+    def cavidad(a):
+        zt = pt(g["s_fin"], a)[1]
+        return (seccion([(-15, zf(-15)), (15, zf(15)), (15, ZS + 2), (-15, ZS + 2)])
+                + seccion([pt(0, 0), pt(g["s_fin"], 0), pt(g["s_fin"], a), pt(0, a)])
+                + seccion([(yn0, z_bot - 1), (yn1, z_bot - 1), (yn1, zf(yn1) + 0.5), (yn0, zf(yn0) + 0.5)])
+                + seccion([(ya0, z_bot - 1), (ya1, z_bot - 1), (ya1, zt), (ya0, zt)])
+                + CrossSection.circle(5.5).translate(piv))
+
+    cav = cavidad(alto)
+    cav_pared = cavidad(ALTO_BIF_PARED)
     hs = g["h_sensor"]
     zona_sensor = seccion([pt(S_SENSOR + s, hs + h) for s, h in
                            ((-placa / 2 - 9, -placa / 2 - 4), (placa / 2 + 9, -placa / 2 - 4),
                             (placa / 2 + 9, placa / 2 + 4), (-placa / 2 - 9, placa / 2 + 4))])
-    perfil = (cav.offset(PARED_BIF, JoinType.Round) + zona_sensor).hull()
-    x_neg, x_pos = -G / 2 - PARED_BIF, G / 2 + PARED_SENSOR
+    zc = piv[1] - SG90["eje_off"]
+    zona_servo = seccion([(piv[0] - 8, zc - 17), (piv[0] + 8, zc - 17),
+                          (piv[0] + 8, zc + 17), (piv[0] - 8, zc + 17)])
+    perfil = cav_pared.offset(PARED_BIF, JoinType.Round) + zona_sensor + zona_servo
+    sg = SG90
+    x_oreja = G / 2 - 0.5 - (sg["caja_sobre_oreja"] + sg["buje"] + sg["estriado"])
+    x_neg, x_pos = x_oreja, G / 2 + PARED_SENSOR   # cara -X plana: las orejas del servo apoyan en ella
     cuerpo = prisma_yz(perfil, x_neg, x_pos) ^ caja(-50, 50, -50, 250, z_bot, 50)
 
     def riel(m):  # del marco del riel (relativo a la ranura) al de mundo
         return rot_y(m.translate((-r.xc, -yc, 0)), INCLINACION)
 
     brida_m = riel(brida(r))
-    embudo_ext = hull(brida_m, caja(x_neg, x_pos, -18, 18, ZS - 3, ZS))
+    embudo_ext = union([hull(riel(caja(r.x0 - 2.5, r.x0 + r.largo + 2.5, -2.5, r.ancho + 2.5, -3.5, 0)),
+                             caja(x_neg, x_pos, -17, 17, ZS - 2, ZS)),
+                        brida_m])
     embudo_int = hull(riel(caja(r.x0, r.x0 + r.largo, 0, r.ancho, -5, 1)),
                       caja(-G / 2, G / 2, -15, 15, ZS - 1, ZS + 0.5))
 
     # SG90 de la aguja en la cara -X; el estriado entra a la ranura
-    sg = SG90
-    x_oreja = G / 2 - 0.5 - (sg["caja_sobre_oreja"] + sg["buje"] + sg["estriado"])
     z_c = piv[1] - sg["eje_off"]
     orejas = [z_c + sg["orejas"] / 2, z_c - sg["orejas"] / 2]
-    pads = [caja(x_oreja, x_neg + 0.5, piv[0] - 5, piv[0] + 5, ez - 2.4, ez + 2.4) for ez in orejas]
 
     salidas = [((yn0 + yn1) / 2, g["z_ir"]), ((ya0 + ya1) / 2, g["z_ir"])]
     X = np.array([1.0, 0, 0])
-    bosses = []
-    for yy, zz in salidas:
-        bosses.append(cil_eje((x_neg - 7, yy, zz), X, 7 + 2, IR_BOSS / 2))
-        bosses.append(cil_eje((x_pos - 1, yy, zz), X, 5, IR_BOSS / 2))
 
-    m = union([cuerpo, embudo_ext, brida_m] + pads + bosses)
+    m = union([cuerpo, embudo_ext, brida_m])
 
-    huecos = [prisma_yz(cav, -G / 2, G / 2), embudo_int]
+    bolsillo = caja(x_oreja - 1, x_oreja + sg["caja_sobre_oreja"] + 0.3,
+                    piv[0] - sg["ancho"] / 2 - 0.35, piv[0] + sg["ancho"] / 2 + 0.35,
+                    z_c - sg["largo"] / 2 - 0.35, z_c + sg["largo"] / 2 + 0.35)
+    huecos = [prisma_yz(cav, -G / 2, G / 2), embudo_int, bolsillo]
     for yy in (-Y_TORN_DUCTO, B + Y_TORN_DUCTO):
         huecos.append(riel(cil_z(r.xc, yy, -6, 1, M3_PASO)))
         huecos.append(riel(cil_z(r.xc, yy, -34, -4, 7.0)))
@@ -446,7 +472,7 @@ def bifurcacion(r: Ranura, sensor="tcs34725") -> Manifold:
     # servo: paso del buje y pilotos de las orejas
     huecos.append(cil_eje((x_oreja - 1, *piv), X, (-G / 2 + 0.01) - (x_oreja - 1), sg["buje_d"] / 2))
     for ez in orejas:
-        huecos.append(cil_eje((x_oreja - 1, piv[0], ez), X, (x_neg + 2.5) - (x_oreja - 1), M2_ROSCA / 2))
+        huecos.append(cil_eje((x_oreja - 1, piv[0], ez), X, (x_neg + 6.0) - (x_oreja - 1), M2_ROSCA / 2))
     # barreras IR en las dos salidas (haz a lo largo de X, a través de la ranura)
     for yy, zz in salidas:
         for s in (1, -1):
@@ -490,13 +516,13 @@ def tolva_cono() -> Manifold:
     t = math.tan(math.radians(TOLVA_SEMIANGULO))
     ri, dr = DISCO_D / 2, (BOCA_SUP_D - DISCO_D) / 2
     h = dr / t
-    e = 2.0 / math.cos(math.radians(TOLVA_SEMIANGULO))
+    e = 1.6 / math.cos(math.radians(TOLVA_SEMIANGULO))
     ext = union([cil_z(0, 0, 0, 4, 2 * ANILLO_RE),
                  Manifold.cylinder(h, ri + e, ri + dr + e).translate((0, 0, 4)),
-                 cil_z(0, 0, 4 + h, 14 + h, 2 * (ri + dr + e))])
+                 cil_z(0, 0, 4 + h, 10 + h, 2 * (ri + dr + e))])
     inte = union([cil_z(0, 0, -1, 4.01, 2 * ri),
                   Manifold.cylinder(h, ri, ri + dr).translate((0, 0, 4)),
-                  cil_z(0, 0, 4 + h - 0.01, 16 + h, 2 * (ri + dr))])
+                  cil_z(0, 0, 4 + h - 0.01, 12 + h, 2 * (ri + dr))])
     # rascador sobre la salida: solo pasa la moneda que va dentro de la cavidad
     arco = [_polar(9, a) for a in range(-55, 19, 3)] + [_polar(ri + 1, a) for a in range(18, -56, -3)]
     rascador = seccion(arco).extrude(8.0)
@@ -523,9 +549,11 @@ def tolva_disco(motor="28byj") -> Manifold:
 
 
 def tolva_base(motor="28byj") -> Manifold:
-    piezas = [cil_z(0, 0, 0, BASE_ESP, BASE_D),
+    tabs = [hull(cil_z(*_polar(R_TORN_BASE, a), 0, BASE_ESP, 11.0),
+                 cil_z(*_polar(R_TORN_BASE - 12.0, a), 0, BASE_ESP, 11.0)) for a in (45, 135, 225, 315)]
+    piezas = tabs + [cil_z(0, 0, 0, BASE_ESP, BASE_D),
               cil_z(0, 0, BASE_ESP - 0.5, Z_ANILLO, 2 * ANILLO_RE) - cil_z(0, 0, 0, 20, DISCO_D + 2 * HOLGURA),
-              cil_z(CAVIDAD_R, 0, -10, 0.5, CAVIDAD_D + 5)]
+              ]
     huecos = [cil_z(CAVIDAD_R, 0, -11, BASE_ESP + 1, CAVIDAD_D + 1)]
     for a in (45, 135, 225, 315):           # fijación al bastidor, cabeza embutida
         x, y = _polar(R_TORN_BASE, a)
@@ -555,20 +583,52 @@ def tolva_base(motor="28byj") -> Manifold:
 # =====================================================================
 def cuna(espejo=False) -> Manifold:
     t = math.tan(math.radians(INCLINACION))
-    largo, ancho, h0 = 30.0, 27.0, 5.0
+    largo, ancho, h0 = 22.0, 28.0, 4.0
     m = prisma_xz(seccion([(0, 0), (largo, 0), (largo, h0), (0, h0 + largo * t)]), 0, ancho)
     n = _unit((t, 0, 1))
-    y_riel = Y_TORN_CUNA - 12.0             # la cuña empieza 0,5 mm fuera de la brida del ducto
-    tope = np.array([largo / 2, y_riel, h0 + largo / 2 * t])
+    y_ala = Y_TORN_CUNA - 6.0               # la cuña arranca 6 mm dentro del ala
+    tope = np.array([largo / 2, y_ala, h0 + largo / 2 * t])
     m -= cil_eje(tope + n, -n, 40, M3_PASO / 2)
     m -= cil_eje(tope - 4 * n, -n, 40, M3_CABEZA / 2)
-    m -= cil_z(largo / 2, 21, -1, 40, M3_PASO) + cil_z(largo / 2, 21, 3, 40, M3_CABEZA)
+    y_v = ancho - 7.0                       # tornillo al bastidor, fuera del ala
+    m -= cil_z(largo / 2, y_v, -1, 40, M3_PASO) + cil_z(largo / 2, y_v, 3, 40, M3_CABEZA)
     return m.mirror((0, 1, 0)) if espejo else m
 
 
 # =====================================================================
 # Salida
 # =====================================================================
+ORIENTACIONES = [(rx, 0) for rx in range(0, 360, 5)] + [(0, 90), (0, 270)]
+
+
+def voladizo(m, ang=45.0):
+    """Área (mm2) que mira hacia abajo más allá de `ang` desde la vertical, sin contar la cama."""
+    me = m.to_mesh()
+    v = np.asarray(me.vert_properties, float)[:, :3]
+    tr = v[np.asarray(me.tri_verts, int)]
+    n = np.cross(tr[:, 1] - tr[:, 0], tr[:, 2] - tr[:, 0])
+    area = np.linalg.norm(n, axis=1) / 2
+    nz = n[:, 2] / np.maximum(2 * area, 1e-12)
+    cama = tr[:, :, 2].max(1) < tr[:, :, 2].min() + 0.05
+    malo = (nz < -math.sin(math.radians(ang))) & ~cama
+    return float(area[malo].sum()), float(area[cama].sum())
+
+
+def orientar(m):
+    """Prueba giros sobre X cada 5 grados y sobre Y a +-90 y deja la de menos voladizo (a igualdad, más apoyo en la cama)."""
+    mejor = None
+    for rx, ry in ORIENTACIONES:
+        c = a_cama(m.rotate((rx, ry, 0)))
+        x0, y0, z0, x1, y1, z1 = c.bounding_box()
+        if max(x1 - x0, y1 - y0) > CAMA[0] - 2 or z1 > CAMA[2]:
+            continue
+        mal, apoyo = voladizo(c)
+        clave = mal - 0.1 * apoyo
+        if mejor is None or clave < mejor[0]:
+            mejor = (clave, c, (rx, ry), mal)
+    return mejor[1], mejor[2], mejor[3]
+
+
 def _clave(r: Ranura):
     return "_".join(c for c, _, _ in r.monedas)
 
@@ -607,6 +667,7 @@ def construir(ensamble=False):
     SALIDA.mkdir(parents=True, exist_ok=True)
     filas = []
     for nombre, m, n, nota in piezas:
+        m, giro, mal = orientar(m)
         if m.is_empty() or m.status().name != "NoError":
             raise RuntimeError(f"{nombre}: malla inválida ({m.status()})")
         x0, y0, z0, x1, y1, z1 = m.bounding_box()
@@ -615,12 +676,14 @@ def construir(ensamble=False):
         if not cabe:
             raise ValueError(f"{nombre} ({dims}) no cabe en la cama {CAMA}")
         escribir_stl(m, SALIDA / f"{nombre}.stl", nombre)
-        filas.append([nombre, n, *(f"{d:.1f}" for d in dims), f"{m.volume() / 1000:.1f}", nota])
+        filas.append([nombre, n, *(f"{d:.1f}" for d in dims), f"{m.volume() / 1000:.1f}", f"{mal:.0f}", nota])
         print(f"{nombre:38s} x{n}  {dims[0]:6.1f} x {dims[1]:6.1f} x {dims[2]:6.1f} mm  "
-              f"{m.volume() / 1000:6.1f} cm3")
+              f"{m.volume() / 1000:6.1f} cm3  voladizo {mal:6.0f} mm2  giro {giro}")
+    print(f"TOTAL macizo: {sum(float(f[5]) * f[1] for f in filas):.0f} cm3 "
+          f"(con relleno 15 %: unos {sum(float(f[5]) * f[1] for f in filas) * 0.45 * 1.24:.0f} g de PLA)")
     with open(SALIDA / "piezas_clasificador.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["pieza", "cantidad", "x_mm", "y_mm", "z_mm", "volumen_cm3", "nota"])
+        w.writerow(["pieza", "cantidad", "x_mm", "y_mm", "z_mm", "volumen_cm3", "voladizo_mm2", "nota"])
         w.writerows(filas)
 
     if ensamble:
@@ -636,6 +699,15 @@ def _ensamble(riel_a, riel_b, ductos, r500):
 
     partes = [mundo(riel_a), mundo(riel_b)] + [mundo(d) for d in ductos.values()]
     partes.append(bifurcacion(r500).translate(p_mundo(r500.xc, r500.ancho / 2, 0)))
+    nombres = ["rielA", "rielB"] + [f"D{i + 1}" for i in ductos] + ["bif"]
+    libres = True
+    for i in range(len(partes)):
+        for j in range(i + 1, len(partes)):
+            v = (partes[i] ^ partes[j]).volume()
+            if v > 0.5:
+                libres = False
+                print(f"INTERFERENCIA {nombres[i]} x {nombres[j]}: {v:.1f} mm3")
+    print("sin interferencias" if libres else "HAY interferencias")
     ex, ey, ez = p_mundo(ENTRADA / 2, 12.0, ESP_BASE)
     tolva = union([tolva_base(), tolva_disco().translate((0, 0, Z_DISCO)),
                    tolva_cono().translate((0, 0, Z_ANILLO))])
