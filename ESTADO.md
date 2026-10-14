@@ -23,5 +23,10 @@
 - `software/brazo/monedas.py` y la simulación siguen con el riel anterior de 8 estaciones.
 - TCS3200 sin driver (solo STL).
 
+## Aligeramiento (v2)
+- Conjunto impreso ~445 cm3 macizo (antes ~718). Ducto = tubo recto pared 2 mm + brida minima; riel base 5/pared 2,4; cunas 22x28; bifurcacion de perfil delgado.
+- Orientacion auto (giro X cada 5 grados): voladizo 0 en R01, T02; <=120 mm2 en ductos/cuna/base/cono; R02 741 mm2 (puente 14 mm de la cola de milano); B01 1614 mm2 (rampa 25 grados, girada 155 grados).
+- Sin interferencias en el ensamble. docs/08 con cifras antiguas: actualizar.
+
 ## Siguiente paso
-Imprimir R01 + D1 + una cuña, medir ranuras con calibrador y ajustar `COMPENSACION_RANURA`.
+Imprimir R01 + D1 + una cuna, medir ranuras y ajustar COMPENSACION_RANURA; B01 con soporte minimo solo en la rampa.
