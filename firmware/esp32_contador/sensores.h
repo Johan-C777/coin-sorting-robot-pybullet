@@ -1,6 +1,6 @@
 #pragma once
-// Barreras infrarrojas: una por estación del riel (ocho). Cada flanco de bajada
-// es una moneda, y la estación dice de qué denominación y familia es.
+// Barreras infrarrojas: una por ducto de salida (nueve). Cada flanco
+// FLANCO_MONEDA es una moneda, y la estación dice de qué denominación y familia es.
 // El conteo se hace en interrupción y se consume en el bucle principal.
 #include "conteo.h"
 

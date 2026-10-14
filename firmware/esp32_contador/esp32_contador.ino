@@ -3,14 +3,17 @@
   Sistema de Logística de Monedas Inteligentes (UMNG).
 
   La tolva recibe monedas colombianas de las dos familias (nueva de 2012 y
-  anterior de 1989-1996). El riel las separa por diámetro en ocho estaciones
-  y los colectores las juntan en cinco vasos, uno por denominación.
+  anterior de 1989-1996). El riel las separa por diámetro en siete ranuras y
+  un extremo abierto; la bifurcación de la ranura 6 separa las dos $500. Nueve
+  ductos con barrera IR descargan en cinco vasos, uno por denominación.
 
-  Hardware: ESP32 DevKit V1, ocho barreras infrarrojas, servo SG90 en la
-  paleta dosificadora y motorreductor de banda sobre puente H L298N.
+  Hardware (pines en config.h): ESP32 DevKit V1, nueve barreras infrarrojas
+  (una por ducto), tolva con disco de 4 cavidades movido por 28BYJ-48/ULN2003
+  (una moneda cada 1,5 s), TCS34725 por I2C y SG90 con la aguja que separa
+  $500 antigua/nueva, y motorreductor de banda sobre puente H L298N.
 
   Puerto serie a 115200:
-    ALIM:3.5     monedas por segundo que suelta la tolva
+    ALIM:0.667   monedas por segundo que suelta la tolva (máx. 0.9)
     BANDA:0.6    velocidad de la banda, de 0 a 1
     CONTEO       devuelve VASOS:50x24a6,100x20a4,...  (aN = antiguas)
     ESTADO       JSON con conteo y estado de los actuadores
@@ -21,7 +24,11 @@
   Con Wi-Fi expone además GET /api/estado y POST /api/arrancar, /api/detener
   y /api/reiniciar, y hace POST /api/vasos al brazo cuando termina la tanda.
 */
+#include <WiFi.h>
+#include <Wire.h>
+
 #include "banda.h"
+#include "bifurcacion.h"
 #include "comms.h"
 #include "config.h"
 #include "conteo.h"
@@ -37,6 +44,7 @@
 Conteo conteo;
 Dosificador dosificador;
 Banda banda;
+Bifurcacion bifurcacion;
 Comms comms(conteo, dosificador, banda);
 
 uint32_t tUltimaMoneda = 0;
@@ -48,17 +56,22 @@ void setup() {
   Sensores::iniciar();
   dosificador.iniciar();
   banda.iniciar();
+  Wire.begin(PIN_SDA, PIN_SCL, 400000);
+  if (!bifurcacion.iniciar()) Serial.println(F("TCS34725 no responde: la aguja queda en $500 antigua"));
   comms.iniciarWifi(WIFI_SSID, WIFI_PASS);
+  WiFi.setSleep(false);                       // sin modem-sleep: evita pulsos falsos en GPIO36/39
   dosificador.ritmo(0);                       // arranca detenido, se activa con ALIM:
 }
 
 void loop() {
   comms.atender();
   dosificador.actualizar();
+  bifurcacion.actualizar();
 
   const int8_t estacion = Sensores::atender(conteo);
   if (estacion >= 0) {
     comms.anunciarMoneda(estacion);
+    bifurcacion.monedaContada(estacion);
     tUltimaMoneda = millis();
   }
 

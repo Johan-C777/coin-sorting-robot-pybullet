@@ -21,15 +21,18 @@ void IRAM_ATTR isr4() { pulso(4); }
 void IRAM_ATTR isr5() { pulso(5); }
 void IRAM_ATTR isr6() { pulso(6); }
 void IRAM_ATTR isr7() { pulso(7); }
-void (*ISR[N_ESTACIONES])() = {isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7};
+void IRAM_ATTR isr8() { pulso(8); }
+void (*ISR[N_ESTACIONES])() = {isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7, isr8};
+static_assert(N_ESTACIONES == 9, "una ISR por ducto");
 }  // namespace
 
 namespace Sensores {
 
 void iniciar() {
   for (uint8_t i = 0; i < N_ESTACIONES; i++) {
-    pinMode(PIN_SENSOR[i], INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(PIN_SENSOR[i]), ISR[i], FALLING);
+    // 34-39 son solo entrada y sin pull-up: la barrera lleva 10 k externos
+    pinMode(PIN_SENSOR[i], PIN_SENSOR[i] >= 34 ? INPUT : INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(PIN_SENSOR[i]), ISR[i], FLANCO_MONEDA);
   }
 }
 

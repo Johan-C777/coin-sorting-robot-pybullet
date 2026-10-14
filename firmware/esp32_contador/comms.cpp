@@ -87,7 +87,7 @@ void Comms::rutasHttp() {
   servidor.on("/api/arrancar", HTTP_POST, []() {
     const String cuerpo = servidor.arg("plain");
     const int pos = cuerpo.indexOf("ritmo");
-    const float ritmo = pos >= 0 ? cuerpo.substring(pos + 7).toFloat() : 3.0f;
+    const float ritmo = pos >= 0 ? cuerpo.substring(pos + 7).toFloat() : 1.0f / PERIODO_MONEDA_S;   // una moneda cada 1,5 s
     instancia->dosificador_.ritmo(ritmo);
     servidor.send(200, "application/json", "{\"ok\":true}");
   });
@@ -105,7 +105,7 @@ void Comms::rutasHttp() {
 void Comms::procesarLinea(char *linea) {
   if (linea[0] == '\0') return;
 
-  if (strncmp(linea, "ALIM:", 5) == 0) {          // ALIM:3.5 monedas por segundo
+  if (strncmp(linea, "ALIM:", 5) == 0) {          // ALIM:0.667 monedas por segundo (máx. RITMO_MAX)
     dosificador_.ritmo(atof(linea + 5));
     Serial.println(F("OK"));
     return;
