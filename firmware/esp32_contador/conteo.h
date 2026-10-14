@@ -9,7 +9,7 @@
 class Conteo {
  public:
   void reiniciar();
-  void sumar(uint8_t estacion, uint16_t n = 1);   // estación 0 a 7
+  void sumar(uint8_t estacion, uint16_t n = 1);   // ducto 0 a N_ESTACIONES-1
 
   uint16_t monedasEstacion(uint8_t estacion) const;
 
@@ -31,5 +31,5 @@ class Conteo {
   size_t json(char *destino, size_t capacidad) const;
 
  private:
-  uint16_t n_[N_ESTACIONES] = {0, 0, 0, 0, 0, 0, 0, 0};
+  uint16_t n_[N_ESTACIONES] = {};
 };

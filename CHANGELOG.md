@@ -1,5 +1,16 @@
 # Cambios
 
+## 0.4.0 · Clasificador físico para impresión FDM
+
+- `scripts/generar_clasificador.py` (manifold3d): tolva de 40° con disco de 4
+  cavidades (28BYJ-48 o SG90 continuo), riel de 22° en dos módulos con cola de
+  milano, 7 ranuras + extremo abierto, 7 ductos y la bifurcación de $500 con
+  alojamientos para TCS34725/TCS3200, SG90 y barreras IR de 5 mm. STL en
+  `hardware/stl/`, guía en `docs/08-clasificador-fisico.md`.
+- Firmware del contador: 9 ductos con interrupción IR, lectura I2C del
+  TCS34725 (`color500.h`, `bifurcacion.*`), aguja SG90 por LEDC y tolva a
+  1 moneda / 1,5 s. Nuevo mapa de pines en `config.h`.
+
 ## 0.3.0 · Entrega de avances del segundo parcial
 
 ### Monedas antiguas y nuevas
