@@ -33,5 +33,9 @@
 - B01 voladizo 1864 mm2 (soporte solo bajo la rampa). Sin interferencias.
 - Mas recorte solo cambiando diseno: 6 cunas en vez de 8, base tolva Ø100 mas chica.
 
+## Visor 3D (etapa 1)
+- `scripts/exportar_visor_3d.py` + `scripts/visor_template.html` -> `hardware/visor/ensamble_etapa1.html` (three.js por CDN, 28 mallas en pose de ensamble, componentes C1-C5, despiece, aguja 0/45).
+- Cuñas colocadas bajo el plano del riel (visual, no verificado contra bastidor real).
+
 ## Siguiente paso
 Imprimir R01 + D1 + una cuna, medir ranuras y ajustar COMPENSACION_RANURA; B01 con soporte minimo solo en la rampa.

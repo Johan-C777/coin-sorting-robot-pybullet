@@ -1,0 +1,298 @@
+<title>Ensamble Etapa 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@400;500&display=swap">
+<style>
+/* Layout: lista de piezas a la izquierda, visor al centro, ficha de la pieza a la derecha; en teléfono se apilan visor, lista y ficha. */
+:root{
+  --bg:#eceee9; --panel:#f6f7f4; --ink:#1b2125; --ink2:#55606a; --line:#cfd4d0;
+  --accent:#c4570a; --accent-ink:#ffffff; --stage:#dfe3de; --edge:#1b2125;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body);
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-block:10px}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr) 300px;grid-template-rows:auto minmax(0,1fr);gap:10px;height:100%;min-height:560px}
+header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font:700 22px/1.1 var(--f-display);letter-spacing:.01em;margin:0}
+header p{margin:0;color:var(--ink2);font-size:13px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;min-height:0;min-width:0}
+#lista{overflow:auto;padding:8px 0}
+.grp{font:600 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);padding:10px 12px 4px}
+.item{display:flex;align-items:center;gap:8px;width:100%;padding:6px 12px;background:none;border:0;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+.item:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.item[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 20%,transparent);box-shadow:inset 3px 0 var(--accent)}
+.item:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sw{width:10px;height:10px;border-radius:2px;flex:none;border:1px solid var(--line)}
+.code{font:500 11px var(--f-mono);color:var(--ink2);width:26px;flex:none}
+.nm{flex:1;min-width:0}
+.qty{font:500 11px var(--f-mono);color:var(--ink2)}
+.item.off{opacity:.4}
+#stage{position:relative;display:flex;flex-direction:column;overflow:hidden}
+#cv{position:relative;flex:1;min-height:320px;background:var(--stage);border-radius:6px 6px 0 0;overflow:hidden;touch-action:none}
+#cv canvas{display:block;width:100%;height:100%}
+.lbl{position:absolute;left:0;top:0;font:500 10px var(--f-mono);padding:1px 4px;border-radius:3px;background:var(--panel);color:var(--ink);border:1px solid var(--line);pointer-events:none;white-space:nowrap;opacity:.92}
+.lbl.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#tip{position:absolute;pointer-events:none;font:500 12px var(--f-body);background:var(--ink);color:var(--bg);padding:3px 8px;border-radius:4px;display:none;white-space:nowrap}
+.bar{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
+.bar label{display:flex;align-items:center;gap:8px;font:500 12px var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.bar input[type=range]{width:130px;accent-color:var(--accent)}
+.bar input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
+.views{display:flex;gap:4px}
+button.b{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 10px;font:500 12px var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+button.b:hover{border-color:var(--accent)}
+button.b[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#ficha{padding:14px;overflow:auto}
+#ficha h2{font:700 20px/1.15 var(--f-display);margin:2px 0 4px}
+.tag{display:inline-block;font:500 11px var(--f-mono);padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--ink2);margin-right:4px}
+.tag.pr{border-color:var(--accent);color:var(--accent)}
+dl{margin:12px 0 0;display:grid;gap:10px}
+dt{font:600 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+dd{margin:2px 0 0}
+.file{font:400 12px var(--f-mono);word-break:break-all}
+.sum{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}
+.sum b{color:var(--ink);font-family:var(--f-mono);font-weight:500}
+.hint{color:var(--ink2);font-size:13px}
+@media (max-width:980px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto;height:auto}
+  #cv{min-height:56vh}
+  #lista{max-height:300px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header>
+    <h1>Etapa 1: tolva y selección</h1>
+    <p>Arrastra para girar, rueda para acercar, toca una pieza para ver qué es.</p>
+  </header>
+  <nav class="panel" id="lista" aria-label="Piezas"></nav>
+  <section class="panel" id="stage">
+    <div id="cv"><div id="tip"></div></div>
+    <div class="bar">
+      <label>Despiece <input type="range" id="exp" min="0" max="100" value="0" aria-label="Despiece"></label>
+      <label><input type="checkbox" id="chkC" checked> Componentes</label>
+      <label><input type="checkbox" id="chkL" checked> Códigos</label>
+      <label>Aguja
+        <span class="views"><button class="b" id="a0" aria-pressed="true">0°</button><button class="b" id="a45" aria-pressed="false">45°</button></span>
+      </label>
+      <span class="views"><button class="b" data-v="iso">Iso</button><button class="b" data-v="lat">Lateral</button><button class="b" data-v="sup">Superior</button></span>
+    </div>
+  </section>
+  <aside class="panel" id="ficha"></aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const DATA = /*DATOS*/null;
+const COLORS = {
+  riel:[0x7f93a6,0x6f8196], cuna:[0x5d6b78,0x536070], ducto:[0x3fa0a0,0x2f8a8a], bif:[0x39414a,0x4a535d], aguja:[0xe0e4e8,0xc9ced4],
+  tolva:[0xd2a45a,0xc0924a], tolva2:[0xe3c07e,0xd1ad68], tolva3:[0xc88a3c,0xb87b30],
+  motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046]
+};
+const dark = () => document.documentElement.dataset.theme==='dark' ||
+  (document.documentElement.dataset.theme!=='light' && matchMedia('(prefers-color-scheme: dark)').matches);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const b64 = (s, T) => { const b = atob(s), u = new Uint8Array(b.length); for (let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new T(u.buffer); };
+
+const cv = document.getElementById('cv');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+cv.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32,1,5,5000);
+camera.up.set(0,0,1);
+scene.add(new THREE.HemisphereLight(0xffffff,0x445566,0.85));
+const sun = new THREE.DirectionalLight(0xffffff,0.9); sun.position.set(200,-300,400); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff,0.35); fill.position.set(-300,200,-100); scene.add(fill);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = .12;
+
+// ---- construir piezas
+const all = [];                      // {d, group, mesh, edges, mats}
+const root = new THREE.Group(); scene.add(root);
+const bbox = new THREE.Box3();
+for (const d of DATA.piezas) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(b64(d.v, Float32Array), 3));
+  geo.setIndex(new THREE.BufferAttribute(b64(d.t, Uint32Array), 1));
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({color:COLORS[d.color][0], roughness:.55, metalness:.08, flatShading:true,
+    side:THREE.DoubleSide, transparent:true, opacity:1, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1});
+  const mesh = new THREE.Mesh(geo, mat);
+  const eg = new THREE.EdgesGeometry(geo, 35);
+  const emat = new THREE.LineBasicMaterial({color:0x000000, transparent:true, opacity:.35});
+  const edges = new THREE.LineSegments(eg, emat);
+  const group = new THREE.Group();
+  if (d.pivote) {                      // aguja: gira sobre el eje X por su pivote
+    mesh.position.set(-d.pivote[0],-d.pivote[1],-d.pivote[2]); mesh.add(edges);
+    const piv = new THREE.Group(); piv.position.set(...d.pivote); piv.add(mesh); group.add(piv);
+    d.pivObj = piv;
+  } else { mesh.add(edges); group.add(mesh); }
+  root.add(group);
+  geo.computeBoundingBox(); bbox.union(geo.boundingBox);
+  all.push({d, group, mesh, edges, mat, emat, base:new THREE.Vector3()});
+}
+const size = bbox.getSize(new THREE.Vector3()), center = bbox.getCenter(new THREE.Vector3());
+const radius = size.length()/2;
+
+// ---- códigos (etiquetas HTML)
+const byPid = {};
+for (const p of all) (byPid[p.d.pid] ||= []).push(p);
+const labels = {};
+for (const pid in byPid) {
+  const el = document.createElement('div'); el.className='lbl'; el.textContent=pid; cv.appendChild(el);
+  labels[pid] = el;
+}
+
+// ---- lista
+const lista = document.getElementById('lista'), ficha = document.getElementById('ficha');
+const groups = [...new Set(DATA.piezas.map(p=>p.grupo))];
+const first = {}; for (const p of DATA.piezas) if(!(p.pid in first)) first[p.pid]=p;
+const hex = c => '#'+COLORS[c][0].toString(16).padStart(6,'0');
+const hidden = new Set();
+let selected = null;
+for (const g of groups) {
+  const h = document.createElement('div'); h.className='grp'; h.textContent=g; lista.appendChild(h);
+  for (const pid of Object.keys(first).filter(k=>first[k].grupo===g)) {
+    const d = first[pid];
+    const b = document.createElement('button'); b.className='item'; b.dataset.pid=pid; b.setAttribute('aria-pressed','false');
+    b.innerHTML = `<span class="sw" style="background:${hex(d.color)}"></span><span class="code">${pid}</span><span class="nm">${d.nombre}</span>${d.cant>1?`<span class="qty">×${d.cant}</span>`:''}`;
+    b.onclick = () => select(selected===pid?null:pid);
+    lista.appendChild(b);
+  }
+}
+
+const PRINT = Object.values(first).filter(d=>d.kind==='print');
+const nFiles = new Set(DATA.piezas.filter(d=>d.kind==='print').map(d=>d.archivo)).size;
+const nPrint = PRINT.reduce((a,d)=>a+d.cant,0);
+function fichaVacia(){
+  ficha.innerHTML = `<h2>Elige una pieza</h2><p class="hint">Toca una pieza en el modelo o en la lista. Las demás se atenúan para ver dónde va.</p>
+  <div class="sum">Se imprimen <b>${nFiles}</b> archivos (<b>${nPrint}</b> piezas) y se agregan <b>5</b> componentes: motor, servo, sensor de color, 9 LED IR y 9 fototransistores.<br><br>
+  Mueve <b>Despiece</b> para separar el ensamble y <b>Aguja</b> para ver cómo desvía la $500.</div>`;
+}
+function select(pid){
+  selected = pid;
+  lista.querySelectorAll('.item').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.pid===pid)));
+  for (const p of all) {
+    const on = !pid || p.d.pid===pid;
+    p.mat.opacity = on?1:.16; p.mat.depthWrite = on; p.emat.opacity = on?.35:.05;
+    p.mat.emissive.setHex(pid && on ? 0x6a3a00 : 0x000000);
+  }
+  for (const k in labels) labels[k].classList.toggle('sel', k===pid);
+  if (!pid) return fichaVacia();
+  const d = first[pid];
+  const piezas = d.kind==='print' ? `<span class="tag pr">Se imprime</span>` : `<span class="tag">Componente comprado</span>`;
+  const cant = d.cant>1 ? `<span class="tag">×${d.cant}</span>` : '';
+  const arch = d.archivo ? (d.cant>1 && pid==='R03' ? 'R03_cuna_22_izq.stl y R03_cuna_22_der.stl (4 de cada una)' : d.archivo) : 'No tiene archivo. Se compra.';
+  let extra = '';
+  if (pid==='B02') extra = `<dt>Posición actual</dt><dd id="agTxt"></dd>`;
+  ficha.innerHTML = `<span class="tag">${pid}</span>${piezas}${cant}<h2>${d.nombre}</h2>
+    <dl><dt>Qué hace</dt><dd>${d.desc}</dd><dt>Cómo se monta</dt><dd>${d.montaje}</dd>
+    <dt>Archivo</dt><dd class="file">${arch}</dd>${extra}</dl>`;
+  actualizarAguja();
+}
+
+// ---- controles
+const exp = document.getElementById('exp'), chkC = document.getElementById('chkC'), chkL = document.getElementById('chkL');
+function aplicar(){
+  const k = exp.value/100*34;
+  for (const p of all) {
+    const e = p.d.ex; p.group.position.set(e[0]*k, e[1]*k, e[2]*k);
+    p.group.visible = chkC.checked || p.d.kind==='print';
+  }
+  lista.querySelectorAll('.item').forEach(b=>b.classList.toggle('off', !chkC.checked && first[b.dataset.pid].kind==='comp'));
+}
+exp.oninput = chkC.onchange = aplicar;
+let ang = 0;
+function actualizarAguja(){
+  const a = document.getElementById('agTxt');
+  if (a) a.textContent = ang? '45°: la aguja baja y la $500 nueva (anillo dorado) cae por el hueco.' : '0°: la aguja queda a ras del piso y la $500 antigua (anillo plateado) pasa a su ducto.';
+}
+function setAng(v){
+  ang = v;
+  const ag = all.find(p=>p.d.pid==='B02');
+  ag.d.pivObj.rotation.x = -v*Math.PI/180;
+  document.getElementById('a0').setAttribute('aria-pressed', String(!v));
+  document.getElementById('a45').setAttribute('aria-pressed', String(!!v));
+  actualizarAguja();
+}
+document.getElementById('a0').onclick = () => setAng(0);
+document.getElementById('a45').onclick = () => setAng(45);
+
+function vista(n){
+  const dir = {iso:[0.9,-1.1,0.75], lat:[0,-1,0.04], sup:[0.001,-0.02,1]}[n];
+  const f = Math.min(1, camera.aspect);
+  const v = new THREE.Vector3(...dir).normalize().multiplyScalar(radius*3.0/f);
+  camera.position.copy(center).add(v); controls.target.copy(center); controls.update();
+}
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>vista(b.dataset.v));
+
+// ---- selección por clic / hover
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tip = document.getElementById('tip');
+function pick(ev){
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set((ev.clientX-r.left)/r.width*2-1, -(ev.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(mouse, camera);
+  const vis = all.filter(p=>p.group.visible && (!selected || p.d.pid===selected || true)).map(p=>p.mesh);
+  const hit = ray.intersectObjects(vis,false).find(h=>h.object.material.opacity>.5 || !selected);
+  return hit ? all.find(p=>p.mesh===hit.object) : null;
+}
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e=>down=[e.clientX,e.clientY]);
+renderer.domElement.addEventListener('pointerup', e=>{
+  if (!down || Math.hypot(e.clientX-down[0], e.clientY-down[1])>5) return;
+  const h = pick(e); select(h ? (selected===h.d.pid ? null : h.d.pid) : null);
+});
+renderer.domElement.addEventListener('pointermove', e=>{
+  if (e.buttons) { tip.style.display='none'; return; }
+  const h = pick(e);
+  if (!h) { tip.style.display='none'; return; }
+  const r = cv.getBoundingClientRect();
+  tip.textContent = h.d.pid+'  '+h.d.nombre; tip.style.display='block';
+  tip.style.left = (e.clientX-r.left+12)+'px'; tip.style.top = (e.clientY-r.top+12)+'px';
+});
+renderer.domElement.addEventListener('pointerleave', ()=>tip.style.display='none');
+
+// ---- bucle
+const v3 = new THREE.Vector3();
+function aplicarTema(){
+  const d = dark();
+  renderer.setClearColor(new THREE.Color(css('--stage')||'#0b1013'), 1);
+  const ec = new THREE.Color(css('--edge')||'#000');
+  for (const p of all) { p.emat.color.copy(ec); p.mat.color.setHex(COLORS[p.d.color][d?0:1]); }
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicarTema);
+new MutationObserver(aplicarTema).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+function resize(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix();
+  if (!resize.ok && w>0) { resize.ok = 1; vista('iso'); }
+}
+new ResizeObserver(resize).observe(cv);
+function frame(){
+  controls.update();
+  renderer.render(scene,camera);
+  const w = cv.clientWidth, h = cv.clientHeight;
+  for (const pid in byPid) {
+    const el = labels[pid], p = byPid[pid][0];
+    const vis = chkL.checked && p.group.visible;
+    el.style.display = vis ? '' : 'none';
+    if (!vis) continue;
+    const b = new THREE.Box3().setFromObject(p.group); b.getCenter(v3); v3.project(camera);
+    el.style.transform = `translate(${(v3.x*.5+.5)*w-10}px,${(-v3.y*.5+.5)*h-8}px)`;
+    el.style.opacity = (selected && selected!==pid) ? .25 : .92;
+  }
+  requestAnimationFrame(frame);
+}
+aplicarTema(); aplicar(); resize(); vista('iso'); fichaVacia(); frame();
+</script>
