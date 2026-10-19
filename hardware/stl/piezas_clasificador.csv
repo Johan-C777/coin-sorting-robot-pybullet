@@ -1,13 +1,13 @@
 pieza,cantidad,x_mm,y_mm,z_mm,volumen_cm3,voladizo_mm2,no_puenteable_mm2,nota
-R01_riel_modulo_A,1,190.5,58.0,14.0,54.7,0,0,entrada + ranuras 1-4
-R02_riel_modulo_B,1,215.3,58.0,14.0,57.5,0,0,ranuras 5-7 + extremo abierto
+R01_riel_modulo_A,1,190.5,58.0,14.0,54.7,437,0,entrada + ranuras 1-4
+R02_riel_modulo_B,1,215.3,58.0,14.0,57.5,478,0,ranuras 5-7 + extremo abierto
 R04_llave_union,3,20.0,11.0,2.4,0.4,0,0,"mariposa bajo la junta A-B, entra desde abajo"
-R03_pata1_izq,1,39.5,30.0,153.6,12.4,0,0,altura 150 mm; pie atado con brida
-R03_pata1_der,1,39.5,30.0,153.6,12.4,0,0,altura 150 mm; pie atado con brida
-R03_pata2_izq,1,37.5,30.0,114.0,10.1,0,0,altura 110 mm; pie atado con brida
-R03_pata2_der,1,37.5,30.0,114.0,10.1,0,0,altura 110 mm; pie atado con brida
-R03_pata3_izq,1,34.0,30.0,43.6,6.1,0,0,altura 40 mm; pie atado con brida
-R03_pata3_der,1,34.0,30.0,43.6,6.1,0,0,altura 40 mm; pie atado con brida
+R03_pata1_izq,1,39.5,30.0,153.6,12.4,74,0,altura 150 mm; pie atado con brida
+R03_pata1_der,1,39.5,30.0,153.6,12.4,74,0,altura 150 mm; pie atado con brida
+R03_pata2_izq,1,37.5,30.0,114.0,10.1,74,0,altura 110 mm; pie atado con brida
+R03_pata2_der,1,37.5,30.0,114.0,10.1,74,0,altura 110 mm; pie atado con brida
+R03_pata3_izq,1,34.0,30.0,43.6,6.1,74,0,altura 40 mm; pie atado con brida
+R03_pata3_der,1,34.0,30.0,43.6,6.1,74,0,altura 40 mm; pie atado con brida
 D1_adaptador_N50,1,36.1,41.0,65.2,12.7,0,0,"ranura 17.5 mm, IR 5 mm; tubo PVC 1"" de 196 mm"
 D2_adaptador_N100,1,36.1,44.3,65.8,13.6,0,0,"ranura 20.8 mm, IR 5 mm; tubo PVC 1"" de 181 mm"
 D3_adaptador_A50,1,36.1,45.0,65.9,13.8,0,0,"ranura 21.5 mm, IR 5 mm; tubo PVC 1"" de 166 mm"
@@ -15,11 +15,11 @@ D4_adaptador_N200,1,36.1,46.4,66.2,14.2,0,0,"ranura 22.9 mm, IR 5 mm; tubo PVC 1
 D5_adaptador_A100,1,36.1,46.9,66.3,14.3,0,0,"ranura 23.4 mm, IR 5 mm; tubo PVC 1"" de 128 mm"
 D7_adaptador_A200,1,36.1,48.4,66.5,14.7,0,0,"ranura 24.9 mm, IR 5 mm; tubo PVC 1"" de 85 mm"
 D8_adaptador_N1000,1,36.1,53.5,67.1,15.8,0,0,"ranura 30.0 mm, IR 5 mm; tubo PVC 1"" de 69 mm"
-D6_bifurcador_500,1,68.6,38.2,152.8,63.3,0,0,plato basculante; servo y IR a presión; PLA negro
-B02_plato_desvio,1,31.0,24.9,9.0,6.0,0,0,buje de estriado SG90 a presión
+D6_bifurcador_500,1,68.6,38.2,152.8,63.3,3,0,plato basculante; servo y IR a presión; PLA negro
+B02_plato_desvio,1,31.0,24.9,9.0,6.0,7,0,buje de estriado SG90 a presión
 B03_puente_sensor,1,28.0,38.9,9.6,3.5,0,0,"TCS34725 a presión, a horcajadas sobre las paredes"
-T01_tolva_cono_40,1,134.2,134.2,43.8,47.1,0,0,"semiángulo 40°, boca Ø130; se imprime boca abajo"
+T01_tolva_cono_40,1,134.2,134.2,43.8,47.1,61,0,"semiángulo 40°, boca Ø130; se imprime boca abajo"
 T02_disco_dosificador,1,80.0,80.0,15.8,9.2,0,0,"28BYJ-48, eje a presión"
-T03_base_tolva,1,100.0,100.0,10.6,39.9,0,0,motor con 2 bridas de nailon
-T04_pata_tolva,4,36.0,36.0,214.4,17.1,0,0,altura 212 mm
+T03_base_tolva,1,100.0,100.0,10.6,39.9,82,0,motor con 2 bridas de nailon
+T04_pata_tolva,4,36.0,36.0,214.4,17.1,96,0,altura 212 mm
 P01_base_extremo,2,44.0,194.0,38.0,52.6,0,0,base ABS de un extremo: 2 patas PVC 3/4 separadas 150 mm
