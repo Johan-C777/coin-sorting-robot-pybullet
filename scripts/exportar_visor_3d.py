@@ -17,8 +17,7 @@ RAIZ = g.RAIZ
 SALIDA = RAIZ / "hardware" / "visor"
 PLANTILLA = Path(__file__).with_name("visor_template.html")
 C22, S22 = g.C22, g.S22
-VASO_D, VASO_H, PASO_VASOS = 52.0, 60.0, 60.0
-Z_BANDA = -150.0                      # cara superior de la banda, bajo la mesa de referencia
+VASO_D, VASO_H = 34.0, 60.0
 DENOM = {"N50": 50, "A50": 50, "N100": 100, "A100": 100, "N200": 200, "A200": 200,
          "A500": 500, "N500": 500, "N1000": 1000}
 VASOS = [50, 100, 200, 500, 1000]
@@ -86,7 +85,7 @@ def construir():
             f"Tubo vertical bajo la ranura {r.i + 1} ({r.ancho:.1f} mm). Dos cavidades Ø5,2 enfrentadas para la barrera infrarroja, {g.T_IR:.0f} mm bajo el riel.",
             "Dos clavijas Ø6 en sus orejas entran en el ala del riel. LED IR a un lado y fototransistor al otro, a presión.")
         luces[f"D{r.i + 1}"] = (c0, hy, -g.T_IR, 0.0)
-    gd = g.geom_d6(r500)
+    gd = g.geom_d6(r500, ctx["extra_d6"])
     c6 = p_mundo(r500.xc, r500.yc, 0)
     add("D6", "Bifurcación $500", "Bifurcador de $500", "D6_bifurcador_500.stl", 1, "print", "bif", mundo("D6_bifurcador_500"), [0, 0, -1.7],
         "Tubo vertical bajo la ranura 6 que se abre en dos columnas separadas por un divisor. En el cruce hay un plato basculante: inclinado a un lado, la moneda sale por una columna; al otro lado, por la otra. Las dos salidas quedan en la misma línea que los demás ductos.",
@@ -142,8 +141,7 @@ def construir():
             cil = g.cil_eje((h, s * (hy + 1.0), up), (0, float(s), 0), 7.6, 2.5).translate(tuple(c0))
             add(pid, "Componentes", nombre, None, 9, "comp", col, cil, ex, desc, mont, tag=k)
 
-    # ---------------- referencia (no se imprime) ----------------
-    xs = [p_mundo(x, 0, 0)[0] for x in (0.0, d.fin_b)]
+    # ---------------- datos de la simulación (se calculan antes de la base) ----------------
     monedas_tmp = {}
     for i, (w, ms) in enumerate(g.RANURAS):
         for key, nombre, diam in ms:
@@ -158,62 +156,67 @@ def construir():
             s["fondo"] = {"D6a": list(c0 + np.array([-col, 0, -gd["t_bot"]])), "D6b": list(c0 + np.array([col, 0, -gd["t_bot"]]))}
             s["ir"] = {"D6a": float(c0[2] + gd["up_ir"]), "D6b": float(c0[2] + gd["up_ir"])}
         else:
-            s["fondo"] = {s["nombre"]: list(c0 + np.array([0, 0, -g.L_DUCTO]))}
+            s["fondo"] = {s["nombre"]: list(c0 + np.array([0, 0, -ctx["largos"][r.i]]))}
             s["ir"] = {s["nombre"]: float(c0[2] - g.T_IR)}
         slots_tmp.append(s)
-    # Base de referencia: tablero con ranura + marco de listones (no se imprime)
-    xm0 = sum(v[0] for sl in slots_tmp for v in sl["fondo"].values()) / sum(len(sl["fondo"]) for sl in slots_tmp)
-    X0 = min(xs[0] - 90.0, xm0 - 4 * PASO_VASOS - 45.0)
-    X1 = max(xs[1] + 40.0, xm0 + 4 * PASO_VASOS + 45.0)
-    YF, YB, SLOT0, SLOT1 = -70.0, 94.0, -7.0, 31.0
-    mesa = [g.caja(X0, X1, YF, SLOT0, -9, 0), g.caja(X0, X1, SLOT1, YB, -9, 0)]
-    add("M1", "Base", "Tablero de la base", None, 1, "ref", "mesa", g.union(mesa), [0, 0, 2],
-        "Tablero de MDF de 9 mm, %d × %d mm, con una ranura de 38 mm por donde bajan los tubos. Sostiene riel, tolva y bifurcador." % (X1 - X0, YB - YF),
-        "Las patas del riel y de la tolva se atan con bridas a este tablero (ranuras de 3 mm para la brida junto a cada pie).")
-    L, LP = 20.0, -158.0
-    ox0, ox1, oy0, oy1 = X0 + 6, X1 - 26, YF + 6, YB - 26
-    marco = []
-    for x in (ox0, ox1):
-        for y in (oy0, oy1):
-            marco.append(g.caja(x, x + L, y, y + L, LP, -9))                       # patas
-    for y in (oy0, oy1):
-        marco.append(g.caja(ox0 + L, ox1, y, y + L, -9 - L, -9))                   # largueros altos
-        marco.append(g.caja(ox0 + L, ox1, y, y + L, LP + 40, LP + 40 + L))        # largueros bajos
-    for x in (ox0, ox1):
-        marco.append(g.caja(x, x + L, oy0 + L, oy1, -9 - L, -9))                   # travesaños altos
-    add("M3", "Base", "Marco de listones", None, 1, "ref", "marco", g.union(marco), [0, 0, -4],
-        "Cuatro patas de 150 mm y largueros de 20 × 20 mm (listón de pino o perfil de aluminio 2020). La banda pasa libre entre las patas, por debajo del tablero.",
-        "Pegado con cola y escuadras de ángulo, o perfil 2020 con escuadras. Los largueros bajos evitan que se deforme; van por encima de los vasos.")
-    # ---- vasos: uno por salida, ordenados por la x de su salida
-    salidas = sorted(((nm, v) for sl in slots_tmp for nm, v in sl["fondo"].items()), key=lambda t: t[1][0])
+
+    # ---------------- base (no se imprime, salvo los codos P01 y P02) ----------------
+    b = ctx["base"]
+    X0, X1, Y0, Y1 = b["lamina"]
+    (sx0, sx1), (sy0, sy1) = b["x_ranura"], b["y_ranura"]
+    lam = g.caja(X0, X1, Y0, Y1, -g.LAMINA_E, 0) - g.caja(sx0, sx1, sy0, sy1, -g.LAMINA_E - 1, 1)
+    add("M1", "Base", "Lámina de la base", None, 1, "ref", "mesa", lam, [0, 0, 2],
+        "Lámina de MDF o acrílico de 6 mm, %d × %d mm, con una ranura de 38 mm por donde bajan los ductos. Sostiene riel, tolva y bifurcador." % (X1 - X0, Y1 - Y0),
+        "Se apoya en los 4 esquineros P02 y se ata con bridas por sus agujeros de las esquinas. Las patas del riel y de la tolva se atan a ella.")
+    r_b = g.BORE_R + g.PARED_PVC
+    pvc = []
+    for x in (b["xl"], b["xr"]):
+        for y in (b["yf"], b["yb"]):
+            pvc.append(g.cil_z(x, y, g.Z_PISO + g.PLACA_E + 2.0, -g.LAMINA_E - g.PLACA_E - 2.0, g.PVC_D))
+    for y in (b["yf"], b["yb"]):
+        for z in (b["z_eje_alto"], b["z_eje_bajo"]):
+            pvc.append(g.cil_eje((b["xl"] + r_b, y, z), (1, 0, 0), b["l_x"], g.PVC_D / 2))
+    for x in (b["xl"], b["xr"]):
+        pvc.append(g.cil_eje((x, b["yf"] + r_b, b["z_eje_alto"]), (0, 1, 0), b["l_y"], g.PVC_D / 2))
+    add("M3", "Base", "Tubos PVC de 3/4\"", None, 10, "ref", "pvc", g.union(pvc), [0, 0, -3],
+        "Cuatro patas de %d mm, dos largueros altos y dos bajos de %d mm, y dos travesaños de %d mm. Tubo PVC de presión de 3/4\" (26,7 mm)." % (b["l_pata"], b["l_x"], b["l_y"]),
+        "Entran a presión en los codos impresos (30 mm de penetración). Se pueden pegar con cemento PVC si quedan flojos.")
+    for nombre, m in g.partes_ensamble(piezas_g, ctx):
+        if nombre.startswith("P01"):
+            add("P01", "Base", "Pie de pata", "P01_pie_pvc.stl", 4, "print", "marco", m, [0, 0, -1],
+                "Placa con un alojamiento vertical para la pata y otro horizontal para el larguero bajo.",
+                "Apoya en el piso. Los tubos entran a presión.")
+        elif nombre.startswith("P02"):
+            add("P02", "Base", "Esquinero", "P02_esquinero_pvc.stl", 4, "print", "marco", m, [0, 0, 1],
+                "Placa que sostiene la lámina, con un alojamiento vertical para la pata y dos horizontales para los largueros altos.",
+                "Los tubos entran por abajo a presión. La lámina se ata a la placa con bridas por los agujeros de las esquinas.")
+    xm_all = sorted(((nm, v) for sl in slots_tmp for nm, v in sl["fondo"].items()), key=lambda t: t[1][0])
+    Z_BANDA_ = g.Z_BOCA - VASO_H
+    xs_c = [v[0] for _, v in xm_all]
+    add("M2", "Base", "Banda transportadora", None, 1, "ref", "banda",
+        g.caja(min(xs_c) - 60, max(xs_c) + 60, 12.0 - 35, 12.0 + 35, Z_BANDA_ - 8, Z_BANDA_), [0, 0, -3],
+        "Lleva los nueve vasos hasta el punto A del brazo.", "Es la etapa 2; aquí solo marca la altura de los vasos. Pasa entre las patas de la base.")
     SALIDA_COIN = {"D6a": "A500", "D6b": "N500"}
-    for sl, r in zip(slots_tmp, r_all):
+    for sl in slots_tmp:
         if sl["nombre"] != "D6":
             SALIDA_COIN[sl["nombre"]] = next(k for k, m in monedas_tmp.items() if m["slot"] == sl["i"])
-    xm = sum(v[0] for _, v in salidas) / len(salidas)
-    Y_VASO = 12.0
-    add("M2", "Base", "Banda transportadora", None, 1, "ref", "banda",
-        g.caja(xm - 4.5 * PASO_VASOS - 40, xm + 4.5 * PASO_VASOS + 40, Y_VASO - 36, Y_VASO + 36, Z_BANDA - 8, Z_BANDA), [0, 0, -3],
-        "Lleva los nueve vasos hasta el punto A del brazo.", "Es la etapa 2; aquí solo marca la altura de los vasos. Pasa entre las patas de la base.")
     cups = []
-    for k, (nm, pos) in enumerate(salidas):
+    for nm, pos in xm_all:
         key = SALIDA_COIN[nm]
-        x = xm + (k - 4) * PASO_VASOS
         mo = monedas_tmp[key]
-        cups.append(dict(den=mo["den"], fam="antigua" if key[0] == "A" else "nueva", salida=nm, key=key, x=x, y=Y_VASO, ztop=Z_BANDA + VASO_H))
-        vaso = (g.cil_z(x, Y_VASO, Z_BANDA, Z_BANDA + VASO_H, VASO_D)
-                - g.cil_z(x, Y_VASO, Z_BANDA + 2.0, Z_BANDA + VASO_H + 1, VASO_D - 3.0))
+        x, y = float(pos[0]), float(pos[1])
+        cups.append(dict(den=mo["den"], fam="antigua" if key[0] == "A" else "nueva", salida=nm, key=key, x=x, y=y, ztop=g.Z_BOCA))
+        vaso = (g.cil_z(x, y, Z_BANDA_, g.Z_BOCA, VASO_D) - g.cil_z(x, y, Z_BANDA_ + 2.0, g.Z_BOCA + 1, VASO_D - 3.0))
         add("V", "Base", "Vaso", None, 9, "ref", "vaso", vaso, [0, 0, -3.5],
-            "Uno por tipo de moneda: %s, nueva y antigua van en vasos distintos. Ø52 × 60, paso de %d mm sobre la banda." % ("$500" if mo["den"] == 500 else "las monedas", PASO_VASOS),
-            "El tubo flexible de cada ducto termina sobre su boca.", tag=f"V{nm}")
+            "Uno por cada tipo de moneda, nueva y antigua por separado. Ø%d × %d mm, justo bajo la salida de su ducto." % (VASO_D, VASO_H),
+            "El ducto baja hasta 6 mm sobre su boca: la moneda cae directo, sin mangueras.", tag=f"V{nm}")
 
-    # ---------------- datos de la simulación ----------------
     sim = dict(c22=C22, s22=S22, zoff=zoff, esp_base=g.ESP_BASE, tan_peralte=g.PERALTE_T, entrada=g.ENTRADA / 2,
                tolva=dict(c=[float(centro[0]), float(centro[1]), float(base_z)], cav_r=g.CAVIDAD_R),
                x_sensor=d.x_sensor, y_moneda=YS,
                d6=dict(c0=[float(v) for v in c6], t_piv=g.T_PIV, t_bot=gd["t_bot"], col=(g.COL_INT0 + g.COL_INT1) / 2,
                        incl=g.INCL_PLATO, pl_h=g.PLATO_H, pl_l=g.PLATO_L, hu=gd["hu"]),
-               monedas=monedas_tmp, slots=slots_tmp, vasos=cups, z_banda=Z_BANDA, vaso_d=VASO_D, z_mesa=0.0)
+               monedas=monedas_tmp, slots=slots_tmp, vasos=cups, z_banda=g.Z_BOCA - VASO_H, vaso_d=VASO_D, z_mesa=0.0)
     return out, sim
 
 

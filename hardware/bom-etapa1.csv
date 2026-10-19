@@ -10,11 +10,12 @@ cantidad,componente,detalle,uso,nota
 4,Varilla roscada M5,longitud segun estacion,soporte del riel,con ocho tuercas y ocho arandelas
 1,Fuente 12 V 3 A,conmutada,motor y logica,con reductor a 5 V para el ESP32
 1,Reductor 12 V a 5 V,LM2596,alimentacion del ESP32,
-5,Vaso de polipropileno,52 mm de diametro y 80 mm de alto,contenedores,los mismos de la etapa 2
-8,Tubo flexible de PVC cristal 3/4 pulgada,15 a 25 cm,colector de cada estacion al vaso de su denominacion,2 m en total
+9,Vaso pequeno,34 mm de diametro y 60 mm de alto,contenedores,uno por tipo de moneda; pueden ser tubos de ensayo o vasos impresos
 1,Filamento PETG,1 kg,piezas estructurales,
 1,Filamento PLA,300 g,tolva y embudos cortos,
 1,Filamento TPU 95A,100 g,pies niveladores,
 20,Brida de nailon,2.5 x 100 mm,motor de tolva y pies de las patas,la etapa 1 no lleva tornillos
 1,Placa base,MDF de 9 mm 60x30 cm,soporte de todo el conjunto,
 1,Juego de cables,Dupont y 18 AWG,señal y potencia,
+1,Lamina de MDF o acrilico,6 mm de espesor 514 x 158 mm,tablero de la base,ranura de 38 mm bajo los ductos y 4 agujeros en las esquinas
+1,Tubo PVC presion 3/4 pulgada,2.5 m en total (comprar 3 m),patas y largueros de la base,4 de 120 mm; 4 de 432 mm; 2 de 77 mm
