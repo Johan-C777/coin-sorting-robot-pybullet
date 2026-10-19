@@ -66,9 +66,9 @@ constexpr uint16_t TOLVA_SG90_US_POR_RPM = 4;  // calibrar: µs sobre el neutro 
 // aguja de la bifurcación de $500: SG90 por LEDC
 constexpr uint8_t PIN_AGUJA = 13;
 constexpr uint8_t CANAL_AGUJA = 2;
-constexpr uint8_t AGUJA_A500_GRADOS = 0;       // a ras del piso: sigue a $500 antigua
-constexpr uint8_t AGUJA_N500_GRADOS = 45;      // baja: cae a $500 nueva
-constexpr uint16_t AGUJA_RETORNO_MS = 600;     // vuelve a 0° si no llega la moneda
+constexpr uint8_t AGUJA_A500_GRADOS = 55;      // plato inclinado hacia -X: $500 antigua
+constexpr uint8_t AGUJA_N500_GRADOS = 125;     // plato inclinado hacia +X: $500 nueva
+constexpr uint16_t AGUJA_RETORNO_MS = 600;     // vuelve a la posición antigua si no llega la moneda
 
 // banda: puente H L298N (19 y 21 quedaron para la tolva y el I2C)
 constexpr uint8_t PIN_BANDA_A = 14;

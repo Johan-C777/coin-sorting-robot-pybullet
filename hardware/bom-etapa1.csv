@@ -15,7 +15,6 @@ cantidad,componente,detalle,uso,nota
 1,Filamento PETG,1 kg,piezas estructurales,
 1,Filamento PLA,300 g,tolva y embudos cortos,
 1,Filamento TPU 95A,100 g,pies niveladores,
-30,Tornillo M3,10 a 16 mm,ensamble general,con tuercas o insertos de laton
-30,Inserto de laton M3,5 mm,ensamble general,se ponen con soldador
+20,Brida de nailon,2.5 x 100 mm,motor de tolva y pies de las patas,la etapa 1 no lleva tornillos
 1,Placa base,MDF de 9 mm 60x30 cm,soporte de todo el conjunto,
 1,Juego de cables,Dupont y 18 AWG,señal y potencia,
