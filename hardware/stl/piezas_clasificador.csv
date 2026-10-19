@@ -2,12 +2,12 @@ pieza,cantidad,x_mm,y_mm,z_mm,volumen_cm3,voladizo_mm2,no_puenteable_mm2,nota
 R01_riel_modulo_A,1,185.1,58.0,14.0,52.7,437,0,entrada + ranuras 1-4
 R02_riel_modulo_B,1,215.3,58.0,14.0,57.5,478,0,ranuras 5-7 + extremo abierto
 R04_llave_union,3,20.0,11.0,2.4,0.4,0,0,"mariposa bajo la junta A-B, entra desde abajo"
-R03_pata1_izq,1,39.5,30.0,152.6,10.9,104,0,altura 149 mm; pie atado con brida
-R03_pata1_der,1,39.5,30.0,152.6,10.9,104,0,altura 149 mm; pie atado con brida
-R03_pata2_izq,1,37.5,30.0,114.0,10.6,79,0,altura 110 mm; pie atado con brida
-R03_pata2_der,1,37.5,30.0,114.0,10.6,79,0,altura 110 mm; pie atado con brida
-R03_pata3_izq,1,34.0,30.0,43.6,6.5,74,0,altura 40 mm; pie atado con brida
-R03_pata3_der,1,34.0,30.0,43.6,6.5,74,0,altura 40 mm; pie atado con brida
+R03_pata1_izq,1,39.5,30.0,152.6,12.8,74,0,altura 149 mm; pie atado con brida
+R03_pata1_der,1,39.5,30.0,152.6,12.8,74,0,altura 149 mm; pie atado con brida
+R03_pata2_izq,1,37.5,30.0,114.0,10.5,74,0,altura 110 mm; pie atado con brida
+R03_pata2_der,1,37.5,30.0,114.0,10.5,74,0,altura 110 mm; pie atado con brida
+R03_pata3_izq,1,34.0,30.0,43.6,6.4,74,0,altura 40 mm; pie atado con brida
+R03_pata3_der,1,34.0,30.0,43.6,6.4,74,0,altura 40 mm; pie atado con brida
 D1_ducto_N50,1,25.5,41.0,239.4,44.9,0,0,"ranura 17.5 mm, IR 5 mm; baja hasta el vaso"
 D2_ducto_N100,1,28.6,44.3,225.8,47.9,0,0,"ranura 20.8 mm, IR 5 mm; baja hasta el vaso"
 D3_ducto_A50,1,29.2,45.0,211.8,46.2,0,0,"ranura 21.5 mm, IR 5 mm; baja hasta el vaso"
@@ -21,6 +21,6 @@ B03_puente_sensor,1,28.0,38.9,9.6,3.5,0,0,"TCS34725 a presión, a horcajadas sob
 T01_tolva_cono_40,1,134.2,134.2,43.8,47.1,61,0,"semiángulo 40°, boca Ø130; se imprime boca abajo"
 T02_disco_dosificador,1,80.0,80.0,15.8,9.2,0,0,"28BYJ-48, eje a presión"
 T03_base_tolva,1,100.0,100.0,10.6,39.9,82,0,motor con 2 bridas de nailon
-T04_pata_tolva,4,36.0,36.0,212.4,17.1,96,0,altura 210 mm
+T04_pata_tolva,4,36.0,36.0,212.4,17.0,96,0,altura 210 mm
 P01_pie_pvc,4,68.7,44.0,43.0,43.3,8,0,pie de pata y larguero bajo; tubo PVC 3/4: pata 120 mm
 P02_esquinero_pvc,4,68.7,68.7,43.0,68.1,13,0,esquina bajo la lámina; une pata y dos largueros altos
