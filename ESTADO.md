@@ -9,7 +9,7 @@
 - Base: lámina MDF 9 mm 560x198 (ranura 357x48), 4 patas PVC 3/4" (134 mm) + 4 tees (11 mm centro-fondo, `F_ACC`) + 2 largueros 490 mm; 2 bases ABS P01 (zócalo + viga 150 mm). Piso -200: 123 mm de ancho libre y 70 mm bajo la banda. Patas R03 y T04 siguen impresas (más livianas que PVC + tapas).
 
 ## Archivos
-- `scripts/{generar_clasificador,exportar_visor_3d}.py`, `scripts/visor_template.html`, `hardware/stl/*` (24 STL), `hardware/visor/ensamble_etapa1.html`, `docs/08-clasificador-fisico.md`, `hardware/bom-etapa1.csv`, `CHANGELOG.md` 0.4.2.
+- `docs/09-guia-armado-etapa1.md` (guía completa), `scripts/{generar_clasificador,exportar_visor_3d}.py`, `scripts/visor_template.html`, `hardware/stl/*` (24 STL), `hardware/visor/ensamble_etapa1.html`, `docs/08-clasificador-fisico.md`, `hardware/bom-etapa1.csv`, `CHANGELOG.md` 0.4.2.
 
 ## Resuelto
 - $500 alineada; voladizos y tornillos fuera; STL cerrados y sin trozos; ductos y base en PVC (612 cm³ macizos, antes 1143); sin interferencias (tubos incluidos).

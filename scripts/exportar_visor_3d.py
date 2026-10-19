@@ -173,7 +173,7 @@ def construir():
     lam = g.caja(X0, X1, Y0, Y1, -g.LAMINA_E, 0) - g.caja(sx0, sx1, sy0, sy1, -g.LAMINA_E - 1, 1)
     add("M1", "Base", "Lámina de la base", None, 1, "ref", "mesa", lam, [0, 0, 2],
         "Lámina de MDF de 9 mm, %d × %d mm, con una ranura de %d × %d mm por donde bajan los tubos de los ductos. Sostiene riel, tolva y bifurcador." % (X1 - X0, Y1 - Y0, sx1 - sx0, sy1 - sy0),
-        "Descansa sobre los 4 tramos cortos de tubo que sobresalen de las tees y se ata con bridas por 4 agujeros. Las patas del riel y de la tolva se atan a ella.")
+        "Descansa sobre los 4 tramos cortos de tubo que sobresalen de las tees y se ata con bridas por 8 agujeros (2 por pata). Las patas del riel y de la tolva se atan a ella.")
     pvc, tees = [], []
     for x in (b["xl"], b["xr"]):
         for y in (b["yf"], b["yb"]):
