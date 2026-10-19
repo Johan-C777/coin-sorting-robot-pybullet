@@ -80,6 +80,16 @@ ESP_PARED = 2.4
 ALA = 14.0              # ala a cada lado del canal
 ENTRADA = 35.0          # zona donde cae la moneda de la tolva
 ALMA = 12.0             # material entre ranuras
+ALMA_EXTRA = {0: 2.8, 1: 0.6, 4: 17.7, 5: 17.2}   # alma extra tras la ranura i: separa las salidas >= 35 mm (vasos de Ø34)
+# Base: lámina sobre 4 patas de tubo PVC de 3/4" unidas con codos impresos
+PVC_D = 26.7             # tubo PVC presión de 3/4" (diámetro exterior)
+BORE_R = PVC_D / 2 + 0.3 # alojamiento a presión
+PARED_PVC = 3.0
+PROF_PVC = 30.0          # penetración del tubo en el codo
+PLACA, PLACA_E = 44.0, 4.0
+LAMINA_E = 6.0           # lámina de MDF o acrílico de 6 mm; su cara de arriba es el plano z = 0
+Z_PISO = -138.0          # piso bajo la banda (cara de arriba de la banda en -130)
+Z_BOCA = -70.0          # altura (mundo) de la boca de los vasos; los ductos bajan hasta 6 mm sobre ella
 EXTRA_LARGO = 4.0       # largo de ranura = ancho + 4 (la moneda cabe entera)
 LARGO_FINAL = 32.0
 PARED_FINAL = 4.0
@@ -100,7 +110,7 @@ T_PIV = 66.0            # pivote del plato bajo el plano del riel (≈115 ms de 
 ANG_FLARE = 40.0        # ensanche del ducto, desde la vertical (se imprime sin soporte)
 INCL_PLATO = 35.0       # inclinación del plato a cada lado
 PLATO_L, PLATO_H = 31.0, 9.0
-COL_INT0, COL_INT1 = 1.5, 29.3      # columnas de salida: borde interno y externo desde el centro
+COL_INT0, COL_INT1 = 4.5, 32.3      # columnas de salida: borde interno y externo desde el centro
 T_COL = 26.0            # de la punta del divisor al fondo
 SG90 = dict(largo=22.8, ancho=12.2, orejas=27.8, eje_off=5.5, caja_sobre_oreja=4.3,
             buje=4.0, estriado=3.0, estriado_d=4.6, buje_d=12.4)
@@ -310,7 +320,7 @@ def disposicion() -> Disposicion:
         ancho = B if w is None else w + COMPENSACION_RANURA
         largo = LARGO_FINAL if w is None else w + EXTRA_LARGO
         ranuras.append(Ranura(i, x, largo, ancho, monedas))
-        x += largo + (0 if w is None else ALMA)
+        x += largo + (0 if w is None else ALMA + ALMA_EXTRA.get(i, 0.0))
     fin_b = x + PARED_FINAL
     # primera pata entre las ranuras 2 y 3; luego una junto a la junta y otra al final
     x_pata_a = (ranuras[1].x0 + ranuras[1].largo + ranuras[2].x0) / 2
@@ -421,34 +431,34 @@ def agujeros_ir(hy, up, h=0.0):
     return out
 
 
-def ducto(r: Ranura) -> Manifold:
+def ducto(r: Ranura, largo: float = L_DUCTO) -> Manifold:
     """Tubo vertical bajo la ranura con barrera IR y dos orejas con clavija."""
     mw = Mundo(r.xc, r.yc)
     hu, hy = medidas_tubo(r)
     top = (hu + E_DUCTO) * T22 + 4.0
-    ext = caja(-(hu + E_DUCTO), hu + E_DUCTO, -(hy + E_DUCTO), hy + E_DUCTO, -L_DUCTO, top) ^ mw.corte()
+    ext = caja(-(hu + E_DUCTO), hu + E_DUCTO, -(hy + E_DUCTO), hy + E_DUCTO, -largo, top) ^ mw.corte()
     pads = [pad_ir(hu, hy, -T_IR, s) for s in (1, -1)]
     m = union([ext, *pads, orejas(r, mw, hy)])
-    huecos = [caja(-hu, hu, -hy, hy, -L_DUCTO - 1, top + 2), *agujeros_ir(hy, -T_IR)]
+    huecos = [caja(-hu, hu, -hy, hy, -largo - 1, top + 2), *agujeros_ir(hy, -T_IR)]
     return m - union(huecos)
 
 
 # =====================================================================
 # Bifurcación D6: tubo vertical, plato basculante y dos columnas de salida
 # =====================================================================
-def geom_d6(r: Ranura):
+def geom_d6(r: Ranura, extra: float = 0.0):
     hu, hy = medidas_tubo(r)
     t_fl = T_PIV - 16.0
     t = math.tan(math.radians(ANG_FLARE))
     d_fl = (COL_INT1 - hu) / t
     t_div = T_PIV + 26.0
-    t_bot = t_div + T_COL
+    t_bot = t_div + T_COL + extra
     return dict(hu=hu, hy=hy, t_fl=t_fl, d_fl=d_fl, t_div=t_div, t_bot=t_bot,
-                y_servo=-(hy + E_DUCTO), up_ir=-(t_bot - 14.0))
+                y_servo=-(hy + E_DUCTO), up_ir=-(t_div + T_COL - 14.0))
 
 
-def d6(r: Ranura) -> Manifold:
-    g = geom_d6(r)
+def d6(r: Ranura, extra: float = 0.0) -> Manifold:
+    g = geom_d6(r, extra)
     mw = Mundo(r.xc, r.yc)
     hu, hy, t_fl, d_fl, t_div, t_bot = (g[k] for k in ("hu", "hy", "t_fl", "d_fl", "t_div", "t_bot"))
     sg = SG90
@@ -724,6 +734,11 @@ def construir_piezas():
         c = p_mundo(r.xc, r.yc, 0)
         return lambda m: m.translate(tuple(c))
 
+    largos = {}
+    for r in r_all:
+        cz = p_mundo(r.xc, r.yc, 0)[2]
+        largos[r.i] = cz - (Z_BOCA + 6.0)
+    extra_d6 = largos[RANURA_500] - (T_PIV + 26.0 + T_COL)
     piezas: list[Pieza] = []
     riel_a = riel_modulo(d, 0, d.la, r_all[:4])
     riel_b = riel_modulo(d, d.la, d.fin_b, r_all[4:], final=True)
@@ -741,9 +756,9 @@ def construir_piezas():
     for r in r_all:
         if r.i == RANURA_500:
             continue
-        piezas.append(Pieza(f"D{r.i + 1}_ducto_{r.clave}", ducto(r), 1, f"ranura {r.ancho:.1f} mm, IR 5 mm",
+        piezas.append(Pieza(f"D{r.i + 1}_ducto_{r.clave}", ducto(r, largos[r.i]), 1, f"ranura {r.ancho:.1f} mm, IR 5 mm; baja hasta el vaso",
                             pose_ducto(r), grupo="ducto"))
-    piezas.append(Pieza("D6_bifurcador_500", d6(r500), 1, "plato basculante; servo y IR a presión; PLA negro",
+    piezas.append(Pieza("D6_bifurcador_500", d6(r500, extra_d6), 1, "plato basculante; servo y IR a presión; PLA negro",
                         pose_ducto(r500), grupo="d6"))
     # plato: se arma con el eje del servo a lo largo de Y, en (0, y, -T_PIV) de D6
     piezas.append(Pieza("B02_plato_desvio", plato(r500), 1, "buje de estriado SG90 a presión",
@@ -765,7 +780,52 @@ def construir_piezas():
     h_pata_t = base_z
     piezas.append(Pieza("T04_pata_tolva", pata_tolva(h_pata_t), 4, f"altura {h_pata_t:.0f} mm",
                         None, grupo="pata_tolva"))
-    return d, piezas, dict(zoff=zoff, base_z=base_z, centro=centro, r500=r500, p_mundo=p_mundo)
+    base = base_pvc(d, p_mundo, largos)
+    piezas.append(Pieza("P01_pie_pvc", codo_pvc([(1, 0)]), 4, f"pie de pata y larguero bajo; tubo PVC 3/4: pata {base['l_pata']:.0f} mm",
+                        None, grupo="base"))
+    piezas.append(Pieza("P02_esquinero_pvc", codo_pvc([(1, 0), (0, 1)]), 4, "esquina bajo la lámina; une pata y dos largueros altos",
+                        None, grupo="base"))
+    return d, piezas, dict(base=base, zoff=zoff, base_z=base_z, centro=centro, r500=r500, p_mundo=p_mundo, largos=largos, extra_d6=extra_d6)
+
+
+# =====================================================================
+# Base: codos impresos para las patas de tubo PVC (marco de impresión = marco de montaje del pie)
+# =====================================================================
+def codo_pvc(dirs):
+    """Placa cuadrada con tope vertical (tubo hacia arriba) y un tope horizontal por cada dirección en `dirs`
+    ((1,0), (0,1)...). La placa va sobre la cama; los alojamientos son de gota, sin soportes."""
+    r_b = BORE_R + PARED_PVC
+    h_axis = PLACA_E + PARED_PVC + BORE_R                      # eje de los topes horizontales
+    alto_caja = h_axis + BORE_R * math.sqrt(2) + PARED_PVC
+    piezas = [caja(-PLACA / 2, PLACA / 2, -PLACA / 2, PLACA / 2, 0, PLACA_E),
+              cil_z(0, 0, 0, PLACA_E + 34.0, 2 * r_b)]
+    huecos = [cil_z(0, 0, PLACA_E + 2.0, PLACA_E + 36.0, 2 * BORE_R)]
+    for (dx, dy) in dirs:
+        ang = math.degrees(math.atan2(dy, dx))
+        caja_h = caja(BORE_R + 1.5, r_b + PROF_PVC, -r_b, r_b, 0, alto_caja)
+        gota_h = prisma_yz(gota(BORE_R).translate((0, h_axis)), r_b, r_b + PROF_PVC + 1.0)
+        piezas.append(caja_h.rotate((0, 0, ang)))
+        huecos.append(gota_h.rotate((0, 0, ang)))
+    for sx in (1, -1):
+        for sy in (1, -1):
+            huecos.append(caja(sx * 17 - 2, sx * 17 + 2, sy * 17 - 2, sy * 17 + 2, -1, PLACA_E + 1))
+    return union(piezas) - union(huecos)
+
+
+def base_pvc(d, p_mundo, largos):
+    """Posiciones y cortes de la base. Devuelve un diccionario."""
+    sal_x = [p_mundo(r.xc, r.yc, 0)[0] for r in d.ranuras]
+    x_ini, x_fin = min(sal_x) - 18.0, max(sal_x) + 20.0           # tramo donde bajan los ductos (ranura de la lámina)
+    xl, xr = -68.0, x_fin + PLACA / 2 + 3.0
+    yf, yb = -40.0, 70.0
+    r_b = BORE_R + PARED_PVC
+    z_alto_p02 = -LAMINA_E - PLACA_E
+    h_axis = PLACA_E + PARED_PVC + BORE_R
+    l_pata = (z_alto_p02 - 2.0) - (Z_PISO + PLACA_E + 2.0)
+    return dict(xl=xl, xr=xr, yf=yf, yb=yb, x_ranura=(x_ini, x_fin), y_ranura=(-4.0, 34.0),
+                lamina=(xl - PLACA / 2 - 2.0, xr + PLACA / 2 + 2.0, yf - PLACA / 2 - 2.0, yb + PLACA / 2 + 2.0),
+                l_pata=l_pata, l_x=(xr - xl) - 2 * r_b, l_y=(yb - yf) - 2 * r_b,
+                z_eje_alto=-LAMINA_E - h_axis, z_eje_bajo=Z_PISO + h_axis)
 
 
 # =====================================================================
@@ -836,6 +896,14 @@ def partes_ensamble(piezas, ctx):
                 out.append((p.nombre, p.pose(p.geom.translate((0, yy, 0)))))
         elif p.nombre.startswith("R03"):
             out.append((p.nombre, p.pose(p.geom)))
+        elif p.nombre.startswith("P0"):
+            b = ctx["base"]
+            for (x, y, ang_i) in ((b["xl"], b["yf"], 90), (b["xr"], b["yf"], 180), (b["xr"], b["yb"], 270), (b["xl"], b["yb"], 0)):
+                if p.nombre.startswith("P01"):
+                    m = p.geom.rotate((0, 0, 0 if x == b["xl"] else 180)).translate((x, y, Z_PISO))
+                else:
+                    m = p.geom.rotate((180, 0, 0)).rotate((0, 0, ang_i)).translate((x, y, -LAMINA_E))
+                out.append((p.nombre, m))
         elif p.nombre == "T04_pata_tolva":
             for a in (45, 135, 225, 315):
                 x, y = _polar(R_PATA_TOLVA, a)
@@ -881,8 +949,8 @@ def moneda(d, esp, centro, normal):
 def verificar_d6(ctx):
     """Plato en sus dos extremos, encaje del servo y trayecto de la moneda por D6."""
     r = ctx["r500"]
-    g = geom_d6(r)
-    cuerpo = d6(r)
+    g = geom_d6(r, ctx["extra_d6"])
+    cuerpo = d6(r, ctx["extra_d6"])
     pl = plato(r)
     z_p = -T_PIV
     avisos = []
@@ -921,7 +989,7 @@ def verificar_d6(ctx):
     return avisos
 
 
-def verificar_pasos_ductos(piezas):
+def verificar_pasos_ductos(piezas, largos):
     avisos = []
     for p in piezas:
         if p.grupo != "ducto":
@@ -929,7 +997,7 @@ def verificar_pasos_ductos(piezas):
         cuerpo = p.geom
         r = next(rr for rr in disposicion().ranuras if f"D{rr.i + 1}_" in p.nombre)
         choque = 0.0
-        for z in np.linspace(-1.0, -L_DUCTO + 1.0, 12):
+        for z in np.linspace(-1.0, -largos[r.i] + 1.0, 30):
             choque += (cuerpo ^ moneda(r.dmax, 2.2, (0, 0, z), (0, 0, 1))).volume()
         if choque > 0.5:
             avisos.append(f"{p.nombre}: la moneda de {r.dmax} choca con el tubo ({choque:.1f} mm3)")
@@ -943,12 +1011,12 @@ def tabla_alineacion(d, ctx):
     for r in d.ranuras:
         c = p_mundo(r.xc, r.yc, 0)
         if r.i == RANURA_500:
-            g = geom_d6(r)
+            g = geom_d6(r, ctx["extra_d6"])
             for s in (-1, 1):
                 filas.append((f"D6{'b' if s > 0 else 'a'}", c[0] + s * (COL_INT0 + COL_INT1) / 2, c[1],
                               c[2] - g["t_bot"]))
         else:
-            filas.append((f"D{r.i + 1}", c[0], c[1], c[2] - L_DUCTO))
+            filas.append((f"D{r.i + 1}", c[0], c[1], c[2] - ctx["largos"][r.i]))
     return filas
 
 
@@ -988,7 +1056,7 @@ def construir(ensamble=False, rapido=False):
         w.writerows(filas)
     if fallos:
         print("PIEZAS CON VOLADIZO NO PUENTEABLE:", ", ".join(fallos))
-    for a in verificar_pasos_ductos(piezas) + verificar_d6(ctx):
+    for a in verificar_pasos_ductos(piezas, ctx["largos"]) + verificar_d6(ctx):
         print("AVISO D6/ductos:", a)
     print("salidas (X, Y, Z mundo):", ", ".join(f"{n} {x:.1f}/{y:.1f}/{z:.0f}" for n, x, y, z in tabla_alineacion(d, ctx)))
     if ensamble:

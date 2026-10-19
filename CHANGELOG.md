@@ -5,6 +5,7 @@
 - Corregida la alineación de la $500: las salidas quedaban 100-137 mm fuera de la línea de vasos. Nuevo bifurcador D6 con plato basculante (SG90 a 55°/125°) y dos columnas alineadas con los demás ductos.
 - Clavijas Ø6, llaves de mariposa y bridas de nailon en lugar de M3. Piezas orientadas para imprimir sin soportes.
 - Visor 3D con simulación de monedas a los vasos.
+- Sin mangueras: ductos alargados hasta los nueve vasos Ø34 (salidas separadas ≥35 mm; riel 36 mm más largo, columnas de D6 abiertas). Base de lámina sobre patas de tubo PVC con codos impresos P01/P02.
 
 ## 0.4.0 · Clasificador físico para impresión FDM
 

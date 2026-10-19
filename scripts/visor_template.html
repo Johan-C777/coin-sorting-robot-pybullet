@@ -121,7 +121,7 @@ const COLORS = {
   plato:[0xe0e4e8,0xc9ced4], puente:[0x6a8f4a,0x5c7f3e],
   tolva:[0xd2a45a,0xc0924a], tolva2:[0xe3c07e,0xd1ad68], tolva3:[0xc88a3c,0xb87b30],
   motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046],
-  marco:[0xc29a62,0xa8803f], mesa:[0xcdbf9f,0xb4a583], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
+  marco:[0xc29a62,0xa8803f], mesa:[0xcdbf9f,0xb4a583], pvc:[0xe8ecef,0xd5dade], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
 };
 const BASEOP = {mesa:.6, marco:.85, vaso:.5, banda:.9};
 const SEETHRU = new Set(['ducto','bif','tolva3','puente']);       // casi transparentes en la simulación
@@ -202,7 +202,7 @@ for (const g of groups) {
 const nPrint = Object.values(first).filter(d=>d.kind==='print').reduce((a,d)=>a+d.cant,0);
 function fichaVacia(){
   ficha.innerHTML = `<h2>Elige una pieza</h2><p class="hint">Toca una pieza en el modelo o en la lista. Las demás se atenúan para ver dónde va.</p>
-  <div class="sum">Se imprimen <b>${nPrint}</b> piezas y <b>ninguna lleva tornillos</b>: todo es a presión, con clavijas Ø6 o con bridas de nailon.<br><br>
+  <div class="sum">Se imprimen <b>${nPrint}</b> piezas y <b>ninguna lleva tornillos</b>: todo es a presión, con clavijas Ø6, tubos PVC o bridas de nailon.<br><br>
   Mueve <b>Despiece</b> para separar el ensamble, cambia el <b>Plato</b> para ver cómo desvía la $500, o abre la pestaña <b>Simulación</b> para ver las monedas llegar a los vasos.</div>`;
 }
 function select(pid){
@@ -231,14 +231,12 @@ function aplicarOpacidad(){
 
 // ---------------- controles del ensamble
 const exp = $('exp'), chkC = $('chkC'), chkR = $('chkR'), chkL = $('chkL');
-const tubosG = new THREE.Group(); scene.add(tubosG);
 function aplicar(){
   const k = mode==='E' ? exp.value/100*34 : 0;
   for (const p of all) {
     const e = p.d.ex; p.group.position.set(e[0]*k, e[1]*k, e[2]*k);
     p.group.visible = p.d.kind==='print' || (p.d.kind==='comp' && (chkC.checked||mode==='S')) || (p.d.kind==='ref' && (chkR.checked||mode==='S'));
   }
-  tubosG.visible = mode==='S';
   lista.querySelectorAll('.item').forEach(b=>{const k=first[b.dataset.pid].kind; b.classList.toggle('off', mode==='E' && ((k==='comp'&&!chkC.checked)||(k==='ref'&&!chkR.checked)));});
 }
 exp.oninput = chkC.onchange = chkR.onchange = aplicar;
@@ -301,27 +299,18 @@ const ORDEN = ['N50','N100','A50','N200','A100','A500','N500','A200','N1000','N5
 const COLOR_VASO = {50:0xb8864f,100:0xcfd2d6,200:0xc9b36a,500:0xd2b04f,1000:0xc8a948};
 const nombreMoneda = k => `$${SIM.monedas[k].den} ${k[0]==='A'?'antigua':'nueva'}`;
 
-// tubos flexibles de cada salida a su vaso
-const curvas = {}, salidas = [];
+// cada salida cae directo en su vaso, justo debajo
+const salidas = [];
 SIM.slots.forEach(sl => { for (const nm in sl.fondo) salidas.push({nm, p:V3(...sl.fondo[nm])}); });
 salidas.sort((a,b)=>a.p.x-b.p.x);
-salidas.forEach((s,k)=>{
-  s.vaso = SIM.vasos.findIndex(v=>v.salida===s.nm); const den = SIM.vasos[s.vaso].den;
-  const v = SIM.vasos[s.vaso], boca = V3(v.x, v.y, v.ztop+8), yo = (k-4)*2.5;
-  const pts = [s.p.clone(), s.p.clone().add(V3(0,0,-18)),
-    V3((s.p.x*2+boca.x)/3, 12+yo, (s.p.z-18)*0.55+boca.z*0.45), V3((s.p.x+boca.x*2)/3, 12+yo*0.4, boca.z+40), boca.clone().add(V3(0,0,18)), boca];
-  const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal'); c.arcLengthDivisions = 200;
-  curvas[s.nm] = c;
-  tubosG.add(new THREE.Mesh(new THREE.TubeGeometry(c, 80, 6, 8, false),
-    new THREE.MeshStandardMaterial({color:COLOR_VASO[den], transparent:true, opacity:.28, roughness:.4, depthWrite:false})));
-});
+salidas.forEach(s=>{ s.vaso = SIM.vasos.findIndex(v=>v.salida===s.nm); });
 
 const coinGeo = new THREE.CylinderGeometry(1,1,1,40).rotateX(Math.PI/2);
 const coins = [], eventos = [];
 let simT = 0, speed = .45, corriendo = true, cola = 0, proximo = 0;
 const conteo = {vasos:SIM.vasos.map(()=>0), ir:{}};
 const pile = SIM.vasos.map(v=>{
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(21,21,1,28).rotateX(Math.PI/2), new THREE.MeshStandardMaterial({color:COLOR_VASO[v.den],roughness:.5,metalness:.4}));
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(15,15,1,24).rotateX(Math.PI/2), new THREE.MeshStandardMaterial({color:COLOR_VASO[v.den],roughness:.5,metalness:.4}));
   m.visible = false; scene.add(m); return m;
 });
 const log = [];
@@ -392,12 +381,8 @@ function planear(key, t0){
     const zf = sl.fondo[salidaNm][2];
     volar(()=> p.z <= zf ? 'f' : null, colx, lc, V3(0,0,1), .01);
   }
-  // 4. tubo flexible hasta el vaso
-  const out = salidas.find(s=>s.nm===salidaNm), cur = curvas[salidaNm], L = cur.getLength(), dur = L/650, t1 = t;
-  for (let i=1; i<=Math.ceil(dur/0.012); i++) {
-    const u = Math.min(1, i*0.012/dur), tg = cur.getTangentAt(u);
-    p = cur.getPointAt(u); n = V3(0,1,0).cross(tg).normalize(); if (n.lengthSq()<.5) n = V3(0,0,1); t = t1 + u*dur; rec();
-  }
+  // 4. el ducto baja hasta el vaso
+  const out = salidas.find(s=>s.nm===salidaNm);
   // 5. caída al vaso
   const pileTop = SIM.z_banda + 2 + Math.min(46, conteo.vasos[out.vaso]*0.9) + EM/2;
   vz = -80;
@@ -475,7 +460,7 @@ function panelSim(){
   const filas = SIM.vasos.map((v,k)=>`<tr><td>$${v.den} ${v.fam}</td><td>${conteo.vasos[k]}</td></tr>`).join('');
   const total = SIM.vasos.reduce((a,v,k)=>a+v.den*conteo.vasos[k],0);
   const irs = salidas.map(s=>`${s.nm} ${conteo.ir[s.nm]||0}`).join(' · ');
-  ficha.innerHTML = `<h2>Simulación</h2><p class="hint">Cada tipo de moneda, nueva o antigua, tiene su propio vaso: nueve en total. La moneda baja por el riel hasta su ranura, cruza la barrera infrarroja y llega por el tubo a su vaso. La $500 pasa antes bajo el sensor de color, que mueve el plato.</p>
+  ficha.innerHTML = `<h2>Simulación</h2><p class="hint">Cada tipo de moneda, nueva o antigua, tiene su propio vaso: nueve en total. La moneda baja por el riel hasta su ranura, cruza la barrera infrarroja y cae por el ducto directo a su vaso. La $500 pasa antes bajo el sensor de color, que mueve el plato.</p>
   <dl><dt>Vasos</dt><dd><table class="t">${filas}<tr><td>Total</td><td>$${total.toLocaleString('es-CO')}</td></tr></table></dd>
   <dt>Barreras IR</dt><dd class="file">${irs}</dd>
   <dt>Último color leído</dt><dd>${ultimoLeido}</dd>
