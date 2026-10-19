@@ -1,22 +1,24 @@
-pieza,cantidad,x_mm,y_mm,z_mm,volumen_cm3,voladizo_mm2,nota
-R01_riel_modulo_A,1,195.7,58.0,14.0,54.7,0,"entrada + ranuras 1-4, cola macho"
-R02_riel_modulo_B,1,180.4,58.0,14.0,43.6,726,"ranuras 5-7 + extremo abierto, cola hembra"
-R03_cuna_22_izq,4,22.0,28.0,12.9,4.8,24,lado pared guía
-R03_cuna_22_der,4,22.0,28.0,12.9,4.8,24,lado labio
-D1_ducto_N50,1,37.6,57.0,34.5,8.3,118,"ranura 17.5 mm, IR 5 mm"
-D2_ducto_N100,1,40.7,57.0,35.0,8.9,118,"ranura 20.8 mm, IR 5 mm"
-D3_ducto_A50,1,41.3,57.0,35.1,9.0,118,"ranura 21.5 mm, IR 5 mm"
-D4_ducto_N200,1,42.6,57.0,35.4,9.2,118,"ranura 22.9 mm, IR 5 mm"
-D5_ducto_A100,1,43.1,57.0,35.5,9.3,118,"ranura 23.4 mm, IR 5 mm"
-D7_ducto_A200,1,44.5,57.0,35.7,9.5,118,"ranura 24.9 mm, IR 5 mm"
-D8_ducto_N1000,1,47.4,57.0,36.3,10.0,118,"ranura 30.0 mm, IR 5 mm"
-B01_bifurcacion_500_tcs34725,1,32.9,135.4,207.5,65.0,1864,"imprimir SOLO la del sensor elegido, en PLA negro"
-B03_tapa_sensor_tcs34725,1,39.5,26.5,2.5,1.6,0,con la bifurcación
-B01_bifurcacion_500_tcs3200,1,32.9,135.4,207.5,68.9,1944,"imprimir SOLO la del sensor elegido, en PLA negro"
-B03_tapa_sensor_tcs3200,1,47.5,34.5,2.5,2.1,0,con la bifurcación
-B02_aguja_desvio,1,34.4,8.9,2.8,0.4,0,estriado del SG90 a presión
-T01_tolva_cono_40,1,134.2,134.2,39.8,43.8,11,"semiángulo 40°, boca Ø160"
-T02_disco_dosificador_28byj,1,80.0,80.0,15.8,9.2,0,elegir uno
-T03_base_tolva_28byj,1,100.0,100.0,7.7,38.1,88,elegir uno
-T02_disco_dosificador_sg90,1,80.0,80.0,16.0,9.4,13,elegir uno
-T03_base_tolva_sg90,1,100.0,69.5,80.8,38.2,733,elegir uno
+pieza,cantidad,x_mm,y_mm,z_mm,volumen_cm3,voladizo_mm2,no_puenteable_mm2,nota
+R01_riel_modulo_A,1,181.7,58.0,14.0,51.5,437,0,entrada + ranuras 1-4
+R02_riel_modulo_B,1,180.4,58.0,14.0,44.9,478,0,ranuras 5-7 + extremo abierto
+R04_llave_union,3,20.0,11.0,2.4,0.4,0,0,"mariposa bajo la junta A-B, entra desde abajo"
+R03_pata1_izq,1,38.8,30.0,139.4,10.8,105,0,altura 136 mm; pie atado con brida
+R03_pata1_der,1,38.8,30.0,139.4,10.8,105,0,altura 136 mm; pie atado con brida
+R03_pata2_izq,1,36.9,30.0,100.9,9.8,74,0,altura 97 mm; pie atado con brida
+R03_pata2_der,1,36.9,30.0,100.9,9.8,74,0,altura 97 mm; pie atado con brida
+R03_pata3_izq,1,34.0,30.0,43.6,6.5,74,0,altura 40 mm; pie atado con brida
+R03_pata3_der,1,34.0,30.0,43.6,6.5,74,0,altura 40 mm; pie atado con brida
+D1_ducto_N50,1,25.5,41.0,37.2,8.8,0,0,"ranura 17.5 mm, IR 5 mm"
+D2_ducto_N100,1,28.6,44.3,37.8,9.6,0,0,"ranura 20.8 mm, IR 5 mm"
+D3_ducto_A50,1,29.2,45.0,37.9,9.7,0,0,"ranura 21.5 mm, IR 5 mm"
+D4_ducto_N200,1,30.5,46.4,38.2,10.1,0,0,"ranura 22.9 mm, IR 5 mm"
+D5_ducto_A100,1,31.0,46.9,38.3,10.2,0,0,"ranura 23.4 mm, IR 5 mm"
+D7_ducto_A200,1,32.4,48.4,38.5,10.6,0,0,"ranura 24.9 mm, IR 5 mm"
+D8_ducto_N1000,1,35.3,53.5,39.1,11.6,0,0,"ranura 30.0 mm, IR 5 mm"
+D6_bifurcador_500,1,62.6,38.2,124.4,40.8,3,0,plato basculante; servo y IR a presión; PLA negro
+B02_plato_desvio,1,31.0,24.9,9.0,6.0,7,0,buje de estriado SG90 a presión
+B03_puente_sensor,1,28.0,38.9,9.6,3.5,0,0,"TCS34725 a presión, a horcajadas sobre las paredes"
+T01_tolva_cono_40,1,134.2,134.2,43.8,47.1,61,0,"semiángulo 40°, boca Ø130; se imprime boca abajo"
+T02_disco_dosificador,1,80.0,80.0,15.8,9.2,0,0,"28BYJ-48, eje a presión"
+T03_base_tolva,1,100.0,100.0,10.6,39.9,82,0,motor con 2 bridas de nailon
+T04_pata_tolva,4,36.0,36.0,198.1,16.3,96,0,altura 195 mm

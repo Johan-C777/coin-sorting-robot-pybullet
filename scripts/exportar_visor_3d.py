@@ -1,11 +1,11 @@
-"""Exporta el ensamble de la etapa 1 (tolva + selección) al visor 3D web.
+"""Exporta el ensamble de la etapa 1 (tolva + selección) al visor 3D web, con simulación.
 
 Uso:  python scripts/exportar_visor_3d.py
 Genera hardware/visor/ensamble_etapa1.html (autocontenido, three.js por CDN).
+Toda la geometría sale de generar_clasificador.py: el visor muestra lo que se imprime.
 """
 import base64
 import json
-import math
 from pathlib import Path
 
 import numpy as np
@@ -16,7 +16,13 @@ import generar_clasificador as g
 RAIZ = g.RAIZ
 SALIDA = RAIZ / "hardware" / "visor"
 PLANTILLA = Path(__file__).with_name("visor_template.html")
-C22, S22, T22 = g.C22, g.S22, math.tan(math.radians(g.INCLINACION))
+C22, S22 = g.C22, g.S22
+VASO_D, VASO_H, PASO_VASOS = 52.0, 60.0, 65.0
+Z_BANDA = -150.0                      # cara superior de la banda, bajo la mesa de referencia
+DENOM = {"N50": 50, "A50": 50, "N100": 100, "A100": 100, "N200": 200, "A200": 200,
+         "A500": 500, "N500": 500, "N1000": 1000}
+VASOS = [50, 100, 200, 500, 1000]
+YS = 11.8                              # la moneda va pegada a la pared guía: centro a r = 11,8
 
 
 def malla(m: Manifold):
@@ -26,171 +32,164 @@ def malla(m: Manifold):
     return {"v": base64.b64encode(v.tobytes()).decode(), "t": base64.b64encode(t.tobytes()).decode()}
 
 
-def mundo(m):                      # marco del riel -> marco de mundo
-    return g.rot_y(m, g.INCLINACION)
-
-
-def p_mundo(x, y, z):
-    return (x * C22 + z * S22, y, -x * S22 + z * C22)
-
-
-def cil_x(x0, x1, y, z, d):
-    return g.cil_eje((x0, y, z), np.array([1.0, 0, 0]), x1 - x0, d / 2)
-
-
 def construir():
-    r_a, r_b, la, fin_b = g.disposicion()
-    r500 = (r_a + r_b)[g.RANURA_500]
-    piezas = []        # cada una: dict de metadatos + malla
+    d, piezas_g, ctx = g.construir_piezas()
+    r_all = d.ranuras
+    r500 = ctx["r500"]
+    p_mundo = ctx["p_mundo"]
+    zoff, base_z, centro = ctx["zoff"], ctx["base_z"], ctx["centro"]
+    por_nombre = {p.nombre: p for p in piezas_g}
+    out = []
 
-    def add(pid, grupo, nombre, archivo, cant, kind, color, m, ex, desc, montaje, idx=None):
-        d = dict(pid=pid, grupo=grupo, nombre=nombre, archivo=archivo, cant=cant, kind=kind,
-                 color=color, ex=ex, desc=desc, montaje=montaje, idx=idx)
-        d.update(malla(m))
-        piezas.append(d)
+    def add(pid, grupo, nombre, archivo, cant, kind, color, m, ex, desc, montaje, tag=None, pivote=None, eje=None):
+        e = dict(pid=pid, grupo=grupo, nombre=nombre, archivo=archivo, cant=cant, kind=kind, color=color,
+                 ex=ex, desc=desc, montaje=montaje, tag=tag, pivote=pivote, eje=eje)
+        e.update(malla(m))
+        out.append(e)
+
+    def mundo(nombre):
+        p = por_nombre[nombre]
+        return p.pose(p.geom)
 
     # ---------------- riel ----------------
-    riel_a = g.riel_modulo(0, la, r_a, macho=True)
-    riel_b = g.riel_modulo(la, fin_b, r_b, hembra=True, final=True)
-    add("R01", "Riel", "Módulo A del riel", "R01_riel_modulo_A.stl", 1, "print", "riel", mundo(riel_a), [-1, 0, 0],
-        "Entrada de monedas y ranuras 1 a 4 ($50 nueva, $100 nueva, $50 antigua, $200 nueva). Lleva la cola de milano macho.",
-        "Se une al módulo B con 2 tornillos M3 × 6 desde arriba. Se apoya en 4 cuñas de 22°.")
-    add("R02", "Riel", "Módulo B del riel", "R02_riel_modulo_B.stl", 1, "print", "riel", mundo(riel_b), [1, 0, 0],
-        "Ranuras 5 a 7 ($100 antigua, $500, $200 antigua) y el extremo abierto para la $1000. Cola de milano hembra.",
-        "Encastra sobre la cola de A con 0,35 mm de holgura. Se apoya en 4 cuñas de 22°.")
+    add("R01", "Riel", "Módulo A del riel", "R01_riel_modulo_A.stl", 1, "print", "riel", mundo("R01_riel_modulo_A"), [-1, 0, 0],
+        "Entrada de monedas y ranuras 1 a 4 ($50 nueva, $100 nueva, $50 antigua, $200 nueva). Piso con 10° de peralte hacia la pared guía.",
+        "Se une al módulo B con 3 llaves de mariposa (R04) desde abajo y se apoya en 3 patas por lado.")
+    add("R02", "Riel", "Módulo B del riel", "R02_riel_modulo_B.stl", 1, "print", "riel", mundo("R02_riel_modulo_B"), [1, 0, 0],
+        "Ranuras 5 a 7 ($100 antigua, $500, $200 antigua) y el extremo abierto para la $1000, con su pared de tope.",
+        "Baja sobre las llaves R04 y sobre las clavijas de sus patas, sin tornillos.")
+    for nombre, m in g.partes_ensamble(piezas_g, ctx):
+        if nombre.startswith("R04"):
+            add("R04", "Riel", "Llave de mariposa", "R04_llave_union.stl", 3, "print", "llave", m, [0, 0, -1.2],
+                "Pieza plana en forma de mariposa que traba los dos módulos del riel. Hay 3: una bajo cada ala y otra bajo el canal.",
+                "Entra desde abajo en las dos mitades de su alojamiento, que tienen 0,2 mm de holgura.")
+        elif nombre.startswith("R03"):
+            add("R03", "Riel", "Pata del riel", "R03_pata{1,2,3}_{izq,der}.stl", 6, "print", "pata", m, [0, 0, -1],
+                "Columna en cruz con la cabeza cortada a 22°. Hay 3 por lado, de alturas distintas: 139, 101 y 44 mm.",
+                "La clavija Ø6 de la cabeza entra en un agujero ciego del ala. El pie se ata a la mesa con 2 bridas.")
+        elif nombre == "T04_pata_tolva":
+            add("T04", "Tolva", "Pata de la tolva", "T04_pata_tolva.stl", 4, "print", "pata", m, [0, 0, -1],
+                f"Cuatro columnas de {base_z + 0:.0f} mm que levantan la base de la tolva sobre la entrada del riel.",
+                "Su clavija Ø6 entra en la oreja de la base. El pie se ata a la mesa con 2 bridas.")
 
-    # ---------------- cuñas ----------------
-    h0, L = 4.0, 22.0
-    n = 0
-    for x0, x1 in ((0.0, la), (la, fin_b)):
-        for xs in (x0 + 12, x1 - 12):
-            X0 = xs * C22 - L / 2
-            dz = -(T22 * X0 + h0 + L * T22)
-            for lado, esp, y0 in (("izq", False, -14.0), ("der", True, 44.0)):
-                n += 1
-                add("R03", "Riel", "Cuña de 22°", f"R03_cuna_22_{lado}.stl", 8, "print", "cuna",
-                    g.cuna(esp).translate((X0, y0, dz)), [0, 0, -1],
-                    "Soporte que inclina el riel a 22° sobre el bastidor. Hay 4 izquierdas (lado pared guía) y 4 derechas.",
-                    "Un M3 × 10 inclinado la une al ala del riel y un M3 vertical la fija al bastidor.", idx=n)
-
-    # ---------------- ductos ----------------
+    # ---------------- ductos y bifurcación ----------------
     nombres = {0: "$50 nueva", 1: "$100 nueva", 2: "$50 antigua", 3: "$200 nueva", 4: "$100 antigua",
                6: "$200 antigua", 7: "$1000 nueva"}
-    ir_parejas = []
-    for r in r_a + r_b:
+    luces = {}
+    for r in r_all:
         if r.i == g.RANURA_500:
             continue
-        d = g.ducto(r)
-        add(f"D{r.i + 1}", "Ductos", f"Ducto {nombres[r.i]}", f"D{r.i + 1}_ducto_{g._clave(r)}.stl", 1, "print", "ducto",
-            mundo(d), [0, 0, -1],
-            f"Tubo de salida bajo la ranura {r.i + 1} ({r.ancho:.1f} mm). Lleva dos cavidades Ø5,2 opuestas para la barrera infrarroja.",
-            "2 M3 × 10 desde abajo por la brida. LED IR en un lado y fototransistor en el otro.")
-        c0 = np.array([r.xc, r.ancho / 2, 0.0])
-        hy = r.ancho / 2 + 0.8
-        p_ir = c0 + g.ABAJO * g.T_IR
-        ir_parejas.append((r.i, p_ir, hy))
-
-    # ---------------- bifurcación ----------------
-    bif_pos = p_mundo(r500.xc, r500.ancho / 2, 0)
-    bif = g.bifurcacion(r500).translate(bif_pos)
-    add("B01", "Bifurcación $500", "Bifurcación de $500", "B01_bifurcacion_500_tcs34725.stl", 1, "print", "bif", bif,
-        [0, 0, -1.7],
-        "Ranura 6. Un embudo pone la moneda de canto y la hace rodar por una ranura de 4,2 mm a 25°. Lleva el alojamiento del sensor de color, el del servo y dos barreras IR. Se imprime en negro.",
-        "2 M3 × 10 a la ranura 6 del riel. El sensor entra por la cara +X y el servo por la cara −X.")
-    gb = g.geometria_bif(r500)
-    piv_y, piv_z = gb["piv"]
-    # aguja en 0°, con su pivote para animarla
-    ag = g.aguja()
-    cr, sr = g.CR, g.SR
-    mat = np.array([[0, 0, 1, -1.4], [cr, sr, 0, piv_y], [-sr, cr, 0, piv_z]], float)
-    ag = ag.transform(mat).translate(bif_pos)
-    add("B02", "Bifurcación $500", "Aguja desviadora", "B02_aguja_desvio.stl", 1, "print", "aguja", ag, [0, 0, -1.7],
-        "Aguja de ferrocarril. A 0° queda a ras del piso y la moneda pasa a $500 antigua. A 45° baja y la moneda cae a $500 nueva.",
-        "Su estriado Ø4,6 encaja a presión en el eje del SG90.")
-    piezas[-1]["pivote"] = [bif_pos[0], piv_y + bif_pos[1], piv_z + bif_pos[2]]
-
-    placa, _ = g.SENSORES_COLOR["tcs34725"]
-    x_pos = g.G / 2 + g.PARED_SENSOR
-    hs = gb["h_sensor"]
-    ps = g.pt(g.S_SENSOR, hs)
-    tapa = g.tapa_sensor("tcs34725")
-    # la tapa cubre la placa por fuera de la cara +X, inclinada como la rampa
-    tapa = g.rot_x(g.rot_y(tapa, 90.0), -g.RAMPA).translate((x_pos + 1.6, *ps)).translate(bif_pos)
-    add("B03", "Bifurcación $500", "Tapa del sensor", "B03_tapa_sensor_tcs34725.stl", 1, "print", "bif", tapa, [3, 0, -1.7],
-        "Tapa que sujeta la placa del TCS34725 en su alojamiento. Queda abierta hacia el lado del conector.",
-        "2 M3 × 6 a los pilotos de la bifurcación.")
+        c0 = p_mundo(r.xc, r.yc, 0)
+        hu, hy = g.medidas_tubo(r)
+        nom = f"D{r.i + 1}_ducto_{r.clave}"
+        add(f"D{r.i + 1}", "Ductos", f"Ducto {nombres[r.i]}", nom + ".stl", 1, "print", "ducto", mundo(nom), [0, 0, -1],
+            f"Tubo vertical bajo la ranura {r.i + 1} ({r.ancho:.1f} mm). Dos cavidades Ø5,2 enfrentadas para la barrera infrarroja, {g.T_IR:.0f} mm bajo el riel.",
+            "Dos clavijas Ø6 en sus orejas entran en el ala del riel. LED IR a un lado y fototransistor al otro, a presión.")
+        luces[f"D{r.i + 1}"] = (c0, hy, -g.T_IR, 0.0)
+    gd = g.geom_d6(r500)
+    c6 = p_mundo(r500.xc, r500.yc, 0)
+    add("D6", "Bifurcación $500", "Bifurcador de $500", "D6_bifurcador_500.stl", 1, "print", "bif", mundo("D6_bifurcador_500"), [0, 0, -1.7],
+        "Tubo vertical bajo la ranura 6 que se abre en dos columnas separadas por un divisor. En el cruce hay un plato basculante: inclinado a un lado, la moneda sale por una columna; al otro lado, por la otra. Las dos salidas quedan en la misma línea que los demás ductos.",
+        "Dos clavijas en sus orejas al ala del riel. El servo SG90 entra a presión por la cara −Y y el plato se mete desde abajo. Se imprime en negro.")
+    luces["D6a"] = (c6, gd["hy"], gd["up_ir"], -(g.COL_INT0 + g.COL_INT1) / 2)
+    luces["D6b"] = (c6, gd["hy"], gd["up_ir"], (g.COL_INT0 + g.COL_INT1) / 2)
+    piv = (c6[0], c6[1], c6[2] - g.T_PIV)
+    add("B02", "Bifurcación $500", "Plato desviador", "B02_plato_desvio.stl", 1, "print", "plato", mundo("B02_plato_desvio"), [0, 0, -1.7],
+        "Bloque basculante de 31 × 9 mm. El servo lo inclina 35° a cada lado: hacia −X la $500 antigua y hacia +X la $500 nueva.",
+        "Su pasador Ø4 entra en la pared +Y y su estriado Ø4,6 se encaja a presión en el eje del SG90.",
+        pivote=list(piv), eje="y")
+    add("B03", "Bifurcación $500", "Puente del sensor", "B03_puente_sensor.stl", 1, "print", "puente", mundo("B03_puente_sensor"), [0, 0, 3.5],
+        "Puente a horcajadas sobre las paredes del riel, antes de la ranura 5. Cuelga la placa del TCS34725 mirando la cara de la moneda, a 4 mm.",
+        "Los faldones abrazan las paredes con un diente de agarre. La placa se desliza desde el lado −X bajo dos labios.")
 
     # ---------------- tolva ----------------
-    ex_, ey_, ez_ = p_mundo(g.ENTRADA / 2, 12.0, g.ESP_BASE)
-    tpos = (ex_ - g.CAVIDAD_R, ey_, ez_ + 25)
-    add("T03", "Tolva", "Base de la tolva", "T03_base_tolva_28byj.stl", 1, "print", "tolva", g.tolva_base().translate(tpos),
-        [0, 0, 0.5],
-        "Plato con el alojamiento del motor, la ventana de salida de la moneda y las 4 orejas de fijación.",
-        "Se fija al bastidor con 4 M3 embutidos. El 28BYJ-48 va por debajo con 2 M3 × 6.")
-    add("T02", "Tolva", "Disco dosificador", "T02_disco_dosificador_28byj.stl", 1, "print", "tolva2",
-        g.tolva_disco().translate((0, 0, g.Z_DISCO)).translate(tpos), [0, 0, 1.4],
-        "Disco Ø80 con 4 cavidades. Cada vuelta de 90° suelta una moneda; a 1,5 s por moneda gira a 10 rpm.",
-        "Entra a presión en el eje del 28BYJ-48, 0,35 mm sobre la base.")
-    add("T01", "Tolva", "Cono de la tolva", "T01_tolva_cono_40.stl", 1, "print", "tolva3",
-        g.tolva_cono().translate((0, 0, g.Z_ANILLO)).translate(tpos), [0, 0, 2.4],
-        "Embudo con paredes a 40° y un rascador sobre la salida que deja pasar solo la moneda alojada en la cavidad.",
-        "3 M3 × 12 desde abajo de la base.")
+    for nom, pid, titulo, desc, mont, ex, col in (
+            ("T03_base_tolva", "T03", "Base de la tolva",
+             "Plato con el anillo del disco, la ventana de salida de la moneda, cuatro orejas con agujero y tres clavijas para el cono.",
+             "El 28BYJ-48 queda bajo el plato, apretado con 2 bridas de nailon que pasan por las ranuras. Las orejas se apoyan en las patas T04.", [0, 0, 0.5], "tolva"),
+            ("T02_disco_dosificador", "T02", "Disco dosificador",
+             "Disco Ø80 con 4 cavidades. Cada giro de 90° suelta una moneda; a 1,5 s por moneda gira a 10 rpm.",
+             "Entra a presión en el eje del 28BYJ-48, 0,35 mm sobre la base.", [0, 0, 1.4], "tolva2"),
+            ("T01_tolva_cono_40", "T01", "Cono de la tolva",
+             "Embudo con paredes a 40° y un rascador sobre la salida que deja pasar solo la moneda alojada en la cavidad.",
+             "Tres agujeros ciegos en el flanje reciben las clavijas del anillo de la base.", [0, 0, 2.4], "tolva3")):
+        add(pid, "Tolva", titulo, nom + ".stl", 1, "print", col, mundo(nom), ex, desc, mont,
+            pivote=[centro[0], centro[1], base_z] if pid == "T02" else None, eje="z" if pid == "T02" else None)
 
-    # ---------------- componentes (no se imprimen) ----------------
-    tp = np.array(tpos)
-    byj = g.cil_z(-g.BYJ["eje_off"], 0, -19.0, 0.0, 28.0) + g.caja(-g.BYJ["eje_off"] - 3.5, -g.BYJ["eje_off"] + 3.5,
-                                                                 -g.BYJ["orejas"] / 2 - 3.5, g.BYJ["orejas"] / 2 + 3.5, -1.0, 0.0)
-    byj = byj + g.cil_z(0, 0, 0.0, 6.0, 5.0) + g.cil_z(-g.BYJ["eje_off"], 0, -19.0, -12.0, 9.0)
-    add("C1", "Componentes", "Motor 28BYJ-48 con ULN2003", None, 1, "comp", "motor", byj.translate(tpos), [0, 0, -1.0],
-        "Motor paso a paso que mueve el disco dosificador. El driver ULN2003 va aparte, en la caja de electrónica.",
-        "GPIO 16, 17, 18 y 19 del ESP32. 2 M3 × 6 a la base.")
+    # ---------------- componentes ----------------
+    byj = (g.cil_z(-g.BYJ["eje_off"], 0, -19.0, 0.0, 28.0)
+           + g.caja(-g.BYJ["eje_off"] - 3.5, -g.BYJ["eje_off"] + 3.5, -g.BYJ["orejas"] / 2 - 3.5, g.BYJ["orejas"] / 2 + 3.5, -1.0, 0.0)
+           + g.cil_z(0, 0, 0.0, 6.0, 5.0) + g.cil_z(-g.BYJ["eje_off"], 0, -19.0, -12.0, 9.0))
+    add("C1", "Componentes", "Motor 28BYJ-48", None, 1, "comp", "motor", byj.translate((centro[0], centro[1], base_z)), [0, 0, -1.0],
+        "Motor paso a paso que mueve el disco. El driver ULN2003 va aparte, en la caja de electrónica.",
+        "GPIO 16, 17, 18 y 19. Queda bajo la base, apretado con 2 bridas de nailon.")
+    y_o = -(gd["hy"] + g.E_DUCTO + g.PAD_SERVO)
+    add("C2", "Componentes", "Micro-servo SG90", None, 1, "comp", "servo", g.servo_sg90(y_o, -g.T_PIV).translate(tuple(c6)), [0, -3, 0],
+        "Inclina el plato: 55° lo manda hacia −X ($500 antigua) y 125° hacia +X ($500 nueva).",
+        "Entra a presión en el bolsillo de la cara −Y de D6. Señal en GPIO 13.")
+    pla = g.caja(-g.SENSOR_PLACA / 2, g.SENSOR_PLACA / 2, YS - g.SENSOR_PLACA / 2, YS + g.SENSOR_PLACA / 2, -1.6, 0)
+    chip = g.caja(-3, 3, YS - 3, YS + 3, -2.6, -1.6)
+    tcs = g.rot_y((pla + chip).translate((d.x_sensor, 0, g.Z_PUENTE)), g.INCLINACION).translate((0, 0, zoff))
+    add("C3", "Componentes", "Sensor de color TCS34725", None, 1, "comp", "sensor", tcs, [0, 0, 6],
+        "Lee la cara de la $500 mientras pasa: anillo, centro, anillo. Anillo plateado es antigua; dorado, nueva.",
+        "Cuelga bajo el puente B03, con el sensor hacia la moneda. I2C en GPIO 21 (SDA) y 22 (SCL).")
+    for k, (c0, hy, up, h) in luces.items():
+        for s, pid, nombre, col, ex, desc, mont in (
+                (1, "C4", "LED infrarrojo", "led", [0, -2, 0], "Emisor de cada barrera. Hay 9: 7 ductos y las 2 columnas de la bifurcación.",
+                 "A presión en su cavidad Ø5,2, con su resistencia en serie."),
+                (-1, "C5", "Fototransistor", "foto", [0, 2, 0], "Receptor de cada barrera. Cuando una moneda corta el haz, dispara la interrupción del ESP32.",
+                 "Frente al LED. Pull-up externo de 10 kΩ. GPIO 34, 35, 36, 39, 32, 33, 25, 26 y 27.")):
+            cil = g.cil_eje((h, s * (hy + 1.0), up), (0, float(s), 0), 7.6, 2.5).translate(tuple(c0))
+            add(pid, "Componentes", nombre, None, 9, "comp", col, cil, ex, desc, mont, tag=k)
 
-    sg = g.SG90
-    x_oreja = g.G / 2 - 0.5 - (sg["caja_sobre_oreja"] + sg["buje"] + sg["estriado"])
-    z_c = piv_z - sg["eje_off"]
-    prof = 22.5
-    cuerpo = g.caja(x_oreja - (prof - sg["caja_sobre_oreja"]), x_oreja + sg["caja_sobre_oreja"],
-                    piv_y - sg["ancho"] / 2, piv_y + sg["ancho"] / 2,
-                    z_c - sg["largo"] / 2, z_c + sg["largo"] / 2)
-    orejas = g.caja(x_oreja, x_oreja + 2.0, piv_y - sg["ancho"] / 2, piv_y + sg["ancho"] / 2,
-                    z_c - sg["orejas"] / 2, z_c + sg["orejas"] / 2)
-    eje = g.cil_eje((x_oreja + sg["caja_sobre_oreja"], piv_y, piv_z), np.array([1.0, 0, 0]),
-                    sg["buje"] + sg["estriado"] + 1.0, 2.3)
-    add("C2", "Componentes", "Micro-servo SG90 (aguja)", None, 1, "comp", "servo",
-        (cuerpo + orejas + eje).translate(bif_pos), [-3, 0, -1.7],
-        "Mueve la aguja entre 0° ($500 antigua) y 45° ($500 nueva).",
-        "Entra por la cara −X de la bifurcación, con 2 tornillos M2 en las orejas. Señal en GPIO 13.")
+    # ---------------- referencia (no se imprime) ----------------
+    xs = [p_mundo(x, 0, 0)[0] for x in (0.0, d.fin_b)]
+    mesa = [g.caja(xs[0] - 90, xs[1] + 40, -70, -7, -4, 0), g.caja(xs[0] - 90, xs[1] + 40, 31, 94, -4, 0)]
+    add("M1", "Referencia", "Mesa de referencia", None, 1, "ref", "mesa", g.union(mesa), [0, 0, -2],
+        "Superficie plana sobre la que se apoyan las patas, con una ranura de 38 mm por donde bajan los tubos. Es solo una guía: tu bastidor puede ser otro.",
+        "Las patas del riel y de la tolva se atan con bridas a esta superficie.")
+    add("M2", "Referencia", "Banda transportadora", None, 1, "ref", "banda", g.caja(30, 400, -20, 44, Z_BANDA - 8, Z_BANDA), [0, 0, -3],
+        "Lleva los cinco vasos hasta el punto A del brazo.", "Es la etapa 2; aquí solo marca la altura de los vasos.")
+    cups = []
+    for k, den in enumerate(VASOS):
+        x = 70.0 + k * PASO_VASOS
+        cups.append(dict(den=den, x=x, y=12.0, ztop=Z_BANDA + VASO_H))
+        vaso = (g.cil_z(x, 12.0, Z_BANDA, Z_BANDA + VASO_H, VASO_D)
+                - g.cil_z(x, 12.0, Z_BANDA + 2.0, Z_BANDA + VASO_H + 1, VASO_D - 3.0))
+        add("V", "Referencia", "Vaso", None, 5, "ref", "vaso", vaso, [0, 0, -3.5],
+            "Recibe todas las monedas de una denominación, nuevas y antiguas. Ø52 × 60, paso de 65 mm sobre la banda.",
+            "Los tubos flexibles de cada ducto terminan sobre su boca.", tag=f"V{den}")
 
-    pl = g.caja(x_pos, x_pos + 1.6, -placa / 2, placa / 2, -placa / 2, placa / 2)
-    chip = g.caja(x_pos + 1.6, x_pos + 2.8, -3, 3, -3, 3)
-    tcs = g.rot_x(pl + chip, -g.RAMPA).translate((0, *ps)).translate(bif_pos)
-    add("C3", "Componentes", "Sensor de color TCS34725", None, 1, "comp", "sensor", tcs, [2, 0, -1.7],
-        "Lee el anillo de la moneda de $500: plateado es antigua, dorado es nueva. Mira a través de una ventana de 7 mm.",
-        "En su alojamiento de la cara +X, sujeto por la tapa. I2C en GPIO 21 (SDA) y 22 (SCL).")
-
-    # barreras IR: LED a un lado, fototransistor al otro
-    ir_led, ir_fto = [], []
-    for i, p_ir, hy in ir_parejas:
-        for s, lst in ((1, ir_led), (-1, ir_fto)):
-            y0 = p_ir[1] + s * (hy + 2.0)
-            m = g.cil_eje((p_ir[0], y0, p_ir[2]), np.array([0, float(s), 0]), 8.6, 2.5)
-            lst.append(mundo(m))
-    for yy, zz in [((gb["yn"][0] + gb["yn"][1]) / 2, gb["z_ir"]), ((gb["ya"][0] + gb["ya"][1]) / 2, gb["z_ir"])]:
-        ir_led.append(cil_x(g.G / 2 + 3.0, g.G / 2 + 3.0 + 8.6, yy, zz, 5.0).translate(bif_pos))
-        ir_fto.append(cil_x(-g.G / 2 - 3.0 - 8.6, -g.G / 2 - 3.0, yy, zz, 5.0).translate(bif_pos))
-    add("C4", "Componentes", "LED infrarrojo (9)", None, 9, "comp", "led", g.union(ir_led), [0, -2, 0],
-        "Emisor de cada barrera. Hay 9, uno por salida: 7 ductos y las 2 salidas de la bifurcación.",
-        "Va a presión en su cavidad Ø5,2, con su resistencia en serie.")
-    add("C5", "Componentes", "Fototransistor (9)", None, 9, "comp", "foto", g.union(ir_fto), [0, 2, 0],
-        "Receptor de cada barrera. Cuando una moneda corta el haz, dispara la interrupción del ESP32.",
-        "Frente al LED. Pull-up externo de 10 kΩ. GPIO 34, 35, 36, 39, 32, 33, 25, 26 y 27.")
-
-    return piezas
+    # ---------------- datos de la simulación ----------------
+    monedas = {}
+    for i, (w, ms) in enumerate(g.RANURAS):
+        for key, nombre, diam in ms:
+            monedas[key] = dict(d=diam, den=DENOM[key], nombre=nombre, slot=i)
+    slots = []
+    for r in r_all:
+        c0 = p_mundo(r.xc, r.yc, 0)
+        s = dict(i=r.i, x0=r.x0, largo=r.largo, ancho=r.ancho, xc=r.xc, yc=r.yc, c0=list(c0),
+                 nombre=f"D{r.i + 1}" if r.i != g.RANURA_500 else "D6")
+        if r.i == g.RANURA_500:
+            col = (g.COL_INT0 + g.COL_INT1) / 2
+            s["fondo"] = {"D6a": list(c0 + np.array([-col, 0, -gd["t_bot"]])), "D6b": list(c0 + np.array([col, 0, -gd["t_bot"]]))}
+            s["ir"] = {"D6a": float(c0[2] + gd["up_ir"]), "D6b": float(c0[2] + gd["up_ir"])}
+        else:
+            s["fondo"] = {s["nombre"]: list(c0 + np.array([0, 0, -g.L_DUCTO]))}
+            s["ir"] = {s["nombre"]: float(c0[2] - g.T_IR)}
+        slots.append(s)
+    sim = dict(c22=C22, s22=S22, zoff=zoff, esp_base=g.ESP_BASE, tan_peralte=g.PERALTE_T, entrada=g.ENTRADA / 2,
+               tolva=dict(c=[float(centro[0]), float(centro[1]), float(base_z)], cav_r=g.CAVIDAD_R),
+               x_sensor=d.x_sensor, y_moneda=YS,
+               d6=dict(c0=[float(v) for v in c6], t_piv=g.T_PIV, t_bot=gd["t_bot"], col=(g.COL_INT0 + g.COL_INT1) / 2,
+                       incl=g.INCL_PLATO, pl_h=g.PLATO_H, pl_l=g.PLATO_L, hu=gd["hu"]),
+               monedas=monedas, slots=slots, vasos=cups, z_banda=Z_BANDA, vaso_d=VASO_D, z_mesa=0.0)
+    return out, sim
 
 
 def main():
-    piezas = construir()
-    datos = json.dumps({"piezas": piezas}, separators=(",", ":"))
+    piezas, sim = construir()
+    datos = json.dumps({"piezas": piezas, "sim": sim}, separators=(",", ":"))
     html = PLANTILLA.read_text(encoding="utf-8").replace("/*DATOS*/null", datos)
     SALIDA.mkdir(parents=True, exist_ok=True)
     ruta = SALIDA / "ensamble_etapa1.html"

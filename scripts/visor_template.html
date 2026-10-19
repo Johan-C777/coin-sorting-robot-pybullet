@@ -2,54 +2,60 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@400;500&display=swap">
 <style>
-/* Layout: lista de piezas a la izquierda, visor al centro, ficha de la pieza a la derecha; en teléfono se apilan visor, lista y ficha. */
+/* Layout: lista de piezas a la izquierda, visor al centro, ficha o panel de simulación a la derecha; en teléfono se apilan. */
 :root{
   --bg:#eceee9; --panel:#f6f7f4; --ink:#1b2125; --ink2:#55606a; --line:#cfd4d0;
-  --accent:#c4570a; --accent-ink:#ffffff; --stage:#dfe3de; --edge:#1b2125;
+  --accent:#c4570a; --accent-ink:#ffffff; --stage:#dfe3de; --edge:#1b2125; --ok:#2a7d4f; --bad:#b3261e;
   --f-display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
   --f-body:"Barlow",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
-  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; color-scheme:dark}}
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; --ok:#5cc58a; --bad:#ff7a70; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
-  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; color-scheme:dark}
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --edge:#cfe0ea; --ok:#5cc58a; --bad:#ff7a70; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--f-body);
   padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-block:10px}
-.app{display:grid;grid-template-columns:240px minmax(0,1fr) 300px;grid-template-rows:auto minmax(0,1fr);gap:10px;height:100%;min-height:560px}
-header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.app{display:grid;grid-template-columns:240px minmax(0,1fr) 310px;grid-template-rows:auto minmax(0,1fr);gap:10px;height:100%;min-height:600px}
+header{grid-column:1/-1;display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
 h1{font:700 22px/1.1 var(--f-display);letter-spacing:.01em;margin:0}
-header p{margin:0;color:var(--ink2);font-size:13px}
+header p{margin:0;color:var(--ink2);font-size:13px;flex:1;min-width:200px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;min-height:0;min-width:0}
 #lista{overflow:auto;padding:8px 0}
 .grp{font:600 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);padding:10px 12px 4px}
 .item{display:flex;align-items:center;gap:8px;width:100%;padding:6px 12px;background:none;border:0;color:var(--ink);text-align:left;cursor:pointer;font:inherit}
 .item:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .item[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 20%,transparent);box-shadow:inset 3px 0 var(--accent)}
-.item:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.item:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .sw{width:10px;height:10px;border-radius:2px;flex:none;border:1px solid var(--line)}
 .code{font:500 11px var(--f-mono);color:var(--ink2);width:26px;flex:none}
 .nm{flex:1;min-width:0}
 .qty{font:500 11px var(--f-mono);color:var(--ink2)}
 .item.off{opacity:.4}
 #stage{position:relative;display:flex;flex-direction:column;overflow:hidden}
-#cv{position:relative;flex:1;min-height:320px;background:var(--stage);border-radius:6px 6px 0 0;overflow:hidden;touch-action:none}
+#cv{position:relative;flex:1;min-height:340px;background:var(--stage);border-radius:6px 6px 0 0;overflow:hidden;touch-action:none}
 #cv canvas{display:block;width:100%;height:100%}
 .lbl{position:absolute;left:0;top:0;font:500 10px var(--f-mono);padding:1px 4px;border-radius:3px;background:var(--panel);color:var(--ink);border:1px solid var(--line);pointer-events:none;white-space:nowrap;opacity:.92}
 .lbl.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lbl.cnt{font-size:11px;padding:2px 6px}
+.lbl.hot{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 #tip{position:absolute;pointer-events:none;font:500 12px var(--f-body);background:var(--ink);color:var(--bg);padding:3px 8px;border-radius:4px;display:none;white-space:nowrap}
-.bar{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}
-.bar label{display:flex;align-items:center;gap:8px;font:500 12px var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
-.bar input[type=range]{width:130px;accent-color:var(--accent)}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
+.bar[hidden]{display:none}
+.bar label,.bar .lab{display:flex;align-items:center;gap:8px;font:500 12px var(--f-display);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.bar input[type=range]{width:120px;accent-color:var(--accent)}
 .bar input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
+.bar select{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:3px 6px;font:500 12px var(--f-mono)}
 .views{display:flex;gap:4px}
 button.b{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 10px;font:500 12px var(--f-display);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 button.b:hover{border-color:var(--accent)}
 button.b[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tabs{display:flex;gap:4px}
+.tabs .b{font-size:13px;padding:5px 14px}
 #ficha{padding:14px;overflow:auto}
 #ficha h2{font:700 20px/1.15 var(--f-display);margin:2px 0 4px}
 .tag{display:inline-block;font:500 11px var(--f-mono);padding:1px 6px;border-radius:3px;border:1px solid var(--line);color:var(--ink2);margin-right:4px}
@@ -61,6 +67,12 @@ dd{margin:2px 0 0}
 .sum{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}
 .sum b{color:var(--ink);font-family:var(--f-mono);font-weight:500}
 .hint{color:var(--ink2);font-size:13px}
+table.t{width:100%;border-collapse:collapse;font:500 12px var(--f-mono);margin:6px 0 2px}
+table.t td{padding:2px 0;border-bottom:1px solid var(--line)}
+table.t td:last-child{text-align:right}
+#log{font:400 11px/1.5 var(--f-mono);color:var(--ink2);max-height:150px;overflow:auto;margin-top:6px}
+#log div:first-child{color:var(--ink)}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
 @media (max-width:980px){
   .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto;height:auto}
   #cv{min-height:56vh}
@@ -72,19 +84,28 @@ dd{margin:2px 0 0}
 <div class="app">
   <header>
     <h1>Etapa 1: tolva y selección</h1>
-    <p>Arrastra para girar, rueda para acercar, toca una pieza para ver qué es.</p>
+    <div class="tabs" role="tablist"><button class="b" id="tabE" aria-pressed="true">Ensamble</button><button class="b" id="tabS" aria-pressed="false">Simulación</button></div>
+    <p id="sub">Arrastra para girar, rueda para acercar, toca una pieza para ver qué es.</p>
   </header>
   <nav class="panel" id="lista" aria-label="Piezas"></nav>
   <section class="panel" id="stage">
     <div id="cv"><div id="tip"></div></div>
-    <div class="bar">
+    <div class="bar" id="barE">
       <label>Despiece <input type="range" id="exp" min="0" max="100" value="0" aria-label="Despiece"></label>
       <label><input type="checkbox" id="chkC" checked> Componentes</label>
+      <label><input type="checkbox" id="chkR" checked> Referencia</label>
       <label><input type="checkbox" id="chkL" checked> Códigos</label>
-      <label>Aguja
-        <span class="views"><button class="b" id="a0" aria-pressed="true">0°</button><button class="b" id="a45" aria-pressed="false">45°</button></span>
-      </label>
-      <span class="views"><button class="b" data-v="iso">Iso</button><button class="b" data-v="lat">Lateral</button><button class="b" data-v="sup">Superior</button></span>
+      <span class="lab">Plato <span class="views"><button class="b" id="pA" aria-pressed="true">$500 antigua</button><button class="b" id="pN" aria-pressed="false">$500 nueva</button></span></span>
+      <span class="views"><button class="b" data-v="iso">Iso</button><button class="b" data-v="lat">Lateral</button><button class="b" data-v="sup">Superior</button><button class="b" data-v="d6">Bifurcador</button></span>
+    </div>
+    <div class="bar" id="barS" hidden>
+      <button class="b" id="play" aria-pressed="true">Pausa</button>
+      <label>Velocidad <input type="range" id="vel" min="10" max="150" value="45" aria-label="Velocidad"><span id="velT" style="min-width:34px"></span></label>
+      <label>Moneda <select id="sel"></select></label>
+      <button class="b" id="soltar">Soltar</button>
+      <label><input type="checkbox" id="auto" checked> Automático</label>
+      <button class="b" id="reset">Reiniciar</button>
+      <span class="views"><button class="b" data-v="iso">Iso</button><button class="b" data-v="lat">Lateral</button><button class="b" data-v="sup">Superior</button><button class="b" data-v="d6">Bifurcador</button></span>
     </div>
   </section>
   <aside class="panel" id="ficha"></aside>
@@ -94,22 +115,30 @@ dd{margin:2px 0 0}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const DATA = /*DATOS*/null;
+const SIM = DATA.sim;
 const COLORS = {
-  riel:[0x7f93a6,0x6f8196], cuna:[0x5d6b78,0x536070], ducto:[0x3fa0a0,0x2f8a8a], bif:[0x39414a,0x4a535d], aguja:[0xe0e4e8,0xc9ced4],
+  riel:[0x7f93a6,0x6f8196], llave:[0xe0a23a,0xd49324], pata:[0x5d6b78,0x536070], ducto:[0x3fa0a0,0x2f8a8a], bif:[0x39414a,0x4a535d],
+  plato:[0xe0e4e8,0xc9ced4], puente:[0x6a8f4a,0x5c7f3e],
   tolva:[0xd2a45a,0xc0924a], tolva2:[0xe3c07e,0xd1ad68], tolva3:[0xc88a3c,0xb87b30],
-  motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046]
+  motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046],
+  mesa:[0xb9b4a6,0xa7a294], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
 };
+const BASEOP = {mesa:.32, vaso:.5, banda:.9};
+const SEETHRU = new Set(['ducto','bif','tolva3','puente']);       // casi transparentes en la simulación
 const dark = () => document.documentElement.dataset.theme==='dark' ||
   (document.documentElement.dataset.theme!=='light' && matchMedia('(prefers-color-scheme: dark)').matches);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const b64 = (s, T) => { const b = atob(s), u = new Uint8Array(b.length); for (let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new T(u.buffer); };
+const $ = id => document.getElementById(id);
+const V3 = (x,y,z) => new THREE.Vector3(x,y,z);
+const rad = d => d*Math.PI/180;
 
-const cv = document.getElementById('cv');
+const cv = $('cv');
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 cv.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(32,1,5,5000);
+const camera = new THREE.PerspectiveCamera(32,1,5,6000);
 camera.up.set(0,0,1);
 scene.add(new THREE.HemisphereLight(0xffffff,0x445566,0.85));
 const sun = new THREE.DirectionalLight(0xffffff,0.9); sun.position.set(200,-300,400); scene.add(sun);
@@ -117,8 +146,8 @@ const fill = new THREE.DirectionalLight(0xffffff,0.35); fill.position.set(-300,2
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = .12;
 
-// ---- construir piezas
-const all = [];                      // {d, group, mesh, edges, mats}
+// ---------------- piezas
+const all = [];
 const root = new THREE.Group(); scene.add(root);
 const bbox = new THREE.Box3();
 for (const d of DATA.piezas) {
@@ -129,128 +158,121 @@ for (const d of DATA.piezas) {
   const mat = new THREE.MeshStandardMaterial({color:COLORS[d.color][0], roughness:.55, metalness:.08, flatShading:true,
     side:THREE.DoubleSide, transparent:true, opacity:1, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1});
   const mesh = new THREE.Mesh(geo, mat);
-  const eg = new THREE.EdgesGeometry(geo, 35);
-  const emat = new THREE.LineBasicMaterial({color:0x000000, transparent:true, opacity:.35});
-  const edges = new THREE.LineSegments(eg, emat);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), new THREE.LineBasicMaterial({color:0x000000, transparent:true, opacity:.35}));
   const group = new THREE.Group();
-  if (d.pivote) {                      // aguja: gira sobre el eje X por su pivote
+  const p = {d, group, mesh, edges, mat, emat:edges.material, base:BASEOP[d.color]||1, piv:null};
+  if (d.pivote) {
     mesh.position.set(-d.pivote[0],-d.pivote[1],-d.pivote[2]); mesh.add(edges);
     const piv = new THREE.Group(); piv.position.set(...d.pivote); piv.add(mesh); group.add(piv);
-    d.pivObj = piv;
+    p.piv = piv;
   } else { mesh.add(edges); group.add(mesh); }
   root.add(group);
   geo.computeBoundingBox(); bbox.union(geo.boundingBox);
-  all.push({d, group, mesh, edges, mat, emat, base:new THREE.Vector3()});
+  all.push(p);
 }
 const size = bbox.getSize(new THREE.Vector3()), center = bbox.getCenter(new THREE.Vector3());
 const radius = size.length()/2;
+const plato = all.find(p=>p.d.pid==='B02'), disco = all.find(p=>p.d.pid==='T02');
+const sensorP = all.find(p=>p.d.pid==='C3');
+const irOf = tag => all.filter(p=>p.d.tag===tag && (p.d.pid==='C4'||p.d.pid==='C5'));
 
-// ---- códigos (etiquetas HTML)
-const byPid = {};
+const byPid = {}, labels = {};
 for (const p of all) (byPid[p.d.pid] ||= []).push(p);
-const labels = {};
 for (const pid in byPid) {
   const el = document.createElement('div'); el.className='lbl'; el.textContent=pid; cv.appendChild(el);
   labels[pid] = el;
 }
 
-// ---- lista
-const lista = document.getElementById('lista'), ficha = document.getElementById('ficha');
+// ---------------- lista y ficha
+const lista = $('lista'), ficha = $('ficha');
 const groups = [...new Set(DATA.piezas.map(p=>p.grupo))];
 const first = {}; for (const p of DATA.piezas) if(!(p.pid in first)) first[p.pid]=p;
 const hex = c => '#'+COLORS[c][0].toString(16).padStart(6,'0');
-const hidden = new Set();
-let selected = null;
+let selected = null, mode = 'E';
 for (const g of groups) {
   const h = document.createElement('div'); h.className='grp'; h.textContent=g; lista.appendChild(h);
   for (const pid of Object.keys(first).filter(k=>first[k].grupo===g)) {
     const d = first[pid];
     const b = document.createElement('button'); b.className='item'; b.dataset.pid=pid; b.setAttribute('aria-pressed','false');
     b.innerHTML = `<span class="sw" style="background:${hex(d.color)}"></span><span class="code">${pid}</span><span class="nm">${d.nombre}</span>${d.cant>1?`<span class="qty">×${d.cant}</span>`:''}`;
-    b.onclick = () => select(selected===pid?null:pid);
+    b.onclick = () => { if (mode==='S') setMode('E'); select(selected===pid?null:pid); };
     lista.appendChild(b);
   }
 }
-
-const PRINT = Object.values(first).filter(d=>d.kind==='print');
-const nFiles = new Set(DATA.piezas.filter(d=>d.kind==='print').map(d=>d.archivo)).size;
-const nPrint = PRINT.reduce((a,d)=>a+d.cant,0);
+const nPrint = Object.values(first).filter(d=>d.kind==='print').reduce((a,d)=>a+d.cant,0);
 function fichaVacia(){
   ficha.innerHTML = `<h2>Elige una pieza</h2><p class="hint">Toca una pieza en el modelo o en la lista. Las demás se atenúan para ver dónde va.</p>
-  <div class="sum">Se imprimen <b>${nFiles}</b> archivos (<b>${nPrint}</b> piezas) y se agregan <b>5</b> componentes: motor, servo, sensor de color, 9 LED IR y 9 fototransistores.<br><br>
-  Mueve <b>Despiece</b> para separar el ensamble y <b>Aguja</b> para ver cómo desvía la $500.</div>`;
+  <div class="sum">Se imprimen <b>${nPrint}</b> piezas y <b>ninguna lleva tornillos</b>: todo es a presión, con clavijas Ø6 o con bridas de nailon.<br><br>
+  Mueve <b>Despiece</b> para separar el ensamble, cambia el <b>Plato</b> para ver cómo desvía la $500, o abre la pestaña <b>Simulación</b> para ver las monedas llegar a los vasos.</div>`;
 }
 function select(pid){
   selected = pid;
   lista.querySelectorAll('.item').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.pid===pid)));
-  for (const p of all) {
-    const on = !pid || p.d.pid===pid;
-    p.mat.opacity = on?1:.16; p.mat.depthWrite = on; p.emat.opacity = on?.35:.05;
-    p.mat.emissive.setHex(pid && on ? 0x6a3a00 : 0x000000);
-  }
+  aplicarOpacidad();
   for (const k in labels) labels[k].classList.toggle('sel', k===pid);
-  if (!pid) return fichaVacia();
+  if (!pid) return mode==='E' ? fichaVacia() : null;
   const d = first[pid];
-  const piezas = d.kind==='print' ? `<span class="tag pr">Se imprime</span>` : `<span class="tag">Componente comprado</span>`;
+  const tipo = d.kind==='print' ? `<span class="tag pr">Se imprime</span>` : (d.kind==='comp' ? `<span class="tag">Componente comprado</span>` : `<span class="tag">Referencia, no se imprime</span>`);
   const cant = d.cant>1 ? `<span class="tag">×${d.cant}</span>` : '';
-  const arch = d.archivo ? (d.cant>1 && pid==='R03' ? 'R03_cuna_22_izq.stl y R03_cuna_22_der.stl (4 de cada una)' : d.archivo) : 'No tiene archivo. Se compra.';
-  let extra = '';
-  if (pid==='B02') extra = `<dt>Posición actual</dt><dd id="agTxt"></dd>`;
-  ficha.innerHTML = `<span class="tag">${pid}</span>${piezas}${cant}<h2>${d.nombre}</h2>
+  const arch = d.archivo ? d.archivo : (d.kind==='comp' ? 'No tiene archivo. Se compra.' : 'Solo para ubicar el resto.');
+  ficha.innerHTML = `<span class="tag">${pid}</span>${tipo}${cant}<h2>${d.nombre}</h2>
     <dl><dt>Qué hace</dt><dd>${d.desc}</dd><dt>Cómo se monta</dt><dd>${d.montaje}</dd>
-    <dt>Archivo</dt><dd class="file">${arch}</dd>${extra}</dl>`;
-  actualizarAguja();
+    <dt>Archivo</dt><dd class="file">${arch}</dd></dl>`;
+}
+function aplicarOpacidad(){
+  const see = mode==='S';
+  for (const p of all) {
+    const on = !selected || p.d.pid===selected, st = see && SEETHRU.has(p.d.color);
+    const o = Math.min(p.base * (on?1:.16), st ? .22 : 1);
+    p.mat.opacity = o; p.mat.depthWrite = o>.5; p.emat.opacity = on ? (st?.2:.35) : .05;
+    p.mat.emissive.setHex(selected && on ? 0x6a3a00 : 0x000000);
+  }
 }
 
-// ---- controles
-const exp = document.getElementById('exp'), chkC = document.getElementById('chkC'), chkL = document.getElementById('chkL');
+// ---------------- controles del ensamble
+const exp = $('exp'), chkC = $('chkC'), chkR = $('chkR'), chkL = $('chkL');
+const tubosG = new THREE.Group(); scene.add(tubosG);
 function aplicar(){
-  const k = exp.value/100*34;
+  const k = mode==='E' ? exp.value/100*34 : 0;
   for (const p of all) {
     const e = p.d.ex; p.group.position.set(e[0]*k, e[1]*k, e[2]*k);
-    p.group.visible = chkC.checked || p.d.kind==='print';
+    p.group.visible = p.d.kind==='print' || (p.d.kind==='comp' && (chkC.checked||mode==='S')) || (p.d.kind==='ref' && (chkR.checked||mode==='S'));
   }
-  lista.querySelectorAll('.item').forEach(b=>b.classList.toggle('off', !chkC.checked && first[b.dataset.pid].kind==='comp'));
+  tubosG.visible = mode==='S';
+  lista.querySelectorAll('.item').forEach(b=>{const k=first[b.dataset.pid].kind; b.classList.toggle('off', mode==='E' && ((k==='comp'&&!chkC.checked)||(k==='ref'&&!chkR.checked)));});
 }
-exp.oninput = chkC.onchange = aplicar;
-let ang = 0;
-function actualizarAguja(){
-  const a = document.getElementById('agTxt');
-  if (a) a.textContent = ang? '45°: la aguja baja y la $500 nueva (anillo dorado) cae por el hueco.' : '0°: la aguja queda a ras del piso y la $500 antigua (anillo plateado) pasa a su ducto.';
+exp.oninput = chkC.onchange = chkR.onchange = aplicar;
+let plateTarget = -1, plateAng = rad(-SIM.d6.incl);      // -1: $500 antigua (−X), +1: $500 nueva (+X)
+function setPlato(s){
+  plateTarget = s;
+  $('pA').setAttribute('aria-pressed', String(s<0)); $('pN').setAttribute('aria-pressed', String(s>0));
 }
-function setAng(v){
-  ang = v;
-  const ag = all.find(p=>p.d.pid==='B02');
-  ag.d.pivObj.rotation.x = -v*Math.PI/180;
-  document.getElementById('a0').setAttribute('aria-pressed', String(!v));
-  document.getElementById('a45').setAttribute('aria-pressed', String(!!v));
-  actualizarAguja();
-}
-document.getElementById('a0').onclick = () => setAng(0);
-document.getElementById('a45').onclick = () => setAng(45);
+$('pA').onclick = () => setPlato(-1); $('pN').onclick = () => setPlato(1);
 
 function vista(n){
-  const dir = {iso:[0.9,-1.1,0.75], lat:[0,-1,0.04], sup:[0.001,-0.02,1]}[n];
   const f = Math.min(1, camera.aspect);
-  const v = new THREE.Vector3(...dir).normalize().multiplyScalar(radius*3.0/f);
-  camera.position.copy(center).add(v); controls.target.copy(center); controls.update();
+  let c = center, r = radius;
+  const dir = {iso:[0.9,-1.1,0.75], lat:[0,-1,0.04], sup:[0.001,-0.02,1], d6:[0.8,-1,0.35]}[n];
+  if (n==='d6') { c = V3(...SIM.d6.c0).add(V3(0,0,-60)); r = 95; }
+  camera.position.copy(c).add(V3(...dir).normalize().multiplyScalar(r*3.0/f)); controls.target.copy(c); controls.update();
 }
 document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>vista(b.dataset.v));
 
-// ---- selección por clic / hover
-const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tip = document.getElementById('tip');
+// ---------------- selección por clic / hover
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tip = $('tip');
 function pick(ev){
   const r = renderer.domElement.getBoundingClientRect();
   mouse.set((ev.clientX-r.left)/r.width*2-1, -(ev.clientY-r.top)/r.height*2+1);
   ray.setFromCamera(mouse, camera);
-  const vis = all.filter(p=>p.group.visible && (!selected || p.d.pid===selected || true)).map(p=>p.mesh);
-  const hit = ray.intersectObjects(vis,false).find(h=>h.object.material.opacity>.5 || !selected);
+  const vis = all.filter(p=>p.group.visible && p.mat.opacity>.5).map(p=>p.mesh);
+  const hit = ray.intersectObjects(vis,false)[0];
   return hit ? all.find(p=>p.mesh===hit.object) : null;
 }
 let down = null;
 renderer.domElement.addEventListener('pointerdown', e=>down=[e.clientX,e.clientY]);
 renderer.domElement.addEventListener('pointerup', e=>{
   if (!down || Math.hypot(e.clientX-down[0], e.clientY-down[1])>5) return;
+  if (mode==='S') return;
   const h = pick(e); select(h ? (selected===h.d.pid ? null : h.d.pid) : null);
 });
 renderer.domElement.addEventListener('pointermove', e=>{
@@ -263,7 +285,227 @@ renderer.domElement.addEventListener('pointermove', e=>{
 });
 renderer.domElement.addEventListener('pointerleave', ()=>tip.style.display='none');
 
-// ---- bucle
+// =====================================================================
+// Simulación
+// =====================================================================
+const G = 9810, MU = 0.22, EM = 2.2, VS0 = 130;                    // mm/s², fricción moneda-PLA, grosor, velocidad de entrada
+const C22 = SIM.c22, S22 = SIM.s22, TP = SIM.tan_peralte;
+const SERVO_DPS = 520, SERVO_DECIDE = 0.025;                       // SG90 ≈ 0,115 s por 60°; la lectura tarda ≈ 25 ms
+const Pw = (x,y,z) => V3(x*C22+z*S22, y, -x*S22+z*C22+SIM.zoff);
+const nSuelo = V3(Math.cos(Math.atan(TP))*S22, -Math.sin(Math.atan(TP)), Math.cos(Math.atan(TP))*C22);
+const suelo = (x,y) => Pw(x, y, SIM.esp_base + y*TP);
+const centroSuelo = (x,y) => suelo(x,y).addScaledVector(nSuelo, EM/2);
+const COIN = {N50:[0xb8864f,0xb8864f],A50:[0xc9ccd0,0xc9ccd0],N100:[0xcfd2d6,0xcfd2d6],A100:[0xbfa35a,0xbfa35a],N200:[0xc9b36a,0xc9b36a],
+  A200:[0xc4c8cc,0xc4c8cc],N1000:[0xc8a948,0xcbd0d4],A500:[0xd2d6da,0xd0ae4e],N500:[0xd2b04f,0xd2d6da]};
+const ORDEN = ['N50','N100','A50','N200','A100','A500','N500','A200','N1000','N500','A500','N100'];
+const COLOR_VASO = {50:0xb8864f,100:0xcfd2d6,200:0xc9b36a,500:0xd2b04f,1000:0xc8a948};
+const nombreMoneda = k => `$${SIM.monedas[k].den} ${k[0]==='A'?'antigua':'nueva'}`;
+
+// tubos flexibles de cada salida a su vaso
+const curvas = {}, salidas = [];
+SIM.slots.forEach(sl => { for (const nm in sl.fondo) salidas.push({nm, p:V3(...sl.fondo[nm])}); });
+salidas.sort((a,b)=>a.p.x-b.p.x);
+const DEN_SALIDA = {D1:50,D2:100,D3:50,D4:200,D5:100,D6a:500,D6b:500,D7:200,D8:1000};
+salidas.forEach((s,k)=>{
+  const den = DEN_SALIDA[s.nm];
+  s.vaso = SIM.vasos.findIndex(v=>v.den===den);
+  const v = SIM.vasos[s.vaso], boca = V3(v.x, v.y, v.ztop+8), yo = (k-4)*8;
+  const pts = [s.p.clone(), s.p.clone().add(V3(0,0,-18)),
+    V3((s.p.x*2+boca.x)/3, 12+yo, (s.p.z-18)*0.55+boca.z*0.45), V3((s.p.x+boca.x*2)/3, 12+yo*0.4, boca.z+40), boca.clone().add(V3(0,0,18)), boca];
+  const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal'); c.arcLengthDivisions = 200;
+  curvas[s.nm] = c;
+  tubosG.add(new THREE.Mesh(new THREE.TubeGeometry(c, 80, 6, 8, false),
+    new THREE.MeshStandardMaterial({color:COLOR_VASO[den], transparent:true, opacity:.28, roughness:.4, depthWrite:false})));
+});
+
+const coinGeo = new THREE.CylinderGeometry(1,1,1,40).rotateX(Math.PI/2);
+const coins = [], eventos = [];
+let simT = 0, speed = .45, corriendo = true, cola = 0, proximo = 0;
+const conteo = {vasos:[0,0,0,0,0], ir:{}};
+const pile = SIM.vasos.map(v=>{
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(21,21,1,28).rotateX(Math.PI/2), new THREE.MeshStandardMaterial({color:COLOR_VASO[v.den],roughness:.5,metalness:.4}));
+  m.visible = false; scene.add(m); return m;
+});
+const log = [];
+const anotar = (txt, cls) => { log.unshift(`<div class="${cls||''}">${simT.toFixed(2)} s  ${txt}</div>`); if (log.length>40) log.pop(); };
+const nSlerp = (a,b,u) => a.clone().lerp(b,Math.min(1,Math.max(0,u))).normalize();
+
+// Calcula la trayectoria completa de una moneda (muestras {t,p,n}) y los eventos que dispara.
+function planear(key, t0){
+  const mo = SIM.monedas[key], r = mo.d/2, sl = SIM.slots[mo.slot], es500 = sl.nombre==='D6';
+  const S = [], E = [], DT = 0.004;
+  let t = 0, p = V3(0,0,0), n = V3(0,0,1), cnt = 0;
+  const rec = () => S.push({t, p:p.clone(), n:n.clone()});
+  const evt = (tipo, extra) => E.push({t:t0+t, tipo, ...extra});
+  // 1. caída desde la tolva al riel
+  const yc = r, land = centroSuelo(SIM.entrada, yc);
+  p = land.clone(); p.z += 24; let vz = 0, tr = 0;
+  while (p.z > land.z) { vz -= G*DT; p.z += vz*DT; t += DT; tr += DT; n = nSlerp(V3(0,0,1), nSuelo, tr/.06); if ((cnt++)%3===0) rec(); }
+  p = land.clone(); n = nSuelo.clone(); rec();
+  // 2. deslizar por el riel
+  let xr = SIM.entrada, vr = VS0, leido = false;
+  const xFall = sl.xc - 2.2, aR = G*(S22 - MU*C22);
+  while (xr < xFall) {
+    vr += aR*DT; xr += vr*DT; t += DT; p = centroSuelo(xr, yc);
+    if (!leido && xr >= SIM.x_sensor) { leido = true; if (es500) evt('lectura', {key}); }
+    if ((cnt++)%3===0) rec();
+  }
+  rec();
+  // 3. caída por la ranura (balística, limitada por las paredes del ducto)
+  let v = V3(vr*C22, 0, -vr*S22);
+  const c0 = V3(...sl.c0);
+  const hu = es500 ? SIM.d6.hu : sl.largo*C22/2 + 0.8;
+  const lim = Math.max(0.1, hu - r - 0.1);
+  const volar = (parar, xc, xl, nTo, trot) => {
+    const nFrom = n.clone(); let tt = 0;
+    for (let i=0;i<3000;i++) {
+      const prev = p.z;
+      v.z -= G*DT; p.addScaledVector(v, DT); t += DT; tt += DT;
+      const dx = p.x - xc; if (Math.abs(dx) > xl) { p.x = xc + Math.sign(dx)*xl; v.x = 0; }
+      n = nSlerp(nFrom, nTo, tt/trot);
+      if (i%3===0) rec();
+      const z = parar(prev); if (z) { rec(); return z; }
+    }
+    rec(); return null;
+  };
+  const cruzaIR = nm => prev => { const z = sl.ir[nm]; if (prev > z && p.z <= z) { evt('ir', {nm}); return 'ir'; } return null; };
+  let salidaNm;
+  if (!es500) {
+    salidaNm = sl.nombre;
+    volar(cruzaIR(salidaNm), c0.x, lim, V3(0,0,1), .05);
+    const zf = sl.fondo[salidaNm][2];
+    volar(()=> p.z <= zf ? 'f' : null, c0.x, lim, V3(0,0,1), .01);
+  } else {
+    const lado = key==='N500' ? 1 : -1, a = rad(lado*SIM.d6.incl);
+    const piv = V3(c0.x, c0.y, c0.z - SIM.d6.t_piv);
+    const np = V3(Math.sin(a), 0, Math.cos(a)), eje = V3(Math.cos(a), 0, -Math.sin(a));
+    const alt = SIM.d6.pl_h/2 + EM/2;
+    volar(()=> p.clone().sub(piv).dot(np) <= alt ? 'plato' : null, c0.x, lim, V3(0,0,1), .05);
+    n = np.clone();
+    let h = p.clone().sub(piv).dot(eje), vs = Math.max(0, v.dot(eje.clone().multiplyScalar(lado))), cn = 0;
+    const aS = G*(Math.sin(Math.abs(a)) - MU*Math.cos(Math.abs(a)));
+    evt('plato', {tCont:t0+t, lado});
+    while (Math.abs(h) < SIM.d6.pl_l/2) { vs += aS*DT; h += lado*vs*DT; t += DT; p = piv.clone().addScaledVector(eje, h).addScaledVector(np, alt); if ((cn++)%3===0) rec(); }
+    rec();
+    v = eje.clone().multiplyScalar(lado*vs);
+    salidaNm = lado>0 ? 'D6b' : 'D6a';
+    const colx = c0.x + lado*SIM.d6.col, lc = Math.max(0.1, 13.9 - r);
+    volar(cruzaIR(salidaNm), colx, lc, V3(0,0,1), .12);
+    const zf = sl.fondo[salidaNm][2];
+    volar(()=> p.z <= zf ? 'f' : null, colx, lc, V3(0,0,1), .01);
+  }
+  // 4. tubo flexible hasta el vaso
+  const out = salidas.find(s=>s.nm===salidaNm), cur = curvas[salidaNm], L = cur.getLength(), dur = L/650, t1 = t;
+  for (let i=1; i<=Math.ceil(dur/0.012); i++) {
+    const u = Math.min(1, i*0.012/dur), tg = cur.getTangentAt(u);
+    p = cur.getPointAt(u); n = V3(0,1,0).cross(tg).normalize(); if (n.lengthSq()<.5) n = V3(0,0,1); t = t1 + u*dur; rec();
+  }
+  // 5. caída al vaso
+  const pileTop = SIM.z_banda + 2 + Math.min(46, conteo.vasos[out.vaso]*0.9) + EM/2;
+  vz = -80;
+  while (p.z > pileTop) { vz -= G*DT; p.z += vz*DT; t += DT; if ((cnt++)%3===0) rec(); }
+  rec();
+  evt('vaso', {vaso:out.vaso, key});
+  return {S, E, t0, tEnd:t0+t, key, salidaNm, llegada:undefined, i:0};
+}
+
+function colocarMoneda(c, tt){
+  const S = c.S;
+  if (tt < S[0].t || tt > S[S.length-1].t) { c.g.visible = false; return; }
+  let i = c.i; while (i < S.length-2 && S[i+1].t < tt) i++; while (i>0 && S[i].t > tt) i--; c.i = i;
+  const a = S[i], b = S[i+1] || a, u = b.t>a.t ? Math.min(1,Math.max(0,(tt-a.t)/(b.t-a.t))) : 0;
+  c.g.position.lerpVectors(a.p, b.p, u);
+  c.g.quaternion.setFromUnitVectors(V3(0,0,1), a.n.clone().lerp(b.n,u).normalize());
+  c.g.visible = true;
+}
+function crearMoneda(key){
+  const r = SIM.monedas[key].d/2, g = new THREE.Group();
+  const ring = new THREE.Mesh(coinGeo, new THREE.MeshStandardMaterial({color:COIN[key][0], metalness:.55, roughness:.35}));
+  ring.scale.set(r, r, EM);
+  const cen = new THREE.Mesh(coinGeo, new THREE.MeshStandardMaterial({color:COIN[key][1], metalness:.55, roughness:.35}));
+  cen.scale.set(r*.64, r*.64, EM+.25);
+  g.add(ring, cen); g.visible = false; scene.add(g); return g;
+}
+let discoObj = 0, discoAng = 0, margen = null, ultimoLeido = '—';
+const flash = {};
+function soltar(key){
+  const plan = planear(key, simT + 0.45);
+  plan.g = crearMoneda(key); coins.push(plan);
+  eventos.push({t:simT, fn:()=>{ discoObj += rad(90); }});
+  for (const e of plan.E) eventos.push({t:e.t, fn:()=>manejar(e, plan)});
+  anotar(`suelta ${nombreMoneda(key)}`);
+  eventos.sort((a,b)=>a.t-b.t);
+}
+function encender(tag, ms){ irOf(tag).forEach(p=>p.mat.emissive.setHex(0xff3b30)); flash[tag] = simT + ms/1000; }
+function manejar(e, plan){
+  if (e.tipo==='lectura') {
+    const dorado = plan.key==='N500', lado = dorado?1:-1;
+    ultimoLeido = dorado ? 'anillo dorado (nueva)' : 'anillo plateado (antigua)';
+    if (sensorP) sensorP.mat.emissive.setHex(0x7a3cff); flash.sensor = simT + .15;
+    anotar(`TCS34725: ${ultimoLeido}, plato hacia ${dorado?'+X':'−X'}`);
+    const tCmd = e.t + SERVO_DECIDE;
+    eventos.push({t:tCmd, fn:()=>setPlato(lado)}); eventos.sort((a,b)=>a.t-b.t);
+    plan.llegada = tCmd + Math.abs(rad(SIM.d6.incl)*lado - plateAng)/rad(SERVO_DPS);
+  } else if (e.tipo==='plato') {
+    if (plan.llegada!==undefined) {
+      margen = (e.tCont - plan.llegada)*1000;
+      anotar(`plato listo ${Math.abs(margen).toFixed(0)} ms ${margen>=0?'antes de la moneda':'después de la moneda'}`, margen>=0?'ok':'bad');
+    }
+  } else if (e.tipo==='ir') {
+    conteo.ir[e.nm] = (conteo.ir[e.nm]||0)+1; encender(e.nm, 160);
+    anotar(`barrera ${e.nm}: ${conteo.ir[e.nm]}`);
+  } else if (e.tipo==='vaso') {
+    const k = e.vaso; conteo.vasos[k]++; const m = pile[k], h = Math.min(48, conteo.vasos[k]*.9);
+    m.visible = true; m.scale.set(1,1,h); m.position.set(SIM.vasos[k].x, SIM.vasos[k].y, SIM.z_banda+2+h/2);
+    anotar(`vaso $${SIM.vasos[k].den}: ${conteo.vasos[k]}`, 'ok');
+  }
+}
+
+// contadores flotantes
+const cntL = [];
+function etiquetaCnt(txt, getPos, tag){ const el = document.createElement('div'); el.className='lbl cnt'; cv.appendChild(el); cntL.push({el, getPos, txt, tag}); }
+SIM.vasos.forEach((v,k)=>etiquetaCnt(()=>`$${v.den} · ${conteo.vasos[k]}`, ()=>V3(v.x, v.y, v.ztop+14)));
+salidas.forEach(s=>etiquetaCnt(()=>`${s.nm} · ${conteo.ir[s.nm]||0}`, ()=>s.p.clone().add(V3(0,0,-12)), s.nm));
+
+function reiniciar(){
+  for (const c of coins) scene.remove(c.g);
+  coins.length = 0; eventos.length = 0; simT = 0; proximo = 0.2; cola = 0;
+  conteo.vasos = [0,0,0,0,0]; conteo.ir = {}; log.length = 0; margen = null; ultimoLeido = '—';
+  pile.forEach(m=>m.visible=false); setPlato(-1); plateAng = rad(-SIM.d6.incl);
+}
+function panelSim(){
+  const filas = SIM.vasos.map((v,k)=>`<tr><td>Vaso $${v.den}</td><td>${conteo.vasos[k]}</td></tr>`).join('');
+  const total = SIM.vasos.reduce((a,v,k)=>a+v.den*conteo.vasos[k],0);
+  const irs = salidas.map(s=>`${s.nm} ${conteo.ir[s.nm]||0}`).join(' · ');
+  ficha.innerHTML = `<h2>Simulación</h2><p class="hint">Cada moneda baja por el riel hasta su ranura, cruza la barrera infrarroja y llega por el tubo a su vaso. La $500 pasa antes bajo el sensor de color, que mueve el plato.</p>
+  <dl><dt>Vasos</dt><dd><table class="t">${filas}<tr><td>Total</td><td>$${total.toLocaleString('es-CO')}</td></tr></table></dd>
+  <dt>Barreras IR</dt><dd class="file">${irs}</dd>
+  <dt>Último color leído</dt><dd>${ultimoLeido}</dd>
+  <dt>Plato de la $500</dt><dd>${plateTarget<0?'hacia −X (antigua)':'hacia +X (nueva)'}${margen===null?'':`<br>última maniobra: <span class="${margen>=0?'ok':'bad'}">${margen>=0?'a tiempo, sobraron':'tarde por'} ${Math.abs(margen).toFixed(0)} ms</span>`}</dd>
+  <dt>Registro</dt><dd><div id="log">${log.join('')}</div></dd></dl>
+  <div class="sum">Cámara lenta: en la realidad todo ocurre ${(1/speed).toFixed(1)} veces más rápido. Se supuso fricción moneda-PLA de ${MU}; si en la prueba no corren, hay que subir la inclinación o pulir el piso.</div>`;
+}
+
+// ---------------- modos
+function setMode(m){
+  mode = m;
+  $('tabE').setAttribute('aria-pressed', String(m==='E')); $('tabS').setAttribute('aria-pressed', String(m==='S'));
+  $('barE').hidden = m!=='E'; $('barS').hidden = m!=='S';
+  $('sub').textContent = m==='E' ? 'Arrastra para girar, rueda para acercar, toca una pieza para ver qué es.' : 'Las piezas de plástico se ven casi transparentes para seguir a la moneda por dentro.';
+  if (m==='S') { selected = null; lista.querySelectorAll('.item').forEach(b=>b.setAttribute('aria-pressed','false')); exp.value = 0; reiniciar(); }
+  aplicar(); aplicarOpacidad();
+  if (m==='S') panelSim(); else fichaVacia();
+}
+$('tabE').onclick = () => setMode('E'); $('tabS').onclick = () => setMode('S');
+for (const k of Object.keys(COIN)) { const o = document.createElement('option'); o.value = k; o.textContent = nombreMoneda(k); $('sel').appendChild(o); }
+$('sel').value = 'N500';
+$('soltar').onclick = () => soltar($('sel').value);
+$('reset').onclick = reiniciar;
+$('play').onclick = () => { corriendo = !corriendo; $('play').textContent = corriendo?'Pausa':'Seguir'; $('play').setAttribute('aria-pressed', String(corriendo)); };
+$('vel').oninput = () => { speed = $('vel').value/100; $('velT').textContent = '×'+speed.toFixed(2); };
+$('vel').oninput();
+
+// ---------------- bucle
 const v3 = new THREE.Vector3();
 function aplicarTema(){
   const d = dark();
@@ -279,20 +521,46 @@ function resize(){
   if (!resize.ok && w>0) { resize.ok = 1; vista('iso'); }
 }
 new ResizeObserver(resize).observe(cv);
-function frame(){
+let last = performance.now(), panelT = 0;
+function frame(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  const sim = mode==='S';
+  if (sim && corriendo) {
+    simT += dt*speed;
+    if ($('auto').checked && simT >= proximo) { soltar(ORDEN[cola++ % ORDEN.length]); proximo = simT + 1.5; }
+    while (eventos.length && eventos[0].t <= simT) eventos.shift().fn();
+    panelT += dt; if (panelT > .25) { panelT = 0; panelSim(); }
+  }
+  const hs = sim ? (corriendo ? dt*speed : 0) : dt;
+  const paso = rad(SERVO_DPS)*(sim ? hs : dt*2);
+  plateAng += Math.max(-paso, Math.min(paso, rad(plateTarget*SIM.d6.incl)-plateAng));
+  if (plato && plato.piv) plato.piv.rotation.y = plateAng;
+  if (disco && disco.piv) { const pd = rad(90)/0.35*hs; discoAng += Math.max(-pd, Math.min(pd, discoObj-discoAng)); disco.piv.rotation.z = discoAng; }
+  for (const k in flash) if (simT > flash[k]) { (k==='sensor' ? (sensorP?[sensorP]:[]) : irOf(k)).forEach(p=>p.mat.emissive.setHex(0)); delete flash[k]; }
+  for (let i=coins.length-1; i>=0; i--) {
+    const c = coins[i];
+    if (simT > c.tEnd + .3) { scene.remove(c.g); coins.splice(i,1); continue; }
+    colocarMoneda(c, simT - c.t0);
+  }
   controls.update();
   renderer.render(scene,camera);
   const w = cv.clientWidth, h = cv.clientHeight;
   for (const pid in byPid) {
     const el = labels[pid], p = byPid[pid][0];
-    const vis = chkL.checked && p.group.visible;
+    const vis = chkL.checked && !sim && p.group.visible;
     el.style.display = vis ? '' : 'none';
     if (!vis) continue;
-    const b = new THREE.Box3().setFromObject(p.group); b.getCenter(v3); v3.project(camera);
+    new THREE.Box3().setFromObject(p.group).getCenter(v3); v3.project(camera);
     el.style.transform = `translate(${(v3.x*.5+.5)*w-10}px,${(-v3.y*.5+.5)*h-8}px)`;
     el.style.opacity = (selected && selected!==pid) ? .25 : .92;
   }
+  for (const c of cntL) {
+    c.el.style.display = sim ? '' : 'none'; if (!sim) continue;
+    c.el.textContent = c.txt(); const q = c.getPos().project(camera);
+    c.el.style.transform = `translate(${(q.x*.5+.5)*w-22}px,${(-q.y*.5+.5)*h-9}px)`;
+    c.el.classList.toggle('hot', !!(c.tag && flash[c.tag]));
+  }
   requestAnimationFrame(frame);
 }
-aplicarTema(); aplicar(); resize(); vista('iso'); fichaVacia(); frame();
+aplicarTema(); aplicar(); aplicarOpacidad(); resize(); fichaVacia(); requestAnimationFrame(frame);
 </script>

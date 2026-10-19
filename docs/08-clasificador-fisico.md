@@ -10,49 +10,43 @@ python scripts/generar_clasificador.py --ensamble
 
 ## Piezas (Creality K1C, cama 220 × 220 × 250)
 
-| STL | Cant. | Notas de impresión |
-|---|---|---|
-| `R01_riel_modulo_A` | 1 | Entrada + ranuras 1-4, cola de milano macho. Plano, sin soportes. 201,7 mm |
-| `R02_riel_modulo_B` | 1 | Ranuras 5-7 + extremo abierto, cola hembra (puente de 22 mm). 180,4 mm |
-| `R03_cuna_22_izq` / `_der` | 4 + 4 | Una por esquina; dan los 22° de la pista |
-| `D1…D8_ducto_*` (7) | 1 c/u | Boca abajo (brida en la cama). Tubo a 22°, sin soportes |
-| `B01_bifurcacion_500_<sensor>` | 1 | Imprimir solo la del sensor elegido, de pie, **PLA negro** |
-| `B02_aguja_desvio` | 1 | Plana, 100 % relleno |
-| `B03_tapa_sensor_<sensor>` | 1 | Plana |
-| `T01_tolva_cono_40` | 1 | Brida abajo; pared a 40° de la vertical (50° de la horizontal) |
-| `T02_disco_dosificador_<motor>` | 1 | Elegir 28BYJ-48 (recomendado) o SG90 continuo |
-| `T03_base_tolva_<motor>` | 1 | Igual que el disco |
+Sin tornillos ni soportes: todo encaja con clavijas Ø6 a presión, llaves de
+mariposa y bridas de nailon. Detalle y medidas en `hardware/stl/piezas_clasificador.csv`.
 
-`hardware/stl/piezas_clasificador.csv` lista medidas y volumen;
-`hardware/stl/ensamble/ensamble_referencia.stl` muestra todo en posición.
+| STL | Cant. | Notas |
+|---|---|---|
+| `R01_riel_modulo_A` / `R02_riel_modulo_B` | 1 + 1 | Riel de 22°, 181,7 y 180,4 mm. Tumbados, sin soportes |
+| `R04_llave_union` | 3 | Mariposa bajo la junta A-B |
+| `R03_pata{1,2,3}_{izq,der}` | 6 | Patas del riel (136, 97 y 40 mm); pie atado a la mesa con brida |
+| `D1…D5, D7, D8_ducto_*` | 1 c/u | Ductos de pared 2 mm; clavijas a presión en el riel; IR a presión |
+| `D6_bifurcador_500` | 1 | Plato basculante, SG90 y barreras IR a presión. **PLA negro** |
+| `B02_plato_desvio` | 1 | Plato que el servo inclina ±35° |
+| `B03_puente_sensor` | 1 | Cajón colgante del TCS34725 |
+| `T01_tolva_cono_40`, `T02_disco_dosificador`, `T03_base_tolva` | 1 c/u | Cono con 3 clavijas; disco en el eje del 28BYJ-48 |
+| `T04_pata_tolva` | 4 | Patas de 195 mm |
+
+`hardware/stl/ensamble/ensamble_referencia.stl` muestra todo en posición;
+`hardware/visor/ensamble_etapa1.html` es el visor 3D con la simulación.
 
 ## Parámetros fijados
 
 | | Valor |
 |---|---|
-| Holgura deslizante / M3 roscado / M3 pasante | 0,35 mm / Ø3,2 / Ø3,4 (cabeza Ø6,5 × 3) |
+| Holgura deslizante / clavija | 0,35 mm / Ø6 en agujero Ø6,1 × 3,1 (`AJUSTE_PRESION`) |
 | Pista | 22°, peralte lateral 10° hacia la pared guía, canal 30 mm |
-| Ranuras (ancho × largo) | 17,5 · 20,8 · 21,5 · 22,9 · 23,4 · 24,1 · 24,9 mm; largo = ancho + 4; extremo abierto 32 mm |
-| Barreras IR | 2 × Ø5,2 a presión, opuestas, con tope Ø3 hacia el ducto |
-| Tolva | Semiángulo 40°, boca Ø160, disco Ø80 × 3 con 4 cavidades Ø28 a r = 24 |
-| Dosificación | 1 moneda / 1,5 s = 10 rpm del disco (28BYJ-48: 679 medios pasos/s) |
-| Bifurcación | Embudo en V → ranura de 4,2 mm, rodadura de canto a 25°, sensor a 50 mm, aguja a 110 mm (≈95 ms para el SG90) |
+| Ranuras (ancho × largo) | 17,5 · 20,8 · 21,5 · 22,9 · 23,4 · 24,1 · 24,9 mm; extremo abierto 32 mm |
+| Barreras IR | 2 × Ø5,2 a presión, opuestas |
+| Tolva | Semiángulo 40°, disco Ø80 × 3 con 4 cavidades Ø28; 28BYJ-48 |
+| Vasos | 5 sobre la banda, paso 65 mm: $50, $100, $200, $500, $1000. Tubo flexible de cada ducto |
+| $500 | TCS34725 lee el anillo antes de la ranura 6; plato SG90 a 55° (antigua, −X) o 125° (nueva, +X). Ambas salen por columnas alineadas con los demás ductos y van al mismo vaso |
 
-## Ensamble
+## Ensamble (sin tornillos)
 
-1. **Riel**: encastrar la cola de A en B y fijar con 2 M3 × 6 desde arriba (Ø3,4 en B → Ø3,2 en la cola).
-   Cuñas bajo las alas (M3 × 10 inclinado al riel, M3 vertical al bastidor).
-2. **Ductos**: 2 M3 × 10 desde abajo por la brida, en los Ø3,2 de cada ranura.
-3. **Tolva**: 28BYJ-48 a la base con 2 M3 × 6 por debajo; disco a presión en el eje
-   (0,35 mm sobre la base); cono con 3 M3 × 12 desde abajo de la base. Base al
-   bastidor con 4 M3 embutidos. La boca de salida cae sobre la zona de entrada del riel.
-4. **Bifurcación**: bajo la ranura 6 con 2 M3 × 10 (los alojamientos verticales
-   dan paso al destornillador). TCS34725 en su alojamiento, conector hacia el lado
-   abierto de la tapa, tapa con 2 M3 × 6. La aguja entra por la boca inferior del
-   ducto N500; se alinea su buje con el agujero lateral y se encaja el SG90 (en 0°,
-   aguja a ras del piso) por la cara −X, con sus 2 tornillos M2.
-5. **IR**: LED IR en un lado y fototransistor en el otro de cada ducto; colector
-   a la entrada del ESP32 con 10 kΩ a 3,3 V (haz libre = bajo, moneda = alto).
+1. **Riel**: unir A y B con las 3 llaves R04. Patas R03 a presión en el riel; pie con brida a la mesa.
+2. **Ductos**: clavijas Ø6 a presión en las orejas del riel; IR a presión.
+3. **Tolva**: 28BYJ-48 en T03 con 2 bridas de nailon; disco a presión en el eje; cono sobre las 3 clavijas de T03; patas T04.
+4. **Bifurcador**: D6 bajo la ranura 6; SG90 a presión en su bolsillo; plato B02 en el estriado; B03 cuelga de su guía con la TCS34725.
+5. **Vasos y tubos**: tubo flexible desde el fondo de cada ducto al vaso de su denominación. Los dos ductos de $500 van al mismo vaso. D6 baja 38 mm bajo el plano de la mesa: la mesa necesita una ranura.
 
 ## Electrónica (firmware/esp32_contador/config.h)
 
@@ -60,7 +54,7 @@ python scripts/generar_clasificador.py --ensamble
 |---|---|
 | IR ductos 1-9 (N50, N100, A50, N200, A100, A500, N500, A200, N1000) | 34, 35, 36, 39, 32, 33, 25, 26, 27 |
 | I2C TCS34725 (SDA, SCL) | 21, 22 |
-| SG90 aguja | 13 |
+| SG90 plato (55° / 125°) | 13 |
 | 28BYJ-48 IN1-IN4 (ULN2003) / SG90 continuo | 16, 17, 18, 19 / 18 |
 | Banda L298N (A, B, PWM) | 14, 4, 23 |
 
@@ -72,8 +66,10 @@ python scripts/generar_clasificador.py --ensamble
   módulo A, medir con calibrador y corregir con `COMPENSACION_RANURA`.
 - Con 3 mm de cavidad caben dos $50 nuevas apiladas (1,3 mm c/u): bajar
   `DISCO_ESP` si el lote es solo de monedas delgadas.
-- Las cotas del SG90 (`SG90` en el script) son nominales; si el estriado no
-  alcanza la aguja, ajustar `caja_sobre_oreja`/`buje` y regenerar.
+- Cotas del SG90 nominales: imprimir D6 solo para probar el bolsillo antes del resto.
+- Margen del plato: en la simulación llega solo 8-12 ms antes de la $500 (a 0,22 de fricción); conviene mover el sensor aguas arriba si en la prueba falla.
+- Probar primero R01 + D1 + una pata (ajuste de clavijas, `AJUSTE_PRESION`).
+- Diámetro interno del tubo flexible: al menos 32 mm para la $1000.
 - El firmware lee el TCS34725 (I2C). La variante TCS3200 de la bifurcación
   existe en STL, pero ese sensor es de salida en frecuencia y necesitaría otro driver.
 - Umbral del color (`Clasificador500::umbralDorado`) por calibrar en banco con el
