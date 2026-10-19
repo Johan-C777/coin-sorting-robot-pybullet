@@ -75,16 +75,22 @@ def construir():
     nombres = {0: "$50 nueva", 1: "$100 nueva", 2: "$50 antigua", 3: "$200 nueva", 4: "$100 antigua",
                6: "$200 antigua", 7: "$1000 nueva"}
     luces = {}
+    tubos_pvc, cortes_tubo = [], []
     for r in r_all:
         if r.i == g.RANURA_500:
             continue
         c0 = p_mundo(r.xc, r.yc, 0)
         hu, hy = g.medidas_tubo(r)
-        nom = f"D{r.i + 1}_ducto_{r.clave}"
-        add(f"D{r.i + 1}", "Ductos", f"Ducto {nombres[r.i]}", nom + ".stl", 1, "print", "ducto", mundo(nom), [0, 0, -1],
-            f"Tubo vertical bajo la ranura {r.i + 1} ({r.ancho:.1f} mm). Dos cavidades Ø5,2 enfrentadas para la barrera infrarroja, {g.T_IR:.0f} mm bajo el riel.",
-            "Dos clavijas Ø6 en sus orejas entran en el ala del riel. LED IR a un lado y fototransistor al otro, a presión.")
+        nom = f"D{r.i + 1}_adaptador_{r.clave}"
+        add(f"D{r.i + 1}", "Ductos", f"Adaptador {nombres[r.i]}", nom + ".stl", 1, "print", "ducto", mundo(nom), [0, 0, -1],
+            f"Caja de la ranura {r.i + 1} ({r.ancho:.1f} mm) con dos cavidades Ø5,2 enfrentadas para la barrera infrarroja, {g.T_IR:.0f} mm bajo el riel, y un embudo a un collar redondo donde entra el tubo PVC de 1\".",
+            "Dos clavijas Ø6 en sus orejas entran en el ala del riel. LED IR a un lado y fototransistor al otro, a presión. El tubo entra 20 mm en el collar.")
         luces[f"D{r.i + 1}"] = (c0, hy, -g.T_IR, 0.0)
+        tubos_pvc.append(g.cil_z(c0[0], c0[1], g.Z_BOCA + 6.0, c0[2] + g.Z_TUBO, g.PVC_DUCTO_D))
+        cortes_tubo.append(f"D{r.i + 1} {ctx['tubos'][r.i]:.0f} mm")
+    add("M4", "Ductos", "Tubos PVC de 1\"", None, 7, "ref", "pvc", g.union(tubos_pvc), [0, 0, -2],
+        "Siete tubos verticales de PVC de presión de 1\" (Ø ext 33,4 mm, interior ≈ 30 mm: pasa la $1000). Cortes: " + ", ".join(cortes_tubo) + ". Bajan hasta 6 mm sobre la boca de su vaso.",
+        "Entran 20 mm por abajo en el collar del adaptador, a presión. Si quedan flojos, una vuelta de cinta o una gota de pegamento.")
     gd = g.geom_d6(r500, ctx["extra_d6"])
     c6 = p_mundo(r500.xc, r500.yc, 0)
     add("D6", "Bifurcación $500", "Bifurcador de $500", "D6_bifurcador_500.stl", 1, "print", "bif", mundo("D6_bifurcador_500"), [0, 0, -1.7],
@@ -160,36 +166,35 @@ def construir():
             s["ir"] = {s["nombre"]: float(c0[2] - g.T_IR)}
         slots_tmp.append(s)
 
-    # ---------------- base (no se imprime, salvo los codos P01 y P02) ----------------
+    # ---------------- base (no se imprime, salvo las dos bases de extremo P01) ----------------
     b = ctx["base"]
     X0, X1, Y0, Y1 = b["lamina"]
     (sx0, sx1), (sy0, sy1) = b["x_ranura"], b["y_ranura"]
     lam = g.caja(X0, X1, Y0, Y1, -g.LAMINA_E, 0) - g.caja(sx0, sx1, sy0, sy1, -g.LAMINA_E - 1, 1)
     add("M1", "Base", "Lámina de la base", None, 1, "ref", "mesa", lam, [0, 0, 2],
-        "Lámina de MDF o acrílico de 6 mm, %d × %d mm, con una ranura de 38 mm por donde bajan los ductos. Sostiene riel, tolva y bifurcador." % (X1 - X0, Y1 - Y0),
-        "Se apoya en los 4 esquineros P02 y se ata con bridas por sus agujeros de las esquinas. Las patas del riel y de la tolva se atan a ella.")
-    r_b = g.BORE_R + g.PARED_PVC
-    pvc = []
+        "Lámina de MDF de 9 mm, %d × %d mm, con una ranura de %d × %d mm por donde bajan los tubos de los ductos. Sostiene riel, tolva y bifurcador." % (X1 - X0, Y1 - Y0, sx1 - sx0, sy1 - sy0),
+        "Descansa sobre los 4 tramos cortos de tubo que sobresalen de las tees y se ata con bridas por 4 agujeros. Las patas del riel y de la tolva se atan a ella.")
+    pvc, tees = [], []
     for x in (b["xl"], b["xr"]):
         for y in (b["yf"], b["yb"]):
-            pvc.append(g.cil_z(x, y, g.Z_PISO + g.PLACA_E + 2.0, -g.LAMINA_E - g.PLACA_E - 2.0, g.PVC_D))
+            pvc.append(g.cil_z(x, y, b["z_pie"], b["z_tee"] - g.F_ACC, g.PVC_D))
+            pvc.append(g.cil_z(x, y, b["z_tee"] + g.F_ACC, -g.LAMINA_E, g.PVC_D))
+            tees.append(g.cil_z(x, y, b["z_tee"] - g.F_ACC - 6.0, b["z_tee"] + g.F_ACC + 6.0, g.PVC_D + 6.0))
     for y in (b["yf"], b["yb"]):
-        for z in (b["z_eje_alto"], b["z_eje_bajo"]):
-            pvc.append(g.cil_eje((b["xl"] + r_b, y, z), (1, 0, 0), b["l_x"], g.PVC_D / 2))
-    for x in (b["xl"], b["xr"]):
-        pvc.append(g.cil_eje((x, b["yf"] + r_b, b["z_eje_alto"]), (0, 1, 0), b["l_y"], g.PVC_D / 2))
+        pvc.append(g.cil_eje((b["xl"] + g.F_ACC, y, b["z_tee"]), (1, 0, 0), b["l_x"], g.PVC_D / 2))
+        for x, sg in ((b["xl"], 1), (b["xr"], -1)):
+            tees.append(g.cil_eje((x, y, b["z_tee"]), (sg, 0, 0), g.F_ACC + 6.0, (g.PVC_D + 6.0) / 2))
     add("M3", "Base", "Tubos PVC de 3/4\"", None, 10, "ref", "pvc", g.union(pvc), [0, 0, -3],
-        "Cuatro patas de %d mm, dos largueros altos y dos bajos de %d mm, y dos travesaños de %d mm. Tubo PVC de presión de 3/4\" (26,7 mm)." % (b["l_pata"], b["l_x"], b["l_y"]),
-        "Entran a presión en los codos impresos (30 mm de penetración). Se pueden pegar con cemento PVC si quedan flojos.")
+        "Cuatro patas de %.0f mm, cuatro tramos cortos de %.0f mm sobre las tees y dos largueros de %.0f mm. Tubo PVC de presión de 3/4\" (26,7 mm)." % (b["l_pata"], b["l_tope"], b["l_x"]),
+        "La pata entra 30 mm en el zócalo impreso (a presión) y sube hasta la tee; el larguero une las dos tees de un lado.")
+    add("M5", "Base", "Tees PVC de 3/4\"", None, 4, "ref", "pvc", g.union(tees), [0, 0, -3],
+        "Cuatro tees de 3/4\" de presión, una en lo alto de cada pata, con la salida lateral hacia adentro.",
+        "Se pegan con cemento PVC (o a presión si es solo para probar).")
     for nombre, m in g.partes_ensamble(piezas_g, ctx):
         if nombre.startswith("P01"):
-            add("P01", "Base", "Pie de pata", "P01_pie_pvc.stl", 4, "print", "marco", m, [0, 0, -1],
-                "Placa con un alojamiento vertical para la pata y otro horizontal para el larguero bajo.",
-                "Apoya en el piso. Los tubos entran a presión.")
-        elif nombre.startswith("P02"):
-            add("P02", "Base", "Esquinero", "P02_esquinero_pvc.stl", 4, "print", "marco", m, [0, 0, 1],
-                "Placa que sostiene la lámina, con un alojamiento vertical para la pata y dos horizontales para los largueros altos.",
-                "Los tubos entran por abajo a presión. La lámina se ata a la placa con bridas por los agujeros de las esquinas.")
+            add("P01", "Base", "Base de extremo (ABS)", "P01_base_extremo.stl", 2, "print", "marco", m, [0, 0, -1],
+                "Dos zócalos con alojamiento para el tubo de 3/4\", unidos por una viga plana de %.0f mm. Ata las dos patas de un extremo." % b["sep"],
+                "Apoya en el piso. Las patas entran a presión; hay 8 agujeros de esquina por si se quiere fijar al piso.")
     xm_all = sorted(((nm, v) for sl in slots_tmp for nm, v in sl["fondo"].items()), key=lambda t: t[1][0])
     Z_BANDA_ = g.Z_BOCA - VASO_H
     xs_c = [v[0] for _, v in xm_all]

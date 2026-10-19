@@ -1,5 +1,11 @@
 # Cambios
 
+## 0.4.2 · Ductos y base en PVC
+
+- Los siete ductos pasan a tubo PVC de presión de 1" (Ø ext 33,4, interior ≈ 30) con un adaptador impreso de 65 mm: caja de la ranura con IR y clavijas, embudo de 36° y collar. Salidas separadas ≥ 37 mm.
+- Base: dos bases de ABS (P01) y patas, tees y largueros de tubo PVC de 3/4"; lámina de MDF de 9 mm. Hueco para la banda de 123 × 490 mm con 70 mm bajo la banda. Se quitan P01/P02 anteriores.
+- Total impreso de 1143 a 612 cm³ macizos (≈ 800 a ≈ 480 g, ≈ 48 a ≈ 33 h).
+
 ## 0.4.1 · Etapa 1 sin tornillos ni soportes
 
 - Corregida la alineación de la $500: las salidas quedaban 100-137 mm fuera de la línea de vasos. Nuevo bifurcador D6 con plato basculante (SG90 a 55°/125°) y dos columnas alineadas con los demás ductos.
