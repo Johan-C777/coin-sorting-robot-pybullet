@@ -28,5 +28,10 @@
 - Orientacion auto (giro X cada 5 grados): voladizo 0 en R01, T02; <=120 mm2 en ductos/cuna/base/cono; R02 741 mm2 (puente 14 mm de la cola de milano); B01 1614 mm2 (rampa 25 grados, girada 155 grados).
 - Sin interferencias en el ensamble. docs/08 con cifras antiguas: actualizar.
 
+## Aligeramiento (v3)
+- Juego de 17 piezas: 445 -> 359 cm3 macizo (-19 %). Bifurcacion 113 -> 65 cm3 (cuerpo delgado, solo se engruesa en servo/sensor/IR); riel ALA 20->14, ESP_BASE 5->4, Y_TORN_CUNA 14->10 (R01 74->55, R02 62->44; ancho 70->58).
+- B01 voladizo 1864 mm2 (soporte solo bajo la rampa). Sin interferencias.
+- Mas recorte solo cambiando diseno: 6 cunas en vez de 8, base tolva Ø100 mas chica.
+
 ## Siguiente paso
 Imprimir R01 + D1 + una cuna, medir ranuras y ajustar COMPENSACION_RANURA; B01 con soporte minimo solo en la rampa.

@@ -68,11 +68,11 @@ HOLGURA_CAIDA = 0.4
 INCLINACION = 22.0      # pista respecto a la horizontal
 PERALTE = 10.0          # inclinación lateral del piso hacia la pared guía
 B = 30.0                # ancho útil del canal (moneda mayor 26,7)
-ESP_BASE = 5.0
+ESP_BASE = 4.0
 ALTO_PARED = 10.0
 ESP_PARED = 2.4
 ALTO_LABIO = 4.0
-ALA = 20.0              # ala a cada lado del canal: tornillos de ductos y cuñas
+ALA = 14.0              # ala a cada lado del canal: tornillos de ductos y cuñas
 ENTRADA = 35.0          # zona donde cae la moneda de la tolva
 ALMA = 12.0             # material entre ranuras
 EXTRA_LARGO = 4.0       # largo de ranura = ancho + 4 (la moneda cabe entera)
@@ -83,7 +83,7 @@ MAX_PIEZA = 210.0
 COLA_LARGO, COLA_CUELLO, COLA_BOCA, COLA_ALTO = 14.0, 9.0, 13.0, 3.0
 Y_TORN_COLA = 6.5
 Y_TORN_DUCTO = 8.0
-Y_TORN_CUNA = 14.0
+Y_TORN_CUNA = 10.0
 
 # ductos estándar
 T_GARGANTA = 24.0       # del riel a la garganta, sobre el eje vertical
@@ -428,18 +428,26 @@ def bifurcacion(r: Ranura, sensor="tcs34725") -> Manifold:
     zc = piv[1] - SG90["eje_off"]
     zona_servo = seccion([(piv[0] - 8, zc - 17), (piv[0] + 8, zc - 17),
                           (piv[0] + 8, zc + 17), (piv[0] - 8, zc + 17)])
-    perfil = cav_pared.offset(PARED_BIF, JoinType.Round) + zona_sensor + zona_servo
     sg = SG90
     x_oreja = G / 2 - 0.5 - (sg["caja_sobre_oreja"] + sg["buje"] + sg["estriado"])
     x_neg, x_pos = x_oreja, G / 2 + PARED_SENSOR   # cara -X plana: las orejas del servo apoyan en ella
-    cuerpo = prisma_yz(perfil, x_neg, x_pos) ^ caja(-50, 50, -50, 250, z_bot, 50)
+    # cuerpo delgado (solo paredes); se engrosa donde hay servo, sensor y barreras IR
+    x_fino = G / 2 + PARED_BIF
+    zonas_ir = [seccion([(yy - 7.5, g["z_ir"] - 7.5), (yy + 7.5, g["z_ir"] - 7.5),
+                         (yy + 7.5, g["z_ir"] + 7.5), (yy - 7.5, g["z_ir"] + 7.5)])
+                for yy in ((yn0 + yn1) / 2, (ya0 + ya1) / 2)]
+    cuerpo = (prisma_yz(cav_pared.offset(PARED_BIF, JoinType.Round), -x_fino, x_fino)
+              + prisma_yz(zona_servo, x_neg, x_fino)
+              + prisma_yz(zona_sensor, -x_fino, x_pos)
+              + prisma_yz(zonas_ir[0] + zonas_ir[1], -G / 2 - IR_BOSS, G / 2 + IR_BOSS)
+              ) ^ caja(-50, 50, -50, 250, z_bot, 50)
 
     def riel(m):  # del marco del riel (relativo a la ranura) al de mundo
         return rot_y(m.translate((-r.xc, -yc, 0)), INCLINACION)
 
     brida_m = riel(brida(r))
     embudo_ext = union([hull(riel(caja(r.x0 - 2.5, r.x0 + r.largo + 2.5, -2.5, r.ancho + 2.5, -3.5, 0)),
-                             caja(x_neg, x_pos, -17, 17, ZS - 2, ZS)),
+                             caja(-x_fino, x_fino, -17, 17, ZS - 2, ZS)),
                         brida_m])
     embudo_int = hull(riel(caja(r.x0, r.x0 + r.largo, 0, r.ancho, -5, 1)),
                       caja(-G / 2, G / 2, -15, 15, ZS - 1, ZS + 0.5))

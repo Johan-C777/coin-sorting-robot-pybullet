@@ -1,6 +1,6 @@
 pieza,cantidad,x_mm,y_mm,z_mm,volumen_cm3,voladizo_mm2,nota
-R01_riel_modulo_A,1,195.7,70.0,15.0,74.0,0,"entrada + ranuras 1-4, cola macho"
-R02_riel_modulo_B,1,180.4,70.0,15.0,61.8,741,"ranuras 5-7 + extremo abierto, cola hembra"
+R01_riel_modulo_A,1,195.7,58.0,14.0,54.7,0,"entrada + ranuras 1-4, cola macho"
+R02_riel_modulo_B,1,180.4,58.0,14.0,43.6,726,"ranuras 5-7 + extremo abierto, cola hembra"
 R03_cuna_22_izq,4,22.0,28.0,12.9,4.8,24,lado pared guía
 R03_cuna_22_der,4,22.0,28.0,12.9,4.8,24,lado labio
 D1_ducto_N50,1,37.6,57.0,34.5,8.3,118,"ranura 17.5 mm, IR 5 mm"
@@ -10,9 +10,9 @@ D4_ducto_N200,1,42.6,57.0,35.4,9.2,118,"ranura 22.9 mm, IR 5 mm"
 D5_ducto_A100,1,43.1,57.0,35.5,9.3,118,"ranura 23.4 mm, IR 5 mm"
 D7_ducto_A200,1,44.5,57.0,35.7,9.5,118,"ranura 24.9 mm, IR 5 mm"
 D8_ducto_N1000,1,47.4,57.0,36.3,10.0,118,"ranura 30.0 mm, IR 5 mm"
-B01_bifurcacion_500_tcs34725,1,32.9,135.4,207.5,112.7,1614,"imprimir SOLO la del sensor elegido, en PLA negro"
+B01_bifurcacion_500_tcs34725,1,32.9,135.4,207.5,65.0,1864,"imprimir SOLO la del sensor elegido, en PLA negro"
 B03_tapa_sensor_tcs34725,1,39.5,26.5,2.5,1.6,0,con la bifurcación
-B01_bifurcacion_500_tcs3200,1,32.9,135.4,207.5,117.2,1682,"imprimir SOLO la del sensor elegido, en PLA negro"
+B01_bifurcacion_500_tcs3200,1,32.9,135.4,207.5,68.9,1944,"imprimir SOLO la del sensor elegido, en PLA negro"
 B03_tapa_sensor_tcs3200,1,47.5,34.5,2.5,2.1,0,con la bifurcación
 B02_aguja_desvio,1,34.4,8.9,2.8,0.4,0,estriado del SG90 a presión
 T01_tolva_cono_40,1,134.2,134.2,39.8,43.8,11,"semiángulo 40°, boca Ø160"
