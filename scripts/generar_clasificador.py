@@ -247,7 +247,7 @@ def clavija(x, y, z0=0.0, direccion=(0, 0, 1)):
     """Clavija Ø6 con punta cónica; con z0 = 0 sale de la cara z = 0 hacia +Z (marco R)."""
     p = np.array([x, y, z0], float)
     a = _unit(direccion)
-    return (cil_eje(p - a * 0.2, a, PEG_L - 0.6 + 0.2, PEG_D / 2)
+    return (cil_eje(p - a * 0.2, a, PEG_L - 0.6 + 0.2 + 0.1, PEG_D / 2)
             + cil_eje(p + a * (PEG_L - 0.6), a, 0.6, PEG_D / 2, PEG_D / 2 - 0.5))
 
 
@@ -401,9 +401,9 @@ def orejas(r: Ranura, mw: Mundo, hy):
     out = []
     for px, py in clavijas_ducto(r):
         if py < r.yc:
-            y_in, y_far = r.yc - hy - E_DUCTO + 0.5, py - 4.5
+            y_in, y_far = r.yc - hy - E_DUCTO + 1.5, py - 4.5
         else:
-            y_in, y_far = r.yc + hy + E_DUCTO - 0.5, py + 4.5
+            y_in, y_far = r.yc + hy + E_DUCTO - 1.5, py + 4.5
         run = abs(y_far - y_in)
         poli = [(y_in, 0.0), (y_far, 0.0), (y_far, -3.0), (y_in, -3.0 - 1.25 * run)]
         out.append(prisma_yz(seccion(poli), px - 5, px + 5))
@@ -569,10 +569,11 @@ def puente() -> Manifold:
     # guía del sensor: dos paredes con labio que lo sujetan por abajo; abierta hacia -X, tope en +X
     for lado in (1, -1):
         y_i = ys + lado * p / 2
-        piezas.append(caja(x0 + 1, p / 2 + ep, min(y_i, y_i + lado * ep), max(y_i, y_i + lado * ep), -prof, 0.01))
-        piezas.append(prisma_yz(seccion([(y_i, -prof), (y_i - lado * 0.6, -prof), (y_i - lado * 0.6, -prof + 0.4),
-                                         (y_i, -prof + 0.9)]), x0 + 1, p / 2 + ep))
-    piezas.append(caja(p / 2, p / 2 + ep, ys - p / 2 - ep, ys + p / 2 + ep, -prof, 0.01))
+        y_o = y_i + lado * ep
+        poli = [(y_o, 0.01), (y_i, 0.01), (y_i, -prof + 0.9), (y_i - lado * 0.6, -prof + 0.4),
+                (y_i - lado * 0.6, -prof), (y_o, -prof)]
+        piezas.append(prisma_yz(seccion(poli), x0 + 1, p / 2 + ep))
+    piezas.append(caja(p / 2 - 0.3, p / 2 + ep, ys - p / 2 - ep + 0.05, ys + p / 2 + ep - 0.05, -prof + 0.05, 0.01))
     return union(piezas)
 
 
@@ -585,24 +586,24 @@ def _pie_y_cartelas(altura, ancho_pie, largo_pie, sentido, y_c):
     esp = 3.0
     if sentido == 0:
         piezas.append(caja(-ancho_pie / 2, ancho_pie / 2, -ancho_pie / 2, ancho_pie / 2, 0, esp))
-        run = ancho_pie / 2 - 6.0
+        run = ancho_pie / 2 - 0.4 - 6.0
         for s in (1, -1):
-            piezas.append(prisma_xz(seccion([(s * 6, esp), (s * ancho_pie / 2, esp),
-                                             (s * 6, esp + min(run * 1.0, altura - esp))]).translate((0, 0)), -1.5, 1.5))
-            piezas.append(prisma_yz(seccion([(s * 6, esp), (s * ancho_pie / 2, esp),
-                                             (s * 6, esp + min(run * 1.0, altura - esp))]), -1.5, 1.5))
+            piezas.append(prisma_xz(seccion([(s * 5.5, esp - 0.1), (s * (ancho_pie / 2 - 0.4), esp - 0.1),
+                                             (s * 5.5, esp + min(run * 1.0, altura - esp))]).translate((0, 0)), -1.5, 1.5))
+            piezas.append(prisma_yz(seccion([(s * 5.5, esp - 0.1), (s * (ancho_pie / 2 - 0.4), esp - 0.1),
+                                             (s * 5.5, esp + min(run * 1.0, altura - esp))]), -1.5, 1.5))
     else:
         s = sentido
         y0, y1 = (y_c - 6, y_c + 6)
         out = largo_pie
         ya, yb = (min(s * out, 6), max(s * out, 6)) if s < 0 else (-6, out)
         piezas.append(caja(-ancho_pie / 2, ancho_pie / 2, ya, yb, 0, esp))
-        run = out - 6.0
-        poli = [(s * 6, esp), (s * out, esp), (s * 6, esp + min(run * 1.0, altura - esp))]
+        run = out - 0.4 - 6.0
+        poli = [(s * 5.5, esp - 0.1), (s * (out - 0.4), esp - 0.1), (s * 5.5, esp + min(run * 1.0, altura - esp))]
         piezas.append(prisma_yz(seccion(poli), -1.5, 1.5))
         for sx in (1, -1):
-            piezas.append(prisma_xz(seccion([(sx * 6, esp), (sx * ancho_pie / 2, esp),
-                                             (sx * 6, esp + min((ancho_pie / 2 - 6) * 1.0, altura - esp))]), -1.5, 1.5))
+            piezas.append(prisma_xz(seccion([(sx * 5.5, esp - 0.1), (sx * (ancho_pie / 2 - 0.4), esp - 0.1),
+                                             (sx * 5.5, esp + min((ancho_pie / 2 - 0.4 - 6) * 1.0, altura - esp))]), -1.5, 1.5))
     return piezas
 
 
@@ -614,7 +615,7 @@ def pata(altura, sentido, inclinada=True) -> Manifold:
     cabeza = caja(-n / 2, n / 2, -n / 2, n / 2, altura - 7, altura + 8)
     cuerpo = union([*cruz, cabeza])
     if inclinada:
-        plano = rot_y(caja(-100, 100, -100, 100, -100, 0), INCLINACION).translate((0, 0, altura))
+        plano = rot_y(caja(-100, 100, -100, 100, -1000, 0), INCLINACION).translate((0, 0, altura))
         cuerpo = cuerpo ^ plano
     pie = _pie_y_cartelas(altura, 32.0 + altura * 0.05, 24.0, sentido, 0.0)
     m = union([cuerpo, *pie])
@@ -1034,6 +1035,8 @@ def construir(ensamble=False, rapido=False):
         m, giro, mal = orientar(p.geom, p.giros)
         if m.is_empty() or m.status().name != "NoError":
             raise RuntimeError(f"{p.nombre}: malla inválida ({m.status()})")
+        if len(m.decompose()) > 1:
+            raise RuntimeError(f"{p.nombre}: la pieza queda en {len(m.decompose())} trozos sueltos")
         x0, y0, z0, x1, y1, z1 = m.bounding_box()
         dims = (x1 - x0, y1 - y0, z1 - z0)
         if max(dims[:2]) > CAMA[0] or z1 > CAMA[2]:
