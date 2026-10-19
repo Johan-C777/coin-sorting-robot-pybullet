@@ -121,9 +121,9 @@ const COLORS = {
   plato:[0xe0e4e8,0xc9ced4], puente:[0x6a8f4a,0x5c7f3e],
   tolva:[0xd2a45a,0xc0924a], tolva2:[0xe3c07e,0xd1ad68], tolva3:[0xc88a3c,0xb87b30],
   motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046],
-  mesa:[0xb9b4a6,0xa7a294], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
+  marco:[0xc29a62,0xa8803f], mesa:[0xcdbf9f,0xb4a583], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
 };
-const BASEOP = {mesa:.32, vaso:.5, banda:.9};
+const BASEOP = {mesa:.6, marco:.85, vaso:.5, banda:.9};
 const SEETHRU = new Set(['ducto','bif','tolva3','puente']);       // casi transparentes en la simulación
 const dark = () => document.documentElement.dataset.theme==='dark' ||
   (document.documentElement.dataset.theme!=='light' && matchMedia('(prefers-color-scheme: dark)').matches);
@@ -305,11 +305,9 @@ const nombreMoneda = k => `$${SIM.monedas[k].den} ${k[0]==='A'?'antigua':'nueva'
 const curvas = {}, salidas = [];
 SIM.slots.forEach(sl => { for (const nm in sl.fondo) salidas.push({nm, p:V3(...sl.fondo[nm])}); });
 salidas.sort((a,b)=>a.p.x-b.p.x);
-const DEN_SALIDA = {D1:50,D2:100,D3:50,D4:200,D5:100,D6a:500,D6b:500,D7:200,D8:1000};
 salidas.forEach((s,k)=>{
-  const den = DEN_SALIDA[s.nm];
-  s.vaso = SIM.vasos.findIndex(v=>v.den===den);
-  const v = SIM.vasos[s.vaso], boca = V3(v.x, v.y, v.ztop+8), yo = (k-4)*8;
+  s.vaso = SIM.vasos.findIndex(v=>v.salida===s.nm); const den = SIM.vasos[s.vaso].den;
+  const v = SIM.vasos[s.vaso], boca = V3(v.x, v.y, v.ztop+8), yo = (k-4)*2.5;
   const pts = [s.p.clone(), s.p.clone().add(V3(0,0,-18)),
     V3((s.p.x*2+boca.x)/3, 12+yo, (s.p.z-18)*0.55+boca.z*0.45), V3((s.p.x+boca.x*2)/3, 12+yo*0.4, boca.z+40), boca.clone().add(V3(0,0,18)), boca];
   const c = new THREE.CatmullRomCurve3(pts, false, 'centripetal'); c.arcLengthDivisions = 200;
@@ -321,7 +319,7 @@ salidas.forEach((s,k)=>{
 const coinGeo = new THREE.CylinderGeometry(1,1,1,40).rotateX(Math.PI/2);
 const coins = [], eventos = [];
 let simT = 0, speed = .45, corriendo = true, cola = 0, proximo = 0;
-const conteo = {vasos:[0,0,0,0,0], ir:{}};
+const conteo = {vasos:SIM.vasos.map(()=>0), ir:{}};
 const pile = SIM.vasos.map(v=>{
   const m = new THREE.Mesh(new THREE.CylinderGeometry(21,21,1,28).rotateX(Math.PI/2), new THREE.MeshStandardMaterial({color:COLOR_VASO[v.den],roughness:.5,metalness:.4}));
   m.visible = false; scene.add(m); return m;
@@ -457,27 +455,27 @@ function manejar(e, plan){
   } else if (e.tipo==='vaso') {
     const k = e.vaso; conteo.vasos[k]++; const m = pile[k], h = Math.min(48, conteo.vasos[k]*.9);
     m.visible = true; m.scale.set(1,1,h); m.position.set(SIM.vasos[k].x, SIM.vasos[k].y, SIM.z_banda+2+h/2);
-    anotar(`vaso $${SIM.vasos[k].den}: ${conteo.vasos[k]}`, 'ok');
+    anotar(`vaso $${SIM.vasos[k].den} ${SIM.vasos[k].fam}: ${conteo.vasos[k]}`, 'ok');
   }
 }
 
 // contadores flotantes
 const cntL = [];
 function etiquetaCnt(txt, getPos, tag){ const el = document.createElement('div'); el.className='lbl cnt'; cv.appendChild(el); cntL.push({el, getPos, txt, tag}); }
-SIM.vasos.forEach((v,k)=>etiquetaCnt(()=>`$${v.den} · ${conteo.vasos[k]}`, ()=>V3(v.x, v.y, v.ztop+14)));
+SIM.vasos.forEach((v,k)=>etiquetaCnt(()=>`$${v.den}${v.fam[0]==='a'?'a':'n'} · ${conteo.vasos[k]}`, ()=>V3(v.x, v.y, v.ztop+14)));
 salidas.forEach(s=>etiquetaCnt(()=>`${s.nm} · ${conteo.ir[s.nm]||0}`, ()=>s.p.clone().add(V3(0,0,-12)), s.nm));
 
 function reiniciar(){
   for (const c of coins) scene.remove(c.g);
   coins.length = 0; eventos.length = 0; simT = 0; proximo = 0.2; cola = 0;
-  conteo.vasos = [0,0,0,0,0]; conteo.ir = {}; log.length = 0; margen = null; ultimoLeido = '—';
+  conteo.vasos = SIM.vasos.map(()=>0); conteo.ir = {}; log.length = 0; margen = null; ultimoLeido = '—';
   pile.forEach(m=>m.visible=false); setPlato(-1); plateAng = rad(-SIM.d6.incl);
 }
 function panelSim(){
-  const filas = SIM.vasos.map((v,k)=>`<tr><td>Vaso $${v.den}</td><td>${conteo.vasos[k]}</td></tr>`).join('');
+  const filas = SIM.vasos.map((v,k)=>`<tr><td>$${v.den} ${v.fam}</td><td>${conteo.vasos[k]}</td></tr>`).join('');
   const total = SIM.vasos.reduce((a,v,k)=>a+v.den*conteo.vasos[k],0);
   const irs = salidas.map(s=>`${s.nm} ${conteo.ir[s.nm]||0}`).join(' · ');
-  ficha.innerHTML = `<h2>Simulación</h2><p class="hint">Cada moneda baja por el riel hasta su ranura, cruza la barrera infrarroja y llega por el tubo a su vaso. La $500 pasa antes bajo el sensor de color, que mueve el plato.</p>
+  ficha.innerHTML = `<h2>Simulación</h2><p class="hint">Cada tipo de moneda, nueva o antigua, tiene su propio vaso: nueve en total. La moneda baja por el riel hasta su ranura, cruza la barrera infrarroja y llega por el tubo a su vaso. La $500 pasa antes bajo el sensor de color, que mueve el plato.</p>
   <dl><dt>Vasos</dt><dd><table class="t">${filas}<tr><td>Total</td><td>$${total.toLocaleString('es-CO')}</td></tr></table></dd>
   <dt>Barreras IR</dt><dd class="file">${irs}</dd>
   <dt>Último color leído</dt><dd>${ultimoLeido}</dd>

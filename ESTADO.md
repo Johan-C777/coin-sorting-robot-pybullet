@@ -2,9 +2,11 @@
 
 ## Decisiones / parámetros
 - `scripts/generar_clasificador.py` (manifold3d) → `hardware/stl/` + `piezas_clasificador.csv`. Sin tornillos ni soportes: clavijas Ø6 (agujero 6,1; `AJUSTE_PRESION`), llaves R04, bridas de nailon.
-- Riel 22°, peralte 10°, canal 30; ranuras 17,5/20,8/21,5/22,9/23,4/24,1/24,9. 5 vasos Ø52, paso 65 mm ($50,100,200,500,1000) en banda; tubo flexible desde cada ducto.
-- $500: TCS34725 antes de la ranura 6; plato SG90 55° (antigua, -X) / 125° (nueva, +X); dos columnas alineadas con los ductos, mismo vaso. Firmware `config.h` 55/125.
+- Riel 22°, peralte 10°, canal 30; ranuras 17,5/20,8/21,5/22,9/23,4/24,1/24,9. 9 vasos Ø52, paso 60 mm, uno por salida (nueva y antigua separadas), en banda; tubo flexible desde cada ducto.
+- $500: TCS34725 antes de la ranura 6; plato SG90 55° (antigua, -X) / 125° (nueva, +X); dos columnas alineadas con los ductos, cada una a su vaso. Firmware `config.h` 55/125.
 - Tolva 28BYJ-48, semiángulo 40°. Pines IR 34,35,36,39,32,33,25,26,27; I2C 21/22; servo 13; tolva 16-19; banda 14/4/23.
+
+- Base no impresa: tablero MDF con ranura 38 mm + marco de listones 20x20 (patas 150 mm); banda pasa entre patas. Visor: grupo Base.
 
 ## Archivos
 - Reescritos: `scripts/{generar_clasificador,exportar_visor_3d}.py`, `scripts/visor_template.html` (ensamble + simulación), `hardware/stl/*`, `docs/08-clasificador-fisico.md`, `hardware/bom-etapa1.csv`.
