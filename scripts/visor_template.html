@@ -123,8 +123,8 @@ const COLORS = {
   motor:[0xaab2ba,0x9aa2ab], servo:[0x3b78e0,0x3b78e0], sensor:[0x8e55cf,0x8e55cf], led:[0xe5484d,0xe5484d], foto:[0x1f2328,0x3a4046],
   marco:[0xc29a62,0xa8803f], mesa:[0xcdbf9f,0xb4a583], pvc:[0xe8ecef,0xd5dade], banda:[0x4a4f55,0x3a3f45], vaso:[0xdfe4e8,0xc9d0d6]
 };
-const BASEOP = {mesa:.6, marco:.85, vaso:.5, banda:.9};
-const SEETHRU = new Set(['ducto','bif','tolva3','puente']);       // casi transparentes en la simulación
+const BASEOP = {mesa:.6, marco:.85, vaso:.5, banda:.9, pvc:.8};
+const SEETHRU = new Set(['ducto','bif','tolva3','puente','pvc']);       // casi transparentes en la simulación
 const dark = () => document.documentElement.dataset.theme==='dark' ||
   (document.documentElement.dataset.theme!=='light' && matchMedia('(prefers-color-scheme: dark)').matches);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();

@@ -80,15 +80,17 @@ ESP_PARED = 2.4
 ALA = 14.0              # ala a cada lado del canal
 ENTRADA = 35.0          # zona donde cae la moneda de la tolva
 ALMA = 12.0             # material entre ranuras
-ALMA_EXTRA = {0: 2.8, 1: 0.6, 4: 17.7, 5: 17.2}   # alma extra tras la ranura i: separa las salidas >= 35 mm (vasos de Ø34)
-# Base: lámina sobre 4 patas de tubo PVC de 3/4" unidas con codos impresos
+ALMA_EXTRA = {0: 4.6, 1: 2.6, 2: 1.6, 4: 17.7, 5: 17.2}   # alma extra tras la ranura i: separa las salidas >= 37 mm (collares de los tubos de 1")
+# Base: lámina sobre 4 patas de tubo PVC de 3/4" con tees; dos bases impresas en ABS
 PVC_D = 26.7             # tubo PVC presión de 3/4" (diámetro exterior)
 BORE_R = PVC_D / 2 + 0.3 # alojamiento a presión
 PARED_PVC = 3.0
-PROF_PVC = 30.0          # penetración del tubo en el codo
+PROF_PVC = 30.0          # penetración del tubo en la base
 PLACA, PLACA_E = 44.0, 4.0
-LAMINA_E = 6.0           # lámina de MDF o acrílico de 6 mm; su cara de arriba es el plano z = 0
-Z_PISO = -138.0          # piso bajo la banda (cara de arriba de la banda en -130)
+F_ACC = 11.0             # tee de 3/4": del centro al fondo de la copa (medir en el accesorio real)
+LAMINA_E = 9.0           # lámina de MDF de 9 mm (6 mm se flecha entre las patas); su cara de arriba es el plano z = 0
+Z_PISO = -200.0          # piso bajo la banda (cara de arriba de la banda en -130): 70 mm para motor y electrónica
+SEP_BASE = 150.0         # separación entre patas delantera y trasera (hueco libre ≈ 123 mm para la banda)
 Z_BOCA = -70.0          # altura (mundo) de la boca de los vasos; los ductos bajan hasta 6 mm sobre ella
 EXTRA_LARGO = 4.0       # largo de ranura = ancho + 4 (la moneda cabe entera)
 LARGO_FINAL = 32.0
@@ -101,7 +103,13 @@ LLAVE_L, LLAVE_CUELLO, LLAVE_BOCA, LLAVE_ESP = 10.0, 6.5, 11.0, 2.4
 
 # ductos
 E_DUCTO = 2.0
-L_DUCTO = 32.0          # largo del tubo bajo el centro de la ranura
+PVC_DUCTO_D = 33.4      # tubo PVC presión de 1" RDE 21 (Ø ext 33,4; interior ≈ 30): pasa la $1000 (26,7)
+BORE_DUCTO_R = (PVC_DUCTO_D + 0.3) / 2
+R_COLLAR = BORE_DUCTO_R + 1.2
+Z_RECT = 31.0           # el adaptador es rectangular (ranura) hasta aquí
+D_EMBUDO = 9.0          # embudo de 36° de la ranura al tubo redondo
+PROF_DUCTO = 20.0       # penetración del tubo de 1" en el collar
+Z_TUBO = -(Z_RECT + D_EMBUDO)   # cara superior del tubo bajo el centro de la ranura
 T_IR = 20.0             # barrera IR bajo el plano del riel
 IR_PAD = 3.5            # espesor extra de pared donde asienta el LED
 
@@ -431,15 +439,24 @@ def agujeros_ir(hy, up, h=0.0):
     return out
 
 
-def ducto(r: Ranura, largo: float = L_DUCTO) -> Manifold:
-    """Tubo vertical bajo la ranura con barrera IR y dos orejas con clavija."""
+def adaptador(r: Ranura) -> Manifold:
+    """Adaptador de la ranura a un tubo PVC de 1": caja de la ranura con barrera IR y orejas con clavija,
+    embudo de 36° y collar redondo en el que entra el tubo (PROF_DUCTO mm)."""
     mw = Mundo(r.xc, r.yc)
     hu, hy = medidas_tubo(r)
     top = (hu + E_DUCTO) * T22 + 4.0
-    ext = caja(-(hu + E_DUCTO), hu + E_DUCTO, -(hy + E_DUCTO), hy + E_DUCTO, -largo, top) ^ mw.corte()
+    eo, yo = hu + E_DUCTO, hy + E_DUCTO
+    z_e = -Z_RECT
+    z_c = -Z_RECT - D_EMBUDO
+    z_f = z_c - PROF_DUCTO
+    ext = caja(-eo, eo, -yo, yo, z_e, top) ^ mw.corte()
     pads = [pad_ir(hu, hy, -T_IR, s) for s in (1, -1)]
-    m = union([ext, *pads, orejas(r, mw, hy)])
-    huecos = [caja(-hu, hu, -hy, hy, -largo - 1, top + 2), *agujeros_ir(hy, -T_IR)]
+    embudo = hull(caja(-eo, eo, -yo, yo, z_e - 0.01, z_e), cil_z(0, 0, z_c, z_c + 0.01, 2 * R_COLLAR))
+    collar = cil_z(0, 0, z_f, z_c + 0.01, 2 * R_COLLAR)
+    m = union([ext, *pads, orejas(r, mw, hy), embudo, collar])
+    dentro = hull(caja(-hu, hu, -hy, hy, z_e - 0.01, z_e), cil_z(0, 0, z_c, z_c + 0.01, 2 * BORE_DUCTO_R))
+    huecos = [caja(-hu, hu, -hy, hy, z_e, top + 2), dentro, cil_z(0, 0, z_f - 1.0, z_c, 2 * BORE_DUCTO_R),
+              *agujeros_ir(hy, -T_IR)]
     return m - union(huecos)
 
 
@@ -596,7 +613,7 @@ def _pie_y_cartelas(altura, ancho_pie, largo_pie, sentido, y_c):
         s = sentido
         y0, y1 = (y_c - 6, y_c + 6)
         out = largo_pie
-        ya, yb = (min(s * out, 6), max(s * out, 6)) if s < 0 else (-6, out)
+        ya, yb = (min(s * out, 2), max(s * out, 2)) if s < 0 else (-2, out)
         piezas.append(caja(-ancho_pie / 2, ancho_pie / 2, ya, yb, 0, esp))
         run = out - 0.4 - 6.0
         poli = [(s * 5.5, esp - 0.1), (s * (out - 0.4), esp - 0.1), (s * 5.5, esp + min(run * 1.0, altura - esp))]
@@ -740,6 +757,7 @@ def construir_piezas():
         cz = p_mundo(r.xc, r.yc, 0)[2]
         largos[r.i] = cz - (Z_BOCA + 6.0)
     extra_d6 = largos[RANURA_500] - (T_PIV + 26.0 + T_COL)
+    tubos = {i: largos[i] + Z_TUBO for i in largos}      # corte del tubo PVC de 1": del collar a 6 mm sobre el vaso
     piezas: list[Pieza] = []
     riel_a = riel_modulo(d, 0, d.la, r_all[:4])
     riel_b = riel_modulo(d, d.la, d.fin_b, r_all[4:], final=True)
@@ -757,7 +775,8 @@ def construir_piezas():
     for r in r_all:
         if r.i == RANURA_500:
             continue
-        piezas.append(Pieza(f"D{r.i + 1}_ducto_{r.clave}", ducto(r, largos[r.i]), 1, f"ranura {r.ancho:.1f} mm, IR 5 mm; baja hasta el vaso",
+        piezas.append(Pieza(f"D{r.i + 1}_adaptador_{r.clave}", adaptador(r), 1,
+                            f"ranura {r.ancho:.1f} mm, IR 5 mm; tubo PVC 1\" de {tubos[r.i]:.0f} mm",
                             pose_ducto(r), grupo="ducto"))
     piezas.append(Pieza("D6_bifurcador_500", d6(r500, extra_d6), 1, "plato basculante; servo y IR a presión; PLA negro",
                         pose_ducto(r500), grupo="d6"))
@@ -782,51 +801,52 @@ def construir_piezas():
     piezas.append(Pieza("T04_pata_tolva", pata_tolva(h_pata_t), 4, f"altura {h_pata_t:.0f} mm",
                         None, grupo="pata_tolva"))
     base = base_pvc(d, p_mundo, largos)
-    piezas.append(Pieza("P01_pie_pvc", codo_pvc([(1, 0)]), 4, f"pie de pata y larguero bajo; tubo PVC 3/4: pata {base['l_pata']:.0f} mm",
-                        None, grupo="base"))
-    piezas.append(Pieza("P02_esquinero_pvc", codo_pvc([(1, 0), (0, 1)]), 4, "esquina bajo la lámina; une pata y dos largueros altos",
-                        None, grupo="base"))
-    return d, piezas, dict(base=base, zoff=zoff, base_z=base_z, centro=centro, r500=r500, p_mundo=p_mundo, largos=largos, extra_d6=extra_d6)
+    piezas.append(Pieza("P01_base_extremo", base_extremo(base["sep"]), 2,
+                        f"base ABS de un extremo: 2 patas PVC 3/4 separadas {base['sep']:.0f} mm", None, grupo="base"))
+    return d, piezas, dict(base=base, zoff=zoff, base_z=base_z, centro=centro, r500=r500, p_mundo=p_mundo, largos=largos, tubos=tubos, extra_d6=extra_d6)
 
 
 # =====================================================================
-# Base: codos impresos para las patas de tubo PVC (marco de impresión = marco de montaje del pie)
+# Base: dos bases impresas (ABS) bajo las patas; el resto es tubo y tees de PVC de 3/4"
 # =====================================================================
-def codo_pvc(dirs):
-    """Placa cuadrada con tope vertical (tubo hacia arriba) y un tope horizontal por cada dirección en `dirs`
-    ((1,0), (0,1)...). La placa va sobre la cama; los alojamientos son de gota, sin soportes."""
+def zocalo_pvc():
+    """Placa cuadrada con un alojamiento vertical (el tubo entra PROF_PVC mm). Se imprime con la placa en la cama."""
     r_b = BORE_R + PARED_PVC
-    h_axis = PLACA_E + PARED_PVC + BORE_R                      # eje de los topes horizontales
-    alto_caja = h_axis + BORE_R * math.sqrt(2) + PARED_PVC
-    piezas = [caja(-PLACA / 2, PLACA / 2, -PLACA / 2, PLACA / 2, 0, PLACA_E),
-              cil_z(0, 0, 0, PLACA_E + 34.0, 2 * r_b)]
-    huecos = [cil_z(0, 0, PLACA_E + 2.0, PLACA_E + 36.0, 2 * BORE_R)]
-    for (dx, dy) in dirs:
-        ang = math.degrees(math.atan2(dy, dx))
-        caja_h = caja(BORE_R + 1.5, r_b + PROF_PVC, -r_b, r_b, 0, alto_caja)
-        gota_h = prisma_yz(gota(BORE_R).translate((0, h_axis)), r_b, r_b + PROF_PVC + 1.0)
-        piezas.append(caja_h.rotate((0, 0, ang)))
-        huecos.append(gota_h.rotate((0, 0, ang)))
-    for sx in (1, -1):
-        for sy in (1, -1):
-            huecos.append(caja(sx * 17 - 2, sx * 17 + 2, sy * 17 - 2, sy * 17 + 2, -1, PLACA_E + 1))
+    boss = cil_z(0, 0, 0, PLACA_E + 34.0, 2 * r_b)
+    placa = caja(-PLACA / 2, PLACA / 2, -PLACA / 2, PLACA / 2, 0, PLACA_E)
+    hueco = cil_z(0, 0, PLACA_E + 2.0, PLACA_E + 36.0, 2 * BORE_R)
+    return union([placa, boss]), hueco
+
+
+def base_extremo(sep):
+    """Una base de extremo: dos zócalos unidos por una viga plana; ata las dos patas de ese lado."""
+    placa, hueco = zocalo_pvc()
+    piezas = [placa, placa.translate((0, sep, 0)),
+              caja(-12.0, 12.0, 0, sep, 0, PLACA_E + 2.0)]
+    huecos = [hueco, hueco.translate((0, sep, 0))]
+    for yy in (0, sep):
+        for sx in (1, -1):
+            for sy in (1, -1):
+                huecos.append(caja(sx * 17 - 2, sx * 17 + 2, yy + sy * 17 - 2, yy + sy * 17 + 2, -1, PLACA_E + 1))
     return union(piezas) - union(huecos)
 
 
 def base_pvc(d, p_mundo, largos):
     """Posiciones y cortes de la base. Devuelve un diccionario."""
     sal_x = [p_mundo(r.xc, r.yc, 0)[0] for r in d.ranuras]
-    x_ini, x_fin = min(sal_x) - 18.0, max(sal_x) + 20.0           # tramo donde bajan los ductos (ranura de la lámina)
-    xl, xr = -68.0, x_fin + PLACA / 2 + 3.0
-    yf, yb = -40.0, 70.0
+    x_ini, x_fin = min(sal_x) - R_COLLAR - 3.0, max(sal_x) + R_COLLAR + 3.0   # tramo donde bajan los ductos
+    xl, xr = -68.0, x_fin + PLACA / 2 + 3.0 + 40.0                   # 40 mm extra a la derecha para el motor de la banda
+    yf = -60.0
+    yb = yf + SEP_BASE
     r_b = BORE_R + PARED_PVC
-    z_alto_p02 = -LAMINA_E - PLACA_E
-    h_axis = PLACA_E + PARED_PVC + BORE_R
-    l_pata = (z_alto_p02 - 2.0) - (Z_PISO + PLACA_E + 2.0)
-    return dict(xl=xl, xr=xr, yf=yf, yb=yb, x_ranura=(x_ini, x_fin), y_ranura=(-4.0, 34.0),
-                lamina=(xl - PLACA / 2 - 2.0, xr + PLACA / 2 + 2.0, yf - PLACA / 2 - 2.0, yb + PLACA / 2 + 2.0),
-                l_pata=l_pata, l_x=(xr - xl) - 2 * r_b, l_y=(yb - yf) - 2 * r_b,
-                z_eje_alto=-LAMINA_E - h_axis, z_eje_bajo=Z_PISO + h_axis)
+    z_tee = -LAMINA_E - 40.0
+    z_pie = Z_PISO + PLACA_E + 2.0                                   # fondo del alojamiento: ahí asienta el tubo
+    return dict(xl=xl, xr=xr, yf=yf, yb=yb, sep=SEP_BASE, x_ranura=(x_ini, x_fin), y_ranura=(-12.0, 36.0),
+                lamina=(xl - 24.0, xr + 24.0, yf - 24.0, yb + 24.0),
+                z_tee=z_tee, z_pie=z_pie,
+                l_pata=(z_tee - F_ACC) - z_pie,                      # tubo largo, del zócalo a la tee
+                l_tope=-LAMINA_E - (z_tee + F_ACC),                  # tubo corto sobre la tee: sostiene la lámina
+                l_x=(xr - xl) - 2 * F_ACC)                           # larguero entre las dos tees (delantero y trasero)
 
 
 # =====================================================================
@@ -897,14 +917,10 @@ def partes_ensamble(piezas, ctx):
                 out.append((p.nombre, p.pose(p.geom.translate((0, yy, 0)))))
         elif p.nombre.startswith("R03"):
             out.append((p.nombre, p.pose(p.geom)))
-        elif p.nombre.startswith("P0"):
+        elif p.nombre.startswith("P01"):
             b = ctx["base"]
-            for (x, y, ang_i) in ((b["xl"], b["yf"], 90), (b["xr"], b["yf"], 180), (b["xr"], b["yb"], 270), (b["xl"], b["yb"], 0)):
-                if p.nombre.startswith("P01"):
-                    m = p.geom.rotate((0, 0, 0 if x == b["xl"] else 180)).translate((x, y, Z_PISO))
-                else:
-                    m = p.geom.rotate((180, 0, 0)).rotate((0, 0, ang_i)).translate((x, y, -LAMINA_E))
-                out.append((p.nombre, m))
+            for x in (b["xl"], b["xr"]):
+                out.append((p.nombre, p.geom.translate((x, b["yf"], Z_PISO))))
         elif p.nombre == "T04_pata_tolva":
             for a in (45, 135, 225, 315):
                 x, y = _polar(R_PATA_TOLVA, a)
