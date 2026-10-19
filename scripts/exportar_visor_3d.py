@@ -17,7 +17,7 @@ RAIZ = g.RAIZ
 SALIDA = RAIZ / "hardware" / "visor"
 PLANTILLA = Path(__file__).with_name("visor_template.html")
 C22, S22 = g.C22, g.S22
-VASO_D, VASO_H, PASO_VASOS = 52.0, 60.0, 65.0
+VASO_D, VASO_H, PASO_VASOS = 52.0, 60.0, 60.0
 Z_BANDA = -150.0                      # cara superior de la banda, bajo la mesa de referencia
 DENOM = {"N50": 50, "A50": 50, "N100": 100, "A100": 100, "N200": 200, "A200": 200,
          "A500": 500, "N500": 500, "N1000": 1000}
@@ -144,28 +144,11 @@ def construir():
 
     # ---------------- referencia (no se imprime) ----------------
     xs = [p_mundo(x, 0, 0)[0] for x in (0.0, d.fin_b)]
-    mesa = [g.caja(xs[0] - 90, xs[1] + 40, -70, -7, -4, 0), g.caja(xs[0] - 90, xs[1] + 40, 31, 94, -4, 0)]
-    add("M1", "Referencia", "Mesa de referencia", None, 1, "ref", "mesa", g.union(mesa), [0, 0, -2],
-        "Superficie plana sobre la que se apoyan las patas, con una ranura de 38 mm por donde bajan los tubos. Es solo una guía: tu bastidor puede ser otro.",
-        "Las patas del riel y de la tolva se atan con bridas a esta superficie.")
-    add("M2", "Referencia", "Banda transportadora", None, 1, "ref", "banda", g.caja(30, 400, -20, 44, Z_BANDA - 8, Z_BANDA), [0, 0, -3],
-        "Lleva los cinco vasos hasta el punto A del brazo.", "Es la etapa 2; aquí solo marca la altura de los vasos.")
-    cups = []
-    for k, den in enumerate(VASOS):
-        x = 70.0 + k * PASO_VASOS
-        cups.append(dict(den=den, x=x, y=12.0, ztop=Z_BANDA + VASO_H))
-        vaso = (g.cil_z(x, 12.0, Z_BANDA, Z_BANDA + VASO_H, VASO_D)
-                - g.cil_z(x, 12.0, Z_BANDA + 2.0, Z_BANDA + VASO_H + 1, VASO_D - 3.0))
-        add("V", "Referencia", "Vaso", None, 5, "ref", "vaso", vaso, [0, 0, -3.5],
-            "Recibe todas las monedas de una denominación, nuevas y antiguas. Ø52 × 60, paso de 65 mm sobre la banda.",
-            "Los tubos flexibles de cada ducto terminan sobre su boca.", tag=f"V{den}")
-
-    # ---------------- datos de la simulación ----------------
-    monedas = {}
+    monedas_tmp = {}
     for i, (w, ms) in enumerate(g.RANURAS):
         for key, nombre, diam in ms:
-            monedas[key] = dict(d=diam, den=DENOM[key], nombre=nombre, slot=i)
-    slots = []
+            monedas_tmp[key] = dict(d=diam, den=DENOM[key], nombre=nombre, slot=i)
+    slots_tmp = []
     for r in r_all:
         c0 = p_mundo(r.xc, r.yc, 0)
         s = dict(i=r.i, x0=r.x0, largo=r.largo, ancho=r.ancho, xc=r.xc, yc=r.yc, c0=list(c0),
@@ -177,13 +160,60 @@ def construir():
         else:
             s["fondo"] = {s["nombre"]: list(c0 + np.array([0, 0, -g.L_DUCTO]))}
             s["ir"] = {s["nombre"]: float(c0[2] - g.T_IR)}
-        slots.append(s)
+        slots_tmp.append(s)
+    # Base de referencia: tablero con ranura + marco de listones (no se imprime)
+    xm0 = sum(v[0] for sl in slots_tmp for v in sl["fondo"].values()) / sum(len(sl["fondo"]) for sl in slots_tmp)
+    X0 = min(xs[0] - 90.0, xm0 - 4 * PASO_VASOS - 45.0)
+    X1 = max(xs[1] + 40.0, xm0 + 4 * PASO_VASOS + 45.0)
+    YF, YB, SLOT0, SLOT1 = -70.0, 94.0, -7.0, 31.0
+    mesa = [g.caja(X0, X1, YF, SLOT0, -9, 0), g.caja(X0, X1, SLOT1, YB, -9, 0)]
+    add("M1", "Base", "Tablero de la base", None, 1, "ref", "mesa", g.union(mesa), [0, 0, 2],
+        "Tablero de MDF de 9 mm, %d × %d mm, con una ranura de 38 mm por donde bajan los tubos. Sostiene riel, tolva y bifurcador." % (X1 - X0, YB - YF),
+        "Las patas del riel y de la tolva se atan con bridas a este tablero (ranuras de 3 mm para la brida junto a cada pie).")
+    L, LP = 20.0, -158.0
+    ox0, ox1, oy0, oy1 = X0 + 6, X1 - 26, YF + 6, YB - 26
+    marco = []
+    for x in (ox0, ox1):
+        for y in (oy0, oy1):
+            marco.append(g.caja(x, x + L, y, y + L, LP, -9))                       # patas
+    for y in (oy0, oy1):
+        marco.append(g.caja(ox0 + L, ox1, y, y + L, -9 - L, -9))                   # largueros altos
+        marco.append(g.caja(ox0 + L, ox1, y, y + L, LP + 40, LP + 40 + L))        # largueros bajos
+    for x in (ox0, ox1):
+        marco.append(g.caja(x, x + L, oy0 + L, oy1, -9 - L, -9))                   # travesaños altos
+    add("M3", "Base", "Marco de listones", None, 1, "ref", "marco", g.union(marco), [0, 0, -4],
+        "Cuatro patas de 150 mm y largueros de 20 × 20 mm (listón de pino o perfil de aluminio 2020). La banda pasa libre entre las patas, por debajo del tablero.",
+        "Pegado con cola y escuadras de ángulo, o perfil 2020 con escuadras. Los largueros bajos evitan que se deforme; van por encima de los vasos.")
+    # ---- vasos: uno por salida, ordenados por la x de su salida
+    salidas = sorted(((nm, v) for sl in slots_tmp for nm, v in sl["fondo"].items()), key=lambda t: t[1][0])
+    SALIDA_COIN = {"D6a": "A500", "D6b": "N500"}
+    for sl, r in zip(slots_tmp, r_all):
+        if sl["nombre"] != "D6":
+            SALIDA_COIN[sl["nombre"]] = next(k for k, m in monedas_tmp.items() if m["slot"] == sl["i"])
+    xm = sum(v[0] for _, v in salidas) / len(salidas)
+    Y_VASO = 12.0
+    add("M2", "Base", "Banda transportadora", None, 1, "ref", "banda",
+        g.caja(xm - 4.5 * PASO_VASOS - 40, xm + 4.5 * PASO_VASOS + 40, Y_VASO - 36, Y_VASO + 36, Z_BANDA - 8, Z_BANDA), [0, 0, -3],
+        "Lleva los nueve vasos hasta el punto A del brazo.", "Es la etapa 2; aquí solo marca la altura de los vasos. Pasa entre las patas de la base.")
+    cups = []
+    for k, (nm, pos) in enumerate(salidas):
+        key = SALIDA_COIN[nm]
+        x = xm + (k - 4) * PASO_VASOS
+        mo = monedas_tmp[key]
+        cups.append(dict(den=mo["den"], fam="antigua" if key[0] == "A" else "nueva", salida=nm, key=key, x=x, y=Y_VASO, ztop=Z_BANDA + VASO_H))
+        vaso = (g.cil_z(x, Y_VASO, Z_BANDA, Z_BANDA + VASO_H, VASO_D)
+                - g.cil_z(x, Y_VASO, Z_BANDA + 2.0, Z_BANDA + VASO_H + 1, VASO_D - 3.0))
+        add("V", "Base", "Vaso", None, 9, "ref", "vaso", vaso, [0, 0, -3.5],
+            "Uno por tipo de moneda: %s, nueva y antigua van en vasos distintos. Ø52 × 60, paso de %d mm sobre la banda." % ("$500" if mo["den"] == 500 else "las monedas", PASO_VASOS),
+            "El tubo flexible de cada ducto termina sobre su boca.", tag=f"V{nm}")
+
+    # ---------------- datos de la simulación ----------------
     sim = dict(c22=C22, s22=S22, zoff=zoff, esp_base=g.ESP_BASE, tan_peralte=g.PERALTE_T, entrada=g.ENTRADA / 2,
                tolva=dict(c=[float(centro[0]), float(centro[1]), float(base_z)], cav_r=g.CAVIDAD_R),
                x_sensor=d.x_sensor, y_moneda=YS,
                d6=dict(c0=[float(v) for v in c6], t_piv=g.T_PIV, t_bot=gd["t_bot"], col=(g.COL_INT0 + g.COL_INT1) / 2,
                        incl=g.INCL_PLATO, pl_h=g.PLATO_H, pl_l=g.PLATO_L, hu=gd["hu"]),
-               monedas=monedas, slots=slots, vasos=cups, z_banda=Z_BANDA, vaso_d=VASO_D, z_mesa=0.0)
+               monedas=monedas_tmp, slots=slots_tmp, vasos=cups, z_banda=Z_BANDA, vaso_d=VASO_D, z_mesa=0.0)
     return out, sim
 
 

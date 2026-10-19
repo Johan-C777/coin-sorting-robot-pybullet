@@ -37,8 +37,8 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/stl/piezas_clasifica
 | Ranuras (ancho × largo) | 17,5 · 20,8 · 21,5 · 22,9 · 23,4 · 24,1 · 24,9 mm; extremo abierto 32 mm |
 | Barreras IR | 2 × Ø5,2 a presión, opuestas |
 | Tolva | Semiángulo 40°, disco Ø80 × 3 con 4 cavidades Ø28; 28BYJ-48 |
-| Vasos | 5 sobre la banda, paso 65 mm: $50, $100, $200, $500, $1000. Tubo flexible de cada ducto |
-| $500 | TCS34725 lee el anillo antes de la ranura 6; plato SG90 a 55° (antigua, −X) o 125° (nueva, +X). Ambas salen por columnas alineadas con los demás ductos y van al mismo vaso |
+| Vasos | 9 sobre la banda, paso 60 mm, uno por salida: N50, N100, A50, N200, A100, A500, N500, A200, N1000. Tubo flexible de cada ducto |
+| $500 | TCS34725 lee el anillo antes de la ranura 6; plato SG90 a 55° (antigua, −X) o 125° (nueva, +X). Salen por dos columnas alineadas con los demás ductos, cada una a su vaso |
 
 ## Ensamble (sin tornillos)
 
@@ -46,7 +46,8 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/stl/piezas_clasifica
 2. **Ductos**: clavijas Ø6 a presión en las orejas del riel; IR a presión.
 3. **Tolva**: 28BYJ-48 en T03 con 2 bridas de nailon; disco a presión en el eje; cono sobre las 3 clavijas de T03; patas T04.
 4. **Bifurcador**: D6 bajo la ranura 6; SG90 a presión en su bolsillo; plato B02 en el estriado; B03 cuelga de su guía con la TCS34725.
-5. **Vasos y tubos**: tubo flexible desde el fondo de cada ducto al vaso de su denominación. Los dos ductos de $500 van al mismo vaso. D6 baja 38 mm bajo el plano de la mesa: la mesa necesita una ranura.
+5. **Vasos y tubos**: tubo flexible desde el fondo de cada ducto al vaso de su denominación. Cada ducto va a su propio vaso (9). D6 baja 38 mm bajo el tablero: el tablero lleva una ranura de 38 mm.
+6. **Base (no impresa)**: tablero de MDF 9 mm (≈ 560 × 164 mm, con ranura de 38 mm a lo largo) sobre marco de listones de 20 × 20: 4 patas de 150 mm, 2 largueros altos y 2 travesaños bajo el tablero, 2 largueros bajos a 40 mm del piso. La banda pasa entre las patas. Patas del riel y de la tolva atadas al tablero con bridas.
 
 ## Electrónica (firmware/esp32_contador/config.h)
 
