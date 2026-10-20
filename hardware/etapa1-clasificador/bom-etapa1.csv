@@ -5,9 +5,9 @@ cantidad,componente,detalle,uso,nota
 1,Sensor de color TCS34725,I2C 0x29,separa $500 antigua y nueva,va en el puente B03 antes de la ranura 6
 9,LED infrarrojo 5 mm,emisor,barreras de conteo,uno por ducto
 9,Fototransistor 5 mm,misma longitud de onda que el LED,barreras de conteo,salida a GPIO con flanco de subida
-9,Resistencia 220 ohm,1/4 W,LED IR a 5 V,calculada (aprox. 17 mA); ajustar segun el LED
+9,Resistencia 330 ohm,1/4 W,LED IR a 5 V,aprox. 11 mA; ya estan en el inventario
 9,Resistencia 10 kohm,1/4 W,pull-up externo a 3.3 V,GPIO 34-39 no tienen pull-up interno
-1,Condensador 470 uF,16 V,5 V del servo,evita reinicios del ESP32
+1,Condensador electrolitico 220 uF,16 V o mas,5 V del servo,evita reinicios del ESP32
 1,Fuente 5 V 2 A,conmutada,tolva servo y LED IR,
 1,Tubo PVC presion 3/4 pulgada,tramo de 2 m (Ø ext 26.7),base: 4 patas x134; 4 topes x29; 2 largueros x490 mm,medir la tee antes de cortar (11 mm centro-fondo nominal)
 4,Tee PVC presion 3/4 pulgada,sin codos,union de pata y larguero,una por pata
