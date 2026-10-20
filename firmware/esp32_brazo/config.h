@@ -36,16 +36,16 @@ constexpr float Q_HOME[N_JUNTAS] = {0.0f, 90.0f, -90.0f, -90.0f, 0.0f};
 // ---- pinza ------------------------------------------------------------------
 constexpr float PINZA_MAX_MM = 70.0f;
 constexpr float PINZA_ABIERTA_MM = 66.0f;
-constexpr float PINZA_CERRADA_MM = 49.0f;         // 3 mm de interferencia
-constexpr float VASO_ANCHO_MM = 52.0f;
+constexpr float PINZA_CERRADA_MM = 31.0f;         // 3 mm de interferencia sobre el vaso
+constexpr float VASO_ANCHO_MM = 34.0f;           // vasos de la etapa 1: Ø34 x 60 mm
 
 // ---- celda ------------------------------------------------------------------
-constexpr float Z_AGARRE = 6.8f;
+constexpr float Z_AGARRE = 4.8f;
 constexpr float Z_SEGURA = 17.0f;
 constexpr float CABECEO = -90.0f;
-constexpr uint8_t N_PUESTOS = 5;
-constexpr float YAW_ENTRADA[N_PUESTOS] = {-86.0f, -70.5f, -55.0f, -39.5f, -24.0f};
-constexpr float YAW_RACK[N_PUESTOS] = {24.0f, 39.5f, 55.0f, 70.5f, 86.0f};
+constexpr uint8_t N_PUESTOS = 9;                 // un vaso por ducto del clasificador
+constexpr float YAW_ENTRADA[N_PUESTOS] = {-88.0f, -78.5f, -69.0f, -59.5f, -50.0f, -40.5f, -31.0f, -21.5f, -12.0f};
+constexpr float YAW_RACK[N_PUESTOS] = {12.0f, 21.5f, 31.0f, 40.5f, 50.0f, 59.5f, 69.0f, 78.5f, 88.0f};
 constexpr int8_t ZONA_ENTRADA = 0;
 constexpr int8_t ZONA_RACK = 1;
 

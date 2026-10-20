@@ -97,9 +97,9 @@ que no están hechas para esa corriente.
 
 ## Detalle del prototipo real
 
-La simulación comanda el cierre de pinza a 40 mm y el vaso la detiene en 52 mm.
+La simulación comanda el cierre de pinza a 20 mm y el vaso la detiene en 34 mm.
 Un servo real seguiría empujando y quedaría en bloqueo permanente. Por eso el
-firmware comanda 49 mm: 3 mm de interferencia que absorben las almohadillas de
+firmware comanda 31 mm: 3 mm de interferencia que absorben las almohadillas de
 TPU (`PINZA_CERRADA_MM` en `config.h` y en `config.py`).
 
 ## Lista de materiales

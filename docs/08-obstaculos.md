@@ -2,7 +2,7 @@
 
 Cuando el vaso llega al final de la banda, que es el límite del alcance del
 brazo, el brazo lo toma (**punto A**) y debe llevarlo al rack (**punto B**,
-puestos R1 a R5). Entre los dos cuelgan cuatro móviles que giran sin parar. Están
+puestos R1 a R9). Entre los dos cuelgan cuatro móviles que giran sin parar. Están
 puestos en el camino en orden de dificultad: cada uno le exige al planificador
 una capacidad que el anterior no pedía.
 
@@ -11,7 +11,7 @@ una capacidad que el anterior no pedía.
 | | Posición |
 | --- | --- |
 | Punto A | Final de la banda, yaw −60°, radio 23 cm |
-| Punto B | Rack de cinco puestos, yaw 24° a 86°, radio 23 cm |
+| Punto B | Rack de nueve puestos, yaw 12° a 88°, radio 23 cm |
 | Tránsito nominal | Arco de radio 23 cm a 20 cm de altura, pinza siempre vertical |
 
 ## Los cuatro niveles
@@ -38,7 +38,7 @@ cd software && python -m brazo.obstaculos
 
 Para cada punto del arco el planificador pregunta, en este orden:
 
-1. **¿Cabe por debajo?** Si `y_esfera − r_esfera − margen − alto del vaso ≥ 12,3 cm`,
+1. **¿Cabe por debajo?** Si `y_esfera − r_esfera − margen − lo que el vaso sobresale sobre el TCP ≥ 12,3 cm`,
    baja la altura de tránsito lo justo (sin bajar de 15,5 cm).
 2. **¿Cabe por dentro?** Si al recogerse queda `ρ ≥ 7,2 cm`, el mínimo que admite
    la inversa con la pinza vertical, recoge el brazo y rodea el móvil.
@@ -53,7 +53,7 @@ Dos reglas más salieron de ver al brazo trabarse en la simulación:
 - **El corredor de bajada se cronometra.** Al llegar sobre A o sobre un puesto
   del rack, el descenso se simula en el tiempo contra el giro de las esferas;
   no se exige que toda la columna esté libre a la vez. Esto es lo que hace
-  difícil al nivel 4: su giro cubre cuatro de los cinco puestos.
+  difícil al nivel 4: su giro cubre varios de los nueve puestos.
 - **Recogerse no siempre ayuda.** El O3 cuelga por dentro del arco; recoger el
   brazo cerca de él lo metería en su giro. Por eso, en la franja del O3 manda la
   espera y el brazo se queda en el radio nominal.

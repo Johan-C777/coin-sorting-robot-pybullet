@@ -35,7 +35,7 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/etapa1-clasificador/
 |---|---|
 | Holgura deslizante / clavija | 0,35 mm / Ø6 en agujero Ø6,1 × 3,1 (`AJUSTE_PRESION`) |
 | Pista | 22°, peralte lateral 10° hacia la pared guía, canal 30 mm |
-| Ranuras (ancho × largo) | 17,5 · 20,8 · 21,5 · 22,9 · 23,4 · 24,1 · 24,9 mm; extremo abierto 32 mm |
+| Ranuras (ancho × largo) | 17,5 · 20,8 · 22,0 · 22,8 · 23,4 · 24,1 · 24,9 mm; extremo abierto 32 mm |
 | Barreras IR | 2 × Ø5,2 a presión, opuestas |
 | Tolva | Semiángulo 40°, disco Ø80 × 3 con 4 cavidades Ø28; 28BYJ-48 |
 | Vasos | 9 de Ø34 × 60 mm sobre la banda, cada uno justo bajo su salida (N50, N100, A50, N200, A100, A500, N500, A200, N1000). Sin mangueras: un tubo PVC de 1" baja hasta 6 mm sobre su boca |

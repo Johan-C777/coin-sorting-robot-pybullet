@@ -3,7 +3,8 @@ import math
 
 import pytest
 
-from brazo.config import HOME, PINZA_ABIERTA_MM, Puesto, Z_AGARRE, Z_SEGURA
+from brazo.config import (GRASP_DZ, HOME, PINZA_ABIERTA_MM, Puesto, VASO_ALTO, Z_AGARRE,
+                          Z_SEGURA)
 from brazo.kinematics import fk, ik, pose_puesto
 from brazo.trajectory import (ciclo_pick_place, duracion_total, muestrear,
                               perfil, picos, quintico)
@@ -33,7 +34,7 @@ def test_el_perfil_es_monotono():
 
 
 def test_ciclo_completo_tiene_ocho_tramos():
-    tramos = ciclo_pick_place(Puesto("entrada", 0), Puesto("rack", 4), HOME)
+    tramos = ciclo_pick_place(Puesto("entrada", 0), Puesto("rack", 8), HOME)
     assert len(tramos) == 8
     assert 4.0 < duracion_total(tramos) < 12.0
 
@@ -51,8 +52,8 @@ def test_las_poses_muestreadas_son_alcanzables():
 
 
 def test_el_traslado_pasa_por_encima_de_los_vasos():
-    """Con el vaso sujeto, su base viaja a 10,8 cm: 1,9 cm sobre los demás."""
+    """Con el vaso sujeto, su base viaja a 12,8 cm: 6,8 cm sobre la boca de los demás."""
     tramos = ciclo_pick_place(Puesto("entrada", 0), Puesto("rack", 0), HOME)
     traslado = tramos[4]
     _, _, z, _ = fk(traslado.evaluar(traslado.duracion / 2)[0])
-    assert z - 6.2 > 8.9
+    assert z - GRASP_DZ > VASO_ALTO + 0.5

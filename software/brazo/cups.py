@@ -5,17 +5,18 @@ import random
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
-from .config import (DENOMINACIONES, MASA_MONEDA_ANTIGUA_G, MASA_MONEDA_G,
-                     MASA_VASO_G, Puesto)
+from .config import (MASA_MONEDA_ANTIGUA_G, MASA_MONEDA_G, MASA_VASO_G, TIPOS_VASO,
+                     Puesto)
 
 
 @dataclass
 class Vaso:
     """Un vaso con monedas de una sola denominación.
 
-    Las monedas pueden ser de la familia nueva (2012) o de la anterior; el
-    selector las cuenta por separado y el vaso guarda cuántas son antiguas,
-    porque pesan distinto: una $200 antigua pesa 7,08 g y una nueva 4,61 g.
+    Desde la etapa 1 física cada vaso recibe un solo tipo de moneda (por
+    ejemplo, $200 antigua), así que ``antiguas`` vale 0 o ``monedas``. El
+    modelo admite mezclas porque el peso depende de ello: una $200 antigua
+    pesa 7,08 g y una nueva 4,61 g.
     """
     denominacion: int
     monedas: int
@@ -71,25 +72,25 @@ CRITERIOS: Dict[str, Callable[[Vaso], float]] = {
 
 
 def lote_demo() -> List[Vaso]:
-    """Lote fijo usado en la documentación y en las pruebas.
+    """Lote fijo usado en la documentación y en las pruebas: los nueve vasos.
 
-    (denominación, monedas, de ellas antiguas). La $500 no distingue familia
-    porque las dos miden y pesan lo mismo, y la $1.000 antigua no se admite.
+    (denominación, monedas, de ellas antiguas). Un vaso por tipo de moneda; la
+    $1.000 antigua no se admite en el riel.
     """
-    datos = [(500, 12, 0), (100, 30, 10), (1000, 8, 0), (50, 25, 9), (200, 17, 6)]
+    datos = [(500, 12, 12), (100, 30, 0), (1000, 8, 0), (50, 25, 0), (200, 17, 0),
+             (100, 10, 10), (50, 9, 9), (500, 8, 0), (200, 6, 6)]
     return [Vaso(d, n, Puesto("entrada", i), a) for i, (d, n, a) in enumerate(datos)]
 
 
 def lote_aleatorio(semilla: Optional[int] = None) -> List[Vaso]:
-    """Cinco vasos, uno por denominación, con 6 a 40 monedas y parte antiguas."""
+    """Nueve vasos, uno por tipo de moneda, con 6 a 40 monedas cada uno."""
     rng = random.Random(semilla)
-    dens = DENOMINACIONES[:]
-    rng.shuffle(dens)
+    tipos = TIPOS_VASO[:]
+    rng.shuffle(tipos)
     vasos = []
-    for i, d in enumerate(dens):
+    for i, (d, antigua) in enumerate(tipos):
         n = rng.randint(6, 40)
-        a = rng.randint(0, n // 2) if d in (50, 100, 200) else 0
-        vasos.append(Vaso(d, n, Puesto("entrada", i), a))
+        vasos.append(Vaso(d, n, Puesto("entrada", i), n if antigua else 0))
     return vasos
 
 

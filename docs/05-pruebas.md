@@ -4,7 +4,7 @@ Todo lo que se afirma en la documentación está respaldado por una prueba que s
 corre en el PC, sin hardware. En GitHub las corre Actions en cada push
 (`.github/workflows/pruebas.yml`).
 
-## Python: 60 pruebas
+## Python: 61 pruebas
 
 ```bash
 pip install -r requirements.txt
@@ -15,8 +15,8 @@ pytest software/tests -q
 | --- | --- |
 | `test_monedas.py` | Ocho estaciones en orden de diámetro; cada moneda cae en la suya; márgenes de al menos 0,25 mm; las dos $500 comparten estación; la $1.000 de 1996 se rechaza; **el firmware del contador usa las mismas luces, masas y vasos**; peso con antiguas; las antiguas cambian el orden por peso; la carga de diseño sigue en 416 g; trama `VASOS:` de ida y vuelta |
 | `test_obstaculos.py` | Cuatro obstáculos entre A y B con nivel creciente; la maniobra de cada uno; las cifras 15,5 cm, ρ = 8,3 cm, 16,1 cm y 2,1 cm; sin maniobra cada uno tapa la ruta; con maniobra queda libre; el nivel 3 deja ventana; las poses de evasión tienen inversa; **el planificador de Python y el de la simulación web dan lo mismo** |
-| `test_kinematics.py` | Reposo en (15, 0, 19); DH contra forma cerrada; ejemplo de R1; ida y vuelta en los diez puestos; límites; singularidad |
-| `test_planner.py` | Cinco movimientos desde la entrada; reordenar un rack lleno usando huecos; no mover lo ya ordenado |
+| `test_kinematics.py` | Reposo en (15, 0, 19); DH contra forma cerrada; ejemplo resuelto (24° a 6,8 cm); ida y vuelta en los dieciocho puestos; límites; singularidad |
+| `test_planner.py` | Nueve movimientos desde la entrada; reordenar un rack lleno usando huecos; no mover lo ya ordenado |
 | `test_protocol.py` | Tramas `S:90,90,90,30,90,85` y `S:114,49,83,64,90,85`; anchos de pulso; JSON del dashboard |
 | `test_trajectory.py` | Extremos y picos del perfil quíntico; ocho tramos por vaso; alturas y holgura sobre los vasos |
 | `test_statics.py` | Pares de la memoria (13,60 / 6,82 / 22,07 kg·cm); factores de seguridad; momento de vuelco |
@@ -27,7 +27,7 @@ La comparación con la simulación web necesita Node: corre
 planificador y las evalúa sin navegador. Si Node no está instalado, esa prueba se
 salta y las demás corren igual.
 
-## Firmware: 43 comprobaciones
+## Firmware: 48 comprobaciones
 
 ```bash
 make -C firmware/tests

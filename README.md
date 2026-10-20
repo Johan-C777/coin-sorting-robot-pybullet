@@ -15,7 +15,7 @@ Nueva Granada.
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
 ![ESP32](https://img.shields.io/badge/control-2%20ESP32%20%2B%20PCA9685-E06E17)
 ![Simulación](https://img.shields.io/badge/simulaci%C3%B3n-Three.js%20%2B%20PyBullet-2F5878)
-![Pruebas](https://img.shields.io/badge/pruebas-60%20Python%20%2B%2045%20C%2B%2B-2C7A54)
+![Pruebas](https://img.shields.io/badge/pruebas-61%20Python%20%2B%2048%20C%2B%2B-2C7A54)
 ![Piezas](https://img.shields.io/badge/etapa%201-24%20STL%20sin%20tornillos-7A4BB8)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-687572)
 
@@ -249,9 +249,9 @@ python scripts/generar_figuras.py
 ## Validación
 
 ```bash
-pytest software/tests -q              # 60 pruebas
-make -C firmware/tests                # 45 comprobaciones de los dos firmwares
-python scripts/verificar_alcance.py   # los diez puestos y el punto A dentro del alcance
+pytest software/tests -q              # 61 pruebas
+make -C firmware/tests                # 48 comprobaciones de los dos firmwares
+python scripts/verificar_alcance.py   # los dieciocho puestos y el punto A dentro del alcance
 ```
 
 Hay una prueba detrás de cada número de este README: las luces del riel, el

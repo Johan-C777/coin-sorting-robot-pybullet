@@ -13,7 +13,7 @@ def test_trama_de_reposo():
 
 
 def test_trama_del_ejemplo_r1():
-    q = ik(*pose_puesto(24.0, Z_AGARRE))
+    q = ik(*pose_puesto(24.0, 6.8))                # ejemplo resuelto de la memoria de cálculo
     assert trama(q, PINZA_ABIERTA_MM) == "S:114,49,83,64,90,85"
 
 
@@ -39,6 +39,6 @@ def test_trama_invalida():
 def test_estado_para_el_dashboard():
     est = estado_json(HOME, PINZA_ABIERTA_MM, lote_demo())
     assert est["estado"] == "listo"
-    assert len(est["entrada"]) == 5
-    assert est["totales"]["valor"] == 21650
+    assert len(est["entrada"]) == 9
+    assert est["totales"]["valor"] == 28300
     assert est["servos"] == [90, 90, 90, 30, 90, 85]

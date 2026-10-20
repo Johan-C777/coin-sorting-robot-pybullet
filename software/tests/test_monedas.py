@@ -11,8 +11,9 @@ from brazo.monedas import (AMBAS, ANTIGUA, CATALOGO, FUERA_DE_ALCANCE, POR_CLAVE
 from brazo.planner import orden_objetivo
 from brazo.protocol import parsear_vasos, trama_vasos
 
-CONFIG_CONTADOR = (Path(__file__).resolve().parents[2]
-                   / "firmware" / "esp32_contador" / "config.h")
+RAIZ = Path(__file__).resolve().parents[2]
+CONFIG_CONTADOR = RAIZ / "firmware" / "esp32_contador" / "config.h"
+GENERADOR = RAIZ / "scripts" / "generar_clasificador.py"
 ADMITIDAS = [m for m in CATALOGO if m.clave not in FUERA_DE_ALCANCE]
 
 
@@ -77,6 +78,25 @@ def test_el_firmware_del_contador_usa_el_mismo_riel():
         assert r == 0 or d >= luz[r - 1] - 0.1   # apoyo de 0,1 mm a calibrar
 
 
+def test_el_riel_impreso_usa_los_diametros_oficiales_y_cada_ranura_deja_pasar_su_moneda():
+    """scripts/generar_clasificador.py (los STL) debe partir de las fichas del Banco de la República."""
+    texto = GENERADOR.read_text(encoding="utf-8")
+    bloque = texto[texto.index("RANURAS = ["):texto.index("RANURA_500")]
+    ranuras = []
+    for luz, monedas in re.findall(r"\(([\d.]+|None), \[(.*?)\]\),?\n", bloque):
+        piezas = re.findall(r'\("(\w+)", "[^"]*", ([\d.]+)\)', monedas)
+        ranuras.append((None if luz == "None" else float(luz),
+                        [(c, float(d)) for c, d in piezas]))
+    assert len(ranuras) == 8
+    for luz, piezas in ranuras:
+        for clave, d in piezas:
+            assert d == POR_CLAVE[clave].diametro_mm, clave       # diámetro oficial
+            assert luz is None or luz - d >= 0.4 - 1e-9, clave      # cae con 0,4 mm
+    for i, (luz, _) in enumerate(ranuras[:-1]):
+        siguiente = min(d for _, d in ranuras[i + 1][1])
+        assert luz < siguiente, f"la ranura {i + 1} no retiene la moneda siguiente"
+
+
 def test_el_peso_del_vaso_cuenta_las_antiguas():
     v = Vaso(100, 30, antiguas=10)
     assert v.nuevas == 20
@@ -96,7 +116,7 @@ def test_las_antiguas_cambian_el_orden_por_peso():
     sin = [Vaso(v.denominacion, v.monedas, v.puesto) for v in con]
     assert orden_objetivo(con, "peso", "asc") != orden_objetivo(sin, "peso", "asc")
     assert [con[i].denominacion for i in orden_objetivo(con, "peso", "asc")] == \
-        [50, 1000, 500, 200, 100]
+        [50, 200, 50, 100, 500, 200, 1000, 500, 100]
 
 
 def test_la_carga_de_diseno_sigue_siendo_el_vaso_de_1000_nuevas():
@@ -107,12 +127,13 @@ def test_la_carga_de_diseno_sigue_siendo_el_vaso_de_1000_nuevas():
 def test_lote_ida_y_vuelta_por_la_trama():
     vasos = lote_demo()
     linea = trama_vasos(vasos)
-    assert linea == "VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6"
+    assert linea == "VASOS:500x12a12,100x30,1000x8,50x25,200x17,100x10a10,50x9a9,500x8,200x6a6"
     leidos = parsear_vasos(linea)
     assert [(v.denominacion, v.monedas, v.antiguas) for v in leidos] == \
         [(v.denominacion, v.monedas, v.antiguas) for v in vasos]
     assert leidos[2].puesto == Puesto("entrada", 2)
-    assert totales(leidos)["antiguas"] == 25
+    assert len(leidos) == 9
+    assert totales(leidos)["antiguas"] == 37
 
 
 def test_trama_mal_escrita_se_rechaza():

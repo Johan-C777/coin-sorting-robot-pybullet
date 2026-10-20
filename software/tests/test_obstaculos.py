@@ -30,7 +30,7 @@ def test_cada_obstaculo_fuerza_su_maniobra():
 
 def test_cifras_de_las_maniobras():
     assert maniobra(POR_CODIGO["O1"]).z == pytest.approx(15.5, abs=0.05)
-    assert maniobra(POR_CODIGO["O2"]).rho == pytest.approx(8.3, abs=0.05)
+    assert maniobra(POR_CODIGO["O2"]).rho == pytest.approx(9.2, abs=0.05)
     assert maniobra(POR_CODIGO["O4"]).z == pytest.approx(16.1, abs=0.05)
     assert maniobra(POR_CODIGO["O4"]).holgura == pytest.approx(2.1, abs=0.05)
 
@@ -73,11 +73,11 @@ def test_transito_nominal_dentro_del_alcance():
 def test_la_ruta_mezcla_las_maniobras_como_la_simulacion():
     from brazo.obstaculos import plan_en
     z, rho, modo, quien = plan_en(-52.0)        # saliendo de A: baja por O1 y se recoge por O2
-    assert (modo, quien) == ("rodeo", "O2") and z == pytest.approx(15.5) and rho == pytest.approx(8.3)
+    assert (modo, quien) == ("rodeo", "O2") and z == pytest.approx(15.5) and rho == pytest.approx(9.27, abs=0.01)
     z, rho, modo, quien = plan_en(0.0)          # entre O2 y O3: cruza por ventanas en el arco
     assert (modo, quien, rho) == ("espera", "O3", R_ARCO)
     z, rho, modo, quien = plan_en(76.0)         # sobre el rack: por debajo de O4
-    assert (modo, quien) == ("bajo", "O4") and z == pytest.approx(16.1)
+    assert (modo, quien) == ("bajo", "O4") and z == pytest.approx(16.2, abs=0.05)
 
 
 def test_python_y_el_simulador_web_calculan_lo_mismo():

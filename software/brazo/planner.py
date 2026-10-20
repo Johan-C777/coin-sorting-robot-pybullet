@@ -2,7 +2,7 @@
 
 Regla del algoritmo (docs/01-arquitectura.md):
   1. Ordenar los vasos por la clave elegida, desempatando por denominación.
-  2. Recorrer los puestos del rack del 1 al 5.
+  2. Recorrer los puestos del rack del 1 al N_PUESTOS (9).
   3. Si el vaso correcto ya está en su puesto, no se toca.
   4. Si el puesto está ocupado por otro, ese otro se lleva a un hueco libre
      de la entrada.
@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
 
-from .config import Puesto
+from .config import N_PUESTOS, Puesto
 from .cups import CRITERIOS, Vaso
 
 
@@ -47,8 +47,8 @@ def planificar(vasos: List[Vaso], criterio: str = "valor",
     """Secuencia mínima de movimientos para dejar el rack ordenado."""
     objetivo = orden_objetivo(vasos, criterio, sentido)
     pos: List[Optional[Puesto]] = [v.puesto for v in vasos]
-    rack: List[Optional[int]] = [None] * 5
-    entrada: List[Optional[int]] = [None] * 5
+    rack: List[Optional[int]] = [None] * N_PUESTOS
+    entrada: List[Optional[int]] = [None] * N_PUESTOS
     for i, p in enumerate(pos):
         if p is None:
             continue

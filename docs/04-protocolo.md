@@ -14,11 +14,11 @@ simulado a real no cambia la lógica de control.
 ## Lote del contador al brazo
 
 ```
-VASOS:50x30a6,100x24a4,200x21a3,500x14,1000x12
+VASOS:50x24,100x20,50x6a6,200x18,100x4a4,500x9,500x5a5,200x3a3,1000x12
 ```
 
-Un vaso por denominación, en el orden de los puestos de entrada. `50x30a6` es
-el vaso de $50 con 30 monedas, de las cuales 6 son de la familia anterior. El
+Un vaso por ducto (N50, N100, A50, N200, A100, N500, A500, A200, N1000), en el orden de los puestos de entrada. Las $500 antiguas y nuevas van a vasos distintos. `50x6a6` es
+el vaso de $50 con 6 monedas, todas de la familia anterior. El
 `aN` se omite cuando no hay antiguas, así que una línea sin él sigue siendo
 válida. La lee `Protocolo::leerVasos()` en el firmware y
 `brazo.protocol.parsear_vasos()` en Python; las dos rechazan un vaso con más
@@ -35,7 +35,7 @@ M:100,5,antigua            denominación, estación del riel y familia
 | Comando | Efecto |
 | --- | --- |
 | `S:j1,j2,j3,j4,j5,pinza` | Pose directa, modo manual |
-| `VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6` | Carga el lote de la entrada |
+| `VASOS:500x12a12,100x30,1000x8,50x25,200x17,100x10a10,50x9a9,500x8,200x6a6` | Carga el lote de la entrada (9 vasos) |
 | `ORDEN:valor,asc` | Clasifica (`valor`, `peso`, `cantidad`, `denominacion`, `antiguas`) |
 | `ESTADO` | Devuelve el JSON de estado |
 | `HOME` | Lleva el brazo al reposo |

@@ -69,18 +69,18 @@ mirando hacia abajo.
 7. `θ₄ = φ − θ₂ − θ₃`, `θ₅ = ψ`
 8. Validar cada ángulo contra su rango
 
-Ejemplo del puesto R1 a la altura de agarre (X = 21,01; Y = 9,35; Z = 6,80; φ = −90°):
+Ejemplo del puesto R1 a la altura de agarre (X = 22,50; Y = 4,78; Z = 4,80; φ = −90°):
 
 | Paso | Resultado |
 | --- | --- |
-| θ₁ | 24,00° |
-| r, h | 23,00 cm; −4,20 cm |
-| r_w, h_w | 23,00 cm; 3,80 cm |
-| D | 0,1301 |
-| θ₃ | −82,53° |
-| θ₂ | 49,02° |
-| θ₄ | −56,50° |
-| Trama | `S:114,49,83,64,90,85` |
+| θ₁ | 12,00° |
+| r, h | 23,00 cm; −6,20 cm |
+| r_w, h_w | 23,00 cm; 1,80 cm |
+| D | 0,1068 |
+| θ₃ | −83,87° |
+| θ₂ | 44,75° |
+| θ₄ | −50,88° |
+| Trama | `S:102,45,84,69,90,85` |
 
 ## Jacobiano
 
@@ -89,7 +89,7 @@ det J = L₁·L₂·sen θ₃
 ```
 
 Solo se anula con el brazo estirado (θ₃ = 0), que es justo el límite de J3. En la
-pose de agarre θ₃ = −82,5° y |det J| = 238 cm², prácticamente el máximo.
+pose de agarre θ₃ = −83,9° y |det J| = 239 cm², prácticamente el máximo.
 
 ## Espacio de trabajo
 
@@ -97,7 +97,7 @@ pose de agarre θ₃ = −82,5° y |det J| = 238 cm², prácticamente el máximo
 
 | Condición | Radio mínimo | Radio máximo |
 | --- | --- | --- |
-| Pinza vertical a 6,8 cm | 7,14 cm | 30,76 cm |
+| Pinza vertical a 4,8 cm | 7,9 cm | 30,9 cm |
 | Pinza vertical a 17 cm | 0 cm | 27,65 cm |
 | Cualquier orientación | 1 cm | 39 cm |
 

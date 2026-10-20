@@ -31,11 +31,15 @@ Secuenciador secuenciador;
 // Lote por defecto: se sobrescribe con VASOS: o con POST /api/vasos.
 // {denominación, monedas, zona, puesto, de ellas antiguas}
 Vaso vasos[N_PUESTOS] = {
-    {500, 12, ZONA_ENTRADA, 0, 0},
-    {100, 30, ZONA_ENTRADA, 1, 10},
+    {500, 12, ZONA_ENTRADA, 0, 12},
+    {100, 30, ZONA_ENTRADA, 1, 0},
     {1000, 8, ZONA_ENTRADA, 2, 0},
-    {50, 25, ZONA_ENTRADA, 3, 9},
-    {200, 17, ZONA_ENTRADA, 4, 6},
+    {50, 25, ZONA_ENTRADA, 3, 0},
+    {200, 17, ZONA_ENTRADA, 4, 0},
+    {100, 10, ZONA_ENTRADA, 5, 10},
+    {50, 9, ZONA_ENTRADA, 6, 9},
+    {500, 8, ZONA_ENTRADA, 7, 0},
+    {200, 6, ZONA_ENTRADA, 8, 6},
 };
 
 Comms comms(bus, secuenciador, vasos);

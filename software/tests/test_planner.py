@@ -1,5 +1,5 @@
 """El planificador debe dejar el rack ordenado con los movimientos mínimos."""
-from brazo.config import Puesto
+from brazo.config import N_PUESTOS, Puesto
 from brazo.cups import Vaso, lote_demo
 from brazo.planner import aplicar, orden_objetivo, planificar
 
@@ -11,10 +11,10 @@ def rack_ordenado(vasos, clave, sentido="asc"):
     return valores == sorted(valores, reverse=(sentido == "desc"))
 
 
-def test_desde_la_entrada_son_cinco_movimientos():
+def test_desde_la_entrada_son_nueve_movimientos():
     vasos = lote_demo()
     movs = planificar(vasos, "valor", "asc")
-    assert len(movs) == 5
+    assert len(movs) == 9
     aplicar(vasos, movs)
     assert rack_ordenado(vasos, lambda v: v.valor)
 
@@ -31,7 +31,7 @@ def test_reordenar_un_rack_lleno_usa_huecos_de_entrada():
     aplicar(vasos, movs)
     assert rack_ordenado(vasos, lambda v: v.valor, "desc")
     assert any(m.motivo == "liberar" for m in movs)
-    assert len(movs) <= 10
+    assert len(movs) <= 2 * N_PUESTOS
 
 
 def test_no_mueve_lo_que_ya_esta_ordenado():

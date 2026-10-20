@@ -73,8 +73,8 @@ moneda para saber si es antigua.
 
 Las estaciones de la misma denominación no quedan juntas (la $50 nueva cae en la
 1 y la antigua en la 3), así que cada embudo tiene una espiga para un tubo
-flexible de 3/4" que lleva la moneda al vaso de su denominación. Quedan **cinco
-vasos**, uno por denominación, que es lo que recibe el brazo en el punto A. Los
+flexible de 3/4" que lleva la moneda al vaso de su denominación. Quedan **nueve
+vasos**, uno por ducto (las $500 antiguas y nuevas separadas por el color), que es lo que recibe el brazo en el punto A. Los
 tubos de las antiguas van por detrás del riel y los de las nuevas por delante.
 
 El vaso guarda cuántas de sus monedas son antiguas porque pesan distinto: una
@@ -93,7 +93,7 @@ su gemela en C++ (`orden por peso con monedas antiguas`) lo comprueba en el
 firmware del brazo.
 
 La carga de diseño del brazo no cambia: el vaso más pesado posible sigue siendo
-el de 40 monedas de $1.000 nuevas, 416 g. El de 40 $200 antiguas llega a 301 g.
+el de 40 monedas de $1.000 nuevas, 416 g. Es un valor de diseño con margen: en un vaso de Ø34 × 60 mm caben físicamente unas 26 monedas de $1.000 (≈ 280 g).
 
 ## Tramas
 

@@ -34,7 +34,7 @@ class Secuenciador {
   void aplicar(float s, BusServos &bus);
 
   Vaso *vasos_ = nullptr;
-  Movimiento movs_[10];
+  Movimiento movs_[2 * N_PUESTOS];
   uint8_t nMovs_ = 0;
   uint8_t indiceMov_ = 0;
   uint8_t indiceEtapa_ = 0;

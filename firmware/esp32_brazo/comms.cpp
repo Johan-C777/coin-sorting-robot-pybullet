@@ -61,7 +61,7 @@ void Comms::estadoJson(char *destino, size_t capacidad) const {
 
 void Comms::rutasHttp() {
   servidor.on("/api/estado", HTTP_GET, []() {
-    char json[768];
+    char json[1536];
     instancia->estadoJson(json, sizeof(json));
     servidor.send(200, "application/json", json);
   });
@@ -148,7 +148,7 @@ void Comms::procesarLinea(char *linea) {
   }
 
   if (strcmp(linea, "ESTADO") == 0) {
-    char json[768];
+    char json[1536];
     estadoJson(json, sizeof(json));
     Serial.println(json);
     return;

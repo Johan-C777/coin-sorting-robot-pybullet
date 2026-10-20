@@ -21,7 +21,7 @@ BRAZO_PERFIL=cad python software/apps/cli_demo.py      # Python
 | Radio del arco de puestos | calculado, no está en el plano | 97 mm | 230 mm | −133 mm |
 
 Otras cotas del plano que ya están en el código: base Ø100 × 50 mm (hoja 3),
-disco del hombro Ø110 mm (hoja 4), apertura útil de la pinza y vaso de 52 mm.
+disco del hombro Ø110 mm (hoja 4), apertura útil de la pinza y vaso de 34 mm (el de la etapa 1).
 
 ## Las dos cotas que faltan
 
@@ -31,7 +31,7 @@ sobre el ensamble, mide estas dos distancias y reemplázalas en los dos archivos
 1. **L₂**: del eje del codo (agujero Ø18 de la hoja 6) al eje de cabeceo de la
    muñeca (agujero Ø5 de Mano 1, hoja 7).
 2. **L₃**: del eje de cabeceo al punto de agarre entre los dedos, con la pinza
-   cerrada sobre un vaso de 52 mm.
+   cerrada sobre un vaso de 34 mm.
 
 ## Consecuencia: el arco de la celda cambia
 

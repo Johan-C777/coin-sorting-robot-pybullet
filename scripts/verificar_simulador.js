@@ -28,7 +28,7 @@ const obst = html.slice(html.indexOf('var NIVELES'), html.indexOf('var MARGEN'))
 const codigo = [
   'var GR = Math.PI/180;',
   ...['R_ARCO', 'Z_AGARRE', 'Z_SEGURA', 'Z_BAJO', 'GRASP_DZ', 'VASO_H', 'VASO_R',
-      'RHO_MIN', 'RHO_MAX', 'MARGEN'].map(constante),
+      'RHO_MIN', 'RHO_MAX', 'BAJO_MIN', 'MARGEN'].map(constante),
   'var THREE = {Vector3: function(x, y, z){ this.x = x; this.y = y; this.z = z; }};',
   'var brazo = {vaso: true}, sim = {vObst: 45};',
   obst,

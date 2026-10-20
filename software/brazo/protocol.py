@@ -3,7 +3,8 @@
 Nivel bajo: una línea de texto por pose.
     S:j1,j2,j3,j4,j5,pinza    (ángulos de servo, grados enteros)
 Lote del contador al brazo, una línea:
-    VASOS:500x12,100x30a10,...  (denominación x monedas, aN = de ellas antiguas)
+    VASOS:50x24,100x20,50x6a6,...  (nueve vasos, en el orden de los ductos;
+    denominación x monedas, aN = de ellas antiguas)
 Nivel alto: JSON por HTTP para la app Streamlit.
 """
 from __future__ import annotations
@@ -61,7 +62,7 @@ def trama_vasos(vasos: Sequence[Vaso]) -> str:
 
 
 def parsear_vasos(linea: str) -> List[Vaso]:
-    """Inversa de trama_vasos(): los vasos quedan en los puestos E1 a E5."""
+    """Inversa de trama_vasos(): los vasos quedan en los puestos E1 a E9."""
     linea = linea.strip()
     if not linea.startswith("VASOS:"):
         raise ValueError("el lote debe empezar con 'VASOS:'")
