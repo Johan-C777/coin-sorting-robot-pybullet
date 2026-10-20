@@ -3,12 +3,13 @@ import math
 
 import pytest
 
-from brazo.config import HOME, Z_AGARRE, Z_SEGURA
+from brazo.config import HOME, Z_SEGURA
 from brazo.kinematics import ik, pose_puesto
 from brazo.statics import (SERVOS, carga_vaso_kg, factores_seguridad,
                            momento_de_vuelco, pares)
 
-AGARRE = ik(*pose_puesto(24.0, Z_AGARRE))
+# poses de la memoria de cálculo: agarre a 6,8 cm y traslado a 17 cm, a 24°
+AGARRE = ik(*pose_puesto(24.0, 6.8))
 TRASLADO = ik(*pose_puesto(24.0, Z_SEGURA))
 EXTENDIDO = [0.0, 0.0, 0.0, 0.0, 0.0]
 

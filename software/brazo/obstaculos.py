@@ -21,16 +21,17 @@ import math
 from dataclasses import dataclass
 from typing import Dict, List, Sequence, Tuple
 
+from .config import GRASP_DZ, VASO_ALTO, VASO_ANCHO_MM, YAW_RACK
+
 # --- celda de la simulación --------------------------------------------------
 R_ARCO = 23.0
 YAW_A = -60.0                                 # punto A: zona de entrega de la banda
-YAW_B = (24.0, 39.5, 55.0, 70.5, 86.0)        # punto B: puestos R1 a R5
-Z_AGARRE = 6.8
+YAW_B = tuple(YAW_RACK)                       # punto B: puestos R1 a R9
 Z_TRANSITO = 20.0                             # altura nominal del TCP en el arco
 Z_BAJO = 15.5                                 # lo mínimo que se baja en tránsito
-GRASP_DZ = 6.2                                # del TCP a la base del vaso
-VASO_H = 8.0
-VASO_R = 2.6
+BAJO_MIN = 12.3                               # por debajo de esto no hay maniobra "por debajo"
+VASO_H = VASO_ALTO                            # 6,0 cm
+VASO_R = VASO_ANCHO_MM / 20.0                 # 1,7 cm
 MARGEN = 1.4                                  # holgura mínima vaso-esfera
 RHO_MIN = 7.2                                 # radio mínimo con la pinza vertical
 RHO_MAX = 25.0
@@ -66,8 +67,8 @@ class Obstaculo:
 
 OBSTACULOS: List[Obstaculo] = [
     Obstaculo("O1", "Guardián de banda", 1, -40.0, 23.0, 3, 6.5, 22.0, 2.6, 0.0, 1, 1.1),
-    Obstaculo("O2", "Muro giratorio", 2, -15.0, 23.0, 2, 8.5, 13.5, 2.2, 1.1, -1, 1.8),
-    Obstaculo("O3", "Centinela", 3, 10.0, 14.0, 3, 5.0, 14.0, 1.9, 0.6, 1, 0.7),
+    Obstaculo("O2", "Muro giratorio", 2, -15.0, 23.0, 2, 8.5, 15.5, 2.2, 1.1, -1, 1.8),
+    Obstaculo("O3", "Centinela", 3, 10.0, 14.0, 3, 6.0, 16.0, 1.9, 0.6, 1, 0.7),
     Obstaculo("O4", "Jefe de rack", 4, 40.0, 23.0, 2, 7.0, 23.0, 3.0, 2.0, -1, 1.3),
 ]
 
@@ -118,7 +119,7 @@ class Maniobra:
 def maniobra(o: Obstaculo) -> Maniobra:
     """Misma regla de preferencia que el planificador de la simulación."""
     bajo = altura_bajo(o)
-    if bajo >= Z_AGARRE + 5.5:                              # 1) por debajo
+    if bajo >= BAJO_MIN:                              # 1) por debajo
         z = max(Z_BAJO, bajo - 0.3)
         holgura = (o.y_esfera - o.r_esfera) - (z + VASO_H - GRASP_DZ)
         return Maniobra("bajo", z, R_ARCO, round(holgura, 2))
@@ -148,7 +149,7 @@ def plan_en(yaw: float, obstaculos: Sequence[Obstaculo] = OBSTACULOS) -> Tuple[f
             continue
         peso = 1.0 if d <= zona * 0.9 else max(0.0, (zona * 2.0 - d) / (zona * 1.1))
         bajo = altura_bajo(o)
-        if bajo >= Z_AGARRE + 5.5:
+        if bajo >= BAJO_MIN:
             zo = max(Z_BAJO, bajo - 0.3)
             z = min(z, Z_TRANSITO + (zo - Z_TRANSITO) * peso)
             if peso > 0.12 and modo == "directo":

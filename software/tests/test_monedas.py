@@ -116,7 +116,7 @@ def test_las_antiguas_cambian_el_orden_por_peso():
     sin = [Vaso(v.denominacion, v.monedas, v.puesto) for v in con]
     assert orden_objetivo(con, "peso", "asc") != orden_objetivo(sin, "peso", "asc")
     assert [con[i].denominacion for i in orden_objetivo(con, "peso", "asc")] == \
-        [50, 1000, 500, 200, 100]
+        [50, 200, 50, 100, 500, 200, 1000, 500, 100]
 
 
 def test_la_carga_de_diseno_sigue_siendo_el_vaso_de_1000_nuevas():
@@ -127,12 +127,13 @@ def test_la_carga_de_diseno_sigue_siendo_el_vaso_de_1000_nuevas():
 def test_lote_ida_y_vuelta_por_la_trama():
     vasos = lote_demo()
     linea = trama_vasos(vasos)
-    assert linea == "VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6"
+    assert linea == "VASOS:500x12a12,100x30,1000x8,50x25,200x17,100x10a10,50x9a9,500x8,200x6a6"
     leidos = parsear_vasos(linea)
     assert [(v.denominacion, v.monedas, v.antiguas) for v in leidos] == \
         [(v.denominacion, v.monedas, v.antiguas) for v in vasos]
     assert leidos[2].puesto == Puesto("entrada", 2)
-    assert totales(leidos)["antiguas"] == 25
+    assert len(leidos) == 9
+    assert totales(leidos)["antiguas"] == 37
 
 
 def test_trama_mal_escrita_se_rechaza():
