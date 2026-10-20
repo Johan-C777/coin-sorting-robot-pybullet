@@ -115,7 +115,7 @@ M:100,5,antigua
 
 - La ranura 4 tiene 0,30 mm a cada lado. Antes de imprimir el riel completo hay
   que imprimir una probeta de las estaciones 3 a 6 y medirla (ver
-  [despiece.md](despiece.md#tolerancias-y-calibración)). Si no alcanza la
+  [despiece de la v1](archivo/despiece-etapa1-v1.md#tolerancias-y-calibración)). Si no alcanza la
   precisión, ese tramo se corta en acrílico.
 - La $1.000 de 1996 necesita un sensor de color para entrar al sistema.
 - El desgaste de las monedas antiguas reduce su diámetro unas décimas; conviene

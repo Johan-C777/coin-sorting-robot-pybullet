@@ -1,4 +1,4 @@
-"""Monedas antiguas y nuevas: selector de ocho estaciones, vasos y lote."""
+"""Monedas antiguas y nuevas: selector de ocho estaciones (nueve ductos), vasos y lote."""
 import re
 from pathlib import Path
 
@@ -6,7 +6,7 @@ import pytest
 
 from brazo.config import MASA_VASO_G, MONEDAS_POR_VASO, Puesto
 from brazo.cups import Vaso, lote_demo, totales
-from brazo.monedas import (AMBAS, CATALOGO, FUERA_DE_ALCANCE, POR_CLAVE, SELECTOR,
+from brazo.monedas import (AMBAS, ANTIGUA, CATALOGO, FUERA_DE_ALCANCE, POR_CLAVE, SELECTOR,
                            disenar_selector, estacion_de, margenes)
 from brazo.planner import orden_objetivo
 from brazo.protocol import parsear_vasos, trama_vasos
@@ -50,18 +50,31 @@ def test_la_1000_de_1996_no_se_puede_separar_por_diametro():
 
 
 def test_el_firmware_del_contador_usa_el_mismo_riel():
+    """El riel físico (scripts/generar_clasificador.py) parte la estación de las
+    $500 en dos ductos con el sensor de color: 9 ductos sobre las 8 estaciones."""
     texto = CONFIG_CONTADOR.read_text(encoding="utf-8")
 
-    def arreglo(nombre):
-        cuerpo = re.search(nombre + r"\[N_ESTACIONES\]\s*=\s*\{([^}]*)\}", texto).group(1)
-        return [float(x.strip().rstrip("f")) for x in cuerpo.split(",")]
+    def arreglo(nombre, n):
+        cuerpo = re.search(nombre + r"\[" + n + r"\]\s*=\s*\{([^}]*)\}", texto).group(1)
+        return [x.strip().rstrip("f") for x in cuerpo.split(",")]
 
-    assert arreglo("DIAMETRO_MM") == pytest.approx([e.diametro_mm for e in SELECTOR], abs=1e-6)
-    assert arreglo("LUZ_MM") == pytest.approx([e.luz_mm for e in SELECTOR], abs=1e-6)
-    assert arreglo("MASA_MONEDA_G") == pytest.approx([e.masa_g for e in SELECTOR], abs=1e-6)
-    vasos = [int(v) for v in arreglo("VASO_DE_ESTACION")]
-    dens = [50, 100, 200, 500, 1000]
-    assert [dens[v] for v in vasos] == [e.denominacion for e in SELECTOR]
+    ranura = [int(r) for r in arreglo("RANURA_DE_ESTACION", "N_ESTACIONES")]
+    familia = [f.lower() for f in arreglo("FAMILIA", "N_ESTACIONES")]
+    vaso = [int(v) for v in arreglo("VASO_DE_ESTACION", "N_ESTACIONES")]
+    dens = [int(d) for d in arreglo("DENOMINACION_VASO", "N_VASOS")]
+    diametro = [float(d) for d in arreglo("DIAMETRO_MM", "N_ESTACIONES")]
+    luz = [float(r) for r in arreglo("RANURA_MM", "N_RANURAS")]
+
+    # cada ducto sale de la estación del modelo con la misma denominación y familia
+    esperadas = [(e.numero - 1, m.denominacion, m.familia)
+                 for e in SELECTOR
+                 for m in sorted(e.monedas, key=lambda m: m.familia != ANTIGUA)]
+    assert list(zip(ranura, [dens[v] for v in vaso], familia)) == esperadas
+
+    # cada moneda cabe en su ranura y no en la anterior (0 = extremo abierto)
+    for r, d in zip(ranura, diametro):
+        assert luz[r] == 0.0 or d < luz[r]
+        assert r == 0 or d >= luz[r - 1] - 0.1   # apoyo de 0,1 mm a calibrar
 
 
 def test_el_peso_del_vaso_cuenta_las_antiguas():

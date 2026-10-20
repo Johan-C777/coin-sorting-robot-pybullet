@@ -104,5 +104,5 @@ TPU (`PINZA_CERRADA_MM` en `config.h` y en `config.py`).
 
 ## Lista de materiales
 
-En [`hardware/bom.csv`](../hardware/bom.csv), con el detalle de materiales y su
+En [`hardware/etapa3-brazo/bom.csv`](../hardware/etapa3-brazo/bom.csv), con el detalle de materiales y su
 justificación en [`hardware/materiales.md`](../hardware/materiales.md).
