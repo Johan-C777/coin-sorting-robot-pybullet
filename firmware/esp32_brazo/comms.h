@@ -25,7 +25,7 @@ class Comms {
   BusServos &bus_;
   Secuenciador &sec_;
   Vaso *vasos_;
-  char buf_[96];
+  char buf_[160];
   uint8_t largo_ = 0;
   bool wifi_ = false;
 };

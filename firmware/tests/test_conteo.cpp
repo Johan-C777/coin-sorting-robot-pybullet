@@ -27,7 +27,7 @@ int main() {
 
   comprobar(c.monedasTotal() == 88, "cuenta las 88 monedas del lote");
   comprobar(c.valorTotal() == 25800u, "valor total de $25.800");
-  comprobar(cerca(c.pesoTotal(), 507.1f, 0.2f), "peso total de 507,1 g con los cinco vasos llenos");
+  comprobar(cerca(c.pesoTotal(), 507.1f, 0.2f), "peso total de 507,1 g con los nueve vasos llenos");
   comprobar(c.valor(8) == 12000u && cerca(c.pesoG(8), 137.4f, 0.1f), "vaso de $1.000 (el noveno)");
   comprobar(c.monedas(2) == 0 && c.pesoG(2) == 0.0f, "un vaso sin monedas no pesa ni cuenta");
   comprobar(!c.vasoLleno(), "ningun vaso llego a la capacidad");

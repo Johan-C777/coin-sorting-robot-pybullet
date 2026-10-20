@@ -273,12 +273,12 @@ var YAW_ENTREGA = -60;                          // zona de entrega sobre la band
 var MONEDAS = [
   {v:50,   s:'nueva',   d:1.700, e:0.130, m:2.00, aro:0xB9BCB4, centro:0xB9BCB4, vaso:0},
   {v:100,  s:'nueva',   d:2.030, e:0.150, m:3.34, aro:0xC7A33A, centro:0xC7A33A, vaso:1},
-  {v:50,   s:'antigua', d:2.150, e:0.140, m:4.50, aro:0xD0D3CB, centro:0xD0D3CB, vaso:0},
-  {v:200,  s:'nueva',   d:2.240, e:0.170, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC, vaso:2},
-  {v:100,  s:'antigua', d:2.300, e:0.155, m:5.31, aro:0xD9B44A, centro:0xD9B44A, vaso:1},
-  {v:500,  s:'ambas',   d:2.370, e:0.205, m:7.14, aro:0xB4B8B0, centro:0xC7A33A, vaso:3},
-  {v:200,  s:'antigua', d:2.440, e:0.170, m:7.08, aro:0xC6C9C0, centro:0xC6C9C0, vaso:2},
-  {v:1000, s:'nueva',   d:2.670, e:0.230, m:9.95, aro:0xC7A33A, centro:0xB4B8B0, vaso:4}
+  {v:50,   s:'antigua', d:2.150, e:0.140, m:4.50, aro:0xD0D3CB, centro:0xD0D3CB, vaso:2},
+  {v:200,  s:'nueva',   d:2.240, e:0.170, m:4.61, aro:0xAFB3AC, centro:0xAFB3AC, vaso:3},
+  {v:100,  s:'antigua', d:2.300, e:0.155, m:5.31, aro:0xD9B44A, centro:0xD9B44A, vaso:4},
+  {v:500,  s:'ambas',   d:2.370, e:0.205, m:7.14, aro:0xB4B8B0, centro:0xC7A33A, vaso:5},
+  {v:200,  s:'antigua', d:2.440, e:0.170, m:7.08, aro:0xC6C9C0, centro:0xC6C9C0, vaso:7},
+  {v:1000, s:'nueva',   d:2.670, e:0.230, m:9.95, aro:0xC7A33A, centro:0xB4B8B0, vaso:8}
 ];
 var LUZ = [1.760, 2.090, 2.195, 2.270, 2.335, 2.405, 2.500, 2.730];   // luces del riel
 var LUZ_ENTRADA = 1.60;
@@ -299,7 +299,7 @@ var Z_BANDA = R_ARCO*Math.sin(-YAW_ENTREGA*GR);   // 19,92 cm: eje de la banda
 var X_ENTREGA = R_ARCO*Math.cos(YAW_ENTREGA*GR);  // 11,5 cm
 var BANDA_X0 = -42, BANDA_X1 = 18, BANDA_W = 7, BANDA_Y = 2.4;
 var VASO_R = 1.7, VASO_H = 6, VASO_Y = 2.7, MASA_VASO = 18;
-var X_VASO = [-30, -23, -16, -9, -2];            // vasos de $50 a $1.000 sobre la banda
+var X_VASO = [-40, -35, -30, -25, -20, -15, -10, -5, 0];   // nueve vasos, uno por ducto, sobre la banda
 var Y_SALIDA = BANDA_Y + VASO_H + 1.2;           // boca de los tubos, sobre el vaso
 
 var EST = [];                                    // estaciones del selector
@@ -670,12 +670,12 @@ var etiTolva = etiqueta('Tolva', 'entrada de monedas', 0.9);
 etiTolva.position.set(RIEL_X0 - 0.6, RIEL_Y0 + 11.5, Z_BANDA);
 etiquetas.add(etiTolva);
 
-/* ---------- rack curvo de cinco puestos ---------- */
+/* ---------- rack curvo de nueve puestos ---------- */
 var rackGrupo = new THREE.Group();
 raiz.add(rackGrupo);
 var arcoRack = new THREE.Mesh(
   new THREE.RingGeometry(R_ARCO - 4.2, R_ARCO + 4.2, 64, 1,
-                         -(YAW_RACK[4]+9)*GR, (YAW_RACK[4]-YAW_RACK[0]+18)*GR),
+                         -(YAW_RACK[8]+6)*GR, (YAW_RACK[8]-YAW_RACK[0]+12)*GR),
   new THREE.MeshStandardMaterial({color:0x2F5878, roughness:0.7, side:THREE.DoubleSide}));
 arcoRack.rotation.x = Math.PI/2;
 arcoRack.rotation.y = 0;
@@ -694,9 +694,9 @@ YAW_RACK.forEach(function(yaw, idx){
   etiquetas.add(eti);
   puestosRack.push({yaw:yaw, x:pos.x, z:pos.z, ocupado:null});
 });
-var yawB = (YAW_RACK[0] + YAW_RACK[4])/2;
+var yawB = (YAW_RACK[0] + YAW_RACK[8])/2;
 var posB = aEscena((R_ARCO + 7.5)*Math.cos(yawB*GR), (R_ARCO + 7.5)*Math.sin(yawB*GR), 0);
-var etiB = etiqueta('Punto B', 'rack ordenado R1 a R5', 1.0);
+var etiB = etiqueta('Punto B', 'rack ordenado R1 a R9', 1.0);
 etiB.position.set(posB.x, 4.2, posB.z);
 etiquetas.add(etiB);
 
@@ -1366,7 +1366,8 @@ function avanzarMonedas(dt){
         var k = Math.floor((mo.x - (EST_LOCAL0 - PASO_LOCAL/2))/PASO_LOCAL);
         if (k >= 0 && k < LUZ.length && mo.d < LUZ[k] &&
             mo.x > EST_LOCAL0 - PASO_LOCAL/2 + PASO_LOCAL*k + mo.d/2 + 0.2){
-          mo.estado = 'tubo'; mo.canal = k; mo.vaso = MONEDAS[k].vaso; mo.vy = 0; mo.s = 0;
+          mo.estado = 'tubo'; mo.canal = k; mo.vaso = MONEDAS[k].vaso;
+          if (MONEDAS[k].s === 'ambas'){ mo.serie = Math.random() < 0.5 ? 'nueva' : 'antigua'; mo.vaso += (mo.serie === 'antigua' ? 1 : 0); } mo.vy = 0; mo.s = 0;
           mo.obj.rotation.z = 0;
           sim.flash[k] = 0.18;
           contar(mo);
@@ -1411,7 +1412,8 @@ function contar(mo){
   var est = MONEDAS[mo.canal], vaso = vasos[mo.vaso];
   sim.cuenta[mo.canal]++;
   vaso.monedas++; vaso.valor += est.v; vaso.peso += est.m;
-  if (est.s === 'antigua') vaso.antiguas++;
+  var serie = mo.serie || est.s;
+  if (serie === 'antigua') vaso.antiguas++;
   consola('<b>M:' + est.v + ',' + (mo.canal+1) + ',' + est.s + '</b>  vaso de ' + pesos(est.v) +
           ': ' + vaso.monedas + ' monedas');
   actualizarTabla();
@@ -1495,7 +1497,7 @@ function actualizarFSM(){
         sim.activo = false;
         estado('Rack ordenado', true);
         botones(false);
-        consola('ciclo terminado: los cinco vasos quedaron ordenados', true);
+        consola('ciclo terminado: los nueve vasos quedaron ordenados', true);
       }
     }
   }

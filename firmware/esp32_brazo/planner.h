@@ -15,6 +15,6 @@ namespace Planificador {
 
 // Llena movs (máximo 10) y devuelve cuántos movimientos hacen falta.
 uint8_t planificar(const Vaso vasos[N_PUESTOS], uint8_t criterio, int8_t sentido,
-                   Movimiento movs[10]);
+                   Movimiento movs[2 * N_PUESTOS]);
 
 }  // namespace Planificador
