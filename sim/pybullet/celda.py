@@ -10,14 +10,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "software"))
 
 import pybullet as p                                    # noqa: E402
 
-from brazo.config import (R_ARCO, SUPERFICIE, YAW_ENTRADA, YAW_RACK)  # noqa: E402
+from brazo.config import (R_ARCO, SUPERFICIE, VASO_ALTO, VASO_ANCHO_MM, YAW_ENTRADA,
+                          YAW_RACK)  # noqa: E402
 from brazo.cups import Vaso                              # noqa: E402
 
 COLOR_DEN = {50: [0.31, 0.49, 0.69, 0.75], 100: [0.23, 0.58, 0.40, 0.75],
              200: [0.52, 0.35, 0.69, 0.75], 500: [0.82, 0.60, 0.07, 0.75],
              1000: [0.77, 0.25, 0.18, 0.75]}
-RADIO_VASO = 0.026      # m
-ALTO_VASO = 0.08        # m
+RADIO_VASO = VASO_ANCHO_MM / 2000.0     # m (vaso de la etapa 1, Ø34)
+ALTO_VASO = VASO_ALTO / 100.0           # m (60 mm)
 
 
 def xy_puesto(yaw_grados: float, radio: float = R_ARCO) -> List[float]:
@@ -27,16 +28,16 @@ def xy_puesto(yaw_grados: float, radio: float = R_ARCO) -> List[float]:
 
 
 def crear_bandejas() -> List[int]:
-    """Discos delgados que marcan los diez puestos."""
+    """Discos delgados que marcan los dieciocho puestos."""
     ids = []
     grosor = SUPERFICIE / 100.0
     for zona, yaws in (("entrada", YAW_ENTRADA), ("rack", YAW_RACK)):
         color = [0.20, 0.35, 0.48, 1] if zona == "rack" else [0.35, 0.37, 0.36, 1]
         for yaw in yaws:
             x, y = xy_puesto(yaw)
-            vis = p.createVisualShape(p.GEOM_CYLINDER, radius=0.042, length=grosor,
+            vis = p.createVisualShape(p.GEOM_CYLINDER, radius=RADIO_VASO + 0.004, length=grosor,
                                       rgbaColor=color)
-            col = p.createCollisionShape(p.GEOM_CYLINDER, radius=0.042, height=grosor)
+            col = p.createCollisionShape(p.GEOM_CYLINDER, radius=RADIO_VASO + 0.004, height=grosor)
             ids.append(p.createMultiBody(0, col, vis, [x, y, grosor / 2]))
     return ids
 

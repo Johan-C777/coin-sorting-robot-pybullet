@@ -13,7 +13,7 @@ class Conteo {
 
   uint16_t monedasEstacion(uint8_t estacion) const;
 
-  // por vaso (0 a 4, en el orden de DENOMINACION_VASO)
+  // por vaso (0 a 8, el mismo orden que los ductos y DENOMINACION_VASO)
   uint16_t monedas(uint8_t vaso) const;
   uint16_t antiguas(uint8_t vaso) const;
   uint32_t valor(uint8_t vaso) const;
@@ -26,7 +26,7 @@ class Conteo {
   bool vasoLleno() const;                        // algún vaso llegó a la capacidad
 
   // "VASOS:50x24a6,100x20,..." para el ESP32 del brazo; "aN" solo si hay antiguas
-  uint8_t trama(char *destino, uint8_t capacidad) const;
+  uint8_t trama(char *destino, uint8_t capacidad) const;   // capacidad ≤ 255 (unos 130 B con 9 vasos)
   // cuerpo JSON de POST /api/vasos
   size_t json(char *destino, size_t capacidad) const;
 

@@ -3,11 +3,11 @@
 namespace Planificador {
 
 uint8_t planificar(const Vaso vasos[N_PUESTOS], uint8_t criterio, int8_t sentido,
-                   Movimiento movs[10]) {
+                   Movimiento movs[2 * N_PUESTOS]) {
   // 1. orden objetivo por la clave elegida, desempatando por denominación
   uint8_t orden[N_PUESTOS];
   for (uint8_t i = 0; i < N_PUESTOS; i++) orden[i] = i;
-  for (uint8_t i = 1; i < N_PUESTOS; i++) {          // inserción: n = 5
+  for (uint8_t i = 1; i < N_PUESTOS; i++) {          // inserción: n = 9
     const uint8_t actual = orden[i];
     int8_t j = (int8_t)i - 1;
     while (j >= 0) {
@@ -35,7 +35,7 @@ uint8_t planificar(const Vaso vasos[N_PUESTOS], uint8_t criterio, int8_t sentido
   }
 
   uint8_t n = 0;
-  for (uint8_t j = 0; j < N_PUESTOS && n < 10; j++) {
+  for (uint8_t j = 0; j < N_PUESTOS && n < 2 * N_PUESTOS; j++) {
     const uint8_t idx = orden[j];
     if (zona[idx] == ZONA_RACK && puesto[idx] == (int8_t)j) continue;   // ya está
 

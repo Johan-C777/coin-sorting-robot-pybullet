@@ -26,14 +26,15 @@ def test_dh_coincide_con_la_forma_cerrada():
     assert peor < 1e-9
 
 
-def test_ejemplo_resuelto_del_puesto_r1():
-    q = ik(*pose_puesto(24.0, Z_AGARRE))
+def test_ejemplo_resuelto_de_la_memoria_de_calculo():
+    """Pose de agarre a 24° y 6,8 cm: el ejemplo de docs/02-cinematica.md."""
+    q = ik(*pose_puesto(24.0, 6.8))
     esperado = [24.0, 49.02, -82.53, -56.50, 0.0]
     for obtenido, ref in zip(q, esperado):
         assert obtenido == pytest.approx(ref, abs=0.01)
 
 
-def test_ida_y_vuelta_en_los_diez_puestos():
+def test_ida_y_vuelta_en_los_dieciocho_puestos():
     for yaw in YAW_ENTRADA + YAW_RACK:
         for z in (Z_AGARRE, Z_SEGURA):
             objetivo = pose_puesto(yaw, z)

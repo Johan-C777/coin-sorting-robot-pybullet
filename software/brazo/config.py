@@ -48,16 +48,21 @@ HOME = [0.0, 90.0, -90.0, -90.0, 0.0]
 # --- pinza -------------------------------------------------------------------
 PINZA_MAX_MM = 70.0
 PINZA_ABIERTA_MM = 66.0
-PINZA_CERRADA_MM = 49.0        # 3 mm de interferencia sobre el vaso de 52 mm
-VASO_ANCHO_MM = 52.0
+PINZA_CERRADA_MM = 31.0        # 3 mm de interferencia sobre el vaso de 34 mm
+VASO_ANCHO_MM = 34.0           # los vasos de la etapa 1 (Ø34 x 60 mm) son los que viajan
 
 # --- celda de trabajo --------------------------------------------------------
 SUPERFICIE = 0.6
-Z_AGARRE = 6.8                 # altura del TCP al tomar o soltar el vaso
+VASO_ALTO = 6.0                # cm; vaso de la etapa 1
+GRASP_DZ = 4.2                 # cm del TCP a la base del vaso (se toma a 42 mm de abajo)
+Z_AGARRE = SUPERFICIE + GRASP_DZ   # altura del TCP al tomar o soltar el vaso (4,8 cm)
 Z_SEGURA = 17.0                # altura de traslado
 R_ARCO = _P["r_arco"]          # radio del arco de puestos
-YAW_ENTRADA = [-86.0, -70.5, -55.0, -39.5, -24.0]
-YAW_RACK = [24.0, 39.5, 55.0, 70.5, 86.0]
+# Nueve puestos por zona, a 9,5° (3,8 cm de cuerda sobre el arco de 23 cm: entre vasos
+# de 34 mm quedan 4 mm). La pinza toma con las mordazas abiertas en sentido radial.
+N_PUESTOS = 9
+YAW_ENTRADA = [-88.0 + 9.5 * i for i in range(N_PUESTOS)]      # -88 a -12
+YAW_RACK = [12.0 + 9.5 * i for i in range(N_PUESTOS)]          # 12 a 88
 CABECEO_AGARRE = -90.0
 
 # --- vasos y monedas (Banco de la República) ---------------------------------
@@ -67,6 +72,9 @@ MASA_VASO_G = 18.0
 MASA_MONEDA_G = {50: 2.00, 100: 3.34, 200: 4.61, 500: 7.14, 1000: 9.95}
 MASA_MONEDA_ANTIGUA_G = {50: 4.50, 100: 5.31, 200: 7.08, 500: 7.14}
 DENOMINACIONES = [50, 100, 200, 500, 1000]
+# Los nueve vasos, uno por ducto del riel (etapa 1): (denominación, antigua)
+TIPOS_VASO = [(50, False), (100, False), (50, True), (200, False), (100, True),
+              (500, True), (500, False), (200, True), (1000, False)]
 MONEDAS_POR_VASO = 40          # capacidad de un vaso lleno
 
 # --- movimiento --------------------------------------------------------------
@@ -83,7 +91,7 @@ PWM_FREQ_HZ = 50
 
 @dataclass(frozen=True)
 class Puesto:
-    """Un puesto de la celda: zona ('entrada' o 'rack') e índice 0..4."""
+    """Un puesto de la celda: zona ('entrada' o 'rack') e índice 0..N_PUESTOS-1."""
     zona: str
     indice: int
 

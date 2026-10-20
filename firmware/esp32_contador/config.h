@@ -7,30 +7,31 @@
 // El riel separa por diámetro en siete ranuras y un extremo abierto. La ranura 6
 // recibe las dos monedas de $500 y la bifurcación activa (sensor de color + aguja
 // SG90) las reparte en dos ductos. Total: nueve ductos de salida, cada uno con su
-// barrera infrarroja y una sola combinación de denominación y familia. Los
-// ductos de la misma denominación descargan en el mismo vaso.
+// barrera infrarroja y una sola combinación de denominación y familia. Cada
+// ducto descarga en su propio vaso: son nueve vasos, uno por tipo de moneda, y
+// el brazo recibe los nueve.
 constexpr uint8_t N_ESTACIONES = 9;            // ductos de salida con barrera IR
-constexpr uint8_t N_VASOS = 5;
+constexpr uint8_t N_VASOS = 9;                 // un vaso por ducto
 
 enum Familia : uint8_t { NUEVA = 0, ANTIGUA = 1 };
 
-// un vaso por denominación, en este orden
-constexpr uint16_t DENOMINACION_VASO[N_VASOS] = {50, 100, 200, 500, 1000};
+// denominación de cada vaso, en el orden de los ductos
+constexpr uint16_t DENOMINACION_VASO[N_VASOS] = {50, 100, 50, 200, 100, 500, 500, 200, 1000};
 
 // ducto:                         1      2      3      4      5      6      7      8      9
 //                               N50   N100    A50   N200   A100   A500   N500   A200  N1000
 // ranura del riel:               1      2      3      4      5      6      6      7    final
-constexpr uint8_t VASO_DE_ESTACION[N_ESTACIONES] = {0, 1, 0, 2, 1, 3, 3, 2, 4};
+constexpr uint8_t VASO_DE_ESTACION[N_ESTACIONES] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 constexpr Familia FAMILIA[N_ESTACIONES] = {NUEVA, NUEVA, ANTIGUA, NUEVA, ANTIGUA,
                                            ANTIGUA, NUEVA, ANTIGUA, NUEVA};
-constexpr float DIAMETRO_MM[N_ESTACIONES] = {17.00f, 20.30f, 21.00f, 22.40f, 23.00f,
-                                             23.50f, 23.70f, 24.40f, 26.70f};
+constexpr float DIAMETRO_MM[N_ESTACIONES] = {17.00f, 20.30f, 21.50f, 22.40f, 23.00f,
+                                             23.70f, 23.70f, 24.40f, 26.70f};
 constexpr uint8_t RANURA_DE_ESTACION[N_ESTACIONES] = {0, 1, 2, 3, 4, 5, 5, 6, 7};
 constexpr uint8_t N_RANURAS = 8;               // 7 ranuras + extremo abierto
-constexpr float RANURA_MM[N_RANURAS] = {17.5f, 20.8f, 21.5f, 22.9f, 23.4f,
+constexpr float RANURA_MM[N_RANURAS] = {17.5f, 20.8f, 22.0f, 22.8f, 23.4f,
                                         24.1f, 24.9f, 0.0f};   // 0 = extremo abierto
 constexpr float MASA_MONEDA_G[N_ESTACIONES] = {2.00f, 3.34f, 4.50f, 4.61f, 5.31f,
-                                               7.43f, 7.14f, 7.08f, 9.95f};
+                                               7.14f, 7.14f, 7.08f, 9.95f};
 constexpr float MASA_VASO_G = 18.0f;
 constexpr uint8_t ESTACION_A500 = 5;
 constexpr uint8_t ESTACION_N500 = 6;
@@ -78,5 +79,5 @@ constexpr uint8_t CANAL_BANDA = 1;
 constexpr uint16_t BANDA_PWM_MIN = 120;        // de 0 a 255, por debajo no arranca
 
 // celda
-constexpr float VASOS_POR_TANDA = 5;
+constexpr float VASOS_POR_TANDA = 9;
 constexpr uint16_t MONEDAS_POR_VASO = 40;      // capacidad de un vaso lleno

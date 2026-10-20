@@ -56,6 +56,8 @@ import pybullet_data
 # ---------------------------------------------------------------------------
 
 DT_FISICA = 1.0 / 240.0          # paso de integración
+PINZA_ABIERTA_MM = 66.0         # abierta; cerrada sobre el vaso de 34 mm: 31 mm
+PINZA_CERRADA_MM = 31.0
 DECIMACION = 5                   # 240 / 5 = 50 Hz de control, igual que el ESP32
 DT_CONTROL = DT_FISICA * DECIMACION
 
@@ -72,12 +74,12 @@ class Geometria:
     home: Tuple[float, ...] = (0.0, 90.0, -90.0, -90.0, 0.0)
     # --- celda ---------------------------------------------------------------
     r_arco: float = 0.23         # radio del arco de puestos del rack
-    z_agarre: float = 0.068      # altura del TCP al tomar o soltar el vaso
+    z_agarre: float = 0.048      # altura del TCP al tomar o soltar el vaso
     z_segura: float = 0.17       # altura de traslado
-    yaw_rack: Tuple[float, ...] = (24.0, 39.5, 55.0, 70.5, 86.0)
+    yaw_rack: Tuple[float, ...] = tuple(12.0 + 9.5 * i for i in range(9))
     yaw_recogida: float = -60.0  # donde la banda entrega el vaso al brazo
     # --- etapa 1 -------------------------------------------------------------
-    paso_estacion: float = 0.065
+    paso_estacion: float = 0.050
     inclinacion: float = math.radians(25.0)
     mu_riel: float = 0.30        # fricción moneda-PETG
     y_banda: float = -0.199      # la banda corre paralela al eje X
@@ -86,14 +88,19 @@ class Geometria:
     x_recogida: float = 0.115    # punto donde el brazo toma el vaso
     v_banda: float = 0.06        # m/s
     # --- vasos y monedas -----------------------------------------------------
-    r_vaso: float = 0.026
-    h_vaso: float = 0.08
+    r_vaso: float = 0.017          # vaso de la etapa 1, Ø34 x 60 mm
+    h_vaso: float = 0.06
     masa_vaso: float = 0.018
-    denominaciones: Tuple[int, ...] = (50, 100, 200, 500, 1000)
-    diametros: Tuple[float, ...] = (0.0170, 0.0203, 0.0224, 0.0237, 0.0267)
-    espesores: Tuple[float, ...] = (0.0014, 0.0016, 0.0017, 0.0020, 0.0023)
-    masas: Tuple[float, ...] = (0.00200, 0.00334, 0.00461, 0.00714, 0.00995)
-    luces: Tuple[float, ...] = (0.0176, 0.0209, 0.0230, 0.0243, 0.0273)
+    # nueve ductos, uno por vaso: N50, N100, A50, N200, A100, N500, A500, A200, N1000
+    denominaciones: Tuple[int, ...] = (50, 100, 50, 200, 100, 500, 500, 200, 1000)
+    diametros: Tuple[float, ...] = (0.0170, 0.0203, 0.0215, 0.0224, 0.0230,
+                                    0.0237, 0.0237, 0.0244, 0.0267)
+    espesores: Tuple[float, ...] = (0.0013, 0.0015, 0.0014, 0.0017, 0.00155,
+                                    0.00205, 0.00205, 0.0017, 0.0023)
+    masas: Tuple[float, ...] = (0.00200, 0.00334, 0.00450, 0.00461, 0.00531,
+                                0.00714, 0.00714, 0.00708, 0.00995)
+    luces: Tuple[float, ...] = (0.0175, 0.0208, 0.0220, 0.0228, 0.0234,
+                                0.0241, 0.0241, 0.0249, 0.0273)
 
 
 G = Geometria()
@@ -179,7 +186,7 @@ def quintico(tau: float) -> float:
 # ---------------------------------------------------------------------------
 
 class Evento(Enum):
-    LOTE_CONTADO = auto()        # la etapa 1 terminó de llenar los cinco vasos
+    LOTE_CONTADO = auto()        # la etapa 1 terminó de llenar los nueve vasos
     VASO_EN_ZONA = auto()        # un vaso llegó a la zona de entrega y está quieto
     VASO_TOMADO = auto()         # el brazo lo levantó: la banda puede indexar
     VASO_COLOCADO = auto()       # quedó en su puesto del rack
@@ -277,8 +284,7 @@ class Vaso:
 
     @property
     def masa(self) -> float:
-        k = G.denominaciones.index(self.denominacion)
-        return G.masa_vaso + self.monedas * G.masas[k]
+        return G.masa_vaso + self.monedas * G.masas[self.indice]
 
     @property
     def peso_g(self) -> float:
@@ -320,8 +326,7 @@ class LlenadoVirtual:
         self.rng = random.Random(semilla)
         self.bolsa: List[int] = []
         for v in vasos:
-            k = G.denominaciones.index(v.denominacion)
-            self.bolsa += [k] * v.objetivo
+            self.bolsa += [v.indice] * v.objetivo
         self.rng.shuffle(self.bolsa)
         self.t_siguiente = 0.0
         self.en_vuelo: List[dict] = []
@@ -530,7 +535,7 @@ class Brazo5GDL:
         self.velocidad = velocidad
         self.mapa = mapa_juntas(cuerpo)
         self.q = list(G.home)
-        self.pinza_mm = 66.0
+        self.pinza_mm = PINZA_ABIERTA_MM
         self.plan: deque[Tramo] = deque()
         self.tramo: Optional[Tramo] = None
         self.t_tramo = 0.0
@@ -607,17 +612,17 @@ class Brazo5GDL:
         alto_d = pose_arco(G.yaw_rack[puesto_rack], G.z_segura)
         bajo_d = pose_arco(G.yaw_rack[puesto_rack], G.z_agarre + 0.003)
 
-        self.plan.append(self._articular(ik(*alto_o), 66.0, "sobre la zona de entrega"))
-        self.plan.append(self._lineal(alto_o, bajo_o, 66.0, "bajar al vaso"))
-        self.plan.append(self._pinza(66.0, 49.0, "cerrar pinza",
+        self.plan.append(self._articular(ik(*alto_o), PINZA_ABIERTA_MM, "sobre la zona de entrega"))
+        self.plan.append(self._lineal(alto_o, bajo_o, PINZA_ABIERTA_MM, "bajar al vaso"))
+        self.plan.append(self._pinza(PINZA_ABIERTA_MM, PINZA_CERRADA_MM, "cerrar pinza",
                                      al_terminar=lambda: self.agarrar(vaso.cuerpo)))
-        self.plan.append(self._lineal(bajo_o, alto_o, 49.0, "subir con el vaso"))
-        self.plan.append(self._articular(ik(*alto_d), 49.0,
+        self.plan.append(self._lineal(bajo_o, alto_o, PINZA_CERRADA_MM, "subir con el vaso"))
+        self.plan.append(self._articular(ik(*alto_d), PINZA_CERRADA_MM,
                                          f"trasladar al puesto R{puesto_rack + 1}"))
-        self.plan.append(self._lineal(alto_d, bajo_d, 49.0, "bajar al rack"))
-        self.plan.append(self._pinza(49.0, 66.0, "abrir pinza",
+        self.plan.append(self._lineal(alto_d, bajo_d, PINZA_CERRADA_MM, "bajar al rack"))
+        self.plan.append(self._pinza(PINZA_CERRADA_MM, PINZA_ABIERTA_MM, "abrir pinza",
                                      al_terminar=self.soltar))
-        self.plan.append(self._lineal(bajo_d, alto_d, 66.0, "subir libre"))
+        self.plan.append(self._lineal(bajo_d, alto_d, PINZA_ABIERTA_MM, "subir libre"))
 
     def ir_a_reposo(self) -> None:
         self.plan.append(self._articular(list(G.home), self.pinza_mm, "reposo"))
@@ -748,9 +753,9 @@ class Orquestador:
             p.resetDebugVisualizerCamera(1.05, 38, -28, (0.0, -0.08, 0.14))
 
     def _crear_vasos(self) -> List[Vaso]:
-        """Cinco vasos dinámicos sobre la banda, uno por denominación."""
+        """Nueve vasos dinámicos sobre la banda, uno por ducto del clasificador."""
         vasos: List[Vaso] = []
-        objetivos = [24, 20, 18, 14, 12]
+        objetivos = [14, 12, 8, 10, 8, 9, 7, 8, 9]
         col = p.createCollisionShape(p.GEOM_CYLINDER, radius=G.r_vaso, height=G.h_vaso)
         for i, den in enumerate(G.denominaciones):
             vis = p.createVisualShape(p.GEOM_CYLINDER, radius=G.r_vaso,
@@ -771,7 +776,7 @@ class Orquestador:
         """Con el lote ya contado se sabe el puesto final de cada vaso.
 
         Se ordena por la clave elegida (desempate por denominación) y el j-ésimo
-        de la lista va al puesto Rj. Como el contenido de los cinco vasos ya se
+        de la lista va al puesto Rj. Como el contenido de los nueve vasos ya se
         conoce cuando termina el llenado, no hace falta zona de espera: cada vaso
         va directo a su puesto definitivo.
         """
