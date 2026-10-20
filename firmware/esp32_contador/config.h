@@ -1,6 +1,6 @@
 #pragma once
 // Etapa 1: selección y conteo de monedas. La geometría sale de
-// scripts/generar_clasificador.py (hardware/stl/); si se cambia una ranura allá,
+// scripts/generar_clasificador.py (hardware/etapa1-clasificador/stl/); si se cambia una ranura allá,
 // se cambia aquí.
 #include <stdint.h>
 

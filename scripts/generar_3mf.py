@@ -24,8 +24,9 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 RAIZ = Path(__file__).resolve().parents[1]
-STL = RAIZ / "hardware" / "Modelos3D" / "stl"
-SALIDA = RAIZ / "hardware" / "Modelos3D" / "sistema_monedas_completo.3mf"
+STL = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "stl"
+STL_BRAZO = RAIZ / "hardware" / "etapa3-brazo" / "stl"
+SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "sistema_monedas_completo.3mf"
 
 # ----------------------------------------------------------------------
 # Cama y acomodo
@@ -193,7 +194,7 @@ def main() -> int:
     for grupo, piezas in GRUPOS:
         lista = []
         for archivo, cantidad, ajustes in piezas:
-            ruta = STL / archivo
+            ruta = (STL_BRAZO if archivo.startswith("B") else STL) / archivo
             if not ruta.exists():
                 raise SystemExit(f"falta {ruta}")
             if archivo not in mallas:

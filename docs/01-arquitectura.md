@@ -33,7 +33,7 @@ flowchart LR
 | RNF3 | Tolerancia de ±5 mm en los puestos | resolución de 1,8 mm, holgura de pinza de 7 mm |
 | RNF4 | Ciclo menor a 10 s por vaso a velocidad 1× | 7,1 s medidos en `cli_demo` |
 | RNF5 | Potencia de servos separada de la lógica, con tierra común | `docs/03-electronica.md` |
-| RNF6 | Piezas imprimibles en 3D y componentes de bajo costo | `hardware/bom.csv` |
+| RNF6 | Piezas imprimibles en 3D y componentes de bajo costo | `hardware/etapa3-brazo/bom.csv`, `hardware/etapa1-clasificador/bom-etapa1.csv` |
 
 ## Bloques del brazo
 
