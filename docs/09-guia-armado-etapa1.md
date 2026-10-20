@@ -42,15 +42,36 @@ El tubo de 1" de pared gruesa (SCH 40, interior ≈ 26,6 mm) atasca la $1000 (26
 | 1 | Sensor de color TCS34725 | I2C, dirección 0x29 |
 | 9 | LED infrarrojo 5 mm | emisores de las barreras |
 | 9 | Fototransistor 5 mm (misma longitud de onda) | receptores |
-| 9 | Resistencia 220 Ω | una por LED IR, a 5 V (≈ 17 mA) |
+| 9 | Resistencia 330 Ω | una por LED IR, a 5 V (≈ 11 mA; con 220 Ω serían 17 mA) |
 | 9 | Resistencia 10 kΩ | pull-up externo de cada fototransistor a 3,3 V |
 | 1 | Fuente 5 V 2 A | alimenta tolva, servo y LED IR; el ESP32 por su USB o por el mismo 5 V |
 | 1 | Protoboard o placa perforada, cables Dupont, cable fino de 26 AWG | unos 3 m para las 9 barreras |
-| 1 | Condensador 470 µF | en el 5 V del servo, evita reinicios |
+| 1 | Condensador electrolítico ≥ 220 µF | en el 5 V del servo, evita reinicios |
 
 La banda (motor, L298N) no es de esta etapa. Los pines ya están reservados en `config.h`.
 
-### 1.4 Herramientas
+### 1.4 Contra tu inventario (xlsx del 2026-10-19)
+
+| Ya lo tienes | Cant. | Nota |
+|---|---|---|
+| ESP32 («Modulo ESP32 + ESP32») | 2 | confirma que es DevKit V1 de 30 pines; si es otra placa, revisa los pines de `config.h` |
+| Resistencias 330 Ω / 10 kΩ | 13 / 23 | alcanzan para 9 LED y 9 pull-ups |
+| Condensadores 220 µF, 100 µF, 4700 µF | 1 c/u | el de 220 µF va en el servo |
+| Fuente 5 VDC; fuente 0-20 V 1,5 A | 1 c/u | revisa la corriente de la de 5 V: necesita ≥ 1,5 A. La de laboratorio ajustada a 5 V sirve para las pruebas |
+| Protoboards, kit de cables, jumpers, borneras | varios | |
+
+| **Te falta** | Cant. | Nota |
+|---|---|---|
+| Motor 28BYJ-48 con driver ULN2003 | 1 | el motor de la tolva |
+| Micro-servo SG90 | 2 | 1 de uso y 1 de repuesto |
+| Sensor de color TCS34725 | 1 | módulo con I2C |
+| LED infrarrojo 5 mm + fototransistor 5 mm | 10 + 10 | uno de cada por ducto, más 1 de repuesto; que sean del mismo kit |
+| Cable fino 26 AWG, 3 m | 1 | para las barreras |
+| Bridas de nailon, PVC, tees, MDF, cemento PVC | ver 1.2 | |
+
+El 4N25 (2 unidades) trae LED IR y fototransistor en un solo encapsulado: sirve solo para probar el firmware sobre la mesa, no para las barreras.
+
+### 1.5 Herramientas
 
 Sierra para PVC o cortatubos, lima o lija fina, calibrador, regla, marcador, destornillador pequeño, soldador de estaño, pegamento instantáneo o pistola de silicona, 4 vasos o tubos de ensayo de Ø34 mm para pruebas, una moneda de cada denominación (nueva y antigua).
 
@@ -163,9 +184,9 @@ Todo está definido en `firmware/esp32_contador/config.h`.
 | 28BYJ-48 (IN1 a IN4 del ULN2003) | 16, 17, 18, 19 |
 | Banda (L298N A, B, PWM), reservado | 14, 4, 23 |
 
-**Cada barrera:** LED IR + resistencia de 220 Ω entre 5 V y GND. Fototransistor con el emisor a GND y el colector al pin del ESP32, y una resistencia de **10 kΩ del pin a 3,3 V** (los pines 34 a 39 no tienen pull-up interno). Con el haz libre el pin está en bajo; cuando una moneda lo corta, sube.
+**Cada barrera:** LED IR + resistencia de 330 Ω entre 5 V y GND. Fototransistor con el emisor a GND y el colector al pin del ESP32, y una resistencia de **10 kΩ del pin a 3,3 V** (los pines 34 a 39 no tienen pull-up interno). Con el haz libre el pin está en bajo; cuando una moneda lo corta, sube.
 
-**Alimentación:** 5 V de la fuente al ULN2003, al servo y a los LED; GND común con el ESP32. Pon el condensador de 470 µF en el 5 V del servo.
+**Alimentación:** 5 V de la fuente al ULN2003, al servo y a los LED; GND común con el ESP32. Pon el condensador de 220 µF en el 5 V del servo.
 
 El orden de las barreras importa: el ducto 1 es la ranura 1 ($50 nueva), y así sucesivamente hasta el 9 ($1000 nueva). El ducto 6 (A500) es la columna −X de D6 y el 7 (N500) la +X.
 
