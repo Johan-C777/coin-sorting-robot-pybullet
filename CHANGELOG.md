@@ -1,5 +1,10 @@
 # Cambios
 
+## 0.5.1 · Ranuras del riel con los diámetros oficiales
+
+- **Corrección antes de imprimir R01:** la ranura 3 medía 21,5 mm y la $50 antigua mide 21,5 mm (Banco de la República, circular DTE-190), así que no habría caído por ella. Ahora la ranura 3 es de 22,0 mm y la 4 de 22,8 mm (antes 22,9; retiene mejor la $100 antigua: 0,2 mm en vez de 0,1). La $500 antigua pasa a 23,7 mm y 7,14 g (antes 23,5 y 7,43). Regenerados D3 a D8, R01, patas, ensamble y visor.
+- Prueba nueva que lee `scripts/generar_clasificador.py` y comprueba diámetros oficiales, caída de 0,4 mm y retención de la moneda siguiente.
+
 ## 0.5.0 · Avance consolidado y repositorio por etapas
 
 - Integra en `main` todo el trabajo de la etapa 1 física (0.4.0 a 0.4.2) y la guía de armado.
