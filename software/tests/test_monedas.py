@@ -11,8 +11,9 @@ from brazo.monedas import (AMBAS, ANTIGUA, CATALOGO, FUERA_DE_ALCANCE, POR_CLAVE
 from brazo.planner import orden_objetivo
 from brazo.protocol import parsear_vasos, trama_vasos
 
-CONFIG_CONTADOR = (Path(__file__).resolve().parents[2]
-                   / "firmware" / "esp32_contador" / "config.h")
+RAIZ = Path(__file__).resolve().parents[2]
+CONFIG_CONTADOR = RAIZ / "firmware" / "esp32_contador" / "config.h"
+GENERADOR = RAIZ / "scripts" / "generar_clasificador.py"
 ADMITIDAS = [m for m in CATALOGO if m.clave not in FUERA_DE_ALCANCE]
 
 
@@ -75,6 +76,25 @@ def test_el_firmware_del_contador_usa_el_mismo_riel():
     for r, d in zip(ranura, diametro):
         assert luz[r] == 0.0 or d < luz[r]
         assert r == 0 or d >= luz[r - 1] - 0.1   # apoyo de 0,1 mm a calibrar
+
+
+def test_el_riel_impreso_usa_los_diametros_oficiales_y_cada_ranura_deja_pasar_su_moneda():
+    """scripts/generar_clasificador.py (los STL) debe partir de las fichas del Banco de la República."""
+    texto = GENERADOR.read_text(encoding="utf-8")
+    bloque = texto[texto.index("RANURAS = ["):texto.index("RANURA_500")]
+    ranuras = []
+    for luz, monedas in re.findall(r"\(([\d.]+|None), \[(.*?)\]\),?\n", bloque):
+        piezas = re.findall(r'\("(\w+)", "[^"]*", ([\d.]+)\)', monedas)
+        ranuras.append((None if luz == "None" else float(luz),
+                        [(c, float(d)) for c, d in piezas]))
+    assert len(ranuras) == 8
+    for luz, piezas in ranuras:
+        for clave, d in piezas:
+            assert d == POR_CLAVE[clave].diametro_mm, clave       # diámetro oficial
+            assert luz is None or luz - d >= 0.4 - 1e-9, clave      # cae con 0,4 mm
+    for i, (luz, _) in enumerate(ranuras[:-1]):
+        siguiente = min(d for _, d in ranuras[i + 1][1])
+        assert luz < siguiente, f"la ranura {i + 1} no retiene la moneda siguiente"
 
 
 def test_el_peso_del_vaso_cuenta_las_antiguas():

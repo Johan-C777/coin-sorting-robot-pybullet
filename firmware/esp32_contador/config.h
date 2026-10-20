@@ -23,14 +23,14 @@ constexpr uint16_t DENOMINACION_VASO[N_VASOS] = {50, 100, 200, 500, 1000};
 constexpr uint8_t VASO_DE_ESTACION[N_ESTACIONES] = {0, 1, 0, 2, 1, 3, 3, 2, 4};
 constexpr Familia FAMILIA[N_ESTACIONES] = {NUEVA, NUEVA, ANTIGUA, NUEVA, ANTIGUA,
                                            ANTIGUA, NUEVA, ANTIGUA, NUEVA};
-constexpr float DIAMETRO_MM[N_ESTACIONES] = {17.00f, 20.30f, 21.00f, 22.40f, 23.00f,
-                                             23.50f, 23.70f, 24.40f, 26.70f};
+constexpr float DIAMETRO_MM[N_ESTACIONES] = {17.00f, 20.30f, 21.50f, 22.40f, 23.00f,
+                                             23.70f, 23.70f, 24.40f, 26.70f};
 constexpr uint8_t RANURA_DE_ESTACION[N_ESTACIONES] = {0, 1, 2, 3, 4, 5, 5, 6, 7};
 constexpr uint8_t N_RANURAS = 8;               // 7 ranuras + extremo abierto
-constexpr float RANURA_MM[N_RANURAS] = {17.5f, 20.8f, 21.5f, 22.9f, 23.4f,
+constexpr float RANURA_MM[N_RANURAS] = {17.5f, 20.8f, 22.0f, 22.8f, 23.4f,
                                         24.1f, 24.9f, 0.0f};   // 0 = extremo abierto
 constexpr float MASA_MONEDA_G[N_ESTACIONES] = {2.00f, 3.34f, 4.50f, 4.61f, 5.31f,
-                                               7.43f, 7.14f, 7.08f, 9.95f};
+                                               7.14f, 7.14f, 7.08f, 9.95f};
 constexpr float MASA_VASO_G = 18.0f;
 constexpr uint8_t ESTACION_A500 = 5;
 constexpr uint8_t ESTACION_N500 = 6;
