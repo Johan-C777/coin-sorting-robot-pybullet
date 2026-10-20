@@ -1,6 +1,6 @@
 # Medidas del CAD frente a las del código
 
-El brazo físico está modelado en SolidWorks (`hardware/Modelos3D/PLANOS BRACITO.pdf`). Sus cotas
+El brazo físico está modelado en SolidWorks (`hardware/etapa3-brazo/PLANOS BRACITO.pdf`). Sus cotas
 no coinciden con las que usan la simulación y la memoria de cálculo, así que el
 código trae dos perfiles y se cambia de uno a otro en un solo sitio:
 

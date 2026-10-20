@@ -29,11 +29,17 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 
 | Objetivo del enunciado | Estado | Evidencia en el repositorio |
 | --- | --- | --- |
-| **Arquitectura** con requerimientos funcionales y no funcionales, diagramas de bloques por módulo y selección de materiales | Hecho | [01-arquitectura.md](01-arquitectura.md) (RF y RNF con dónde se verifica cada uno, bloques, responsabilidades, algoritmo de orden), [materiales.md](../hardware/materiales.md), [bom.csv](../hardware/bom.csv), [bom-etapa1.csv](../hardware/bom-etapa1.csv) |
-| **Diseño mecánico y electrónico**: CAD, planos, esquemas eléctricos; PyBullet y URDF opcional | Hecho en diseño; falta el esquemático en KiCad | Planos del brazo en SolidWorks ([PLANOS BRACITO.pdf](../hardware/Modelos3D/PLANOS%20BRACITO.pdf)), 15 STL y proyecto 3MF de la celda generados por código, [despiece.md](despiece.md), [06-medidas-cad.md](06-medidas-cad.md), conexiones y presupuesto de corriente en [03-electronica.md](03-electronica.md), URDF en `sim/pybullet/`, [memoria de cálculo](memoria-calculo.html) con cinemática, pares y selección de servos |
+| **Arquitectura** con requerimientos funcionales y no funcionales, diagramas de bloques por módulo y selección de materiales | Hecho | [01-arquitectura.md](01-arquitectura.md) (RF y RNF con dónde se verifica cada uno, bloques, responsabilidades, algoritmo de orden), [materiales.md](../hardware/materiales.md), [bom.csv](../hardware/etapa3-brazo/bom.csv), [bom-etapa1.csv](../hardware/etapa1-clasificador/bom-etapa1.csv) |
+| **Diseño mecánico y electrónico**: CAD, planos, esquemas eléctricos; PyBullet y URDF opcional | Hecho en diseño; falta el esquemático en KiCad | Planos del brazo en SolidWorks ([PLANOS BRACITO.pdf](../hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)); etapa 1 física lista para imprimir: 24 STL generados por código, [visor 3D](ensamble-etapa1.html), [09-clasificador-fisico.md](09-clasificador-fisico.md) y [guía de armado](10-guia-armado-etapa1.md); [06-medidas-cad.md](06-medidas-cad.md), conexiones y presupuesto de corriente en [03-electronica.md](03-electronica.md), URDF en `sim/pybullet/`, [memoria de cálculo](memoria-calculo.html) con cinemática, pares y selección de servos |
 | **Primeros módulos funcionando** (se acepta simulado en PyBullet) | Hecho en simulación | Simulación web de la [etapa 1](simulacion-etapa1.html) y del [sistema completo](simulacion_sistema_completo.html); PyBullet en `sim/pybullet/run_sim.py` y `run_sim_integrada.py`; firmware de los dos ESP32 con su núcleo probado en el PC |
 | **App web (Streamlit) inalámbrica con el ESP32**, primeras métricas | Hecho, probado contra la simulación | `software/apps/streamlit_app.py`: modo simulación y modo ESP32 por Wi-Fi (HTTP/JSON), métricas de valor, peso, cantidad y antiguas, ruta del brazo, tabla de obstáculos y asistente; rutas `/api/estado`, `/api/ordenar`, `/api/vasos` y `/api/pose` en el firmware ([04-protocolo.md](04-protocolo.md)) |
 | Diferencial: trayectoria con obstáculos hasta la meta | Hecho en simulación y en Python | Cuatro obstáculos por nivel entre A y B, con tres maniobras distintas: [08-obstaculos.md](08-obstaculos.md) |
+
+## Avance después de la entrega
+
+- **Etapa 1 lista para imprimir.** Clasificador físico generado por código: riel de 22° en dos módulos, 7 ranuras y extremo abierto, tolva con 28BYJ-48 y las dos $500 separadas por color (TCS34725) con un plato basculante. Nueve salidas, cada una a su propio vaso.
+- **Sin tornillos ni soportes**, con ductos y base en tubo PVC: de ≈ 800 a ≈ 480 g de filamento. Visor 3D con simulación y guía de armado completa.
+- **Repositorio ordenado por etapa** en `hardware/` (etapa1-clasificador, etapa2-transporte, etapa3-brazo y archivo).
 
 ## Qué cambió en esta entrega
 
@@ -56,7 +62,7 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 
 ```bash
 pytest software/tests -q          # 60 pruebas
-make -C firmware/tests            # 43 comprobaciones de los dos firmwares
+make -C firmware/tests            # 45 comprobaciones de los dos firmwares
 python scripts/verificar_alcance.py
 python software/apps/cli_demo.py --criterio peso
 ```
@@ -75,7 +81,9 @@ python software/apps/cli_demo.py --criterio peso
 
 | Pendiente | Para qué |
 | --- | --- |
-| Imprimir la probeta de las estaciones 3 a 6 y medir las luces | Confirmar que FDM da los 0,30 mm o pasar ese tramo a acrílico |
+| Imprimir las camas 1 y 2 de prueba (R01, patas, D1, D6) y medir ranuras y ajuste | Confirmar las ranuras y las clavijas antes de imprimir los ≈ 480 g |
+| Armar la etapa 1 con la [guía](10-guia-armado-etapa1.md) | Pasar la tolva y la selección de diseño a construido |
+| Diseñar la banda transportadora (etapa 2) | Llevar los 9 vasos al punto A |
 | Medir L₂ y L₃ en el ensamble de SolidWorks | Cerrar el perfil real del brazo construido |
 | Llevar la evasión de obstáculos al firmware del brazo | Hoy corre en simulación y en Python |
 | Esquemático eléctrico en KiCad | Hoy está como tabla de conexiones y diagrama |

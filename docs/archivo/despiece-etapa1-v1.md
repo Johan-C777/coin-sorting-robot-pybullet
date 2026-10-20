@@ -1,18 +1,20 @@
-# Despiece de la etapa 1
+# Despiece de la etapa 1 (versión 1, archivada)
 
-![Vista de despiece](img/etapa1-despiece.png)
+> **Diseño reemplazado.** Esta fue la primera etapa 1 (riel de 8 estaciones con varillas M5 y tornillos). La versión que se imprime ahora está en [09-clasificador-fisico.md](../09-clasificador-fisico.md) y su guía de armado en [10-guia-armado-etapa1.md](../10-guia-armado-etapa1.md).
+
+![Vista de despiece](../img/etapa1-despiece.png)
 
 La misma vista se mueve en vivo desde la simulación
-([`simulacion-etapa1.html`](simulacion-etapa1.html), pestaña **Despiece**): el
+([`simulacion-etapa1.html`](../simulacion-etapa1.html), pestaña **Despiece**): el
 deslizador separa las piezas y al tocar una de la lista se aísla y muestra su ficha.
 
 En esta entrega el riel pasó de 5 a **8 estaciones** para recibir monedas
-antiguas y nuevas (ver [07-monedas.md](07-monedas.md)). Los STL y el proyecto 3MF
+antiguas y nuevas (ver [07-monedas.md](../07-monedas.md)). Los STL y el proyecto 3MF
 ya están regenerados con esa geometría.
 
 ## Piezas impresas
 
-Los archivos están en [`hardware/Modelos3D/stl/`](../hardware/Modelos3D/stl) y el
+Los archivos están en [`hardware/archivo/etapa1-v1/stl/`](../../hardware/archivo/etapa1-v1/stl) y el
 resumen con triángulos y ajustes en `stl/piezas.csv`.
 
 | Código | Pieza | Cant. | Archivo | Medidas | Material y ajustes |
@@ -33,7 +35,7 @@ resumen con triángulos y ajustes en `stl/piezas.csv`.
 
 Ninguna pieza pasa de 204 mm, así que todas caben en una cama de 220 x 220 mm con
 margen, y se imprimen sin soportes en la orientación del STL. El proyecto
-[`sistema_monedas_completo.3mf`](../hardware/Modelos3D/sistema_monedas_completo.3mf)
+[`sistema_monedas_completo.3mf`](../../hardware/archivo/etapa1-v1/sistema_monedas_completo.3mf)
 trae las 58 piezas de la celda repartidas en 9 bandejas por material.
 
 ## Piezas compradas
@@ -48,7 +50,7 @@ trae las 58 piezas de la celda repartidas en 9 bandejas por material.
 | C06 | Tubo flexible de PVC cristal de 3/4" | 8 | Colector de cada estación hacia el vaso de su denominación |
 
 Detalle con cantidades y tornillería en
-[`hardware/bom-etapa1.csv`](../hardware/bom-etapa1.csv).
+[`hardware/etapa1-clasificador/bom-etapa1.csv`](../../hardware/etapa1-clasificador/bom-etapa1.csv).
 
 ## Cómo se arma
 

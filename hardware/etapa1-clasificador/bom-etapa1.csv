@@ -1,0 +1,22 @@
+cantidad,componente,detalle,uso,nota
+1,ESP32 DevKit V1,30 pines,controlador de la etapa,pines en firmware/esp32_contador/config.h
+1,Motor 28BYJ-48 + driver ULN2003,5 V,disco dosificador de la tolva,1 moneda cada 1.5 s
+1,Micro-servo SG90,9 g,plato basculante de D6 ($500),55 grados antigua / 125 grados nueva
+1,Sensor de color TCS34725,I2C 0x29,separa $500 antigua y nueva,va en el puente B03 antes de la ranura 6
+9,LED infrarrojo 5 mm,emisor,barreras de conteo,uno por ducto
+9,Fototransistor 5 mm,misma longitud de onda que el LED,barreras de conteo,salida a GPIO con flanco de subida
+9,Resistencia 220 ohm,1/4 W,LED IR a 5 V,calculada (aprox. 17 mA); ajustar segun el LED
+9,Resistencia 10 kohm,1/4 W,pull-up externo a 3.3 V,GPIO 34-39 no tienen pull-up interno
+1,Condensador 470 uF,16 V,5 V del servo,evita reinicios del ESP32
+1,Fuente 5 V 2 A,conmutada,tolva servo y LED IR,
+1,Tubo PVC presion 3/4 pulgada,tramo de 2 m (Ø ext 26.7),base: 4 patas x134; 4 topes x29; 2 largueros x490 mm,medir la tee antes de cortar (11 mm centro-fondo nominal)
+4,Tee PVC presion 3/4 pulgada,sin codos,union de pata y larguero,una por pata
+1,Tubo PVC presion 1 pulgada RDE 21,1 m (Ø ext 33.4; interior aprox. 30 mm),7 ductos verticales,cortes 196; 181; 167; 152; 128; 85; 69 mm. SCH 40 atasca la $1000
+1,Lamina de MDF,9 mm; 560 x 198 mm,tablero de la base,ranura 357 x 48 mm bajo los tubos y 8 agujeros de 5 mm para bridas
+20,Brida de nailon,2.5 x 100 mm,patas del riel y de la tolva; motor; lamina,la etapa 1 no lleva tornillos
+1,Cemento PVC,tarro pequeno,tees y tubos de la base,opcional
+9,Vaso o tubo de ensayo,Ø34 x 60 mm,pruebas,los vasos definitivos son de la etapa 2
+1,Filamento PLA+ negro,aprox. 230 g,adaptadores; D6; plato; puente; tolva,negro para no dejar pasar luz a IR y color
+1,Filamento PETG azul,aprox. 180 g,riel; patas del riel y de la tolva,
+1,Filamento ABS gris,aprox. 75 g,dos bases de extremo P01,relleno 25 %
+1,Juego de cables,Dupont y 26 AWG (aprox. 3 m),senal de las 9 barreras,

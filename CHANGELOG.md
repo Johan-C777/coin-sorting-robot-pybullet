@@ -1,5 +1,39 @@
 # Cambios
 
+## 0.5.0 · Avance consolidado y repositorio por etapas
+
+- Integra en `main` todo el trabajo de la etapa 1 física (0.4.0 a 0.4.2) y la guía de armado.
+- `hardware/` por etapa: `etapa1-clasificador/` (24 STL + BOM), `etapa2-transporte/` (restricciones para la banda), `etapa3-brazo/` (planos, rack, bandeja, BOM) y `archivo/etapa1-v1/` (riel con varillas M5 y su 3MF). Generadores actualizados a las rutas nuevas.
+- Visor 3D movido a `docs/ensamble-etapa1.html` para que abra en GitHub Pages; enlazado en la portada.
+- Docs renumerados: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`; el despiece v1 pasa a `docs/archivo/`.
+- `bom-etapa1.csv` rehecho según la guía (quedaban varillas M5, SG90 de paleta y piezas de banda de la v1).
+- La prueba que cruza el firmware del contador con el modelo de monedas compara ahora los 9 ductos del riel físico con las 8 estaciones del modelo (fallaba desde 0.4.0).
+- README y entrega de avances con tabla de avance por etapa.
+
+## 0.4.2 · Ductos y base en PVC
+
+- Los siete ductos pasan a tubo PVC de presión de 1" (Ø ext 33,4, interior ≈ 30) con un adaptador impreso de 65 mm: caja de la ranura con IR y clavijas, embudo de 36° y collar. Salidas separadas ≥ 37 mm.
+- Base: dos bases de ABS (P01) y patas, tees y largueros de tubo PVC de 3/4"; lámina de MDF de 9 mm. Hueco para la banda de 123 × 490 mm con 70 mm bajo la banda. Se quitan P01/P02 anteriores.
+- Total impreso de 1143 a 612 cm³ macizos (≈ 800 a ≈ 480 g, ≈ 48 a ≈ 33 h).
+
+## 0.4.1 · Etapa 1 sin tornillos ni soportes
+
+- Corregida la alineación de la $500: las salidas quedaban 100-137 mm fuera de la línea de vasos. Nuevo bifurcador D6 con plato basculante (SG90 a 55°/125°) y dos columnas alineadas con los demás ductos.
+- Clavijas Ø6, llaves de mariposa y bridas de nailon en lugar de M3. Piezas orientadas para imprimir sin soportes.
+- Visor 3D con simulación de monedas a los vasos.
+- Sin mangueras: ductos alargados hasta los nueve vasos Ø34 (salidas separadas ≥35 mm; riel 36 mm más largo, columnas de D6 abiertas). Base de lámina sobre patas de tubo PVC con codos impresos P01/P02.
+
+## 0.4.0 · Clasificador físico para impresión FDM
+
+- `scripts/generar_clasificador.py` (manifold3d): tolva de 40° con disco de 4
+  cavidades (28BYJ-48 o SG90 continuo), riel de 22° en dos módulos con cola de
+  milano, 7 ranuras + extremo abierto, 7 ductos y la bifurcación de $500 con
+  alojamientos para TCS34725/TCS3200, SG90 y barreras IR de 5 mm. STL en
+  `hardware/stl/`, guía en `docs/08-clasificador-fisico.md`.
+- Firmware del contador: 9 ductos con interrupción IR, lectura I2C del
+  TCS34725 (`color500.h`, `bifurcacion.*`), aguja SG90 por LEDC y tolva a
+  1 moneda / 1,5 s. Nuevo mapa de pines en `config.h`.
+
 ## 0.3.0 · Entrega de avances del segundo parcial
 
 ### Monedas antiguas y nuevas
