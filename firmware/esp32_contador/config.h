@@ -7,20 +7,21 @@
 // El riel separa por diámetro en siete ranuras y un extremo abierto. La ranura 6
 // recibe las dos monedas de $500 y la bifurcación activa (sensor de color + aguja
 // SG90) las reparte en dos ductos. Total: nueve ductos de salida, cada uno con su
-// barrera infrarroja y una sola combinación de denominación y familia. Los
-// ductos de la misma denominación descargan en el mismo vaso.
+// barrera infrarroja y una sola combinación de denominación y familia. Cada
+// ducto descarga en su propio vaso: son nueve vasos, uno por tipo de moneda, y
+// el brazo recibe los nueve.
 constexpr uint8_t N_ESTACIONES = 9;            // ductos de salida con barrera IR
-constexpr uint8_t N_VASOS = 5;
+constexpr uint8_t N_VASOS = 9;                 // un vaso por ducto
 
 enum Familia : uint8_t { NUEVA = 0, ANTIGUA = 1 };
 
-// un vaso por denominación, en este orden
-constexpr uint16_t DENOMINACION_VASO[N_VASOS] = {50, 100, 200, 500, 1000};
+// denominación de cada vaso, en el orden de los ductos
+constexpr uint16_t DENOMINACION_VASO[N_VASOS] = {50, 100, 50, 200, 100, 500, 500, 200, 1000};
 
 // ducto:                         1      2      3      4      5      6      7      8      9
 //                               N50   N100    A50   N200   A100   A500   N500   A200  N1000
 // ranura del riel:               1      2      3      4      5      6      6      7    final
-constexpr uint8_t VASO_DE_ESTACION[N_ESTACIONES] = {0, 1, 0, 2, 1, 3, 3, 2, 4};
+constexpr uint8_t VASO_DE_ESTACION[N_ESTACIONES] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 constexpr Familia FAMILIA[N_ESTACIONES] = {NUEVA, NUEVA, ANTIGUA, NUEVA, ANTIGUA,
                                            ANTIGUA, NUEVA, ANTIGUA, NUEVA};
 constexpr float DIAMETRO_MM[N_ESTACIONES] = {17.00f, 20.30f, 21.50f, 22.40f, 23.00f,
@@ -78,5 +79,5 @@ constexpr uint8_t CANAL_BANDA = 1;
 constexpr uint16_t BANDA_PWM_MIN = 120;        // de 0 a 255, por debajo no arranca
 
 // celda
-constexpr float VASOS_POR_TANDA = 5;
+constexpr float VASOS_POR_TANDA = 9;
 constexpr uint16_t MONEDAS_POR_VASO = 40;      // capacidad de un vaso lleno

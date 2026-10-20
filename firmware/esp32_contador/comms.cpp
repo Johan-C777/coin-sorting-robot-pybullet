@@ -37,7 +37,7 @@ bool Comms::iniciarWifi(const char *ssid, const char *clave, uint16_t segundos) 
 }
 
 void Comms::estadoJson(char *destino, size_t capacidad) const {
-  char cuerpo[768];
+  char cuerpo[1024];
   conteo_.json(cuerpo, sizeof(cuerpo));
   snprintf(destino, capacidad,
            "{\"etapa\":1,\"alimentando\":%s,\"banda\":%s,\"conteo\":%s}",
@@ -47,12 +47,12 @@ void Comms::estadoJson(char *destino, size_t capacidad) const {
 
 bool Comms::enviarAlBrazo(const char *ipBrazo) {
   if (!wifi_) {                       // sin red, al menos se deja la trama en el serie
-    char trama[96];
+    char trama[160];
     conteo_.trama(trama, sizeof(trama));
     Serial.println(trama);
     return false;
   }
-  char cuerpo[768];
+  char cuerpo[1024];
   conteo_.json(cuerpo, sizeof(cuerpo));
   HTTPClient http;
   char url[64];
@@ -80,7 +80,7 @@ void Comms::anunciarMoneda(int8_t estacion) {
 
 void Comms::rutasHttp() {
   servidor.on("/api/estado", HTTP_GET, []() {
-    char json[1024];
+    char json[1536];
     instancia->estadoJson(json, sizeof(json));
     servidor.send(200, "application/json", json);
   });
@@ -122,13 +122,13 @@ void Comms::procesarLinea(char *linea) {
     return;
   }
   if (strcmp(linea, "CONTEO") == 0) {
-    char trama[96];
+    char trama[160];
     conteo_.trama(trama, sizeof(trama));
     Serial.println(trama);
     return;
   }
   if (strcmp(linea, "ESTADO") == 0) {
-    char json[1024];
+    char json[1536];
     estadoJson(json, sizeof(json));
     Serial.println(json);
     return;

@@ -85,9 +85,10 @@ size_t Conteo::json(char *destino, size_t capacidad) const {
   int n = snprintf(destino, capacidad, "{\"entrada\":[");
   for (uint8_t v = 0; v < N_VASOS && n > 0 && (size_t)n < capacidad; v++)
     n += snprintf(destino + n, capacidad - n,
-                  "%s{\"puesto\":%u,\"den\":%u,\"n\":%u,\"antiguas\":%u,"
+                  "%s{\"puesto\":%u,\"den\":%u,\"familia\":\"%s\",\"n\":%u,\"antiguas\":%u,"
                   "\"valor\":%lu,\"peso_g\":%.1f}",
-                  v ? "," : "", v + 1, DENOMINACION_VASO[v], monedas(v), antiguas(v),
+                  v ? "," : "", v + 1, DENOMINACION_VASO[v],
+                  antiguas(v) && antiguas(v) == monedas(v) ? "antigua" : "nueva", monedas(v), antiguas(v),
                   (unsigned long)valor(v), pesoG(v));
   if (n > 0 && (size_t)n < capacidad)
     n += snprintf(destino + n, capacidad - n,
