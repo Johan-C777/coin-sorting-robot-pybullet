@@ -1,6 +1,6 @@
 # Guía de armado: etapa 1 (tolva y selección de monedas)
 
-Todo lo necesario para imprimir, armar, cablear y probar la etapa 1, en el orden en que conviene hacerlo. Las cotas salen de `scripts/generar_clasificador.py`; el ensamble 3D está en `hardware/visor/ensamble_etapa1.html`.
+Todo lo necesario para imprimir, armar, cablear y probar la etapa 1, en el orden en que conviene hacerlo. Las cotas salen de `scripts/generar_clasificador.py`; el ensamble 3D está en [`docs/ensamble-etapa1.html`](ensamble-etapa1.html); los STL, en `hardware/etapa1-clasificador/stl/`.
 
 **Qué hace la etapa 1:** la tolva suelta una moneda cada 1,5 s al riel de 22°. El riel las separa por diámetro en 7 ranuras y un extremo abierto. Cada moneda cruza una barrera infrarroja (cuenta) y cae por un tubo de PVC a su vaso. Las dos $500 (antigua y nueva) pasan antes bajo un sensor de color que mueve un plato, y salen por dos columnas distintas. Son 9 vasos en total. La banda y los vasos son de la etapa siguiente; aquí solo se deja el espacio y se prueba con vasos sueltos.
 

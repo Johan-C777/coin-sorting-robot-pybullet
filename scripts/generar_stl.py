@@ -30,7 +30,8 @@ from geometria_stl import (Malla, anillo_variable, caja, cilindro,  # noqa: E402
 from brazo.monedas import SELECTOR                                 # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
-SALIDA = RAIZ / "hardware" / "Modelos3D" / "stl"
+SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "stl"     # etapa 1 v1 (E*)
+SALIDA_BRAZO = RAIZ / "hardware" / "etapa3-brazo" / "stl"       # rack y bandeja (B*)
 
 # =====================================================================
 # Parámetros maestros (mm). Son los mismos de la simulación HTML.
@@ -239,6 +240,7 @@ def bandeja_electronica() -> Malla:
 # =====================================================================
 def main() -> int:
     SALIDA.mkdir(parents=True, exist_ok=True)
+    SALIDA_BRAZO.mkdir(parents=True, exist_ok=True)
     piezas = [
         # ---------------- etapa 1 ----------------
         ("E01_riel_tramo_a.stl", "Riel selector, tramo de entrada", 2, riel_tramo_a(),
@@ -287,7 +289,8 @@ def main() -> int:
     total_tri = 0
     total_piezas = 0
     for archivo, nombre, cantidad, malla, material, ajustes, nota in piezas:
-        n = escribir_stl(str(SALIDA / archivo), malla, archivo[:-4])
+        destino = SALIDA_BRAZO if archivo.startswith("B") else SALIDA
+        n = escribir_stl(str(destino / archivo), malla, archivo[:-4])
         registrar(archivo, nombre, cantidad, malla, material, ajustes, nota)
         total_tri += n
         total_piezas += cantidad

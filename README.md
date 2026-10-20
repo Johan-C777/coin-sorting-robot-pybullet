@@ -15,12 +15,20 @@ Nueva Granada.
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
 ![ESP32](https://img.shields.io/badge/control-2%20ESP32%20%2B%20PCA9685-E06E17)
 ![Simulación](https://img.shields.io/badge/simulaci%C3%B3n-Three.js%20%2B%20PyBullet-2F5878)
-![Pruebas](https://img.shields.io/badge/pruebas-60%20Python%20%2B%2043%20C%2B%2B-2C7A54)
-![Piezas](https://img.shields.io/badge/piezas-15%20STL%20%2B%203MF-7A4BB8)
+![Pruebas](https://img.shields.io/badge/pruebas-60%20Python%20%2B%2045%20C%2B%2B-2C7A54)
+![Piezas](https://img.shields.io/badge/etapa%201-24%20STL%20sin%20tornillos-7A4BB8)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-687572)
 
 > **Entrega de avances del segundo parcial.** Qué pide el enunciado, dónde está
 > cada cosa en el repositorio y qué falta: [docs/00-entrega-avances.md](docs/00-entrega-avances.md).
+
+## Avance por etapa
+
+| Etapa | Qué hace | Estado | Dónde |
+| --- | --- | --- | --- |
+| **1 · Tolva y selección** | Dosifica, separa por diámetro (7 ranuras + extremo), cuenta con 9 barreras IR y separa las dos $500 por color; un vaso por tipo de moneda | Diseño físico cerrado: 24 STL sin tornillos ni soportes, ductos y base en PVC. Sigue imprimir y armar | [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/ensamble-etapa1.html), [guía de armado](docs/10-guia-armado-etapa1.md), [`hardware/etapa1-clasificador/`](hardware/etapa1-clasificador) |
+| **2 · Transporte** | Banda que lleva los 9 vasos hasta el punto A | En diseño | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ---
 
@@ -29,7 +37,8 @@ Nueva Granada.
 | Demo | Qué muestra |
 | --- | --- |
 | [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las dos etapas juntas: tolva, riel de 8 ranuras, banda, punto A, los cuatro obstáculos por nivel, punto B y el rack ordenado |
-| [**Etapa 1: selección**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) | Monedas antiguas y nuevas por el riel, conteo por estación, tubos colectores y vista de despiece |
+| [**Etapa 1: selección (v1)**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) | Primera versión del riel: monedas antiguas y nuevas, conteo por estación y vista de despiece |
+| [**Ensamble etapa 1**](https://johan-c777.github.io/coin-sorting-robot-pybullet/ensamble-etapa1.html) | Las piezas que se imprimen, en posición: despiece, ficha de cada pieza y simulación de monedas cayendo a los 9 vasos |
 | [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y selección de servos, con calculadoras |
 
 Son archivos HTML autónomos (Three.js), sin instalación. También se abren desde
@@ -41,9 +50,9 @@ la carpeta [`docs/`](docs) del repositorio.
 
 ```mermaid
 flowchart LR
-    T["Tolva<br/>antiguas y nuevas"] --> R["Riel de 8 ranuras<br/>por diámetro"]
-    R --> IR["8 barreras IR<br/>denominación y familia"]
-    IR --> C["Tubos colectores<br/>5 vasos"]
+    T["Tolva<br/>antiguas y nuevas"] --> R["Riel por diámetro<br/>+ color para la $500"]
+    R --> IR["9 barreras IR<br/>denominación y familia"]
+    IR --> C["Tubos PVC<br/>9 vasos"]
     C --> B["Banda"]
     B --> A(["Punto A"])
     A --> O1["Nivel 1<br/>O1"] --> O2["Nivel 2<br/>O2"] --> O3["Nivel 3<br/>O3"] --> O4["Nivel 4<br/>O4"]
@@ -55,7 +64,7 @@ flowchart LR
 | --- | --- | --- |
 | 1. Selección | El riel inclinado 25° tiene 8 ranuras que se abren por escalones; cada moneda cae en la primera que supera su diámetro | [07-monedas.md](docs/07-monedas.md) |
 | 2. Conteo | Una barrera IR por ranura; como cada ranura recibe un solo tipo de moneda, la estación dice denominación **y familia** | `firmware/esp32_contador` |
-| 3. Embalaje | Un tubo por estación lleva la moneda al vaso de su denominación: 5 vasos sobre la banda | [despiece.md](docs/despiece.md) |
+| 3. Embalaje | Un tubo de PVC por ducto lleva la moneda a su vaso: 9 vasos, uno por tipo de moneda | [10-guia-armado-etapa1.md](docs/10-guia-armado-etapa1.md) |
 | 4. Punto A | La banda deja cada vaso en el límite del alcance del brazo | simulación |
 | 5. De A a B | El brazo cruza cuatro móviles giratorios, cada uno más difícil que el anterior | [08-obstaculos.md](docs/08-obstaculos.md) |
 | 6. Orden | Deja los vasos en el rack según la orden: valor, peso, cantidad, denominación o antiguas, ascendente o descendente | `software/brazo/planner.py` |
@@ -100,9 +109,30 @@ VASOS:50x30a6,100x24a4,200x21a3,500x14,1000x12
 
 ![Etapa 1 en la simulación](docs/img/etapa1-selector.png)
 
+### La etapa 1 que se imprime
+
+El modelo de arriba fija qué monedas caben en cada ranura; la pieza física
+([09-clasificador-fisico.md](docs/09-clasificador-fisico.md)) sale de
+`scripts/generar_clasificador.py` y se ajustó a la impresión FDM:
+
+- Riel de 22° en dos módulos con 7 ranuras y extremo abierto. La ranura 6 recibe
+  las dos $500; un TCS34725 lee el color y el plato basculante de D6 (SG90 a
+  55°/125°) manda cada una a su columna. Son **9 salidas, cada una a su vaso**.
+- **Sin tornillos ni soportes:** clavijas Ø6 a presión, llaves de mariposa entre
+  módulos y bridas de nailon. Las 24 piezas salen cerradas, sin choques en el
+  ensamble y orientadas para imprimir sin soportes.
+- **Ductos y base en PVC:** cada ducto es un adaptador impreso con la barrera IR
+  más un tubo de 1" RDE 21; la base es una lámina de MDF sobre patas y tees de
+  3/4" con dos bases de ABS. Deja 123 × 490 mm libres bajo la lámina para la banda.
+- Impresión: 8 camas, ≈ 480 g (PLA+ negro, PETG azul y ABS) y ≈ 33 h. Las camas
+  1 y 2 son de prueba de ajuste.
+
+El contador de la versión física tiene 9 ductos; las cifras de la tabla siguen
+el modelo de 8 estaciones.
+
 ---
 
-## Etapa 2: del punto A al punto B entre cuatro obstáculos
+## Etapa 3: del punto A al punto B entre cuatro obstáculos
 
 ![Ruta de A a B](docs/img/ruta-obstaculos.png)
 
@@ -165,7 +195,7 @@ Desarrollo completo en [02-cinematica.md](docs/02-cinematica.md), la
 
 ```mermaid
 flowchart LR
-    C["ESP32 contador<br/>8 IR · dosificador · banda"]
+    C["ESP32 contador<br/>9 IR · tolva · color · banda"]
     B["ESP32 brazo<br/>planificador · cinemática inversa"]
     PCA["PCA9685<br/>6 PWM"]
     SRV["Servos J1 a J5 + pinza"]
@@ -193,22 +223,26 @@ con los datos del lote. Detalle en [04-protocolo.md](docs/04-protocolo.md).
 
 ## Hardware
 
-- **Brazo:** planos en SolidWorks en
-  [`hardware/Modelos3D/PLANOS BRACITO.pdf`](hardware/Modelos3D/PLANOS%20BRACITO.pdf).
-- **Celda:** 15 STL generados por código (riel de 8 ranuras, tolva, embudos con
-  espiga para tubo, banda, portavasos, rack) y un proyecto 3MF con 58 piezas en
-  9 bandejas. Ninguna pieza pasa de 204 mm y ninguna necesita soportes.
-- **Listas de materiales:** [`bom.csv`](hardware/bom.csv) del brazo y
-  [`bom-etapa1.csv`](hardware/bom-etapa1.csv) de la etapa 1, con la
-  justificación en [`materiales.md`](hardware/materiales.md).
+Ordenado por etapa en [`hardware/`](hardware/README.md):
+
+- **Etapa 1:** 24 STL en [`hardware/etapa1-clasificador/stl/`](hardware/etapa1-clasificador/stl),
+  lista de materiales [`bom-etapa1.csv`](hardware/etapa1-clasificador/bom-etapa1.csv)
+  y [guía de armado](docs/10-guia-armado-etapa1.md) con camas, cortes de PVC,
+  cableado y pruebas.
+- **Etapa 2:** banda en diseño; las medidas que deja la etapa 1 están en
+  [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
+- **Etapa 3:** planos en SolidWorks
+  ([`PLANOS BRACITO.pdf`](hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)), rack,
+  bandeja de electrónica y [`bom.csv`](hardware/etapa3-brazo/bom.csv).
+- **Archivo:** la primera etapa 1 (riel con varillas M5) y su 3MF quedan en
+  [`hardware/archivo/`](hardware/archivo/etapa1-v1) como referencia.
 
 ```bash
-python scripts/generar_stl.py      # lee las luces de software/brazo/monedas.py
-python scripts/generar_3mf.py
+python scripts/generar_clasificador.py   # STL de la etapa 1
+python scripts/exportar_visor_3d.py      # docs/ensamble-etapa1.html
+python scripts/generar_stl.py            # rack, bandeja y piezas archivadas
 python scripts/generar_figuras.py
 ```
-
-![Despiece de la etapa 1](docs/img/etapa1-despiece.png)
 
 ---
 
@@ -216,7 +250,7 @@ python scripts/generar_figuras.py
 
 ```bash
 pytest software/tests -q              # 60 pruebas
-make -C firmware/tests                # 43 comprobaciones de los dos firmwares
+make -C firmware/tests                # 45 comprobaciones de los dos firmwares
 python scripts/verificar_alcance.py   # los diez puestos y el punto A dentro del alcance
 ```
 
@@ -260,15 +294,17 @@ docs/
 ├── 01-arquitectura.md … 06-medidas-cad.md
 ├── 07-monedas.md           monedas antiguas y nuevas, diseño del riel
 ├── 08-obstaculos.md        ruta de A a B y niveles de dificultad
-├── despiece.md             piezas, armado y calibración de la etapa 1
+├── 09-clasificador-fisico.md  etapa 1 para impresión FDM
+├── 10-guia-armado-etapa1.md   materiales, camas, cortes, armado, cableado y pruebas
+├── archivo/                despiece de la primera etapa 1
 ├── index.html              portada de las demos (GitHub Pages)
-└── simulacion_sistema_completo.html, simulacion-etapa1.html, memoria-calculo.html
+└── ensamble-etapa1.html, simulacion_sistema_completo.html, simulacion-etapa1.html, memoria-calculo.html
 firmware/
 ├── esp32_brazo/            cinemática, trayectorias, planificador, secuenciador, PCA9685, Wi-Fi
-├── esp32_contador/         8 barreras IR, dosificador, banda, conteo por familia, Wi-Fi
+├── esp32_contador/         9 barreras IR, tolva 28BYJ-48, color de la $500, banda, Wi-Fi
 └── tests/                  núcleo de los dos firmwares compilado y probado en el PC
-hardware/                   planos del brazo, STL, 3MF y listas de materiales
-scripts/                    generadores de STL, 3MF y figuras; verificadores
+hardware/                   por etapa: etapa1-clasificador, etapa2-transporte, etapa3-brazo, archivo
+scripts/                    generadores de STL (etapa 1 y brazo), visor 3D, 3MF y figuras
 sim/pybullet/               URDF, celda y orquestador integrado
 software/
 ├── brazo/                  monedas, cinemática, obstáculos, planificador, trayectorias, protocolo
@@ -281,6 +317,7 @@ software/
 ## Estado
 
 - [x] Selector de monedas antiguas y nuevas: 8 estaciones calculadas, STL y firmware
+- [x] Etapa 1 física: 24 STL sin tornillos ni soportes, $500 separadas por color, ductos y base en PVC, visor 3D y guía de armado
 - [x] Conteo por estación y por familia, con trama hacia el brazo
 - [x] Cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
 - [x] Ruta de A a B con cuatro obstáculos por nivel y tres maniobras
@@ -288,7 +325,8 @@ software/
 - [x] Simulación web de las dos etapas y orquestador en PyBullet
 - [x] Firmware modular de los dos ESP32, con pruebas que corren en el PC
 - [x] App Streamlit con modo simulación y modo Wi-Fi
-- [ ] Imprimir la probeta del riel (estaciones 3 a 6) y medir las luces
+- [ ] Imprimir las camas 1 y 2 de prueba, medir ranuras y ajuste, y armar la etapa 1
+- [ ] Diseñar la banda transportadora (etapa 2)
 - [ ] Medir L₂ y L₃ en el CAD y cerrar el perfil real del brazo
 - [ ] Llevar la evasión de obstáculos al firmware del brazo
 - [ ] Montar la celda, integrar los dos ESP32 con la app y medir el ciclo real

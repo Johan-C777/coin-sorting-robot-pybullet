@@ -1,5 +1,15 @@
 # Cambios
 
+## 0.5.0 · Avance consolidado y repositorio por etapas
+
+- Integra en `main` todo el trabajo de la etapa 1 física (0.4.0 a 0.4.2) y la guía de armado.
+- `hardware/` por etapa: `etapa1-clasificador/` (24 STL + BOM), `etapa2-transporte/` (restricciones para la banda), `etapa3-brazo/` (planos, rack, bandeja, BOM) y `archivo/etapa1-v1/` (riel con varillas M5 y su 3MF). Generadores actualizados a las rutas nuevas.
+- Visor 3D movido a `docs/ensamble-etapa1.html` para que abra en GitHub Pages; enlazado en la portada.
+- Docs renumerados: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`; el despiece v1 pasa a `docs/archivo/`.
+- `bom-etapa1.csv` rehecho según la guía (quedaban varillas M5, SG90 de paleta y piezas de banda de la v1).
+- La prueba que cruza el firmware del contador con el modelo de monedas compara ahora los 9 ductos del riel físico con las 8 estaciones del modelo (fallaba desde 0.4.0).
+- README y entrega de avances con tabla de avance por etapa.
+
 ## 0.4.2 · Ductos y base en PVC
 
 - Los siete ductos pasan a tubo PVC de presión de 1" (Ø ext 33,4, interior ≈ 30) con un adaptador impreso de 65 mm: caja de la ranura con IR y clavijas, embudo de 36° y collar. Salidas separadas ≥ 37 mm.
