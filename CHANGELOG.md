@@ -1,5 +1,14 @@
 # Cambios
 
+## 0.6.0 · Nueve vasos al brazo
+
+- El brazo recibe y ordena **9 vasos** (uno por ducto: N50, N100, A50, N200, A100, N500, A500, A200, N1000) en un rack de **9 puestos** más 9 de entrada, a 9,5° sobre el arco de 23 cm.
+- Vaso de la etapa 1 (Ø34 × 60 mm) en todo el sistema: pinza cerrada a 31 mm, agarre a 4,8 cm, puestos a 3,81 cm entre centros (4 mm libres).
+- Contador: `N_VASOS = 9`, trama `VASOS:` y JSON con la familia; las $500 antiguas y nuevas van a vasos distintos.
+- Brazo: `config.py`, `cups.py`, `planner.py`, `obstaculos.py` (los móviles O2 y O3 se reajustaron para conservar su nivel), simulador web, firmware ESP32 (`movs[2*N_PUESTOS]`, buffers mayores) y PyBullet (`celda.py`, `run_sim_integrada.py`: 9 ductos, 9 vasos).
+- Pruebas: 61 de Python y 48 de C++ en verde. **PyBullet no se pudo ejecutar** en el entorno de desarrollo (no compila en Python 3.13): hay que correr `run_sim_integrada.py --headless` en el PC.
+- Pendiente: `docs/memoria-calculo.html` conserva las cifras del perfil anterior (lleva un aviso); el brazo del CAD (r_arco 9,7 cm) no cabe los 9 puestos en su arco.
+
 ## 0.5.1 · Ranuras del riel con los diámetros oficiales
 
 - **Corrección antes de imprimir R01:** la ranura 3 medía 21,5 mm y la $50 antigua mide 21,5 mm (Banco de la República, circular DTE-190), así que no habría caído por ella. Ahora la ranura 3 es de 22,0 mm y la 4 de 22,8 mm (antes 22,9; retiene mejor la $100 antigua: 0,2 mm en vez de 0,1). La $500 antigua pasa a 23,7 mm y 7,14 g (antes 23,5 y 7,43). Regenerados D3 a D8, R01, patas, ensamble y visor.

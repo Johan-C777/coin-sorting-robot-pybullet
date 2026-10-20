@@ -13,8 +13,8 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 2. Un **riel selector de ocho ranuras** las separa por diámetro; una barrera
    infrarroja por ranura cuenta cada moneda y, por la ranura en que cayó, sabe
    su denominación y su familia.
-3. Unos **tubos colectores** llevan cada moneda al vaso de su denominación: cinco
-   vasos sobre una **banda transportadora**.
+3. Unos **tubos colectores** llevan cada moneda al vaso de su denominación: nueve
+   vasos (uno por ducto) sobre una **banda transportadora**.
 4. La banda entrega cada vaso en el **punto A**, el límite del alcance del brazo.
 5. El **brazo de 5 GDL** lleva el vaso al **punto B** (el rack) esquivando
    **cuatro obstáculos giratorios de dificultad creciente**.
@@ -36,6 +36,8 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 | Diferencial: trayectoria con obstáculos hasta la meta | Hecho en simulación y en Python | Cuatro obstáculos por nivel entre A y B, con tres maniobras distintas: [08-obstaculos.md](08-obstaculos.md) |
 
 ## Avance después de la entrega
+
+- **Nueve vasos al brazo (0.6.0).** El contador, el brazo (Python, ESP32 y simulación web) y PyBullet reciben y ordenan 9 vasos Ø34 × 60 mm en un rack de 9 puestos; las $500 antiguas y nuevas van en vasos distintos. Las ranuras del riel usan los diámetros oficiales del Banco de la República (0.5.1).
 
 - **Etapa 1 lista para imprimir.** Clasificador físico generado por código: riel de 22° en dos módulos, 7 ranuras y extremo abierto, tolva con 28BYJ-48 y las dos $500 separadas por color (TCS34725) con un plato basculante. Nueve salidas, cada una a su propio vaso.
 - **Sin tornillos ni soportes**, con ductos y base en tubo PVC: de ≈ 800 a ≈ 480 g de filamento. Visor 3D con simulación y guía de armado completa.
