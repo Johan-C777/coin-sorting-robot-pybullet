@@ -21,9 +21,12 @@
 - Docs: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`, `archivo/despiece-etapa1-v1.md`, `ensamble-etapa1.html`; README, 00-entrega, index.html, CHANGELOG.
 - `bom-etapa1.csv` rehecho; `software/tests/test_monedas.py` (9 ductos vs 8 estaciones).
 
-## Rediseño v3 (monedas de canto) en curso
-- El riel plano ranurado aceptaba cualquier moneda. Nuevo: moneda de pie en esquina placa(20° atrás)+repisa, empujador lento, ventanas H=d+0,15 (sim MuJoCo `sim/mujoco/`: 88-95% con empujador y roce 0,3-0,7; decide la prueba real).
-- Hecho: `scripts/generar_canto.py` (probeta R00 + cuña R00b en `hardware/etapa1-clasificador/v3-canto/`). Falta: módulos completos, bandeja de volteo, empujador, receptores, firmware, visor, guía.
+## Rediseño v4 (gravedad + medición) en curso
+- Rechazado: empujador y ventanas/huecos por tamaño (sim: no separan 0,6 mm; compuertas en pista fallan, la moneda las salta a >0,8 m/s).
+- Elegido: aleta SG90 voltea a canto, pista 22°, 2 barreras IR miden diámetro por tiempo de paso (sim 72/72, σ 0,03 mm), color TCS34725 para $500, embudo (sim 79/81), 1 servo distribuidor, 10 tubos en abanico a vasos en línea sobre la banda. Una moneda a la vez con confirmación.
+- Torre ≈ 52 cm (variante M5b con vasos móviles ≈ 34 cm). Tablero + piso impresos, sin PVC/MDF/tornillos. Módulos M0 a M7 (M7 retorno de rechazo, reservado).
+- Plan y decisiones: `etapa1-clasificador/PLAN-v4-viabilidad.md` (carpeta del proyecto). Sim: `sim/mujoco/{rodar,embudo,compuerta}.py`. Artefacto publicado, a la espera del visto bueno del usuario antes de imprimir.
+- Falta: validar canal+abanico, giro pasivo opcional; luego generador (`generar_canto.py` es obsoleto), STL, firmware, guía.
 
 ## Resuelto
 - $500 alineada, STL cerrados, PVC en ductos y base, sin choques.
