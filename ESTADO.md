@@ -21,6 +21,10 @@
 - Docs: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`, `archivo/despiece-etapa1-v1.md`, `ensamble-etapa1.html`; README, 00-entrega, index.html, CHANGELOG.
 - `bom-etapa1.csv` rehecho; `software/tests/test_monedas.py` (9 ductos vs 8 estaciones).
 
+## Rediseño v3 (monedas de canto) en curso
+- El riel plano ranurado aceptaba cualquier moneda. Nuevo: moneda de pie en esquina placa(20° atrás)+repisa, empujador lento, ventanas H=d+0,15 (sim MuJoCo `sim/mujoco/`: 88-95% con empujador y roce 0,3-0,7; decide la prueba real).
+- Hecho: `scripts/generar_canto.py` (probeta R00 + cuña R00b en `hardware/etapa1-clasificador/v3-canto/`). Falta: módulos completos, bandeja de volteo, empujador, receptores, firmware, visor, guía.
+
 ## Resuelto
 - $500 alineada, STL cerrados, PVC en ductos y base, sin choques.
 - Prueba firmware↔modelo de monedas fallando desde 0.4.0 → corregida.
