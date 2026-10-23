@@ -21,12 +21,11 @@
 - Docs: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`, `archivo/despiece-etapa1-v1.md`, `ensamble-etapa1.html`; README, 00-entrega, index.html, CHANGELOG.
 - `bom-etapa1.csv` rehecho; `software/tests/test_monedas.py` (9 ductos vs 8 estaciones).
 
-## Rediseño v4 (gravedad + medición) en curso
-- Rechazado: empujador y ventanas/huecos por tamaño (sim: no separan 0,6 mm; compuertas en pista fallan, la moneda las salta a >0,8 m/s).
-- Elegido: aleta SG90 voltea a canto, pista 22°, 2 barreras IR miden diámetro por tiempo de paso (sim 72/72, σ 0,03 mm), color TCS34725 para $500, embudo (sim 79/81), 1 servo distribuidor, 10 tubos en abanico a vasos en línea sobre la banda. Una moneda a la vez con confirmación.
-- Torre ≈ 52 cm (variante M5b con vasos móviles ≈ 34 cm). Tablero + piso impresos, sin PVC/MDF/tornillos. Módulos M0 a M7 (M7 retorno de rechazo, reservado).
-- Plan y decisiones: `etapa1-clasificador/PLAN-v4-viabilidad.md` (carpeta del proyecto). Sim: `sim/mujoco/{rodar,embudo,compuerta}.py`. Artefacto publicado, a la espera del visto bueno del usuario antes de imprimir.
-- Falta: validar canal+abanico, giro pasivo opcional; luego generador (`generar_canto.py` es obsoleto), STL, firmware, guía.
+## Rediseño v5 (prototipo compacto) en curso
+- v4 descartado por alto (52 cm), tubos en abanico y tablero de pared.
+- v5: torre ≈ 34 cm de pie sobre 2 patines, pasa sobre la banda. Tolva → aleta SG90 a canto → pista 22° con 2 barreras IR (diámetro) + TCS34725 ($500) → embudo (sim 79/81) → compuerta SG90 bajo el hueco.
+- La banda (NEMA17 + A4988 + GT2, barrera de posición) mueve un cartucho de 9 vasos para poner el vaso correcto bajo el hueco; la moneda cae derecho. Rechazo: la compuerta se inclina al otro lado hacia una caja sobre el patín.
+- Meta 90%. No simulado: compuerta, posición del cartucho, sensores reales. Sim: `sim/mujoco/{rodar,embudo,compuerta}.py`. Artefacto publicado, espera visto bueno antes de imprimir (primero módulo de pista de prueba).
 
 ## Resuelto
 - $500 alineada, STL cerrados, PVC en ductos y base, sin choques.
