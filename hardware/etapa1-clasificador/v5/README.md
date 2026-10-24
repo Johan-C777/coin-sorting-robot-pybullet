@@ -20,17 +20,17 @@ Total aproximado: **842 g de PLA** (3 paredes, 20% relleno). Todas caben en la K
 
 | Código | Pieza | Cant. | Medidas de impresión (mm) | g total | Cómo imprimir |
 |---|---|---|---|---|---|
-| L01 | Pista con repisa, barreras y sensor de color | 1 | 179 x 60 x 23 | 34 | Acostada sobre la espalda de la placa. Sin soportes. |
+| L01 | Pista con repisa, barreras y sensor de color | 1 | 179 x 23 x 60 | 38 | De pie, apoyada en la cara de abajo de la repisa. Sin soportes. |
 | B01 | Porta-emisor IR (se engancha detrás de la placa) | 2 | 27 x 15 x 14 | 4 | De lado. Sin soportes. |
-| H01 | Base de la tolva: plato inclinado, aro y soporte del motor | 1 | 128 x 117 x 48 | 52 | Con la cara trasera abajo. Necesita soportes (solo bajo las clavijas del motor y las almohadillas). |
+| H01 | Base de la tolva: plato inclinado, aro y soporte del motor | 1 | 129 x 113 x 43 | 49 | Con la espalda plana sobre la cama. Sin soportes. |
 | H02 | Disco de 8 bolsillos | 1 | 98 x 98 x 8 | 6 | Plano, el cubo hacia arriba. Sin soportes. |
 | H03 | Rascador (quita la moneda montada) | 1 | 36 x 43 x 4 | 1 | De canto. Sin soportes. Se imprimen 3 alturas: 2,5 / 2,6 / 2,8 mm. |
-| K01 | Soporte de la tolva y la pista (caballete 1) | 1 | 91 x 70 x 16 | 57 | De lado (cara plana abajo). Sin soportes. |
-| K02 | Soporte de la pista (caballete 2) | 1 | 50 x 35 x 16 | 13 | De lado. Sin soportes. |
+| K01 | Soporte de la tolva y la pista (caballete 1) | 1 | 89 x 70 x 16 | 57 | De lado, con la cara que mira a la tolva hacia arriba. Sin soportes. |
+| K02 | Soporte de la pista (caballete 2) | 1 | 47 x 35 x 16 | 13 | De lado. Sin soportes. |
 | F01 | Embudo con brida | 1 | 136 x 136 x 30 | 28 | Boca abajo (la brida sobre la cama). Pared a 45°, sin soportes. |
 | F02 | Campana del embudo con ventana | 1 | 88 x 100 x 60 | 28 | Con la tapa sobre la cama. Sin soportes. |
 | G01 | Cuna del servo de la compuerta | 1 | 27 x 24 x 51 | 12 | Boca abajo. Sin soportes. |
-| G02 | Compuerta (paleta con bisagra) | 1 | 9 x 38 x 36 | 2 | De canto, el cubo arriba. Sin soportes. |
+| G02 | Compuerta (paleta con bisagra) | 1 | 36 x 9 x 38 | 2 | De pie sobre la punta de la paleta, la bisagra arriba. Sin soportes (usa borde/brim). |
 | T01 | Caballete (marco en forma de puente) | 3 | 206 x 161 x 16 | 273 | Plano. Sin soportes. |
 | S01 | Patín largo (caballetes 1 y 2) | 2 | 186 x 24 x 14 | 78 | Plano. Sin soportes. |
 | S02 | Patín corto (caballete 3) | 2 | 100 x 24 x 14 | 42 | Plano. Sin soportes. |
@@ -39,8 +39,9 @@ Total aproximado: **842 g de PLA** (3 paredes, 20% relleno). Todas caben en la K
 | C01 | Cartucho de 3 vasos (se unen 3 en fila) | 3 | 120 x 52 x 16 | 56 | Plano. Sin soportes. |
 | C02 | Rampa de rechazo (va en la punta del cartucho) | 1 | 64 x 74 x 44 | 24 | De lado. Sin soportes. |
 | V01 | Vaso Ø34 x 60 | 9 | 34 x 34 x 60 | 67 | De pie. Sin soportes. |
-| P01 | Clavija Ø6 x 20 | 17 | 6 x 6 x 20 | 6 | De pie. Imprime todas juntas. |
-| P02 | Clavija Ø6 x 12 | 8 | 6 x 6 x 12 | 2 | De pie. Imprime todas juntas. |
+| P01 | Clavija Ø6 x 20 | 19 | 6 x 6 x 20 | 7 | De pie. Imprime todas juntas. |
+| P02 | Clavija Ø6 x 12 | 6 | 6 x 6 x 12 | 1 | De pie. Imprime todas juntas. |
+| P03 | Remache del motor (por cada oreja del 28BYJ-48 hasta H01) | 3 | 8 x 8 x 5 | 0 | De pie, cabeza abajo. 100 % de relleno. Entra a presión. |
 
 Ajustes sugeridos: PLA, capa 0,2 mm, 3 paredes, 20% relleno. Las clavijas al 100% de relleno.
 Si las clavijas entran muy duras o flojas, cambia `HOLGURA` (0,3 mm por lado) en el script y vuelve a generar.
@@ -51,7 +52,7 @@ Si las clavijas entran muy duras o flojas, cambia `HOLGURA` (0,3 mm por lado) en
 2. **Largueros.** R01 entre los caballetes 1 y 2 (los de afuera), R02 entre 2 y 3. Cada punta con una clavija P01.
 3. **Soportes.** K01 sobre el caballete 1 y K02 sobre el caballete 2, cada uno con clavijas P01.
 4. **Pista.** Pon los porta-emisores B01 (se enganchan en el borde de abajo, detrás de la placa) con sus LED IR. Mete los fototransistores en los postes de adelante y el TCS34725 en su rebaje. Apoya la pista en K01 y K02 con una clavija P01 en cada uno.
-5. **Tolva.** Fija el 28BYJ-48 detrás de H01 (las orejas en sus dos clavijas y una brida por los pasos). Pon el disco H02 en el eje y el rascador H03a en su ranura. Apoya H01 en K01 (el motor entra en su hueco) y únela a la pista con dos clavijas P02.
+5. **Tolva.** Pon el 28BYJ-48 detrás de H01 con el resalte del eje en el agujero central y clava un remache P03 por cada oreja (entra a presión desde atrás). Pon el disco H02 en el eje y el rascador H03a en su ranura. Apoya H01 en K01 (el motor entra en su hueco) y únela a la pista con dos clavijas P01 que atraviesan la placa y las almohadillas.
 6. **Embudo.** F01 sobre los largueros R02 con 4 clavijas P02. La campana F02 se asienta en su ranura, con la ventana hacia la pista.
 7. **Compuerta.** El SG90 entra en la cuna G01 con el eje hacia el centro. Cuelga G01 de la brida con 2 clavijas P02. Pega el brazo simple del servo en el rebaje de G02 y ponlo en el eje con la compuerta cerrada (horizontal).
 8. **Cartucho.** Une C02 + C01 + C01 + C01 por sus colas de milano, con la rampa al lado opuesto al punto A. Pon los 9 vasos en orden: $50 n, $100 n, $50 a, $200 n, $100 a, $500 a, $500 n, $200 a, $1000 n.

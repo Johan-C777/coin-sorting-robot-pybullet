@@ -1,12 +1,14 @@
 # Camas de impresión, etapa 1 v5 (Creality K1C)
 
+Ninguna pieza necesita soportes; lo que el laminador marque son techos de agujeros y puentes cortos.
+
 Cada archivo `.3mf` trae las piezas ya acomodadas y orientadas. Ábrelo en Creality Print, elige el material y lamina.
 Ajustes: capa 0,2 mm, 3 paredes, 20 % de relleno. Gramos aproximados con esos ajustes.
 
 | Cama | Material | Piezas | g aprox | Soportes |
 |---|---|---|---|---|
-| 1 | PLA+ negro | L01 pista, H01 base tolva, B01 x2, H03 a/b/c | 95 | Sí, solo en H01 (marca "solo en la cama") |
-| 2 | PLA+ negro | H02 disco, K01, K02, G01, G02, P01 x17, P02 x8 | 100 | No. Clavijas al 100 % de relleno |
+| 1 | PLA+ negro | L01 pista (de pie), H01 base tolva, B01 x2, H03 a/b/c, P03 x3 | 95 | No. Usa borde (brim) de 5 mm para L01 |
+| 2 | PLA+ negro | H02 disco, K01, K02, G01, G02, P01 x19, P02 x6 | 100 | No. Borde (brim) para G02. Clavijas al 100 % de relleno |
 | 3 | PETG azul | T01 caballete, S01 patín largo, R02 larguero largo | 145 | No |
 | 4 | PETG azul | T01 caballete, S01 patín largo, R02 larguero largo | 145 | No |
 | 5 | PETG azul | T01 caballete, S02 x2, R01 x2 | 160 | No |

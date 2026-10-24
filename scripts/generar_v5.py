@@ -179,7 +179,7 @@ S_K = (s_de_x(X_CAB[0]), s_de_x(X_CAB[1]))
 def zona_pista():
     """Volumen que ocupa la pista y todo lo que queda encima/delante (para recortar soportes)."""
     a = caja(-300, 500, -BAJO, 600, -600, 0.0)            # detrás de la cara de la placa, desde su borde inferior
-    b = caja(-300, 500, -REPISA_E, 600, -1, 600)            # delante de la placa, desde la cara inferior de la repisa
+    b = caja(-300, 500, -BAJO, 600, -1, 600)                # delante de la placa, desde la cara inferior de la repisa
     for sk in S_K:                                          # tacos bajo la repisa
         b += caja(sk - 8.3, sk + 8.3, -BAJO, 600, -1, LAB + 0.3)
     return marco_pista(a + b)
@@ -187,21 +187,24 @@ def zona_pista():
 
 S_TOLVA = 76.0       # la placa sube a T_TOLVA en s < S_TOLVA (agarre de la tolva)
 T_TOLVA = 54.0
-PADS_S = (-20.0, 66.0)
-PAD_T = (40.0, 52.0)
+PADS_S = (62.0, 86.0)  # almohadillas de H01: no tocan la placa, se unen con una clavija P01 perpendicular a ella
+PAD_T = (28.0, 38.0)  # (más arriba la espalda de H01 cruzaría la placa y habría voladizo)
+PAD_N = 16.0
 
 
 def pista_local():
     m = caja(-4, S_END, -BAJO, ALTO, -PLACA, 0)
     m += caja(-4, S_TOLVA, ALTO - 1, T_TOLVA, -PLACA, 0)
-    m += caja(-4, S_END, -REPISA_E, 0, -1, LAB)                      # repisa
+    m += caja(-4, S_END, -BAJO, 0, -1, LAB)                          # repisa (llena hasta el borde: se imprime apoyada ahí)
+    for sb in (B1, B1 + SEP):
+        m -= caja(sb - 7.3, sb + 7.3, -BAJO - 1, -REPISA_E - 1.0, -0.01, 3.3)   # muesca para el gancho de B01
     m += caja(-4, 0, 0, 22, -1, 8)                                    # tope trasero
     for sb in (B1, B1 + SEP):
-        m += caja(sb - 5, sb + 5, -REPISA_E, H_BAR + 8, LAB, LAB + 8)  # poste del receptor
+        m += caja(sb - 5, sb + 5, -BAJO, H_BAR + 8, LAB, LAB + 8)      # poste del receptor
         m -= cil((sb, H_BAR, LAB + 1.5), (0, 0, 1), 20, 5.2 / 2)        # bolsillo del receptor (Ø5)
         m -= cil((sb, H_BAR, -PLACA - 1), (0, 0, 1), LAB + 10, 1.6 / 2)  # ventana del haz
     # sensor de color (TCS34725) delante de la moneda, mirando a su cara
-    m += caja(S_COLOR - 11, S_COLOR + 11, -REPISA_E, 26, LAB - 1, LAB + 4.5)
+    m += caja(S_COLOR - 11, S_COLOR + 11, -BAJO, 26, LAB - 1, LAB + 4.5)
     m -= caja(S_COLOR - 10.4, S_COLOR + 10.4, 3.6, 24.4, LAB + 3.0, LAB + 5)  # rebaje de la placa del sensor
     m -= cil((S_COLOR, 14, LAB - 2), (0, 0, 1), 8, 4.0)                       # ventana del sensor
     # agujeros para las clavijas de la tolva (en la cara de la placa) y de los soportes (borde inferior)
@@ -232,6 +235,12 @@ MOTOR_OFF = 8.0          # el eje del 28BYJ-48 está 8 mm corrido del centro del
 MOTOR_D, MOTOR_L, OREJAS = 28.0, 19.0, 35.0
 RASC_ANG = 150.0         # posición del rascador (grados, 0 = hacia la pista, 90 = arriba)
 RASC_GAP = (2.5, 2.6, 2.8)
+REM_D, REM_AG, REM_L = 3.9, 4.0, 3.6     # remache del motor: espiga, agujero en H01, largo de la espiga
+
+
+def remache():
+    """P03: espiga que entra a presión por la oreja del motor en H01, con cabeza detrás."""
+    return Manifold.cylinder(1.2, 4.0) + Manifold.cylinder(REM_L, REM_D / 2).translate((0, 0, 1.2))
 
 
 def zona_detras_placa():
@@ -254,21 +263,27 @@ def base_tolva():
     # hueco de salida (arriba) y paso del eje
     m -= Manifold.cylinder(BASE_E + 2, 15.5).translate((0, R_PASO, -BASE_E - 1))
     m -= Manifold.cylinder(BASE_E + 2, 5.0).translate((0, 0, -BASE_E - 1))
-    # clavijas para las orejas del motor (detrás)
+    # agujeros para los remaches P03 que pasan por las orejas del motor (la espalda queda plana)
     for u in (-OREJAS / 2, OREJAS / 2):
-        m += Manifold.cylinder(4.5, 3.9 / 2).translate((u, -MOTOR_OFF, -BASE_E - 4.0))
-    # pasos para una brida alrededor del motor
-    for u in (-MOTOR_D / 2 - 4, MOTOR_D / 2 + 4):
-        m += caja(u - 3, u + 3, -MOTOR_OFF - 9, -MOTOR_OFF + 9, -BASE_E - 5, -BASE_E + 0.5)
-        m -= caja(u - 4, u + 4, -MOTOR_OFF - 2.5, -MOTOR_OFF + 2.5, -BASE_E - 4, -BASE_E - 0.8)
+        m -= Manifold.cylinder(BASE_E + 2, REM_AG / 2).translate((u, -MOTOR_OFF, -BASE_E - 1))
     w = marco_disco(m)
     w -= zona_detras_placa()
     # almohadillas que se apoyan en la placa de la pista, con clavija
     for sp in PADS_S:
-        pad = caja(sp - 9, sp + 9, PAD_T[0] - 3, PAD_T[1], 0.3, 9.0)
-        pad -= cil((sp, (PAD_T[0] + PAD_T[1]) / 2, 0), (0, 0, 1), 8.5, PIN_H / 2)
+        pad = caja(sp - 7, sp + 7, PAD_T[0], PAD_T[1], 0.3, PAD_N)
         w += marco_pista(pad)
-    return w
+    for sp in PADS_S:
+        w -= marco_pista(cil((sp, (PAD_T[0] + PAD_T[1]) / 2, -1), (0, 0, 1), PAD_N + 30, PIN_H / 2))
+    # todo lo que quede detrás de la espalda se corta: la espalda es plana y va sobre la cama
+    w = w ^ marco_disco(caja(-400, 400, -400, 400, -BASE_E, 400))
+    # donde la espalda cruza la placa, chaflán a 45° en vez del corte a 25° (que sería voladizo)
+    nn = lambda w_, nd: DISCO_O_L[2] + w_ * WD_L[2] + nd * ND_L[2]
+    w_lin = (DISCO_O_L[2] - BASE_E * ND_L[2] - 0.3) / -WD_L[2]
+    assert abs(nn(w_lin, -BASE_E) - 0.3) < 1e-6
+    chaf = caja(-400, 400, 0, 400, -400, 400).transform(np.array(
+        [[1, 0, 0, 0], [0, math.cos(math.pi / 4), math.sin(math.pi / 4), w_lin],
+         [0, -math.sin(math.pi / 4), math.cos(math.pi / 4), -BASE_E]]))
+    return w - marco_disco(chaf)
 
 
 def disco():
@@ -537,17 +552,17 @@ CAB_PLANO = [-Z_, Y_, X_]
 
 FICHAS = [
     # código, nombre, orientación, notas de impresión
-    ("L01", "Pista con repisa, barreras y sensor de color", lambda: [SV, TV, NV], "Acostada sobre la espalda de la placa. Sin soportes."),
+    ("L01", "Pista con repisa, barreras y sensor de color", lambda: [SV, -NV, TV], "De pie, apoyada en la cara de abajo de la repisa. Sin soportes."),
     ("B01", "Porta-emisor IR (se engancha detrás de la placa)", lambda: [TV, NV, SV], "De lado. Sin soportes."),
-    ("H01", "Base de la tolva: plato inclinado, aro y soporte del motor", lambda: [UD, WD, ND], "Con la cara trasera abajo. Necesita soportes (solo bajo las clavijas del motor y las almohadillas)."),
+    ("H01", "Base de la tolva: plato inclinado, aro y soporte del motor", lambda: [UD, WD, ND], "Con la espalda plana sobre la cama. Sin soportes."),
     ("H02", "Disco de 8 bolsillos", lambda: [UD, WD, ND], "Plano, el cubo hacia arriba. Sin soportes."),
     ("H03", "Rascador (quita la moneda montada)", None, "De canto. Sin soportes. Se imprimen 3 alturas: 2,5 / 2,6 / 2,8 mm."),
-    ("K01", "Soporte de la tolva y la pista (caballete 1)", lambda: X_ARRIBA, "De lado (cara plana abajo). Sin soportes."),
+    ("K01", "Soporte de la tolva y la pista (caballete 1)", lambda: [Y_, -Z_, -X_], "De lado, con la cara que mira a la tolva hacia arriba. Sin soportes."),
     ("K02", "Soporte de la pista (caballete 2)", lambda: X_ARRIBA, "De lado. Sin soportes."),
     ("F01", "Embudo con brida", lambda: BOCA_ABAJO, "Boca abajo (la brida sobre la cama). Pared a 45°, sin soportes."),
     ("F02", "Campana del embudo con ventana", lambda: BOCA_ABAJO, "Con la tapa sobre la cama. Sin soportes."),
     ("G01", "Cuna del servo de la compuerta", lambda: BOCA_ABAJO, "Boca abajo. Sin soportes."),
-    ("G02", "Compuerta (paleta con bisagra)", lambda: X_ARRIBA, "De canto, el cubo arriba. Sin soportes."),
+    ("G02", "Compuerta (paleta con bisagra)", lambda: [X_, -Y_, -Z_], "De pie sobre la punta de la paleta, la bisagra arriba. Sin soportes (usa borde/brim)."),
     ("T01", "Caballete (marco en forma de puente)", lambda: CAB_PLANO, "Plano. Sin soportes."),
     ("S01", "Patín largo (caballetes 1 y 2)", lambda: ARRIBA_Y, "Plano. Sin soportes."),
     ("S02", "Patín corto (caballete 3)", lambda: ARRIBA_Y, "Plano. Sin soportes."),
@@ -589,7 +604,7 @@ def verificar(m: Manifold, nombre: str):
     return dims
 
 
-CLAVIJAS = {"P01": (20.0, 17), "P02": (12.0, 8)}   # largo, cantidad (con 2 de repuesto cada una)
+CLAVIJAS = {"P01": (20.0, 19), "P02": (12.0, 6)}   # largo, cantidad (con 2 de repuesto cada una)
 
 
 def main():
@@ -623,6 +638,11 @@ def main():
         escribir_stl(m, SALIDA / "stl" / f"{cod}_clavija_{int(largo)}mm.stl", cod)
         filas.append((cod, f"Clavija Ø6 x {int(largo)}", cant, (6, 6, largo), m.volume(), "De pie. Imprime todas juntas."))
         print(f"  {cod} x{cant:<2} clavija Ø6 x {largo:.0f}")
+    m = remache()
+    verificar(m, "P03")
+    escribir_stl(m, SALIDA / "stl" / "P03_remache_motor.stl", "P03")
+    filas.append(("P03", "Remache del motor (por cada oreja del 28BYJ-48 hasta H01)", 3, (8, 8, 4.8), m.volume(),
+                  "De pie, cabeza abajo. 100 % de relleno. Entra a presión."))
     with open(SALIDA / "despiece.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["codigo", "pieza", "cantidad", "medidas_mm", "volumen_cm3", "gramos_aprox_total", "impresion"])
