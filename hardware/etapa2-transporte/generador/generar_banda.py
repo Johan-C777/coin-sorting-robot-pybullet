@@ -59,20 +59,28 @@ BOCA_VASO = 113.0
 # Banda
 # =====================================================================
 Y_C = 0.0
-ANCHO_BANDA, ESP_BANDA = 56.0, 1.5
-ROD_D, ROD_CORONA, ROD_L = 30.0, 0.8, 58.0
+# cadena de tablillas impresas: paso 12 mm, 8 dientes, pasador a media altura de la tablilla
+PASO, DIENTES = 12.0, 8
+ANCHO_BANDA, ESP_BANDA = 56.0, 6.0      # ancho y espesor de la tablilla
+SEG = 8.0                               # 7 segmentos de 8 mm: nudillos alternados y ranura central
+KN_D, PIN_C, PIN_CH, PIN_CL = 6.0, 3.0, 3.4, 57.0
+RANURA, RUEDA_W = 8.4, 7.8              # ranura de la tablilla y grosor de la rueda dentada
+RP = PASO / (2 * math.sin(math.pi / DIENTES))      # radio primitivo (centros de pasadores)
+HEX_E = 10.0                            # hexagono del eje donde se calza la rueda
+Z_PIN = Z_BANDA - ESP_BANDA / 2         # altura de los pasadores arriba
 Z_CAMA = Z_BANDA - ESP_BANDA
-RM = (ROD_D + ROD_CORONA) / 2           # radio mayor del rodillo
-Z_EJE = Z_CAMA - RM
+Z_EJE = Z_PIN - RP
+N_TAB = 176                             # se imprimen 176; se sacan las que sobren al tensar
 X_MOT, X_TEN = -330.0, 660.0            # ejes del rodillo motriz (-X) y del libre con tensor (+X)
-CARRERA = 6.0
+CARRERA = 12.0
+TAIL = 40.0                             # cola con rosca del carro del tensor
 ESP_CAMA, ALTO_PARED, ESP_PARED = 3.2, 30.0, 9.0
 Y_PARED = ANCHO_BANDA / 2 + 2.0         # cara interior de la pared +Y
 YW = Y_PARED + ESP_PARED                # cara exterior de la pared +Y
 Y_NERVIO = (-Y_PARED - 9.0, -Y_PARED)   # nervio -Y bajo la cama
 PROF_NERVIO = 12.0
 Y_TAPA = (-Y_PARED - 5.0, -Y_PARED)     # tapas -Y: cara interior a 2 mm del borde de la cinta
-MODULOS = [-358.0, -200.0, -45.0, 120.0, 285.0, 450.0, 570.0, 700.0]
+MODULOS = [-358.0, -200.0, -45.0, 120.0, 285.0, 450.0, 570.0, 722.0]
 X_INI, X_FIN = MODULOS[0], MODULOS[-1]
 CAMA_X = (X_MOT + 17.0, X_TEN - 17.0)
 PATAS_X = [-270.0, -120.0, 60.0, 235.0, 410.0, 603.0, 625.0]
@@ -94,12 +102,13 @@ X_IR = -290.0               # la barrera ve el borde -X del cartucho
 Z_IR = Z_BANDA + 3.0
 
 # motor NEMA17 (cabe en una bolsa impresa, sin tornillos)
-NEMA = dict(lado=42.3, largo=40.0, pilot=22.0, eje_d=5.0, eje_l=24.0)
+NEMA = dict(lado=42.3, largo=48.0, pilot=22.0, eje_d=5.0, eje_l=24.0)
 Y_PLACA = (78.0, 82.0)      # placa frontal del soporte (cara del motor en Y=82)
 BOLSA = 42.9                # hueco para el motor (0,3 mm de holgura por lado)
 Y_ACO = (46.0, 72.0)        # acople impreso
 HEX_AC = 8.0                # espiga hexagonal del rodillo, de lado a lado
 GUIA_TORN = [g + 30 + 60 * k for g in GUIAS[:-1] for k in range(3)]
+X_REF = 300.0                # donde se muestra una tablilla de ejemplo sobre la cama
 
 
 def caja(x0, x1, y0, y1, z0, z1):
@@ -266,28 +275,60 @@ def guia(x0, x1, lado):
     return m
 
 
-def rodillo(motriz):
-    """Rodillo hueco con corona y muñones Ø10 de una pieza. El motriz termina en una espiga hexagonal."""
-    y0 = -ROD_L / 2
-    n = 8
-    partes = []
-    for k in range(n):
-        ya, yb = y0 + ROD_L * k / n, y0 + ROD_L * (k + 1) / n
-        da = ROD_D + ROD_CORONA * (1 - abs(2 * (ya - y0) / ROD_L - 1))
-        db = ROD_D + ROD_CORONA * (1 - abs(2 * (yb - y0) / ROD_L - 1))
-        partes.append(cil_y(0, 0, ya, yb + (0.01 if k < n - 1 else 0), da, db))
-    m = union(partes)
+def eje(motriz):
+    """Eje de una pieza con muñones Ø10 (giran en la pared y la tapa) y un hexágono central donde se calza la rueda.
+    El motriz termina en una espiga hexagonal de 8 mm para el acople."""
     if motriz:
-        for k in range(24):
-            a = 2 * math.pi * k / 24
-            r = ROD_D / 2 + 0.1
-            m = m - cil_y(r * math.cos(a), r * math.sin(a), y0 - 1, y0 + ROD_L + 1, 1.2)
-    m = m - cil_y(0, 0, y0 + 10, y0 + ROD_L - 10, ROD_D - 6)
-    if motriz:
-        m = m + cil_y(0, 0, -41 + 1, y0 + 0.01, PIN_D) + cil_y(0, 0, -y0 - 0.01, 45.0, PIN_D) + hex_y(0, 0, 44.99, 57.0, HEX_AC)
+        m = cil_y(0, 0, -41 + 1, 45.0, PIN_D) + hex_y(0, 0, 44.99, 57.0, HEX_AC)
     else:
-        m = m + cil_y(0, 0, Y_TAPA[0] - CT + 1.5, y0 + 0.01, PIN_D) + cil_y(0, 0, -y0 - 0.01, YW + CT - 1.5, PIN_D)
+        m = cil_y(0, 0, Y_TAPA[0] - CT + 1.5, YW + CT - 1.5, PIN_D)
+    m = m + hex_y(0, 0, -RUEDA_W / 2 - 0.1, RUEDA_W / 2 + 0.1, HEX_E)
     return m.translate((X_MOT if motriz else X_TEN, 0, Z_EJE))
+
+
+def rueda(x):
+    """Rueda dentada de 8 dientes que toma los pasadores de la cadena por la ranura central de las tablillas."""
+    n = DIENTES
+    disco = cil_y(0, 0, -RUEDA_W / 2, RUEDA_W / 2, 2 * (RP + 1.2))
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        px, pz = RP * math.cos(a), RP * math.sin(a)
+        disco = disco - cil_y(px, pz, -RUEDA_W, RUEDA_W, PIN_C + 0.6)
+        # boca abierta hacia afuera para que entre el pasador
+        boca = caja(0, 12, -RUEDA_W, RUEDA_W, -(PIN_C + 0.4) / 2, (PIN_C + 0.4) / 2)
+        boca = boca.rotate((0, -math.degrees(a), 0)).translate((px, 0, pz))
+        disco = disco - boca
+    disco = disco - hex_y(0, 0, -RUEDA_W, RUEDA_W, HEX_E + 0.4)
+    return disco.translate((x, 0, Z_EJE))
+
+
+def tablilla(x=0.0, z=0.0):
+    """Tablilla de 12 × 56 × 6 mm con el pasador trasero en (x, z): nudillos alternados, ranura central para la rueda.
+    Se imprime con la cara de arriba sobre la cama."""
+    h = ESP_BANDA / 2
+    plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
+    plate = plate - caja(-1, PASO + 1, -RANURA / 2, RANURA / 2, -h - 1, h + 1)
+    seg = lambda j: (-ANCHO_BANDA / 2 + SEG * j, -ANCHO_BANDA / 2 + SEG * (j + 1))
+    for j in (1, 5):                              # muescas traseras donde entran los nudillos de la tablilla anterior
+        ya, yb = seg(j)
+        plate = plate - caja(-1, KN_D / 2 + 0.6, ya, yb, -h - 1, h + 1)
+    for j in (0, 2, 4, 6):                        # muescas delanteras para los nudillos de la siguiente
+        ya, yb = seg(j)
+        plate = plate - caja(PASO - KN_D / 2 - 0.6, PASO + 1, ya, yb, -h - 1, h + 1)
+    nud = []
+    for j in (0, 2, 4, 6):
+        ya, yb = seg(j)
+        nud.append(cil_y(0, 0, ya + 0.2, yb - 0.2, KN_D))
+    for j in (1, 5):
+        ya, yb = seg(j)
+        nud.append(cil_y(PASO, 0, ya + 0.2, yb - 0.2, KN_D))
+    m = plate + union(nud)
+    m = m - cil_y(0, 0, -PIN_CL, PIN_CL, PIN_CH) - cil_y(PASO, 0, -PIN_CL, PIN_CL, PIN_CH)
+    return m.translate((x, 0, z))
+
+
+def pasador(x=0.0, z=0.0):
+    return cil_y(x, z, -PIN_CL / 2, PIN_CL / 2, PIN_C)
 
 
 def carro_tensor(lado):
@@ -295,19 +336,19 @@ def carro_tensor(lado):
     y0, y1 = (YW, YW + CT) if lado > 0 else (Y_TAPA[0] - CT, Y_TAPA[0])
     ym = (y0 + y1) / 2
     m = caja(X_TEN - 10, X_TEN + 10, y0, y1, Z_EJE - 9, Z_EJE + 9)
-    m = m + caja(X_TEN + 9.99, X_TEN + 26, y0, y1, Z_EJE - 7, Z_EJE + 7)
+    m = m + caja(X_TEN + 9.99, X_TEN + TAIL, y0, y1, Z_EJE - 7, Z_EJE + 7)
     if lado > 0:
         m = m - cil_y(X_TEN, Z_EJE, y0 - 1, y1 - 1, PIN_H)
     else:
         m = m - cil_y(X_TEN, Z_EJE, y0 + 1, y1 + 1, PIN_H)
-    m = m - hilo(X_TEN + 8, X_TEN + 26.5, ym, Z_EJE, HILO_JUEGO)
+    m = m - hilo(X_TEN + 8, X_TEN + TAIL + 0.5, ym, Z_EJE, HILO_JUEGO)
     return m
 
 
 def tornillo_tensor(lado):
     """Tornillo impreso: cabeza ranurada afuera de la oreja, rosca gruesa que tira del carro."""
     ym = YW + CT / 2 if lado > 0 else Y_TAPA[0] - CT / 2
-    m = hilo(X_TEN + 12, X_FIN + 0.01, ym, Z_EJE)
+    m = hilo(X_TEN + 18, X_FIN + 0.01, ym, Z_EJE)
     cab = cil_x(ym, Z_EJE, X_FIN, X_FIN + 8, 22.0)
     for k in range(8):
         a = 2 * math.pi * k / 8
@@ -394,25 +435,9 @@ def clavija():
 # =====================================================================
 # Comprados y referencias
 # =====================================================================
-def banda_malla():
-    r_in = RM
-    ro = r_in + ESP_BANDA / 2
-    pts = []
-    n = 20
-    for k in range(n + 1):
-        a = math.pi / 2 + math.pi * k / n
-        pts.append((X_MOT + ro * math.cos(a), Z_EJE + ro * math.sin(a)))
-    for k in range(n + 1):
-        a = -math.pi / 2 + math.pi * k / n
-        pts.append((X_TEN + ro * math.cos(a), Z_EJE + ro * math.sin(a)))
-    ext = CrossSection([pts]).offset(ESP_BANDA / 2, join_type=JoinType.Round)
-    inn = CrossSection([pts]).offset(-ESP_BANDA / 2, join_type=JoinType.Round)
-    return (ext - inn).extrude(ANCHO_BANDA).rotate((90, 0, 0)).translate((0, ANCHO_BANDA / 2, 0))
-
-
 def lazo_banda():
-    r = RM + ESP_BANDA / 2
-    return 2 * (X_TEN - X_MOT) + 2 * math.pi * r
+    """Largo de la cadena por la línea de pasadores con las ruedas de radio primitivo RP."""
+    return 2 * (X_TEN - X_MOT) + 2 * math.pi * RP
 
 
 def nema():
@@ -454,8 +479,8 @@ def piezas():
         P.append(("BT08", guia(GUIAS[i], GUIAS[i + 1], -1), {"tag": f"G{i + 1}"}))
     for i in range(len(GUIAS) - 1):
         P.append(("BT09", guia(GUIAS[i], GUIAS[i + 1], 1), {"tag": f"G{i + 1}"}))
-    P.append(("BT10", rodillo(True), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT11", rodillo(False), {"pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT10", eje(True), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT11", eje(False), {"pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
     P.append(("BT12", carro_tensor(1), {"tag": "+Y"}))
     P.append(("BT12", carro_tensor(-1), {"tag": "-Y"}))
     P.append(("BT13", tapa(True), {}))
@@ -467,12 +492,15 @@ def piezas():
     P.append(("BT18", tornillo_tensor(1), {"tag": "+Y"}))
     P.append(("BT18", tornillo_tensor(-1), {"tag": "-Y"}))
     P.append(("BT19", acople(), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("K1", banda_malla(), {}))
-    P.append(("K2", nema(), {}))
+    P.append(("BT20", rueda(X_MOT), {"tag": "motriz", "pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT20", rueda(X_TEN), {"tag": "libre", "pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT21", tablilla(X_REF, Z_PIN), {"origen": [X_REF, 0, Z_PIN]}))
+    P.append(("BT22", pasador(X_REF, Z_PIN), {}))
+    P.append(("K1", nema(), {}))
     led, foto = leds_ref()
-    P.append(("K3", led, {}))
-    P.append(("K4", foto, {}))
-    P.append(("K5", vaso_rechazo(), {}))
+    P.append(("K2", led, {}))
+    P.append(("K3", foto, {}))
+    P.append(("K4", vaso_rechazo(), {}))
     return P
 
 
@@ -485,7 +513,7 @@ def main():
         v, t = malla(m)
         bb = m.bounding_box()
         out.append(dict(pid=pid, v=b64(v), t=b64(t), vol=round(m.volume() / 1000.0, 2), bb=[round(x, 1) for x in bb], **ex))
-    sim = dict(z_banda=Z_BANDA, x_mot=X_MOT, x_ten=X_TEN, z_eje=Z_EJE, r_rod=RM, esp=ESP_BANDA, ancho=ANCHO_BANDA,
+    sim = dict(z_banda=Z_BANDA, x_mot=X_MOT, x_ten=X_TEN, z_eje=Z_EJE, rp=RP, paso_cad=PASO, dientes=DIENTES, n_cad=N_TAB, z_pin=Z_PIN, esp=ESP_BANDA, ancho=ANCHO_BANDA,
                lazo=lazo_banda(), a_x=A_X, s_min=S_MIN, s_rechazo=S_RECHAZO, paso=PASO_VASO,
                x_vaso1=X_VASO1, x_rampa=X_RAMPA, cart=list(X_CART), x_ir=X_IR, z_ir=Z_IR, rec=REC,
                y_lab=Y_LAB, s_a=[S_A(k) for k in range(1, 10)])

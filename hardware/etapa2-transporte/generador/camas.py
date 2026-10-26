@@ -1,4 +1,4 @@
-"""Exporta los STL de la banda (v2 sin herrajes) en posicion de impresion y arma las camas.
+"""Exporta los STL de la banda (v2b, cadena de tablillas) en posicion de impresion y arma las camas.
 
     python camas.py salida/        # salida/stl/*.stl, salida/camas/*.stl, salida/CAMAS.md
 Cada cama es un solo STL con las piezas ya acomodadas en la cama de 220 x 220 de la K1C.
@@ -28,8 +28,8 @@ ORI = {
     'BT08G2': ('guia-menos-Y', 'Guía −Y, tramos 2 a 5', 'PLA', '20 %', (180, 0, 0), 4, 'Ala abajo, labio hacia arriba.'),
     'BT09G1': ('guia-mas-Y-tramo1', 'Guía +Y, tramo 1 (con el hueco del LED)', 'PLA', '20 %', (180, 0, 0), 1, 'Ala abajo, labio hacia arriba.'),
     'BT09G2': ('guia-mas-Y', 'Guía +Y, tramos 2 a 5', 'PLA', '20 %', (180, 0, 0), 4, 'Ala abajo, labio hacia arriba.'),
-    'BT10': ('rodillo-motriz', 'Rodillo motriz', 'PETG', '40 %, 4 paredes', (90, 0, 0), 1, 'De pie sobre el muñón corto. Soportes de árbol sólo bajo el disco de la base. Las estrías de agarre quedan en la pared del cilindro.'),
-    'BT11': ('rodillo-libre', 'Rodillo libre', 'PETG', '40 %, 4 paredes', (90, 0, 0), 1, 'De pie sobre el muñón corto. Soportes de árbol sólo bajo el disco de la base.'),
+    'BT10': ('eje-motriz', 'Eje motriz con espiga hexagonal', 'PETG', '100 %', (0, 0, 0), 1, 'Tumbado: las capas corren a lo largo del eje, que es lo que más aguanta. Usa borde (brim) de 5 mm; el cilindro apoya en una línea.'),
+    'BT11': ('eje-libre', 'Eje libre', 'PETG', '100 %', (0, 0, 0), 1, 'Tumbado, igual que el motriz.'),
     'BT12P': ('carro-tensor-mas-Y', 'Carro del tensor +Y', 'PETG', '40 %, 4 paredes', (-90, 0, 0), 1, 'Plano, con el agujero del muñón hacia arriba.'),
     'BT12M': ('carro-tensor-menos-Y', 'Carro del tensor −Y', 'PETG', '40 %, 4 paredes', (90, 0, 0), 1, 'Plano, con el agujero del muñón hacia arriba.'),
     'BT13': ('tapa-motor', 'Tapa motor (−Y)', 'PETG', '20 %', (-90, 0, 0), 1, 'Cara interior abajo, cubo del muñón hacia arriba.'),
@@ -39,6 +39,9 @@ ORI = {
     'BT17': ('clavija-6x12', 'Clavija Ø6 × 12 (P02)', 'PETG', '100 %', (0, -90, 0), 72, 'De pie. Imprime todas juntas; 64 + 8 de repuesto.'),
     'BT18': ('tornillo-tensor', 'Tornillo del tensor', 'PETG', '100 %', (0, 90, 0), 2, 'Cabeza abajo. La rosca no necesita soportes.'),
     'BT19': ('acople', 'Acople hexágono + D', 'PETG', '100 %', (90, 0, 0), 1, 'De pie sobre la boca hexagonal.'),
+    'BT20': ('rueda-dentada', 'Rueda dentada de 8 dientes', 'PETG', '100 %', (90, 0, 0), 2, 'Plana, eje vertical. Imprime la motriz y la libre iguales.'),
+    'BT21': ('tablilla', 'Tablilla de la cadena', 'PETG', '100 %', (180, 0, 0), 176, 'Cara de arriba contra la cama (lisa, sin soportes). 173 hacen la cadena; 3 de repuesto. Imprime 3 primero y prueba la articulación.'),
+    'BT22': ('pasador-3x57', 'Pasador Ø3 × 57', 'PETG', '100 %', (0, 0, 0), 188, 'Tumbado. 173 + repuestos. Si sale con rebabas, lijar suave; deben girar libres en la tablilla.'),
 }
 
 
@@ -51,7 +54,13 @@ def prueba():
     b = b - r
     muñon = g.cil_z(55, 10, 0, 20, g.PIN_D)
     rosca = g.hilo(0, 24, 0, 0).rotate((0, -90, 0)).translate((55, 30, 0))
-    return b + muñon + rosca
+    t1 = g.tablilla(0, 0).rotate((180, 0, 0))
+    t2 = g.tablilla(g.PASO, 0).rotate((180, 0, 0))
+    pas = g.pasador(g.PASO, 0)
+    arti = (t1 + t2 + pas.rotate((180, 0, 0)))
+    x0, y0, z0, x1, y1, z1 = arti.bounding_box()
+    arti = arti.translate((70 - x0, 70 - y0 + 0, -z0))
+    return b + muñon + rosca + arti
 
 
 def pose(m, rot):
@@ -127,7 +136,7 @@ def main():
     pr, (w, d, h) = pose(prueba(), (0, 0, 0))
     (out / 'stl' / 'BT00_prueba-tolerancias.stl').write_bytes(stl_bytes([pr]))
     prueba_p = dict(key='BT00', arch='prueba-tolerancias', nom='Prueba de tolerancias', mat='PETG', relleno='100 %', cant=1,
-                    nota='Muñón en agujero de 10,4, clavija en 6,2 y rosca con 0,35 mm de juego. Imprímela primero.',
+                    nota='Muñón en agujero de 10,4, clavija en 6,2, rosca con 0,35 mm de juego y dos tablillas unidas con su pasador (deben girar libres sin holgura exagerada). Imprímela primero.',
                     m=pr, w=w, d=d, h=h, vol=pr.volume() / 1000.0, fn='BT00_prueba-tolerancias.stl')
     for pz in piezas:
         assert pz['h'] <= 250, pz['key']
@@ -142,8 +151,8 @@ def main():
             for i in range(pz['cant']):
                 items.append(dict(pz, i=i + 1))
         # las clavijas y los tornillos van juntos en una cama aparte al 100 %
-        pequenas = [i for i in items if i['key'] in ('BT17', 'BT18', 'BT19')]
-        grandes = [i for i in items if i['key'] not in ('BT17', 'BT18', 'BT19')]
+        pequenas = [i for i in items if i['key'] in ('BT17', 'BT18', 'BT19', 'BT21', 'BT22')]
+        grandes = [i for i in items if i['key'] not in ('BT17', 'BT18', 'BT19', 'BT21', 'BT22')]
         for grupo in (grandes, pequenas):
             if not grupo:
                 continue
@@ -177,7 +186,7 @@ def gramos(pz):
 def escribir_md(out, filas, piezas, prueba_p):
     L = []
     L.append("# Banda transportadora (etapa 2): camas de impresión\n")
-    L.append("Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin tornillos, tuercas ni rodamientos: todo se une con clavijas Ø6 × 12, muñones y un tornillo impreso.\n")
+    L.append("Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin tornillos, tuercas, rodamientos ni correa: la banda es una cadena de tablillas impresa; todo se une con clavijas Ø6 × 12, muñones, pasadores Ø3 y un tornillo impreso.\n")
     L.append("Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene cada cama ya acomodada en un solo STL. Si prefieres acomodar tú, usa `stl/`.\n")
     L.append("## Ajustes\n")
     L.append("- Boquilla 0,4, capa 0,2 mm, 3 paredes y 20 % de relleno salvo que la tabla diga otra cosa (lo que carga o gira lleva 4 paredes y más relleno).")
@@ -185,7 +194,7 @@ def escribir_md(out, filas, piezas, prueba_p):
     L.append("- Compensación de agujeros: ninguna. Las holguras ya están en el modelo (muñón 10 en 10,4; clavija 6 en 6,2; rosca con 0,35 mm).")
     L.append("- Las estimaciones de peso son aproximadas (relleno y paredes cambian el resultado).\n")
     L.append("## Orden\n")
-    L.append("1. **Cama 00, prueba de tolerancias.** Mete el muñón en el agujero de 10,4, una clavija en el de 6,2 y atornilla la rosca en el bloque. Si algo queda flojo o no entra, dime la medida y lo corrijo antes de imprimir lo demás.")
+    L.append("1. **Cama 00, prueba de tolerancias.** Mete el muñón en el agujero de 10,4, una clavija en el de 6,2, atornilla la rosca en el bloque y dobla las dos tablillas unidas: deben girar libres. Si algo queda flojo o no entra, dime la medida y lo corrijo antes de imprimir lo demás.")
     L.append("2. Camas de PETG en el orden de abajo (primero las clavijas, que se necesitan para armar).")
     L.append("3. Cama de guías en PLA al final.\n")
     L.append("## Camas\n")
@@ -216,9 +225,10 @@ def escribir_md(out, filas, piezas, prueba_p):
     for pz in piezas:
         L.append(f"| `{pz['fn']}` | {pz['cant']} | {pz['mat']} |")
     L.append("\n## Cosas a vigilar al imprimir\n")
-    L.append("- **Rodillos:** quedan con el eje vertical para que giren redondos, pero así las capas cruzan el muñón. Imprímelos con 4 paredes y mira que el muñón no tenga huecos. Si uno se parte, avísame y lo paso a otra orientación.")
-    L.append("- **Muñones:** una gota de grasa de silicona en los agujeros al armar. Si aparece juego, se reimprime el rodillo.")
-    L.append("- **Clavijas de módulos, patas y soporte del motor:** se pegan con cianoacrilato. Las de guías y tapas no, porque se sacan para meter la cinta.")
+    L.append("- **Cadena:** son 176 tablillas y 188 pasadores; cada tablilla pesa unos 3 g. Imprime primero 3 tablillas con 2 pasadores (o la cama 00) y comprueba que giran libres. Si quedan duras, lima el agujero de pasador; si quedan flojas, avísame.")
+    L.append("- **Armado de la cadena:** se une sobre la mesa y se cierra con el último pasador. Si al tensar sobra cadena (por el juego de las articulaciones), quita eslabones.")
+    L.append("- **Ejes y ruedas:** los ejes se imprimen tumbados con borde; las ruedas planas. Una gota de grasa de silicona en los muñones al armar.")
+    L.append("- **Clavijas de módulos, patas y soporte del motor:** se pegan con cianoacrilato. Las de guías y tapas no, porque se sacan para meter la cadena.")
     L.append("- **Bolsa del motor:** el NEMA17 entra por atrás con un poco de fuerza. Si queda flojo, una gota de cianoacrilato en las esquinas.")
     (out / 'CAMAS.md').write_text("\n".join(L) + "\n")
 
