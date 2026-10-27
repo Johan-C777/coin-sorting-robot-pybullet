@@ -1,7 +1,9 @@
 # Clasificador físico (etapa 1)
 
+> **Archivado (v4).** Este diseño (riel de 8 ranuras, ductos y base de PVC) se reemplazó por la torre de canto v5: [hardware/etapa1-clasificador/](../../hardware/etapa1-clasificador/README.md) y [09-clasificador-v5.md](../09-clasificador-v5.md).
+
 Piezas imprimibles con los alojamientos de la electrónica ya modelados.
-Fuente única: `scripts/generar_clasificador.py` → `hardware/etapa1-clasificador/stl/`.
+Fuente única: `scripts/generar_clasificador.py` → `hardware/archivo/etapa1-v4/stl/`.
 
 ```
 pip install manifold3d numpy
@@ -11,7 +13,7 @@ python scripts/generar_clasificador.py --ensamble
 ## Piezas (Creality K1C, cama 220 × 220 × 250)
 
 Sin tornillos ni soportes: todo encaja con clavijas Ø6 a presión, llaves de
-mariposa y bridas de nailon. Detalle y medidas en `hardware/etapa1-clasificador/stl/piezas_clasificador.csv`.
+mariposa y bridas de nailon. Detalle y medidas en `hardware/archivo/etapa1-v4/stl/piezas_clasificador.csv`.
 
 | STL | Cant. | Notas |
 |---|---|---|
@@ -26,8 +28,8 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/etapa1-clasificador/
 | `T04_pata_tolva` | 4 | Patas de 212 mm |
 | `P01_base_extremo` | 2 | Base de ABS de un extremo: dos zócalos para tubo PVC de 3/4" unidos por una viga de 150 mm |
 
-`hardware/etapa1-clasificador/stl/ensamble/ensamble_referencia.stl` muestra todo en posición;
-[`docs/ensamble-etapa1.html`](ensamble-etapa1.html) es el visor 3D con la simulación.
+`hardware/archivo/etapa1-v4/stl/ensamble/ensamble_referencia.stl` muestra todo en posición;
+[`docs/ensamble-etapa1.html`](../ensamble-etapa1.html) es el visor 3D con la simulación.
 
 ## Parámetros fijados
 

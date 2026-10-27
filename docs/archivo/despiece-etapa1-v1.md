@@ -1,6 +1,6 @@
 # Despiece de la etapa 1 (versión 1, archivada)
 
-> **Diseño reemplazado.** Esta fue la primera etapa 1 (riel de 8 estaciones con varillas M5 y tornillos). La versión que se imprime ahora está en [09-clasificador-fisico.md](../09-clasificador-fisico.md) y su guía de armado en [10-guia-armado-etapa1.md](../10-guia-armado-etapa1.md).
+> **Diseño reemplazado.** Esta fue la primera etapa 1 (riel de 8 estaciones con varillas M5 y tornillos). La versión que se imprime ahora está en [09-clasificador-fisico.md](09-clasificador-fisico-v4.md) y su guía de armado en [10-guia-armado-etapa1.md](10-guia-armado-etapa1-v4.md).
 
 ![Vista de despiece](../img/etapa1-despiece.png)
 
@@ -50,7 +50,7 @@ trae las 58 piezas de la celda repartidas en 9 bandejas por material.
 | C06 | Tubo flexible de PVC cristal de 3/4" | 8 | Colector de cada estación hacia el vaso de su denominación |
 
 Detalle con cantidades y tornillería en
-[`hardware/etapa1-clasificador/bom-etapa1.csv`](../../hardware/etapa1-clasificador/bom-etapa1.csv).
+[`hardware/etapa1-clasificador/bom-etapa1.csv`](../../hardware/archivo/etapa1-v4/bom-etapa1.csv).
 
 ## Cómo se arma
 
