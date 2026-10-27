@@ -10,12 +10,15 @@ constexpr uint8_t PIN_SERVO    = 15;            // SG90 compuerta (5 V externos)
 constexpr uint8_t PIN_IR1      = 1;             // fototransistor barrera 1 (ADC1_CH0)
 constexpr uint8_t PIN_IR2      = 2;             // fototransistor barrera 2 (ADC1_CH1)
 constexpr uint8_t PIN_IR_REF   = 13;            // haz de referencia de la banda
-constexpr uint8_t PIN_SDA      = 8;             // TCS34725
-constexpr uint8_t PIN_SCL      = 9;
+constexpr uint8_t PIN_TCS_OUT  = 14;            // TCS3200: salida en frecuencia (PCNT)
+constexpr uint8_t PIN_TCS_S2   = 16;
+constexpr uint8_t PIN_TCS_S3   = 17;
+constexpr uint8_t PIN_TCS_S0   = 18;            // S0=S1=1 -> 100 % (chip a 15 mm); o a 3V3 fijo
+constexpr uint8_t PIN_TCS_S1   = 21;            // OE a GND, VCC a 3V3
 constexpr uint8_t PIN_STEP     = 10;            // A4988 (banda)
 constexpr uint8_t PIN_DIR      = 11;
 constexpr uint8_t PIN_EN       = 12;            // activo en bajo
-// libres si hacen falta: 14, 16, 17, 18, 21, 38, 39, 40, 41, 42, 47
+// libres si hacen falta: 8, 9, 38, 39, 40, 41, 42, 47
 
 // ---- Tolva: 28BYJ-48 en PASO COMPLETO, 2 bobinas (máx. torque y velocidad) -----
 // Reductora real 63,68395:1 -> 2037,8868 pasos/vuelta (no 2048). Se acumula la
@@ -52,6 +55,7 @@ constexpr Tipo TIPOS[9] = {                       // índice = vaso en el cartuc
     {"$500 N", 23.7f}, {"$200 A", 24.4f}, {"$1000 N", 26.7f}};
 constexpr int V_500A = 5, V_500N = 6;
 constexpr float TOLERANCIA_MM = 0.6f;            // fuera de esto -> rechazo
+constexpr uint16_t TCS_VENTANA_MS = 4;           // tiempo de conteo por canal (R, G, B)
 constexpr float UMBRAL_DORADO = 1.30f;           // (R+G)/2B > umbral = dorado (calibrar)
 constexpr int   VASO_RECHAZO = -1;
 

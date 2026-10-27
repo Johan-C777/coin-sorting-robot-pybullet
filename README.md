@@ -26,7 +26,7 @@ Nueva Granada.
 
 | Etapa | Qué hace | Estado | Dónde |
 | --- | --- | --- | --- |
-| **1 · Tolva y selección** | Torre de canto v5: tolva de disco, pista con 2 barreras IR que miden el diámetro y un TCS34725 para las $500, embudo y compuerta que sueltan cada moneda en su vaso del cartucho de 9 | 24 STL sin tornillos ni soportes; camas 1 a 6 impresas, falta la 7 y armar. ESP32-S3 con pines y firmware de prueba | [diseño](docs/09-clasificador-v5.md), [piezas y armado](hardware/etapa1-clasificador), [electrónica](docs/11-electronica-etapa1.md) |
+| **1 · Tolva y selección** | Torre de canto v5: tolva de disco, pista con 2 barreras IR que miden el diámetro y un TCS3200 para las $500, embudo y compuerta que sueltan cada moneda en su vaso del cartucho de 9 | 24 STL sin tornillos ni soportes; camas 1 a 6 impresas, falta la 7 y armar. ESP32-S3 con pines y firmware de prueba | [diseño](docs/09-clasificador-v5.md), [piezas y armado](hardware/etapa1-clasificador), [electrónica](docs/11-electronica-etapa1.md) |
 | **2 · Transporte** | Banda que pone cada vaso del cartucho bajo el embudo y lo lleva al punto A | En diseño | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
 | **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
@@ -51,7 +51,7 @@ la carpeta [`docs/`](docs) del repositorio.
 ```mermaid
 flowchart LR
     T["Tolva de disco<br/>antiguas y nuevas"] --> R["Pista de canto<br/>2 barreras IR: diámetro"]
-    R --> IR["TCS34725<br/>$500 antigua o nueva"]
+    R --> IR["TCS3200<br/>$500 antigua o nueva"]
     IR --> C["Embudo y compuerta<br/>vaso del cartucho"]
     C --> B["Banda"]
     B --> A(["Punto A"])
@@ -62,7 +62,7 @@ flowchart LR
 
 | Paso | Qué pasa | Dónde se ve |
 | --- | --- | --- |
-| 1. Selección | El disco de la tolva sube una moneda por bolsillo y la deja de canto en la pista; dos barreras IR miden su diámetro por tiempo y el TCS34725 separa las $500 por color | [09-clasificador-v5.md](docs/09-clasificador-v5.md), [07-monedas.md](docs/07-monedas.md) |
+| 1. Selección | El disco de la tolva sube una moneda por bolsillo y la deja de canto en la pista; dos barreras IR miden su diámetro por tiempo y el TCS3200 separa las $500 por color | [09-clasificador-v5.md](docs/09-clasificador-v5.md), [07-monedas.md](docs/07-monedas.md) |
 | 2. Conteo | Cada medida da denominación **y familia**; lo que no encaja va al vaso de rechazo | [`firmware/etapa1_prueba_motor`](firmware/etapa1_prueba_motor) |
 | 3. Embalaje | La banda pone el vaso correcto del cartucho bajo el embudo y la compuerta suelta la moneda: 9 vasos, uno por tipo | [`hardware/etapa1-clasificador/`](hardware/etapa1-clasificador) |
 | 4. Punto A | La banda deja cada vaso en el límite del alcance del brazo | simulación |
@@ -120,7 +120,7 @@ torre de 33 cm que se para sobre la banda
 - **Tolva de disco** a 45° con un 28BYJ-48: cada bolsillo sube una moneda y la deja
   caer de canto a la pista (simulado en MuJoCo: 1.728 de 1.728).
 - **Pista** a 22° con dos barreras IR a 24 mm: el tiempo de paso da el diámetro.
-  Un **TCS34725** separa la $500 antigua de la nueva, que miden lo mismo.
+  Un **TCS3200** separa la $500 antigua de la nueva, que miden lo mismo.
 - **Embudo y compuerta** (SG90): la moneda espera hasta que la banda pone el vaso
   correcto del cartucho debajo. Lo dudoso va por la rampa C02 a un vaso de rechazo.
 - **Sin tornillos ni soportes:** clavijas Ø6 impresas y remaches para el motor.
@@ -304,7 +304,7 @@ docs/
 └── ensamble-etapa1.html, simulacion_sistema_completo.html, simulacion-etapa1.html, memoria-calculo.html
 firmware/
 ├── esp32_brazo/            cinemática, trayectorias, planificador, secuenciador, PCA9685, Wi-Fi
-├── etapa1_prueba_motor/    ESP32-S3 de la etapa 1 v5 (PlatformIO): tolva, 2 barreras IR, TCS34725, compuerta, banda
+├── etapa1_prueba_motor/    ESP32-S3 de la etapa 1 v5 (PlatformIO): tolva, 2 barreras IR, TCS3200, compuerta, banda
 ├── esp32_contador/         contador de la etapa 1 v4 (9 barreras IR); lo usan las pruebas de monedas
 └── tests/                  núcleo de los dos firmwares compilado y probado en el PC
 hardware/                   por etapa: etapa1-clasificador, etapa2-transporte, etapa3-brazo, archivo

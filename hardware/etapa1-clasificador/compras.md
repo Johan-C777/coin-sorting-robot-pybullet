@@ -9,7 +9,7 @@ Cotas leídas de los STL (no de memoria): bolsillos y agujeros de L01, B01, H01,
 | 1 (+1 repuesto) | Micro servo SG90 9 g con brazo simple (MG90S también calza) | Cuerpo 22,7 x 12,2 mm (G01: bolsillo 23,1 x 12,8) | G01, G02 |
 | 3 | LED infrarrojo 5 mm (T-1¾), 940 nm | Cuerpo Ø5,0 (B01: agujero Ø5,2) | B01 x2 |
 | 3 | Fototransistor 5 mm (T-1¾), 940 nm, del mismo kit/fabricante | Cuerpo Ø5,0 (L01: agujeros Ø5,2 a 105 y 129 mm) | L01 |
-| 1 | Módulo TCS34725 con placa de ~20 mm de ancho (tipo Adafruit 1334) | Ranura L01 de 22,0 de ancho x 5,5 de grueso, a 152 mm. Mide tu placa con calibrador antes: ≤ 21,5 x ≤ 5 (con pines soldados por fuera de la ranura) | L01 |
+| 1 | Módulo TCS3200 de 4 LED (placa ≈ 28,5 mm) | Va en el adaptador A01 pegado sobre L01 a 152 mm, después de cortar el rebaje que era para el TCS34725. Si la placa mide más de 29,5 mm, hay que regenerar A01 | L01, A01 |
 | 1 | Cianoacrilato (pegante instantáneo) | Pegar el brazo del servo en G02 | G02 |
 | opc. | Cables Dupont hembra-hembra y macho-hembra (20 de cada) | Si tu kit no los trae | — |
 
