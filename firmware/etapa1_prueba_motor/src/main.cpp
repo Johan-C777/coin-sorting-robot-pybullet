@@ -1,4 +1,4 @@
-// Etapa 1 completa en ESP32-S3: tolva 28BYJ-48 -> barreras IR (diámetro) -> TCS34725
+// Etapa 1 completa en ESP32-S3: tolva 28BYJ-48 -> barreras IR (diámetro) -> TCS3200
 // ($500 A/N) -> compuerta SG90 -> (opcional) banda NEMA17/A4988.
 // Consola serie 115200: ver ayuda() abajo.
 #include <Arduino.h>
@@ -155,7 +155,8 @@ void setup() {
   bandaIniciar();
 #endif
   b1.iniciar(); b2.iniciar();
-  Serial.printf("IR base: B1=%.0f B2=%.0f  TCS34725: %s\n", b1.base, b2.base, color.iniciar() ? "ok" : "NO DETECTADO");
+  color.iniciar();
+  Serial.printf("IR base: B1=%.0f B2=%.0f\n", b1.base, b2.base);
   iniciarTareaPasos();
   ayuda();
 }
@@ -167,6 +168,9 @@ void loop() {
   consola();
   if (monitor && millis() - t_mon > 200) {
     t_mon = millis();
-    Serial.printf("IR1=%d/%.0f IR2=%d/%.0f REF=%d\n", b1.raw, b1.base, b2.raw, b2.base, analogRead(PIN_IR_REF));
+    uint32_t tot;
+    const float rz = color.razonMax(10, &tot);
+    Serial.printf("IR1=%d/%.0f IR2=%d/%.0f REF=%d  TCS razon=%.2f total=%u\n", b1.raw, b1.base, b2.raw,
+                  b2.base, analogRead(PIN_IR_REF), rz, tot);
   }
 }

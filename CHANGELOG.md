@@ -6,7 +6,8 @@
 - Integra la rama de la v5: `scripts/generar_v5.py` (regenera los 24 STL idénticos), `scripts/armar_camas_v5.py` (camas 2, 3 y 7) y `sim/mujoco/` (disco 1728/1728, embudo 81/81, pista de canto).
 - Archivo: la v4 (riel de 8 ranuras, ductos y base de PVC, BOM) a `hardware/archivo/etapa1-v4/`; las probetas del riel de canto a `hardware/archivo/etapa1-v3-canto/`; `09-clasificador-fisico` y `10-guia-armado-etapa1` a `docs/archivo/` con sufijo `-v4`. Los generadores v4 escriben en las rutas nuevas.
 - Docs nuevos: `09-clasificador-v5.md` (cambios frente a la v4, recorrido de la moneda, validación) y `11-electronica-etapa1.md` (pines del ESP32-S3, alimentación, barreras IR, tolva en paso completo, consola) con `docs/img/etapa1-cableado.svg` e imagen `docs/img/etapa1-v5.png`.
-- Firmware `firmware/etapa1_prueba_motor/` (PlatformIO, ESP32-S3): tolva con rampa en paso completo, 2 barreras IR, TCS34725, compuerta SG90 y banda opcional.
+- Firmware `firmware/etapa1_prueba_motor/` (PlatformIO, ESP32-S3): tolva con rampa en paso completo, 2 barreras IR, TCS3200 leído con el PCNT, compuerta SG90 y banda opcional. Compila con Arduino-ESP32 3.x.
+- Sensor de color: TCS3200 (OUT 14, S2 16, S3 17, S0 18, S1 21) en el adaptador `A01_adaptador_tcs3200.stl`, que se pega sobre L01 tras cortar el rebaje del TCS34725; generador `scripts/generar_adaptador_tcs3200.py`.
 - README, portada, entrega de avances y `hardware/README.md` al día. Pruebas: 61 de Python y 48 de C++ en verde.
 
 ## 0.6.0 · Nueve vasos al brazo

@@ -14,7 +14,7 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 | Una ranura por diámetro, 9 barreras IR, 9 ductos de PVC a 9 vasos fijos | Una sola pista con 2 barreras IR que miden el diámetro por tiempo, un embudo y una compuerta | Menos piezas y sensores; la ranura crítica de la v4 tenía 0,30 mm por lado |
 | Base de MDF y PVC de 560 × 198 mm | Torre de 33 cm sobre 3 caballetes impresos, de pie sobre la banda | Todo impreso, sin cortes de PVC ni herrajes |
 | Vasos quietos bajo los ductos | Cartucho de 9 vasos que la banda (etapa 2) pone bajo el embudo | La misma banda lleva después los vasos al punto A del brazo |
-| Plato basculante para las dos $500 | TCS34725 en la pista; la compuerta solo suelta cuando el vaso correcto está debajo | El color decide el vaso, no un desvío mecánico |
+| Plato basculante para las dos $500 | Sensor de color TCS3200 en la pista; la compuerta solo suelta cuando el vaso correcto está debajo | El color decide el vaso, no un desvío mecánico |
 
 ## Recorrido de una moneda
 
@@ -24,7 +24,7 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
    2 cm a la pista, parada contra la placa.
 3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Barreras IR a
    105 y 129 mm (24 mm entre haces): el tiempo de paso da la cuerda y de ahí el
-   diámetro. El TCS34725 a 152 mm separa la $500 antigua (dorada) de la nueva.
+   diámetro. El TCS3200 a 152 mm (en el adaptador A01, que reemplaza el rebaje del TCS34725) separa la $500 antigua (dorada) de la nueva.
 4. **Embudo (F01, F02).** Borde Ø90 con pared a 45°, 60 mm adelante y 50 mm bajo el
    fin de la pista.
 5. **Compuerta (G01, G02).** Paleta sobre el eje del SG90: sostiene la moneda y abre

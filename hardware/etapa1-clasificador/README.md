@@ -6,7 +6,7 @@ Los STL ya salen orientados para imprimir. Se regeneran con
 
 | Carpeta / archivo | Qué hay |
 |---|---|
-| [`stl/`](stl) | Las 24 piezas (22 códigos; H03 en tres alturas) |
+| [`stl/`](stl) | Las 24 piezas (22 códigos; H03 en tres alturas) y el adaptador A01 del TCS3200 |
 | [`impresion/`](impresion) | 8 camas `.3mf` para la K1C en el orden de impresión ([CAMAS.md](impresion/CAMAS.md)) |
 | [`despiece.csv`](despiece.csv) | Código, cantidad, medidas, volumen, gramos y orientación de cada pieza |
 | [`compras.md`](compras.md) | Componentes que faltan, con la cota que debe cumplir cada uno |
@@ -20,7 +20,7 @@ Las versiones anteriores (v1 con varillas, v3 de canto, v4 con riel de 8 ranuras
 
 1. **Tolva de disco (H01, H02, H03).** Plato inclinado a 45°. El 28BYJ-48 gira un disco de 8 bolsillos (Ø29). Cada bolsillo sube una moneda; el rascador tumba la que venga montada.
 2. **Cae de canto.** Arriba, el bolsillo pasa sobre un hueco y la moneda cae unos 2 cm a la pista. Queda parada contra la placa (simulado: 1728 de 1728, `sim/mujoco/disco.py`).
-3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Dos barreras IR a 105 y 129 mm miden el diámetro; el TCS34725 a 152 mm separa las $500.
+3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Dos barreras IR a 105 y 129 mm miden el diámetro; el sensor de color TCS3200 a 152 mm separa las $500.
 4. **Embudo (F01, F02).** Borde Ø90, pared a 45°, 60 mm adelante y 50 mm bajo el fin de pista (simulado: 81 de 81, `sim/mujoco/embudo.py`).
 5. **Compuerta (G01, G02).** Paleta con bisagra en su borde trasero sobre el eje del SG90. Cerrada sostiene la moneda; abre 60° hacia abajo cuando el vaso ya está debajo.
 6. **Cartucho (C01 x3, C02, V01 x9).** La banda lo mueve para poner el vaso correcto bajo el hueco. Para el rechazo pone la rampa C02 y la moneda resbala a un vaso que se pone a mano en la mesa, 60 mm al frente del centro de la banda.
@@ -53,6 +53,7 @@ Total aproximado: **842 g de PLA** (3 paredes, 20% relleno). Todas caben en la K
 | P01 | Clavija Ø6 x 20 | 19 | 6 x 6 x 20 | 7 | De pie. Imprime todas juntas. |
 | P02 | Clavija Ø6 x 12 | 6 | 6 x 6 x 12 | 1 | De pie. Imprime todas juntas. |
 | P03 | Remache del motor (por cada oreja del 28BYJ-48 hasta H01) | 3 | 8 x 8 x 5 | 0 | De pie, cabeza abajo. 100 % de relleno. Entra a presión. |
+| A01 | Adaptador del TCS3200 (se pega sobre L01) | 1 | — | 3 | De lado, con soportes automáticos mínimos. PLA+ negro. |
 
 Ajustes sugeridos: PLA, capa 0,2 mm, 3 paredes, 20% relleno. Las clavijas al 100% de relleno.
 Si las clavijas entran muy duras o flojas, cambia `HOLGURA` (0,3 mm por lado) en el script y vuelve a generar.
@@ -62,7 +63,7 @@ Si las clavijas entran muy duras o flojas, cambia `HOLGURA` (0,3 mm por lado) en
 1. **Patines y caballetes.** Mete las patas de los caballetes T01 en los encajes de los patines: S01 (largo) lleva los caballetes 1 y 2; S02 (corto) el caballete 3. Uno de cada lado.
 2. **Largueros.** R01 entre los caballetes 1 y 2 (los de afuera), R02 entre 2 y 3. Cada punta con una clavija P01.
 3. **Soportes.** K01 sobre el caballete 1 y K02 sobre el caballete 2, cada uno con clavijas P01.
-4. **Pista.** Pon los porta-emisores B01 (se enganchan en el borde de abajo, detrás de la placa) con sus LED IR. Mete los fototransistores en los postes de adelante y el TCS34725 en su rebaje. Apoya la pista en K01 y K02 con una clavija P01 en cada uno.
+4. **Pista.** Pon los porta-emisores B01 (se enganchan en el borde de abajo, detrás de la placa) con sus LED IR. Mete los fototransistores en los postes de adelante y el TCS3200 en su adaptador A01: corta a ras de la repisa el bloque que sostenía el TCS34725 (queda un muñón de 22 × 5,5 mm), pega A01 encima con cianoacrilato (se centra solo con sus patillas y su faldón) y mete el TCS3200 por los rieles, LED hacia la pista y cabecera arriba. Apoya la pista en K01 y K02 con una clavija P01 en cada uno.
 5. **Tolva.** Pon el 28BYJ-48 detrás de H01 con el resalte del eje en el agujero central y clava un remache P03 por cada oreja (entra a presión desde atrás). Pon el disco H02 en el eje y el rascador H03a en su ranura. Apoya H01 en K01 (el motor entra en su hueco) y únela a la pista con dos clavijas P01 que atraviesan la placa y las almohadillas.
 6. **Embudo.** F01 sobre los largueros R02 con 4 clavijas P02. La campana F02 se asienta en su ranura, con la ventana hacia la pista.
 7. **Compuerta.** El SG90 entra en la cuna G01 con el eje hacia el centro. Cuelga G01 de la brida con 2 clavijas P02. Pega el brazo simple del servo en el rebaje de G02 y ponlo en el eje con la compuerta cerrada (horizontal).
@@ -87,7 +88,7 @@ Resumen; el detalle, el esquema y el firmware están en [docs/11-electronica-eta
 | SG90 compuerta | 15 |
 | Fototransistor barrera 1 / barrera 2 | 1 / 2 (ADC1) |
 | LED IR de las barreras | fijos, 330 Ω a 5 V |
-| TCS34725 (I2C) | SDA 8, SCL 9 |
+| TCS3200 OUT / S2 / S3 / S0 / S1 | 14 / 16 / 17 / 18 / 21 |
 | Banda (etapa 2): A4988 STEP / DIR / EN, haz de referencia | 10 / 11 / 12, 13 |
 
 ## Qué no está validado

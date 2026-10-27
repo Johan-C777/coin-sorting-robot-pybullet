@@ -10,7 +10,7 @@
 ## Etapa 1 v5 (vigente, 0.7.0)
 - Piezas: `scripts/generar_v5.py --ensamble` → `hardware/etapa1-clasificador/{stl,despiece.csv,ensamble*}`; camas `scripts/armar_camas_v5.py` → `impresion/` (CAMAS.md, orden "sin electrónica primero").
 - Docs: `docs/09-clasificador-v5.md`, `docs/11-electronica-etapa1.md` (+ `img/etapa1-cableado.svg`, `img/etapa1-v5.png`).
-- Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS SDA 8/SCL 9; banda STEP 10/DIR 11/EN 12, ref 13.
+- Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS3200 OUT 14, S2 16, S3 17, S0 18, S1 21; banda STEP 10/DIR 11/EN 12, ref 13.
 - Pendiente: imprimir cama 7, armar, probar motor con carga, calibrar `K_CUERDA`/`UMBRAL_DORADO`, confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
 - Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/esp32_contador` es de la v4 (lo usan las pruebas).
 

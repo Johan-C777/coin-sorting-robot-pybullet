@@ -25,8 +25,11 @@
     <text x="410" y="312">GPIO 15</text>
     <text x="410" y="372">GPIO 1 (ADC1)</text>
     <text x="410" y="402">GPIO 2 (ADC1)</text>
-    <text x="630" y="262" text-anchor="end">GPIO 8 SDA</text>
-    <text x="630" y="282" text-anchor="end">GPIO 9 SCL</text>
+    <text x="630" y="252" text-anchor="end">GPIO 14 OUT</text>
+    <text x="630" y="270" text-anchor="end">GPIO 16 S2</text>
+    <text x="630" y="288" text-anchor="end">GPIO 17 S3</text>
+    <text x="630" y="306" text-anchor="end">GPIO 18 S0</text>
+    <text x="630" y="324" text-anchor="end">GPIO 21 S1</text>
     <text x="630" y="362" text-anchor="end">GPIO 10 STEP</text>
     <text x="630" y="382" text-anchor="end">GPIO 11 DIR</text>
     <text x="630" y="402" text-anchor="end">GPIO 12 EN</text>
@@ -76,13 +79,19 @@
   <path class="pw5" d="M60 420 H80"/>
   <path class="pw3" d="M410 478 H340 V446 H300"/>
 
-  <!-- TCS34725 -->
-  <rect class="blk" x="740" y="220" width="220" height="70" rx="6"/>
-  <text class="t h" x="850" y="244" text-anchor="middle">TCS34725 (I²C 0x29)</text>
-  <text class="s" x="850" y="262" text-anchor="middle">VIN 3V3 · LED a 3V3</text>
-  <text class="s" x="850" y="278" text-anchor="middle">ranura de L01 a 152 mm · $500 a/n</text>
-  <path class="i2c" d="M640 258 H740"/>
-  <path class="i2c" d="M640 278 H740"/>
+  <!-- TCS3200 -->
+  <rect class="blk" x="740" y="200" width="220" height="130" rx="6"/>
+  <text class="t h" x="850" y="224" text-anchor="middle">TCS3200 (4 LED)</text>
+  <text class="s" x="850" y="242" text-anchor="middle">VCC 3V3 · OE a GND</text>
+  <text class="s" x="850" y="258" text-anchor="middle">OUT: frecuencia, contada con PCNT</text>
+  <text class="s" x="850" y="274" text-anchor="middle">S2/S3: filtro R, G, B</text>
+  <text class="s" x="850" y="290" text-anchor="middle">S0 = S1 = alto: escala 100 %</text>
+  <text class="s" x="850" y="312" text-anchor="middle">adaptador A01 en L01 · $500 a/n</text>
+  <path class="i2c" d="M640 248 H740"/>
+  <path class="i2c" d="M640 266 H740"/>
+  <path class="i2c" d="M640 284 H740"/>
+  <path class="i2c" d="M640 302 H740"/>
+  <path class="i2c" d="M640 320 H740"/>
 
   <!-- A4988 -->
   <rect class="blk" x="740" y="340" width="220" height="80" rx="6"/>
@@ -105,6 +114,6 @@
     <path class="pw3" d="M80 0 H110"/><text class="t" x="118" y="4">3,3 V</text>
     <path class="gnd" d="M170 0 H200"/><text class="t" x="208" y="4">GND</text>
     <path class="sig" d="M260 0 H290"/><text class="t" x="298" y="4">señal</text>
-    <path class="i2c" d="M350 0 H380"/><text class="t" x="388" y="4">I²C</text>
+    <path class="i2c" d="M350 0 H380"/><text class="t" x="388" y="4">color</text>
   </g>
 </svg>
