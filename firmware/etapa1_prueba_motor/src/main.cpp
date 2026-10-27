@@ -14,8 +14,8 @@ unsigned long t_espera = 0;
 
 void setup() {
   Serial.begin(115200);
-  motor.setMaxSpeed(800);
-  motor.setAcceleration(400);
+  motor.setMaxSpeed(1100);
+  motor.setAcceleration(2000);
   Serial.println("Prueba tolva: f/b = 1 bolsillo, s = auto on/off");
 }
 
