@@ -1,0 +1,23 @@
+codigo,pieza,cantidad,medidas_mm,volumen_cm3,gramos_aprox_total,impresion
+L01,"Pista con repisa, barreras y sensor de color",1,179 x 23 x 60,55.5,38,"De pie, apoyada en la cara de abajo de la repisa. Sin soportes."
+B01,Porta-emisor IR (se engancha detrás de la placa),2,27 x 15 x 14,3.0,4,De lado. Sin soportes.
+H01,"Base de la tolva: plato inclinado, aro y soporte del motor",1,129 x 113 x 43,71.9,49,Con la espalda plana sobre la cama. Sin soportes.
+H02,Disco de 8 bolsillos,1,98 x 98 x 8,9.5,6,"Plano, el cubo hacia arriba. Sin soportes."
+H03,Rascador (quita la moneda montada),1,36 x 43 x 4,2.0,1,"De canto. Sin soportes. Se imprimen 3 alturas: 2,5 / 2,6 / 2,8 mm."
+K01,Soporte de la tolva y la pista (caballete 1),1,89 x 70 x 16,83.3,57,"De lado, con la cara que mira a la tolva hacia arriba. Sin soportes."
+K02,Soporte de la pista (caballete 2),1,47 x 35 x 16,19.5,13,De lado. Sin soportes.
+F01,Embudo con brida,1,136 x 136 x 30,41.4,28,"Boca abajo (la brida sobre la cama). Pared a 45°, sin soportes."
+F02,Campana del embudo con ventana,1,88 x 100 x 60,41.2,28,Con la tapa sobre la cama. Sin soportes.
+G01,Cuna del servo de la compuerta,1,27 x 24 x 51,18.0,12,Boca abajo. Sin soportes.
+G02,Compuerta (paleta con bisagra),1,36 x 9 x 38,3.2,2,"De pie sobre la punta de la paleta, la bisagra arriba. Sin soportes (usa borde/brim)."
+T01,Caballete (marco en forma de puente),3,206 x 161 x 16,133.6,273,Plano. Sin soportes.
+S01,Patín largo (caballetes 1 y 2),2,186 x 24 x 14,57.0,78,Plano. Sin soportes.
+S02,Patín corto (caballete 3),2,100 x 24 x 14,30.8,42,Plano. Sin soportes.
+R01,Larguero entre caballetes 1 y 2,2,132 x 12 x 12,18.4,25,Plano. Sin soportes.
+R02,Larguero entre caballetes 2 y 3 (lleva el embudo),2,170 x 12 x 12,23.3,32,Plano. Sin soportes.
+C01,Cartucho de 3 vasos (se unen 3 en fila),3,120 x 52 x 16,27.3,56,Plano. Sin soportes.
+C02,Rampa de rechazo (va en la punta del cartucho),1,64 x 74 x 44,35.6,24,De lado. Sin soportes.
+V01,Vaso Ø34 x 60,9,34 x 34 x 60,10.9,67,De pie. Sin soportes.
+P01,Clavija Ø6 x 20,19,6 x 6 x 20,0.5,7,De pie. Imprime todas juntas.
+P02,Clavija Ø6 x 12,6,6 x 6 x 12,0.3,1,De pie. Imprime todas juntas.
+P03,Remache del motor (por cada oreja del 28BYJ-48 hasta H01),3,8 x 8 x 5,0.1,0,"De pie, cabeza abajo. 100 % de relleno. Entra a presión."
