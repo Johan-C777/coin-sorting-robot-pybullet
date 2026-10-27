@@ -3,7 +3,7 @@
 Cada moneda se desliza pegada a la pared y cae por donde la ventana ya es lo bastante ancha. Se anota
 entre qué marcas cae cada una y con eso se fijan los anchos de las ranuras del riel.
 
-    python3 scripts/generar_cuna_prueba.py      # -> hardware/etapa1-clasificador/pruebas/P00_cuna_calibracion.stl
+    python3 scripts/generar_cuna_prueba.py      # -> hardware/archivo/etapa1-v3-canto/P00_cuna_calibracion.stl
 """
 import generar_clasificador as g
 from generar_clasificador import B, ALA, ESP_BASE, ALTO_PARED, ESP_PARED, PERALTE_T, ALTO_LABIO, caja, prisma_yz, seccion, union
@@ -37,7 +37,7 @@ def cuna():
 
 
 if __name__ == "__main__":
-    destino = g.RAIZ / "hardware" / "etapa1-clasificador" / "pruebas"
+    destino = g.RAIZ / "hardware" / "archivo" / "etapa1-v3-canto"
     destino.mkdir(parents=True, exist_ok=True)
     c = cuna()
     g.escribir_stl(c, destino / "P00_cuna_calibracion.stl", "cuna")

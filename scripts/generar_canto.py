@@ -28,7 +28,7 @@ from manifold3d import CrossSection, Manifold, set_circular_segments
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generar_clasificador import SALIDA as _SALIDA_V2, caja, escribir_stl  # noqa: E402
 
-SALIDA = _SALIDA_V2.parent / "v3-canto"
+SALIDA = _SALIDA_V2.parents[1] / "etapa1-v3-canto"
 
 set_circular_segments(72)
 

@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 700" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <title>Cableado de la etapa 1 con ESP32-S3</title>
+  <rect width="1040" height="700" fill="#ffffff"/>
+  <defs>
+    <style>
+      .blk{fill:#f4f6f8;stroke:#2f3b45;stroke-width:1.5}
+      .mcu{fill:#e8f0f8;stroke:#2f5878;stroke-width:2}
+      .pw5{stroke:#c0392b;stroke-width:2;fill:none}
+      .pw3{stroke:#e67e22;stroke-width:2;fill:none}
+      .gnd{stroke:#222;stroke-width:2;fill:none}
+      .sig{stroke:#2c7a54;stroke-width:2;fill:none}
+      .i2c{stroke:#7a4bb8;stroke-width:2;fill:none}
+      .t{fill:#1d2730}
+      .s{fill:#55636e;font-size:11px}
+      .h{font-weight:bold;font-size:14px}
+    </style>
+  </defs>
+
+  <!-- ESP32-S3 -->
+  <rect class="mcu" x="400" y="190" width="240" height="330" rx="8"/>
+  <text class="t h" x="520" y="214" text-anchor="middle">ESP32-S3 DevKitC-1</text>
+  <text class="s" x="520" y="230" text-anchor="middle">USB al PC (alimentación y consola)</text>
+  <g class="t">
+    <text x="410" y="262">GPIO 4 · 5 · 6 · 7</text>
+    <text x="410" y="312">GPIO 15</text>
+    <text x="410" y="372">GPIO 1 (ADC1)</text>
+    <text x="410" y="402">GPIO 2 (ADC1)</text>
+    <text x="630" y="262" text-anchor="end">GPIO 8 SDA</text>
+    <text x="630" y="282" text-anchor="end">GPIO 9 SCL</text>
+    <text x="630" y="362" text-anchor="end">GPIO 10 STEP</text>
+    <text x="630" y="382" text-anchor="end">GPIO 11 DIR</text>
+    <text x="630" y="402" text-anchor="end">GPIO 12 EN</text>
+    <text x="630" y="442" text-anchor="end">GPIO 13 ref.</text>
+    <text x="410" y="482">3V3</text>
+    <text x="630" y="482" text-anchor="end">GND</text>
+  </g>
+  <text class="s" x="520" y="508" text-anchor="middle">No usar: 0, 3, 45, 46, 19, 20, 26–37, 43, 44, 48</text>
+
+  <!-- Fuente 5 V -->
+  <rect class="blk" x="400" y="30" width="240" height="80" rx="6"/>
+  <text class="t h" x="520" y="55" text-anchor="middle">Fuente 5 V ≥ 2 A</text>
+  <text class="s" x="520" y="73" text-anchor="middle">tolva + servo + LED IR</text>
+  <text class="s" x="520" y="90" text-anchor="middle">220 µF entre 5 V y GND, cerca del servo</text>
+  <text x="448" y="128" fill="#c0392b" font-weight="bold">+5 V</text>
+  <text x="590" y="128" fill="#222" font-weight="bold">GND</text>
+  <path class="pw5" d="M440 110 V140 H60 V420"/>
+  <path class="gnd" d="M600 110 V150 H980 V640 H700"/>
+  <path class="gnd" d="M630 478 H700 V640"/>
+  <text class="s" x="710" y="630">GND común (fuente y ESP32)</text>
+
+  <!-- Tolva -->
+  <rect class="blk" x="80" y="220" width="220" height="70" rx="6"/>
+  <text class="t h" x="190" y="244" text-anchor="middle">ULN2003 → 28BYJ-48 5 V</text>
+  <text class="s" x="190" y="262" text-anchor="middle">IN1..IN4 · paso completo, 2 bobinas</text>
+  <text class="s" x="190" y="278" text-anchor="middle">tolva de disco H01/H02</text>
+  <path class="sig" d="M300 258 H400"/>
+  <path class="pw5" d="M60 240 H80"/>
+
+  <!-- Servo -->
+  <rect class="blk" x="80" y="300" width="220" height="50" rx="6"/>
+  <text class="t h" x="190" y="322" text-anchor="middle">SG90 compuerta G02</text>
+  <text class="s" x="190" y="339" text-anchor="middle">rojo 5 V · café GND · naranja señal</text>
+  <path class="sig" d="M300 308 H400"/>
+  <path class="pw5" d="M60 318 H80"/>
+
+  <!-- Barreras -->
+  <rect class="blk" x="80" y="360" width="220" height="150" rx="6"/>
+  <text class="t h" x="190" y="382" text-anchor="middle">2 barreras IR en L01</text>
+  <text class="s" x="190" y="400" text-anchor="middle">a 105 y 129 mm de la pista</text>
+  <text class="t" x="92" y="424">LED IR: 5 V → 330 Ω → LED → GND</text>
+  <text class="t" x="92" y="446">Fototransistor: C → 3V3</text>
+  <text class="t" x="92" y="466">E → GPIO y 10 kΩ → GND</text>
+  <text class="s" x="92" y="490">haz libre: alto · cortado: bajo</text>
+  <path class="sig" d="M300 368 H400"/>
+  <path class="sig" d="M300 398 H400"/>
+  <path class="pw5" d="M60 420 H80"/>
+  <path class="pw3" d="M410 478 H340 V446 H300"/>
+
+  <!-- TCS34725 -->
+  <rect class="blk" x="740" y="220" width="220" height="70" rx="6"/>
+  <text class="t h" x="850" y="244" text-anchor="middle">TCS34725 (I²C 0x29)</text>
+  <text class="s" x="850" y="262" text-anchor="middle">VIN 3V3 · LED a 3V3</text>
+  <text class="s" x="850" y="278" text-anchor="middle">ranura de L01 a 152 mm · $500 a/n</text>
+  <path class="i2c" d="M640 258 H740"/>
+  <path class="i2c" d="M640 278 H740"/>
+
+  <!-- A4988 -->
+  <rect class="blk" x="740" y="340" width="220" height="80" rx="6"/>
+  <text class="t h" x="850" y="364" text-anchor="middle">A4988 → NEMA17 (etapa 2)</text>
+  <text class="s" x="850" y="382" text-anchor="middle">1/16 µpaso · VMOT 12 V aparte</text>
+  <text class="s" x="850" y="398" text-anchor="middle">EN activo en bajo</text>
+  <text class="s" x="850" y="412" text-anchor="middle">desactivada en firmware por defecto</text>
+  <path class="sig" d="M640 358 H740"/>
+  <path class="sig" d="M640 378 H740"/>
+  <path class="sig" d="M640 398 H740"/>
+
+  <!-- Haz de referencia -->
+  <rect class="blk" x="740" y="430" width="220" height="40" rx="6"/>
+  <text class="t" x="850" y="455" text-anchor="middle">Haz de referencia de la banda</text>
+  <path class="sig" d="M640 438 H740"/>
+
+  <!-- Leyenda -->
+  <g transform="translate(80,560)">
+    <path class="pw5" d="M0 0 H30"/><text class="t" x="38" y="4">5 V</text>
+    <path class="pw3" d="M80 0 H110"/><text class="t" x="118" y="4">3,3 V</text>
+    <path class="gnd" d="M170 0 H200"/><text class="t" x="208" y="4">GND</text>
+    <path class="sig" d="M260 0 H290"/><text class="t" x="298" y="4">señal</text>
+    <path class="i2c" d="M350 0 H380"/><text class="t" x="388" y="4">I²C</text>
+  </g>
+</svg>

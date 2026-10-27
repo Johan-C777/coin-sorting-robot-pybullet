@@ -1,9 +1,20 @@
-# Etapa 1 v5: piezas, despiece y armado
+# Etapa 1: clasificador de canto (v5), piezas, despiece y armado
 
 Prototipo compacto del clasificador. Torre de 33 cm que se para sobre la mesa y pasa por encima de la banda.
-Se genera con `python scripts/generar_v5.py --ensamble` (revisa choques, cama y que cada pieza sea un solo cuerpo).
+Los STL ya salen orientados para imprimir. Se regeneran con
+`python scripts/generar_v5.py --ensamble` (revisa choques, cama y que cada pieza sea un solo cuerpo).
 
-Visor 3D con estas mismas piezas: el artefacto "Clasificador de Canto".
+| Carpeta / archivo | Qué hay |
+|---|---|
+| [`stl/`](stl) | Las 24 piezas (22 códigos; H03 en tres alturas) |
+| [`impresion/`](impresion) | 8 camas `.3mf` para la K1C en el orden de impresión ([CAMAS.md](impresion/CAMAS.md)) |
+| [`despiece.csv`](despiece.csv) | Código, cantidad, medidas, volumen, gramos y orientación de cada pieza |
+| [`compras.md`](compras.md) | Componentes que faltan, con la cota que debe cumplir cada uno |
+| [`ensamble_referencia.stl`](ensamble_referencia.stl), `ensamble.json` | Torre armada (solo para ver, no se imprime) |
+| [Electrónica](../../docs/11-electronica-etapa1.md) | Pines del ESP32-S3, cableado y firmware de prueba |
+
+Las versiones anteriores (v1 con varillas, v3 de canto, v4 con riel de 8 ranuras y PVC) están en
+[`hardware/archivo/`](../archivo).
 
 ## Cómo funciona
 
@@ -66,16 +77,18 @@ Imprime L01, B01 (x2), H01, H02 y los tres H03. Con eso, apoyados con calces, re
 - que la moneda caiga de canto y ruede,
 - el ruido real de las barreras con tus monedas (modo calibración).
 
-## Conexiones (propuesta)
+## Conexiones (ESP32-S3)
 
-| Elemento | ESP32 |
+Resumen; el detalle, el esquema y el firmware están en [docs/11-electronica-etapa1.md](../../docs/11-electronica-etapa1.md).
+
+| Elemento | GPIO ESP32-S3 |
 |---|---|
-| 28BYJ-48 (ULN2003 IN1..IN4) | 19, 18, 5, 17 |
-| SG90 compuerta | 13 |
-| LED IR de las 2 barreras (modulados, por un transistor) | 25 |
-| Receptor barrera 1 / barrera 2 | 34 / 35 |
-| TCS34725 (I2C) | SDA 21, SCL 22 |
-| Banda (etapa 2): A4988 STEP / DIR / EN, barrera de posición | 26 / 27 / 14, 32 |
+| 28BYJ-48 (ULN2003 IN1..IN4) | 4, 5, 6, 7 |
+| SG90 compuerta | 15 |
+| Fototransistor barrera 1 / barrera 2 | 1 / 2 (ADC1) |
+| LED IR de las barreras | fijos, 330 Ω a 5 V |
+| TCS34725 (I2C) | SDA 8, SCL 9 |
+| Banda (etapa 2): A4988 STEP / DIR / EN, haz de referencia | 10 / 11 / 12, 13 |
 
 ## Qué no está validado
 

@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generar_clasificador import escribir_stl  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
-SALIDA = RAIZ / "hardware" / "etapa1-clasificador" / "v5"
+SALIDA = RAIZ / "hardware" / "etapa1-clasificador"
 CAMA = 210.0
 set_circular_segments(64)
 

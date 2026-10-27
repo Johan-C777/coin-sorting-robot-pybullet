@@ -6,7 +6,7 @@ basculante. Sin tornillos y sin soportes de impresión.
     python scripts/generar_clasificador.py              # STL de impresión + verificación
     python scripts/generar_clasificador.py --ensamble   # + ensamble de referencia
 
-Salida en hardware/etapa1-clasificador/stl/ (mm, orientación de impresión: Z = capas).
+Salida en hardware/archivo/etapa1-v4/stl/ (versión v4, reemplazada por v5) (mm, orientación de impresión: Z = capas).
 Impresora objetivo: Creality K1C, cama 220 x 220 x 250 mm.
 
 Uniones (todas por encaje, sin tornillos)
@@ -35,7 +35,7 @@ import numpy as np
 from manifold3d import CrossSection, FillRule, JoinType, Manifold, OpType, set_circular_segments
 
 RAIZ = Path(__file__).resolve().parents[1]
-SALIDA = RAIZ / "hardware" / "etapa1-clasificador" / "stl"
+SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v4" / "stl"
 CAMA = (220.0, 220.0, 250.0)
 set_circular_segments(72)
 
