@@ -21,6 +21,11 @@
 - Docs: `09-clasificador-fisico.md`, `10-guia-armado-etapa1.md`, `archivo/despiece-etapa1-v1.md`, `ensamble-etapa1.html`; README, 00-entrega, index.html, CHANGELOG.
 - `bom-etapa1.csv` rehecho; `software/tests/test_monedas.py` (9 ductos vs 8 estaciones).
 
+## Etapa 1 v5 (prototipo final) lista para imprimir
+- Torre de 33 cm de pie sobre la banda (3 caballetes + patines). Tolva de disco inclinado 45° (28BYJ-48, 8 bolsillos, rascador) → la moneda cae de canto a la pista (sim 1728/1728, `sim/mujoco/disco.py`) → 2 barreras IR + TCS34725 → embudo Ø90 a 45° (sim 81/81) → compuerta SG90 con bisagra → cartucho de 9 vasos que mueve la banda. Rechazo: rampa C02 en la punta del cartucho a un vaso puesto a mano.
+- Piezas: `scripts/generar_v5.py` → `hardware/etapa1-clasificador/v5/` (STL, despiece, guía de armado). Sin choques, todo cabe en la K1C, ~850 g.
+- No validado: una sola moneda por bolsillo, compuerta, posición del cartucho (depende de la banda, etapa 2), sensores reales. Meta 90%.
+
 ## Resuelto
 - $500 alineada, STL cerrados, PVC en ductos y base, sin choques.
 - Prueba firmware↔modelo de monedas fallando desde 0.4.0 → corregida.
