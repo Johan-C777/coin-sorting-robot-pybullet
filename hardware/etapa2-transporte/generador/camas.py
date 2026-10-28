@@ -15,66 +15,57 @@ import generar_banda as g
 CAMA = 220.0
 MARGEN, SEP = 4.0, 5.0
 
-# pid -> (nombre de archivo, descripcion, material, relleno, rotacion de impresion, cantidad, notas)
-ORI = {
-    'BT01': ('modulo-motor', 'Módulo del motor', 'PETG', '20 %', (180, 0, 0), 1, 'Cama de la banda abajo. El cubo del muñón sale de la pared: hay un voladizo corto bajo el cubo.'),
-    'BT02': ('modulo-2', 'Módulo 2', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo.'),
-    'BT03': ('modulo-3', 'Módulo 3 (bajo la torre)', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo.'),
-    'BT04': ('modulo-4', 'Módulo 4', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo.'),
-    'BT05': ('modulo-5', 'Módulo 5', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo.'),
-    'BT06': ('modulo-6', 'Módulo 6', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo.'),
-    'BT07': ('modulo-tensor', 'Módulo del tensor', 'PETG', '20 %', (180, 0, 0), 1, 'Cama abajo. La oreja del tornillo queda hacia arriba.'),
-    'BT08G1': ('guia-menos-Y-tramo1', 'Guía −Y, tramo 1 (con el hueco del fototransistor)', 'PLA', '20 %', (180, 0, 0), 1, 'Ala abajo, labio hacia arriba.'),
-    'BT08G2': ('guia-menos-Y', 'Guía −Y, tramos 2 a 5', 'PLA', '20 %', (180, 0, 0), 4, 'Ala abajo, labio hacia arriba.'),
-    'BT09G1': ('guia-mas-Y-tramo1', 'Guía +Y, tramo 1 (con el hueco del LED)', 'PLA', '20 %', (180, 0, 0), 1, 'Ala abajo, labio hacia arriba.'),
-    'BT09G2': ('guia-mas-Y', 'Guía +Y, tramos 2 a 5', 'PLA', '20 %', (180, 0, 0), 4, 'Ala abajo, labio hacia arriba.'),
-    'BT10': ('eje-motriz', 'Eje motriz con espiga hexagonal', 'PETG', '100 %', (0, 0, 0), 1, 'Tumbado: las capas corren a lo largo del eje, que es lo que más aguanta. Usa borde (brim) de 5 mm; el cilindro apoya en una línea.'),
-    'BT11': ('eje-libre', 'Eje libre', 'PETG', '100 %', (0, 0, 0), 1, 'Tumbado, igual que el motriz.'),
-    'BT12P': ('carro-tensor-mas-Y', 'Carro del tensor +Y', 'PETG', '40 %, 4 paredes', (-90, 0, 0), 1, 'Plano, con el agujero del muñón hacia arriba.'),
-    'BT12M': ('carro-tensor-menos-Y', 'Carro del tensor −Y', 'PETG', '40 %, 4 paredes', (90, 0, 0), 1, 'Plano, con el agujero del muñón hacia arriba.'),
-    'BT13': ('tapa-motor', 'Tapa motor (−Y)', 'PETG', '20 %', (-90, 0, 0), 1, 'Cara interior abajo, cubo del muñón hacia arriba.'),
-    'BT14': ('tapa-tensor', 'Tapa tensor (−Y)', 'PETG', '20 %', (-90, 0, 0), 1, 'Cara interior abajo, oreja hacia arriba.'),
-    'BT15': ('soporte-nema17', 'Soporte del NEMA17', 'PETG', '30 %, 4 paredes', (-90, 0, 0), 1, 'Boca de la bolsa hacia la cama. Puente de 43 mm sobre la bolsa: soporte de árbol sólo bajo la placa.'),
-    'BT16': ('pata', 'Pata', 'PETG', '20 %', (0, 0, 0), 7, 'Como está: el zócalo plano en la cama y la placa de pie.'),
-    'BT17': ('clavija-6x12', 'Clavija Ø6 × 12 (P02)', 'PETG', '100 %', (0, -90, 0), 72, 'De pie. Imprime todas juntas; 64 + 8 de repuesto.'),
-    'BT18': ('tornillo-tensor', 'Tornillo del tensor', 'PETG', '100 %', (0, 90, 0), 2, 'Cabeza abajo. La rosca no necesita soportes.'),
-    'BT19': ('acople', 'Acople hexágono + D', 'PETG', '100 %', (90, 0, 0), 1, 'De pie sobre la boca hexagonal.'),
-    'BT20': ('rueda-dentada', 'Rueda dentada de 8 dientes', 'PETG', '100 %', (90, 0, 0), 2, 'Plana, eje vertical. Imprime la motriz y la libre iguales.'),
-    'BT21': ('tablilla', 'Tablilla de la cadena', 'PETG', '100 %', (180, 0, 0), 176, 'Cara de arriba contra la cama (lisa, sin soportes). 173 hacen la cadena; 3 de repuesto. Imprime 3 primero y prueba la articulación.'),
-    'BT22': ('pasador-3x57', 'Pasador Ø3 × 57', 'PETG', '100 %', (0, 0, 0), 188, 'Tumbado. 173 + repuestos. Si sale con rebabas, lijar suave; deben girar libres en la tablilla.'),
-}
-
-
+# clave -> (archivo, descripción, filamento, relleno, rotación de impresión, cantidad, nota)
 PETG = 'PETG Azul 4DLAB'
 PLA_M = 'PLA+ Mármol 4DLAB'
 PLA_A = 'PLA+ Azul 4DLAB'
 PLA_N = 'PLA+ Negro 4DLAB'
-# filamento por pieza (inventario 2026-10-28); gramos disponibles
-FIL = {k: PLA_M for k in ('BT02', 'BT03', 'BT04', 'BT05', 'BT06', 'BT07', 'BT14', 'BT16')}
-FIL.update({k: PETG for k in ('BT01', 'BT13', 'BT15', 'BT10', 'BT11', 'BT12P', 'BT12M', 'BT17', 'BT18', 'BT19', 'BT20', 'BT22')})
-FIL.update({k: PLA_A for k in ('BT21',)})
-FIL.update({k: PLA_N for k in ('BT08G1', 'BT08G2', 'BT09G1', 'BT09G2')})
+R_VOLT, R_PY, R_MY, R_MX, R_PX, R_0 = (180, 0, 0), (-90, 0, 0), (90, 0, 0), (0, -90, 0), (0, 90, 0), (0, 0, 0)
+ORI = {
+    'BT01': ('modulo-1-motor', 'Módulo 1 (motor)', PETG, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT02': ('modulo-2', 'Módulo 2', PLA_M, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT03': ('modulo-3', 'Módulo 3 (bajo la torre)', PLA_M, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT04': ('modulo-4', 'Módulo 4', PLA_M, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT05': ('modulo-5', 'Módulo 5', PLA_M, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT06': ('modulo-6-tensor', 'Módulo 6 (tensor)', PLA_M, '15 %, 3 paredes', R_VOLT, 1, 'Piso contra la cama. Sin soportes.'),
+    'BT07': ('tapa-motor', 'Tapa lateral del motor (−Y)', PETG, '20 %, 3 paredes', R_PY, 1, 'Acostada sobre la cara interior.'),
+    'BT08': ('tapa-tensor', 'Tapa lateral del tensor (−Y)', PLA_M, '20 %, 3 paredes', R_PY, 1, 'Acostada sobre la cara interior.'),
+    'BT09G1': ('guia-menos-Y-tramo1', 'Guía −Y, tramo 1 (hueco del fototransistor)', PLA_N, '15 %, 3 paredes', R_VOLT, 1, 'Ala abajo, labio arriba.'),
+    'BT09G2': ('guia-menos-Y', 'Guía −Y, tramos 2 a 5', PLA_N, '15 %, 3 paredes', R_VOLT, 4, 'Ala abajo, labio arriba.'),
+    'BT10G1': ('guia-mas-Y-tramo1', 'Guía +Y, tramo 1 (hueco del LED)', PLA_N, '15 %, 3 paredes', R_VOLT, 1, 'Ala abajo, labio arriba.'),
+    'BT10G2': ('guia-mas-Y', 'Guía +Y, tramos 2 a 5', PLA_N, '15 %, 3 paredes', R_VOLT, 4, 'Ala abajo, labio arriba.'),
+    'BT11': ('eje-motriz', 'Eje motriz', PETG, '100 %', R_0, 1, 'Tumbado (las capas corren a lo largo del eje). Borde (brim) de 5 mm. Es lo único redondo apoyado en una línea: el arco de abajo es chico y sale limpio.'),
+    'BT12': ('eje-libre', 'Eje libre', PETG, '100 %', R_0, 1, 'Tumbado, igual que el motriz.'),
+    'BT13P': ('carro-tensor-mas-Y', 'Carro del tensor +Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
+    'BT13M': ('carro-tensor-menos-Y', 'Carro del tensor −Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
+    'BT14': ('tornillo-tensor', 'Tornillo del tensor', PETG, '100 %', R_PX, 2, 'De pie sobre el extremo de la rosca; la cabeza queda arriba.'),
+    'BT15': ('soporte-nema17', 'Soporte del NEMA17', PETG, '30 %, 4 paredes', R_MY, 1, 'La base contra la cama; la jaula se cierra en cono. Sin soportes.'),
+    'BT16': ('acople', 'Acople hexágono + D', PETG, '100 %', R_PY, 1, 'Sin soportes.'),
+    'BT17': ('rueda-dentada', 'Rueda dentada de 8 dientes', PETG, '100 %', R_PY, 2, 'Plana. La motriz y la libre son iguales.'),
+    'BT18': ('pata', 'Pata', PLA_M, '20 %, 3 paredes', R_0, 6, 'Acostada. Las clavijas en gota quedan horizontales y salen sin soportes.'),
+    'BT19': ('seccion-cadena', 'Sección de cadena (14 eslabones articulados)', PLA_A, '100 %', R_VOLT, 12, 'Print-in-place: sale ya articulada. Tapa lisa contra la cama.'),
+}
 STOCK = {PETG: 429, PLA_M: 1000, PLA_A: 1000, PLA_N: 647}
 TEMP = {PETG: '230–250 °C', PLA_M: '200–230 °C', PLA_A: '200–230 °C', PLA_N: '200–230 °C'}
-ORI = {k: (v[0], v[1], FIL[k]) + tuple(v[3:]) for k, v in ORI.items()}
 
 
 def prueba():
-    """Pieza de prueba de tolerancias: bloque con agujero de muñón, de clavija y de rosca, mas un muñón."""
-    b = g.caja(0, 40, 0, 40, 0, 14)
-    b = b - g.cil_z(10, 10, -1, 15, g.PIN_H) - g.cil_z(10, 30, -1, 15, g.PEG_H)
-    r = g.hilo(-1, 15, 0, 0, g.HILO_JUEGO).rotate((0, -90, 0))      # eje X -> Z
-    r = r.translate((30, 20, 0))
-    b = b - r
-    muñon = g.cil_z(55, 10, 0, 20, g.PIN_D)
-    rosca = g.hilo(0, 24, 0, 0).rotate((0, -90, 0)).translate((55, 30, 0))
-    t1 = g.tablilla(0, 0).rotate((180, 0, 0))
-    t2 = g.tablilla(g.PASO, 0).rotate((180, 0, 0))
-    pas = g.pasador(g.PASO, 0)
-    arti = (t1 + t2 + pas.rotate((180, 0, 0)))
-    x0, y0, z0, x1, y1, z1 = arti.bounding_box()
-    arti = arti.translate((70 - x0, 70 - y0 + 0, -z0))
-    return b + muñon + rosca + arti
+    """Pieza de prueba: dos tramos de 3 eslabones articulados (uno con la presilla) + bloque con agujero de muñón, zócalo de clavija y clavija en gota."""
+    def tramo(n, primero):
+        return g.union([g.tablilla(i * g.PASO, 0, primero=primero and i == 0) for i in range(n)])
+    t1 = tramo(3, False).rotate((180, 0, 0))
+    t2 = tramo(3, True).rotate((180, 0, 0))
+    def alza(m, y):
+        x0, y0, z0, x1, y1, z1 = m.bounding_box()
+        return m.translate((-x0, y - y0, -z0))
+    t1, t2 = alza(t1, 0), alza(t2, 62)
+    bq = g.caja(0, 40, 0, 40, 0, 14)
+    bq = bq - g.hueco_y(10, 7, -1, 41, g.PIN_H) - g.hueco_y(30, 7, 3, 41, g.PEG_H)
+    bq = bq.translate((60, 0, 0))
+    cl = g.clavija_y(0, 0, 0, g.PEG_L, g.PEG_D).rotate((0, 0, 0))
+    x0, y0, z0, x1, y1, z1 = cl.bounding_box()
+    cl = cl.translate((60 - x0, 130 - y0, -z0))
+    return t1 + t2 + bq + cl
 
 
 def pose(m, rot):
@@ -129,18 +120,23 @@ def main():
     out = Path(sys.argv[1])
     (out / 'stl').mkdir(parents=True, exist_ok=True)
     (out / 'camas').mkdir(exist_ok=True)
-    P = g.piezas()
     por = {}
-    for pid, m, ex in P:
+    for pid, m, ex in g.piezas():
         tag = ex.get('tag', '')
-        key = pid + (tag if pid in ('BT08', 'BT09') else ('P' if tag == '+Y' and pid == 'BT12' else ('M' if tag == '-Y' and pid == 'BT12' else '')))
-        if pid in ('BT08', 'BT09') and tag not in ('G1', 'G2'):
-            continue
-        if pid == 'BT18' and tag == '-Y':
-            continue
-        if pid == 'BT16' and key in por:
-            continue
-        por[key] = m
+        if pid in ('BT09', 'BT10'):
+            if tag not in ('G1', 'G2'):
+                continue
+            por[pid + tag] = m
+        elif pid == 'BT13':
+            por['BT13' + ('P' if tag == '+Y' else 'M')] = m
+        elif pid == 'BT14':
+            por.setdefault('BT14', m)
+        elif pid == 'BT17':
+            por.setdefault('BT17', m)
+        elif pid == 'BT18':
+            por.setdefault('BT18', m)
+        elif pid in ORI:
+            por[pid] = m
     piezas = []
     for key, (arch, nom, mat, relleno, rot, cant, nota) in ORI.items():
         m, (w, d, h) = pose(por[key], rot)
@@ -150,31 +146,20 @@ def main():
     pr, (w, d, h) = pose(prueba(), (0, 0, 0))
     (out / 'stl' / 'BT00_prueba-tolerancias.stl').write_bytes(stl_bytes([pr]))
     prueba_p = dict(key='BT00', arch='prueba-tolerancias', nom='Prueba de tolerancias', mat=PLA_A, relleno='100 %', cant=1,
-                    nota='Muñón en agujero de 10,4, clavija en 6,2, rosca con 0,35 mm de juego y dos tablillas unidas con su pasador (deben girar libres sin holgura exagerada). Imprímela primero.',
+                    nota='Dos tramos de 3 eslabones, uno con la presilla; un bloque con agujero de eje, zócalo de clavija y una clavija en gota.',
                     m=pr, w=w, d=d, h=h, vol=pr.volume() / 1000.0, fn='BT00_prueba-tolerancias.stl')
     for pz in piezas:
-        assert pz['h'] <= 250, pz['key']
-    # camas por material, la prueba va sola
-    camas = [('00', PLA_A, [dict(prueba_p, i=1)])]
+        assert pz['h'] <= 250 and max(pz['w'], pz['d']) <= 212, pz['key']
+    camas = [('00', PLA_A, [dict(prueba_p, i=1, px=0, py=0, giro=0)])]
     n = 1
     for mat in (PETG, PLA_A, PLA_M, PLA_N):
         items = []
         for pz in piezas:
-            if pz['mat'] != mat:
-                continue
-            for i in range(pz['cant']):
-                items.append(dict(pz, i=i + 1))
-        # las clavijas y los tornillos van juntos en una cama aparte al 100 %
-        pequenas = [i for i in items if i['key'] in ('BT17', 'BT18', 'BT19', 'BT21', 'BT22')]
-        grandes = [i for i in items if i['key'] not in ('BT17', 'BT18', 'BT19', 'BT21', 'BT22')]
-        for grupo in (grandes, pequenas):
-            if not grupo:
-                continue
-            for cama in empacar(grupo):
-                camas.append((f"{n:02d}", mat, [dict(p['it'], px=p['x'], py=p['y'], giro=p['giro']) for p in cama['puestos']]))
-                n += 1
-    # cama 00 con coordenadas
-    camas[0] = ('00', PLA_A, [dict(prueba_p, i=1, px=0, py=0, giro=0)])
+            if pz['mat'] == mat:
+                items += [dict(pz, i=i + 1) for i in range(pz['cant'])]
+        for cama in empacar(items):
+            camas.append((f"{n:02d}", mat, [dict(p['it'], px=p['x'], py=p['y'], giro=p['giro']) for p in cama['puestos']]))
+            n += 1
     filas = []
     for num, mat, its in camas:
         meshes = []
@@ -185,7 +170,8 @@ def main():
                 x0, y0, z0, x1, y1, z1 = m.bounding_box()
                 m = m.translate((-x0, -y0, -z0))
             meshes.append(m.translate((it['px'] + MARGEN, it['py'] + MARGEN, 0)))
-        (out / 'camas' / f"cama-{num}_{mat.split()[0].replace('+', 'mas')}-{mat.split()[1].lower().replace('á','a').replace('ó','o')}.stl").write_bytes(stl_bytes(meshes))
+        sl = mat.replace('+', 'mas').replace('á', 'a').replace('ó', 'o').split()
+        (out / 'camas' / f"cama-{num}_{sl[0]}-{sl[1].lower()}.stl").write_bytes(stl_bytes(meshes))
         filas.append((num, mat, its))
     escribir_md(out, filas, piezas, prueba_p)
     print(len(filas), 'camas', len(piezas) + 1, 'STL')
@@ -199,34 +185,43 @@ def gramos(pz):
 
 def escribir_md(out, filas, piezas, prueba_p):
     L = []
-    L.append("# Banda transportadora (etapa 2): camas de impresión\n")
-    L.append("Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin tornillos, tuercas, rodamientos ni correa: la banda es una cadena de tablillas impresa; todo se une con clavijas Ø6 × 12, muñones, pasadores Ø3 y un tornillo impreso.\n")
+    L.append("# Banda transportadora (etapa 2): camas de impresión (versión print-and-place)\n")
+    L.append("Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin rodamientos, tornillos, tuercas ni correa. "
+             "Son **46 piezas** en vez de unas 460: la cadena sale en 12 secciones ya articuladas, el bastidor en 6 módulos grandes con rompecabezas, "
+             "las clavijas y los pasadores sueltos desaparecieron (van fundidos en la pieza) y no hay piezas de menos de 18 mm salvo las 2 ruedas, el acople y los tornillos.\n")
     L.append("Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene cada cama ya acomodada en un solo STL. Si prefieres acomodar tú, usa `stl/`.\n")
     L.append("## Ajustes\n")
-    L.append("- Capa 0,2 mm, 3 paredes y 20 % de relleno salvo que la tabla diga otra cosa (lo que carga o gira lleva 4 paredes y más relleno).")
-    L.append("- Boquilla 0,4. Temperaturas según el filamento (tabla de abajo). Sin soportes salvo donde se indica.")
-    L.append("- Compensación de agujeros: ninguna. Las holguras ya están en el modelo.\n")
+    L.append("- Capa 0,2 mm, boquilla 0,4, **sin soportes en ninguna pieza**. Paredes y relleno por pieza en las tablas.")
+    L.append("- Compensación de agujeros: ninguna. Las holguras ya están en el modelo (0,3 mm por lado en las articulaciones de la cadena).")
+    L.append("- Desactiva el «elephant foot» compensation si tu perfil lo trae muy alto: en la cadena las primeras capas deben quedar libres de rebaba.")
+    L.append("- Piezas largas (módulos de 192–204 mm): usa borde (brim) de 3 mm y limpia la cama; son las que más se curvan.\n")
     L.append("## Filamentos (inventario del 2026-10-28)\n")
     L.append("| Filamento | Para qué | Gramos necesarios | Hay | Sobra | Temp. |")
     L.append("|---|---|---|---|---|---|")
-    uso = {PETG: 'Pasadores, clavijas, ejes, ruedas, tensor, carros, acople, soporte y módulo del motor, tapa del motor (lo que gira, se desgasta o está junto al motor)',
-           PLA_M: 'Módulos 2 a 7, tapa del tensor y patas (bastidor)',
-           PLA_A: 'Las 176 tablillas de la cadena (y la cama 00 de prueba)',
-           PLA_N: 'Guías laterales'}
+    uso = {PETG: 'Módulo del motor, tapa del motor, ejes, ruedas, acople, soporte NEMA, carros y tornillos del tensor',
+           PLA_M: 'Módulos 2 a 6, tapa del tensor y patas',
+           PLA_A: 'Las 12 secciones de cadena y la cama 00 de prueba',
+           PLA_N: 'Guías laterales (10)'}
     need = {}
     for num, mat, its in filas:
         need[mat] = need.get(mat, 0) + sum(gramos(it) for it in its)
     for mat in (PETG, PLA_M, PLA_A, PLA_N):
         L.append(f"| {mat} | {uso[mat]} | {need.get(mat, 0):.0f} g | {STOCK[mat]} g | {STOCK[mat] - need.get(mat, 0):.0f} g | {TEMP[mat]} |")
     L.append("")
-    L.append("- No se usan: PLA+ Verde, Rosado, Silk, Hyper PLA y los rollos casi agotados (sirven para pruebas); ABS Gris queda de reserva para el soporte del motor si el PETG se ablanda; TPU no hace falta.")
-    L.append("- Por qué así: el PETG (429 g) no alcanza para todo, así que sólo va a lo que lo necesita (pasadores Ø3 que flexan, ejes y ruedas que giran, y lo que queda pegado al motor, que se calienta). Las tablillas van en PLA+ Azul: son 176 piezas y se necesitan ≈ 580 g. El bastidor y las guías van en PLA+ porque no trabajan en caliente ni a flexión.")
-    L.append("- La cama 00 es una prueba dimensional: sale en PLA+ Azul con las tablillas; el pasador, el muñón y la clavija de la prueba luego se hacen en PETG y el juego es el mismo.\n")
-    L.append("## Orden\n")
-    L.append("1. **Cama 00, prueba de tolerancias** (PLA+ Azul). Mete el muñón en el agujero de 10,4, una clavija en el de 6,2, atornilla la rosca en el bloque y dobla las dos tablillas unidas: deben girar libres. Si algo queda flojo o no entra, dime la medida y lo corrijo antes de imprimir lo demás.")
-    L.append("2. Camas de PETG Azul (primero pasadores y clavijas, que se necesitan para armar).")
-    L.append("3. Camas de tablillas en PLA+ Azul (176 en total; imprime 3 primero y prueba la articulación).")
-    L.append("4. Camas de bastidor en PLA+ Mármol y guías en PLA+ Negro.\n")
+    L.append("- El PETG (429 g) sólo va a lo que gira o está junto al motor. La cadena va en PLA+ Azul porque necesita ≈ 640 g; el bastidor y las guías van en PLA+ porque no trabajan en caliente ni a flexión.")
+    L.append("- Los gramos son una estimación por exceso (el relleno real de 15 % pesa menos).")
+    L.append("- Si la presilla de la cadena se parte en la prueba (cama 00), reimprime sólo el primer eslabón de cada sección en PETG o baja la velocidad de las paredes a 60 mm/s y sube 5 °C.\n")
+    L.append("## Orden de impresión\n")
+    L.append("1. **Cama 00 (prueba, ≈ 25 min).** Dobla los dos tramos de eslabones: deben girar libres sin holgura exagerada. Encaja un tramo en el otro por la presilla del primer eslabón: tiene que entrar con un clic y no salirse al jalar. Mete la clavija en el zócalo y el eje en el agujero grande. **Si algo falla, dime la medida y lo corrijo antes de gastar filamento.**")
+    L.append("2. Camas 02 a 05, la cadena (PLA+ Azul): 4 camas de 3 secciones. Es lo que más tarda (≈ 4 h por cama), pero ya no hay que armar nada suelto.")
+    L.append("3. Cama 01, PETG Azul (ejes, ruedas, carros, tornillos, acople, soporte y módulo del motor).")
+    L.append("4. Camas 06 a 08 (módulos, tapa y patas, PLA+ Mármol) y 09 (guías, PLA+ Negro).\n")
+    L.append("## Armado\n")
+    L.append("1. **Bastidor:** une los 6 módulos deslizándolos de arriba hacia abajo por los rompecabezas (cola de milano), con una gota de cianoacrilato en cada junta. Pega las 6 patas (clavijas integradas) en los zócalos de la pared +Y.")
+    L.append("2. **Soporte del motor** al módulo 1; pega la tapa del motor y la del tensor con sus lengüetas.")
+    L.append("3. **Cadena:** une las 12 secciones sobre la mesa encajando la presilla (primer eslabón) en el último pasador de la sección anterior; la 12 cierra con la 1 y queda un anillo de 168 eslabones. Con las tapas y las guías quitadas, mete el anillo por el costado −Y alrededor de las dos ruedas.")
+    L.append("4. Ejes y ruedas en su sitio, carros del tensor en las ranuras y tornillos hasta que la cadena quede tensa pero giren libres a mano.")
+    L.append("5. Pon las guías y las tapas. Antes de quitar una tapa, afloja el tensor por completo.\n")
     L.append("## Camas\n")
     tot = 0.0
     for num, mat, its in filas:
@@ -243,23 +238,21 @@ def escribir_md(out, filas, piezas, prueba_p):
             gt += gg
             L.append(f"| `{it['fn']}` | {it['nom']} | {c} | {it['relleno']} | {w:.0f} × {d:.0f} × {h:.0f} | {gg:.0f} |")
         tot += gt
-        notas = sorted({it['nota'] for it in its})
         L.append("")
-        for n_ in notas:
+        for n_ in sorted({it['nota'] for it in its}):
             L.append(f"- {n_}")
         L.append(f"- Peso aproximado de la cama: {gt:.0f} g.\n")
     L.append(f"Total aproximado: **{tot:.0f} g** en {len(filas)} camas.\n")
-    L.append("## Cantidades que hay que imprimir\n")
+    L.append("## Cantidades\n")
     L.append("| Pieza | Cant. | Filamento |")
     L.append("|---|---|---|")
     for pz in piezas:
         L.append(f"| `{pz['fn']}` | {pz['cant']} | {pz['mat']} |")
-    L.append("\n## Cosas a vigilar al imprimir\n")
-    L.append("- **Cadena:** son 176 tablillas y 188 pasadores; cada tablilla pesa unos 3 g. Imprime primero 3 tablillas con 2 pasadores (o la cama 00) y comprueba que giran libres. Si quedan duras, lima el agujero de pasador; si quedan flojas, avísame.")
-    L.append("- **Armado de la cadena:** se une sobre la mesa y se cierra con el último pasador. Si al tensar sobra cadena (por el juego de las articulaciones), quita eslabones.")
-    L.append("- **Ejes y ruedas:** los ejes se imprimen tumbados con borde; las ruedas planas. Una gota de grasa de silicona en los muñones al armar.")
-    L.append("- **Clavijas de módulos, patas y soporte del motor:** se pegan con cianoacrilato. Las de guías y tapas no, porque se sacan para meter la cadena.")
-    L.append("- **Bolsa del motor:** el NEMA17 entra por atrás con un poco de fuerza. Si queda flojo, una gota de cianoacrilato en las esquinas.")
+    L.append("\n## Qué se hizo contra los fallos\n")
+    L.append("- **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo del eje es octogonal y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición, deja sólo puentes cortos (≤ 8 mm, como los zócalos de clavija) y el arco de los primeros 0,8 mm de los nudillos de la cadena, que apoyan en la cama.")
+    L.append("- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es una gota para que no tenga voladizo al imprimirse acostado.")
+    L.append("- **Pocas piezas pequeñas:** las clavijas Ø6 se integraron en guías y patas; los pasadores Ø3 son parte de cada eslabón; el rompecabezas de los módulos sustituye a todas las clavijas de unión del bastidor.")
+    L.append("- **Riesgos que quedan:** (1) la tolerancia de la articulación (por eso la cama 00 primero); (2) la presilla de la sección, de PLA, puede ser frágil; (3) el juego de 168 articulaciones alarga la cadena, por eso el tensor tiene 24 mm de recorrido; (4) el torque de un NEMA17 de 48 mm con el radio de la rueda de ≈ 0,3 N·m es justo para la carga de monedas: si patina, baja la tensión.")
     (out / 'CAMAS.md').write_text("\n".join(L) + "\n")
 
 

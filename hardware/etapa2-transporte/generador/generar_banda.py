@@ -1,13 +1,9 @@
-"""Banda de la etapa 2 (v2), ajustada a la torre v5 de la etapa 1 y sin herrajes:
-muñones impresos en lugar de rodamientos, clavijas Ø6 en lugar de tornillos y tornillo de tensor impreso.
-
-La torre v5 se para sobre la mesa y pasa por encima de la banda. La banda lleva el
-cartucho de 9 vasos (C01 x3 + C02 + V01 x9) y pone el vaso pedido bajo el hueco del
-embudo; para el rechazo pone la rampa C02 y el vaso de rechazo va a mano en la mesa.
+"""Banda de la etapa 2 (v3, print-and-place): cadena de tablillas en 12 secciones que salen articuladas de una sola
+impresión (pasador integrado), bastidor en 6 módulos que se encajan como rompecabezas (sin clavijas sueltas) y piezas
+pensadas para imprimirse sin voladizos.
 
     pip install manifold3d numpy
     python generar_banda.py --datos banda.json     # mallas del ensamble para el visor
-    python generar_banda.py --stl salida/          # STL de impresion (tras el visto bueno)
 
 Marco de referencia (el del ensamble v5 con Y y Z intercambiadas para que Z sea la altura):
   X a lo largo de la banda, con el hueco del embudo en X = 0;
@@ -59,38 +55,45 @@ BOCA_VASO = 113.0
 # Banda
 # =====================================================================
 Y_C = 0.0
-# cadena de tablillas impresas: paso 12 mm, 8 dientes, pasador a media altura de la tablilla
-PASO, DIENTES = 12.0, 8
+# cadena de tablillas impresas en secciones de 14 eslabones; 8 dientes; el pasador va fundido a la tablilla
+DIENTES = 8
+SECC_N, N_SECC = 14, 12
+N_TAB = SECC_N * N_SECC                 # 168 eslabones
+X_MOT, X_TEN = -330.0, 654.0            # ejes de la rueda motriz (-X) y de la libre (+X, con tensor); X_TEN = cadena sin holgura
+PASO = 2 * (X_TEN - X_MOT) / (N_TAB - DIENTES)      # 12,3 mm: la cadena cierra justo con las ruedas en X_MOT y X_TEN
 ANCHO_BANDA, ESP_BANDA = 56.0, 6.0      # ancho y espesor de la tablilla
 SEG = 8.0                               # 7 segmentos de 8 mm: nudillos alternados y ranura central
-KN_D, PIN_C, PIN_CH, PIN_CL = 6.0, 3.0, 3.4, 57.0
+KN_D = 6.0                              # nudillo (se aplana a la altura de la tablilla)
+PIN_C, PIN_CH, PIN_CL = 3.0, 3.6, 57.0  # pasador, agujero del nudillo (0,3 mm de juego por lado: es el mínimo para que no se suelden al imprimir) y largo de corte
+PIN_RANURA = 2.7                        # boca de los nudillos que encajan a presión entre secciones
 RANURA, RUEDA_W = 8.4, 7.8              # ranura de la tablilla y grosor de la rueda dentada
 RP = PASO / (2 * math.sin(math.pi / DIENTES))      # radio primitivo (centros de pasadores)
 HEX_E = 10.0                            # hexagono del eje donde se calza la rueda
 Z_PIN = Z_BANDA - ESP_BANDA / 2         # altura de los pasadores arriba
 Z_CAMA = Z_BANDA - ESP_BANDA
 Z_EJE = Z_PIN - RP
-N_TAB = 176                             # se imprimen 176; se sacan las que sobren al tensar
-X_MOT, X_TEN = -330.0, 660.0            # ejes del rodillo motriz (-X) y del libre con tensor (+X)
-CARRERA = 12.0
+CARRERA_ATRAS, CARRERA_ADEL = 6.0, 24.0 # el eje libre se mueve entre X_TEN-6 (cadena suelta) y X_TEN+24 (tensa, con el juego de 168 articulaciones)
 TAIL = 40.0                             # cola con rosca del carro del tensor
 ESP_CAMA, ALTO_PARED, ESP_PARED = 3.2, 30.0, 9.0
 Y_PARED = ANCHO_BANDA / 2 + 2.0         # cara interior de la pared +Y
 YW = Y_PARED + ESP_PARED                # cara exterior de la pared +Y
 Y_NERVIO = (-Y_PARED - 9.0, -Y_PARED)   # nervio -Y bajo la cama
-PROF_NERVIO = 12.0
-Y_TAPA = (-Y_PARED - 5.0, -Y_PARED)     # tapas -Y: cara interior a 2 mm del borde de la cinta
-MODULOS = [-358.0, -200.0, -45.0, 120.0, 285.0, 450.0, 570.0, 722.0]
-X_INI, X_FIN = MODULOS[0], MODULOS[-1]
+PROF_NERVIO = 14.0
+Y_TAPA = (-Y_PARED - 5.0, -Y_PARED)     # tapas -Y: cara interior a 2 mm del borde de la cadena
+X_INI, X_FIN = -358.0, 722.0
+JUNTAS = [-178.0, 2.0, 182.0, 362.0, 542.0]          # rompecabezas entre módulos
+MODULOS = [X_INI] + JUNTAS + [X_FIN]
+LAP = 12.0                              # los medios espesores de pared y nervio se traslapan 12 mm a cada lado de la junta
 CAMA_X = (X_MOT + 17.0, X_TEN - 17.0)
-PATAS_X = [-270.0, -120.0, 60.0, 235.0, 410.0, 603.0, 625.0]
+PATAS_X = [-268.0, -88.0, 92.0, 272.0, 452.0, 596.0]
 GUIAS = [-300.0, -127.0, 64.0, 255.0, 446.0, 637.0]
 
-# clavijas Ø6 x 12 (la P02 de la etapa 1), muñones Ø10 impresos
-PEG_D, PEG_H, PEG_L = 6.0, 6.2, 12.0
+# clavijas Ø6 integradas (guías y patas), muñones Ø10 impresos
+PEG_D, PEG_H, PEG_L = 6.0, 6.3, 5.5
 PIN_D, PIN_H = 10.0, 10.4
 CT = 12.0                               # espesor de los carros del tensor
-TRASLAPE = 16.0                         # largo del encastre entre tapa y nervio
+TONG = 10.0                             # largo de la lengüeta de las tapas
+Z_TONG = Z_CAMA - 7.0                   # centro de la lengüeta: z = 37
 # tornillo del tensor: sección elíptica retorcida (paso de 10 mm por vuelta)
 HILO_A, HILO_B, HILO_PASO, HILO_JUEGO = 4.1, 2.8, 10.0, 0.35
 
@@ -106,9 +109,9 @@ NEMA = dict(lado=42.3, largo=48.0, pilot=22.0, eje_d=5.0, eje_l=24.0)
 Y_PLACA = (78.0, 82.0)      # placa frontal del soporte (cara del motor en Y=82)
 BOLSA = 42.9                # hueco para el motor (0,3 mm de holgura por lado)
 Y_ACO = (46.0, 72.0)        # acople impreso
-HEX_AC = 8.0                # espiga hexagonal del rodillo, de lado a lado
-GUIA_TORN = [g + 30 + 60 * k for g in GUIAS[:-1] for k in range(3)]
-X_REF = 300.0                # donde se muestra una tablilla de ejemplo sobre la cama
+HEX_AC = 8.0                # espiga hexagonal del eje, de lado a lado
+APOT_BUJE = Z_CAMA - Z_EJE  # el buje octogonal de la pared llega justo a la altura de la cama (sin voladizo)
+X_REF = 300.0               # donde se muestra una sección de ejemplo sobre la cama
 
 
 def caja(x0, x1, y0, y1, z0, z1):
@@ -141,6 +144,67 @@ def union(ms):
     return out
 
 
+def rect2(x0, x1, y0, y1):
+    return CrossSection.square((x1 - x0, y1 - y0)).translate((x0, y0))
+
+
+def prisma_z(cs, z0, z1):
+    return cs.extrude(z1 - z0).translate((0, 0, z0))
+
+
+def prisma_y(cs, y0, y1):
+    """Extruye un perfil (x, z) a lo largo de Y entre y0 e y1."""
+    return cs.extrude(y1 - y0).rotate((90, 0, 0)).translate((0, y1, 0))
+
+
+def octo_y(x, z, y0, y1, apot):
+    """Prisma octogonal a lo largo de Y con caras planas arriba y abajo (apotema dado)."""
+    R = apot / math.cos(math.radians(22.5))
+    pts = [(R * math.cos(math.radians(22.5 + 45 * k)), R * math.sin(math.radians(22.5 + 45 * k))) for k in range(8)]
+    return CrossSection([pts]).extrude(y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z))
+
+
+def losange_y(x, z, y0, y1, r):
+    """Rombo con puntas arriba y abajo: cerrado el hueco horizontal a 45 grados (sin techo plano)."""
+    return caja(-r, r, y0, y1, -r, r).rotate((0, 45, 0)).translate((x, 0, z))
+
+
+def losange_x(y, z, x0, x1, r):
+    return caja(x0, x1, -r, r, -r, r).rotate((45, 0, 0)).translate((0, y, z))
+
+
+def hueco_y(x, z, y0, y1, d):
+    """Agujero horizontal a lo largo de Y que se imprime sin soporte (círculo + rombo)."""
+    return cil_y(x, z, y0, y1, d) + losange_y(x, z, y0, y1, d / 2)
+
+
+def hueco_x(y, z, x0, x1, d):
+    return cil_x(y, z, x0, x1, d) + losange_x(y, z, x0, x1, d / 2)
+
+
+def hueco_px(x, z, y0, y1, d):
+    """Agujero a lo largo de Y con la punta del rombo hacia +X: el carro del tensor se imprime parado sobre su cola (+X arriba)."""
+    return hueco_y(0, 0, y0, y1, d).rotate((0, 90, 0)).translate((x, 0, z))
+
+
+def clavija_y(x, z, y0, y1, d, arriba=True):
+    """Clavija horizontal en gota (punta arriba): se imprime parada sin soporte."""
+    r = d / 2
+    k = r / math.sqrt(2)
+    s = -1 if arriba else 1                       # en el perfil (px, py) py positivo = Z negativo tras rotar
+    gota = CrossSection.circle(r, 48) + CrossSection([[(k, s * k), (-k, s * k), (0, s * r * math.sqrt(2))]])
+    return gota.extrude(y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z))
+
+
+def pasador_gota(x, z, y0, y1, d=PIN_C, corte=1.55):
+    """Pasador Ø3 con la parte de abajo (la que mira a la cama al imprimir) en punta recortada a 45 grados: no cuelga y gira en el agujero."""
+    r = d / 2
+    k = r / math.sqrt(2)
+    gota = CrossSection.circle(r, 48) + CrossSection([[(k, -k), (-k, -k), (0, -r * math.sqrt(2))]])
+    gota = gota ^ rect2(-5, 5, -corte, 5)
+    return gota.extrude(y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z))
+
+
 def hilo(x0, x1, y, z, extra=0.0):
     """Rosca gruesa de dos filos: elipse que gira a lo largo del eje X. El hueco es la misma forma con juego."""
     a, b = HILO_A + extra, HILO_B + extra
@@ -165,87 +229,81 @@ S_RECHAZO = -X_RAMPA                    # +190
 S_A = lambda k: A_X - (X_VASO1 + (k - 1) * PASO_VASO)   # vaso k en el punto A
 
 
-def nervio_x(x0, x1):
-    cx0, cx1 = max(x0, CAMA_X[0]), min(x1, CAMA_X[1])
-    nx0 = cx0 + 20 if x0 == X_INI else cx0
-    nx1 = cx1 - 20 if x1 == X_FIN else cx1
-    return cx0, cx1, nx0, nx1
+NX0, NX1 = CAMA_X[0] + 20.0, CAMA_X[1] - 20.0        # el nervio -Y empieza y acaba lejos de las ruedas (ahí van las tapas)
+PROHIBIDO = [(xj - LAP - 5.0, xj + LAP + 5.0) for xj in JUNTAS] + [(NX0 - 3.0, NX0 + TONG + 5.0), (NX1 - TONG - 5.0, NX1 + 3.0)]
 
 
-# =====================================================================
-# Piezas
-# =====================================================================
-def modulo(x0, x1):
-    extremo_mot = x0 == X_INI
-    extremo_ten = x1 == X_FIN
-    cx0, cx1, nx0, nx1 = nervio_x(x0, x1)
-    cama = caja(cx0, cx1, Y_NERVIO[0], Y_PARED, Z_CAMA - ESP_CAMA, Z_CAMA)
-    pared = caja(x0, x1, Y_PARED, YW, Z_CAMA - ALTO_PARED, Z_CAMA)
-    nervio = caja(nx0, nx1, Y_NERVIO[0], Y_NERVIO[1], Z_CAMA - PROF_NERVIO, Z_CAMA)
-    partes = [cama, pared, nervio]
-    ymn = (Y_NERVIO[0] + Y_NERVIO[1]) / 2
-    ag = []
-    # bridas de union entre modulos: una clavija Ø6 en la pared y otra en el nervio
-    for xj, lado in ((x0, -1), (x1, 1)):
-        if (extremo_mot and lado < 0) or (extremo_ten and lado > 0):
-            continue
-        xa, xb = (xj, xj + 6) if lado < 0 else (xj - 6, xj)
-        partes.append(caja(xa, xb, YW, YW + 8, Z_CAMA - ALTO_PARED, Z_CAMA))
-        hx = (xj - 0.5, xj + 6) if lado < 0 else (xj - 6, xj + 0.5)
-        ag.append(cil_x(YW + 4, Z_CAMA - ALTO_PARED / 2, hx[0], hx[1], PEG_H))
-        if nx0 <= xa and xb <= nx1:
-            partes.append(caja(xa, xb, Y_NERVIO[0] - 8, Y_NERVIO[0], Z_CAMA - PROF_NERVIO, Z_CAMA))
-            ag.append(cil_x(Y_NERVIO[0] - 4, Z_CAMA - PROF_NERVIO / 2, hx[0], hx[1], PEG_H))
+def clavijas_guia(x0, x1):
+    """Tres posiciones de clavija por guía, lejos de las juntas, las lengüetas de las tapas y el LED."""
+    L, out = x1 - x0, []
+    for f in (1 / 6, 0.5, 5 / 6):
+        for dx in sorted(range(-45, 46, 2), key=abs):
+            c = x0 + f * L + dx
+            if x0 + 8 < c < x1 - 8 and not any(a < c < b for a, b in PROHIBIDO) and abs(c - X_IR) > 9:
+                out.append(c)
+                break
+    return out
+
+
+def cuerpo():
+    """Bastidor continuo (se parte luego en módulos): cama bajo la cadena, pared +Y, nervio -Y, buje del motor, oreja del tensor."""
+    cama = caja(CAMA_X[0], CAMA_X[1], Y_NERVIO[0], Y_PARED, Z_CAMA - ESP_CAMA, Z_CAMA)
+    pared = caja(X_INI, X_FIN, Y_PARED, YW, Z_CAMA - ALTO_PARED, Z_CAMA)
+    nervio = caja(NX0, NX1, Y_NERVIO[0], Y_NERVIO[1], Z_CAMA - PROF_NERVIO, Z_CAMA)
+    partes = [cama, pared, nervio, octo_y(X_MOT, Z_EJE, Y_PARED, YW + 6, APOT_BUJE)]
+    partes.append(caja(X_FIN - 6, X_FIN, YW, YW + 14, Z_EJE - 9, Z_CAMA))                     # oreja del tornillo del tensor
     for xp in PATAS_X:
-        if x0 + 12 < xp < x1 - 12:
-            partes.append(caja(xp - 10, xp + 10, YW, YW + 3, Z_CAMA - ALTO_PARED, Z_CAMA))
-            for dx in (-5, 5):
-                ag.append(cil_y(xp + dx, Z_CAMA - 12, YW - 3, YW + 3.01, PEG_H))
-    if extremo_ten:
-        partes.append(caja(x1 - 6, x1, YW, YW + 14, Z_EJE - 9, Z_EJE + 9))
-    if extremo_mot:
-        partes.append(cil_y(X_MOT, Z_EJE, Y_PARED, YW + 6, 34))
+        partes.append(caja(xp - 10, xp + 10, YW, YW + 3, Z_CAMA - ALTO_PARED, Z_CAMA))          # tope de la pata
     m = union(partes)
-    # ventanas de aligeramiento de la pared (no sobre las patas ni los extremos)
-    for xa in np.arange(x0 + 16, x1 - 16 - 22, 34.0):
-        if extremo_mot and xa < X_MOT + 40:
-            continue
-        if extremo_ten and xa > X_TEN - 50:
-            continue
-        if any(xa - 14 < xp < xa + 22 + 14 for xp in PATAS_X):
-            continue
-        m = m - caja(xa, xa + 22, Y_PARED - 1, YW + 1, Z_CAMA - ALTO_PARED + 8, Z_CAMA - 8)
-    # clavijas verticales de las guias
-    for xg in GUIA_TORN:
-        if nx0 + 4 < xg < nx1 - 4:
-            ag.append(cil_z(xg, ymn, Z_CAMA - 4.5, Z_CAMA + 1, PEG_H))
-        if x0 + 4 < xg < x1 - 4 and CAMA_X[0] - 2 < xg < CAMA_X[1] + 2:
-            ag.append(cil_z(xg, Y_PARED + ESP_PARED / 2, Z_CAMA - 4.5, Z_CAMA + 1, PEG_H))
-    # encaste con la tapa -Y: el nervio pierde la mitad de abajo en TRASLAPE y lleva dos clavijas verticales
-    if extremo_mot:
-        ag.append(caja(nx0 - 1, nx0 + TRASLAPE + 0.4, Y_NERVIO[0] - 0.1, Y_NERVIO[1], Z_CAMA - PROF_NERVIO - 1, Z_CAMA - PROF_NERVIO / 2))
-        for dx in (4, 12):
-            ag.append(cil_z(nx0 + dx, ymn, Z_CAMA - PROF_NERVIO - 1, Z_CAMA + 1, PEG_H))
-    if extremo_ten:
-        ag.append(caja(nx1 - TRASLAPE - 0.4, nx1 + 1, Y_NERVIO[0] - 0.1, Y_NERVIO[1], Z_CAMA - PROF_NERVIO - 1, Z_CAMA - PROF_NERVIO / 2))
-        for dx in (4, 12):
-            ag.append(cil_z(nx1 - dx, ymn, Z_CAMA - PROF_NERVIO - 1, Z_CAMA + 1, PEG_H))
-        # ranura del muñon del rodillo libre y agujero del tornillo del tensor en la oreja
-        ag.append(caja(X_TEN - CARRERA - PIN_H / 2, X_TEN + CARRERA + PIN_H / 2, Y_PARED - 1, YW + 1, Z_EJE - PIN_H / 2, Z_EJE + PIN_H / 2))
-        ag.append(cil_x(YW + CT / 2, Z_EJE, x1 - 7, x1 + 1, 9.0))
-    if extremo_mot:
-        ag.append(cil_y(X_MOT, Z_EJE, Y_PARED - 1, YW + 7, PIN_H))
-        # clavijas que sujetan el soporte del motor
-        for dx in (-19, 19):
-            for zz in (Z_CAMA - ALTO_PARED + 8, Z_CAMA - 5):
-                ag.append(cil_y(X_MOT + dx, zz, YW - 6, YW + 0.01, PEG_H))
+    ag = [hueco_y(X_MOT, Z_EJE, Y_PARED - 1, YW + 7, PIN_H)]                                   # muñón del eje motriz
+    ag.append(caja(X_TEN - CARRERA_ATRAS - PIN_H / 2, X_TEN + CARRERA_ADEL + PIN_H / 2, Y_PARED - 1, YW + 1, Z_CAMA - ALTO_PARED - 1, Z_EJE + PIN_H / 2))   # muesca abierta abajo (sin techo)
+    ag.append(hueco_x(YW + CT / 2, Z_EJE, X_FIN - 7, X_FIN + 1, 9.0))                           # paso del tornillo del tensor
+    for xp in PATAS_X:                                                                         # agujeros de las clavijas de las patas
+        for dx in (-5, 5):
+            ag.append(cil_y(xp + dx, Z_CAMA - 12, YW + 3 - 8.4, YW + 3.01, PEG_H) + losange_y(xp + dx, Z_CAMA - 12, YW + 3 - 8.4, YW + 3.01, PEG_H / 2))
+    for i in range(len(GUIAS) - 1):                                                            # agujeros de las clavijas de las guías
+        for xg in clavijas_guia(GUIAS[i], GUIAS[i + 1]):
+            ag.append(cil_z(xg, (Y_NERVIO[0] + Y_NERVIO[1]) / 2, Z_CAMA - PEG_L - 0.7, Z_CAMA + 1, PEG_H))
+            ag.append(cil_z(xg, Y_PARED + ESP_PARED / 2, Z_CAMA - PEG_L - 0.7, Z_CAMA + 1, PEG_H))
+    for nx, signo in ((NX0, 1), (NX1, -1)):                                                    # bolsillo de la lengüeta de cada tapa
+        xa, xb = (nx - 0.01, nx + TONG + 0.4) if signo > 0 else (nx - TONG - 0.4, nx + 0.01)
+        ag.append(caja(xa, xb, Y_NERVIO[0] - 1, Y_NERVIO[1] + 1, Z_TONG - 3.25, Z_TONG + 3.25))
     for a in ag:
         m = m - a
     return m
 
 
+def _izq(xj):
+    """Territorio del módulo de la izquierda en la junta xj: recto, con dos colas de milano en la cama y los medios espesores de pared y nervio."""
+    z = rect2(-1000, xj, -100, 100)
+    for yc in (-16.0, 12.0):
+        z = z + CrossSection([[(xj - 1, yc - 4), (xj, yc - 4), (xj + 9, yc - 7), (xj + 9, yc + 7), (xj, yc + 4), (xj - 1, yc + 4)]])
+    z = z + rect2(xj - 1, xj + LAP, Y_PARED + ESP_PARED / 2, 100) + rect2(xj - 1, xj + LAP, -100, -Y_PARED - ESP_PARED / 2)
+    z = z - rect2(xj - LAP, xj + 1, Y_PARED, Y_PARED + ESP_PARED / 2) - rect2(xj - LAP, xj + 1, -Y_PARED - ESP_PARED / 2, -Y_PARED)
+    return z
+
+
+def territorios():
+    big = rect2(-1000, 1000, -100, 100)
+    out = []
+    for k in range(len(MODULOS) - 1):
+        t = big
+        if k > 0:
+            t = t ^ (big - _izq(JUNTAS[k - 1]))
+        if k < len(JUNTAS):
+            t = t ^ _izq(JUNTAS[k])
+        out.append(t.offset(-0.1, JoinType.Miter, 2.0, 0))
+    return out
+
+
+def modulos():
+    c = cuerpo()
+    return [c ^ prisma_z(t, -5, 100) for t in territorios()]
+
+
 def guia(x0, x1, lado):
-    """Guia lateral en L: pie sobre la pared o el nervio (con clavijas) y labio de 6 mm a 1 mm sobre la cinta."""
+    """Guia lateral en L: pie con tres clavijas integradas hacia abajo y labio de 6 mm a 1 mm sobre la cadena.
+    Se imprime boca abajo (el ala en la cama): las clavijas quedan paradas arriba y no hay voladizos."""
     zt = Z_BANDA + ALTO_LAB
     if lado < 0:
         pie = caja(x0, x1, Y_NERVIO[0], Y_NERVIO[1], Z_CAMA, zt)
@@ -266,12 +324,11 @@ def guia(x0, x1, lado):
             ya, yb = -Y_LAB - 3 - 5.0, -Y_LAB
         m = m + caja(X_IR - 6, X_IR + 6, ya, yb, Z_BANDA + 1.0, zt)
         if lado > 0:
-            m = m - cil_y(X_IR, Z_IR, Y_LAB - 1, yb + 1, IR_VENTANA) - cil_y(X_IR, Z_IR, Y_LAB + 3, YW + 1, IR_D)
+            m = m - cil_y(X_IR, Z_IR, Y_LAB - 1, yb + 1, IR_VENTANA) - hueco_y(X_IR, Z_IR, Y_LAB + 3, YW + 1, IR_D)
         else:
-            m = m - cil_y(X_IR, Z_IR, ya - 1, -Y_LAB + 1, IR_VENTANA) - cil_y(X_IR, Z_IR, Y_NERVIO[0] - 1, -Y_LAB - 3, IR_D)
-    for xg in GUIA_TORN:
-        if x0 + 4 < xg < x1 - 4:
-            m = m - cil_z(xg, ytor, Z_CAMA - 1, zt + 1, PEG_H)
+            m = m - cil_y(X_IR, Z_IR, ya - 1, -Y_LAB + 1, IR_VENTANA) - hueco_y(X_IR, Z_IR, Y_NERVIO[0] - 1, -Y_LAB - 3, IR_D)
+    for xg in clavijas_guia(x0, x1):
+        m = m + cil_z(xg, ytor, Z_CAMA - PEG_L, Z_CAMA + 0.01, PEG_D)
     return m
 
 
@@ -302,33 +359,36 @@ def rueda(x):
     return disco.translate((x, 0, Z_EJE))
 
 
-def tablilla(x=0.0, z=0.0):
-    """Tablilla de 12 × 56 × 6 mm con el pasador trasero en (x, z): nudillos alternados, ranura central para la rueda.
-    Se imprime con la cara de arriba sobre la cama."""
+def tablilla(x=0.0, z=0.0, primero=False):
+    """Eslabón de 12,3 × 56 × 6 mm. Adelante: nudillos con el pasador Ø3 fundido. Atrás: nudillos con agujero Ø3,4 que abraza el
+    pasador del eslabón anterior (print-in-place, 0,2 mm de juego). El primer eslabón de cada sección lleva los nudillos abiertos por
+    abajo (ranura de 2,7 mm): se encajan a presión en el pasador del último eslabón de la sección anterior.
+    Se imprime con la cara de arriba contra la cama; ningún voladizo pasa de 45 grados."""
     h = ESP_BANDA / 2
+    kr = 3.2
     plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
     plate = plate - caja(-1, PASO + 1, -RANURA / 2, RANURA / 2, -h - 1, h + 1)
     seg = lambda j: (-ANCHO_BANDA / 2 + SEG * j, -ANCHO_BANDA / 2 + SEG * (j + 1))
-    for j in (1, 5):                              # muescas traseras donde entran los nudillos de la tablilla anterior
+    for j in (1, 5):                              # muescas traseras donde entran los nudillos del eslabón anterior
         ya, yb = seg(j)
         plate = plate - caja(-1, KN_D / 2 + 0.6, ya, yb, -h - 1, h + 1)
-    for j in (0, 2, 4, 6):                        # muescas delanteras para los nudillos de la siguiente
+    for j in (0, 2, 4, 6):                        # muescas delanteras para los nudillos del siguiente
         ya, yb = seg(j)
         plate = plate - caja(PASO - KN_D / 2 - 0.6, PASO + 1, ya, yb, -h - 1, h + 1)
-    nud = []
-    for j in (0, 2, 4, 6):
+    def nud(xn, j):
         ya, yb = seg(j)
-        nud.append(cil_y(0, 0, ya + 0.2, yb - 0.2, KN_D))
-    for j in (1, 5):
-        ya, yb = seg(j)
-        nud.append(cil_y(PASO, 0, ya + 0.2, yb - 0.2, KN_D))
-    m = plate + union(nud)
-    m = m - cil_y(0, 0, -PIN_CL, PIN_CL, PIN_CH) - cil_y(PASO, 0, -PIN_CL, PIN_CL, PIN_CH)
+        return cil_y(xn, 0, ya + 0.2, yb - 0.2, 2 * kr) ^ caja(xn - 4, xn + 4, ya, yb, -h, h)
+    m = plate + union([nud(0, j) for j in (0, 2, 4, 6)] + [nud(PASO, j) for j in (1, 5)])
+    m = m - hueco_y(0, 0, -PIN_CL, PIN_CL, PIN_CH)
+    if primero:
+        m = m - caja(-PIN_RANURA / 2, PIN_RANURA / 2, -PIN_CL, PIN_CL, -h - 1, 0)
+    m = m + pasador_gota(PASO, 0, -27.5, 27.5)
     return m.translate((x, 0, z))
 
 
-def pasador(x=0.0, z=0.0):
-    return cil_y(x, z, -PIN_CL / 2, PIN_CL / 2, PIN_C)
+def seccion(x=0.0, z=0.0):
+    """Sección de 14 eslabones que se imprime ya articulada (print-in-place); la rueda toma los pasadores por la ranura central."""
+    return union([tablilla(i * PASO, 0, primero=i == 0) for i in range(SECC_N)]).translate((x, 0, z))
 
 
 def carro_tensor(lado):
@@ -338,9 +398,9 @@ def carro_tensor(lado):
     m = caja(X_TEN - 10, X_TEN + 10, y0, y1, Z_EJE - 9, Z_EJE + 9)
     m = m + caja(X_TEN + 9.99, X_TEN + TAIL, y0, y1, Z_EJE - 7, Z_EJE + 7)
     if lado > 0:
-        m = m - cil_y(X_TEN, Z_EJE, y0 - 1, y1 - 1, PIN_H)
+        m = m - hueco_px(X_TEN, Z_EJE, y0 - 1, y1 - 1, PIN_H)
     else:
-        m = m - cil_y(X_TEN, Z_EJE, y0 + 1, y1 + 1, PIN_H)
+        m = m - hueco_px(X_TEN, Z_EJE, y0 + 1, y1 + 1, PIN_H)
     m = m - hilo(X_TEN + 8, X_TEN + TAIL + 0.5, ym, Z_EJE, HILO_JUEGO)
     return m
 
@@ -357,31 +417,22 @@ def tornillo_tensor(lado):
 
 
 def tapa(motor):
-    """Tapa lateral -Y desmontable: se quita para meter la cinta cerrada por el costado.
-    Se encaja en el nervio con una lengueta y dos clavijas verticales."""
+    """Tapa lateral -Y desmontable: se quita para meter la cadena por el costado. La lengüeta de 10 mm entra por Y en el
+    bolsillo del nervio y se pega con cianoacrilato. Se imprime acostada sobre la cara interior (sin voladizos)."""
     y0, y1 = Y_TAPA
-    ymn = (Y_NERVIO[0] + Y_NERVIO[1]) / 2
     if motor:
-        nx = CAMA_X[0] + 20
         m = caja(X_INI, CAMA_X[0], y0, y1, Z_CAMA - ALTO_PARED, Z_CAMA)
-        m = m + caja(CAMA_X[0], nx, Y_NERVIO[0], y1, Z_CAMA - PROF_NERVIO, Z_CAMA - ESP_CAMA)
-        m = m + caja(CAMA_X[0], nx, Y_NERVIO[0], y1, Z_CAMA - ALTO_PARED, Z_CAMA - PROF_NERVIO)
-        lx0, lx1 = nx, nx + TRASLAPE
-        hx = [nx + 4, nx + 12]
+        m = m + caja(CAMA_X[0], NX0, Y_NERVIO[0], y1, Z_CAMA - ALTO_PARED, Z_CAMA - ESP_CAMA)
+        m = m + caja(NX0 - 0.01, NX0 + TONG, Y_NERVIO[0], Y_NERVIO[1], Z_TONG - 3.0, Z_TONG + 3.0)
         m = m + cil_y(X_MOT, Z_EJE, y0 - 6, y1, 34)
-        m = m - cil_y(X_MOT, Z_EJE, y0 - 7, y1 + 1, PIN_H)
+        m = m - hueco_y(X_MOT, Z_EJE, y0 - 7, y1 + 1, PIN_H)
     else:
-        nx = CAMA_X[1] - 20
         m = caja(CAMA_X[1], X_FIN, y0, y1, Z_CAMA - ALTO_PARED, Z_CAMA)
-        m = m + caja(nx, CAMA_X[1], Y_NERVIO[0], y1, Z_CAMA - PROF_NERVIO, Z_CAMA - ESP_CAMA)
-        lx0, lx1 = nx - TRASLAPE, nx
-        hx = [nx - 4, nx - 12]
-        m = m + caja(X_FIN - 6, X_FIN, y0 - 14, y0, Z_EJE - 9, Z_EJE + 9)
-        m = m - caja(X_TEN - CARRERA - PIN_H / 2, X_TEN + CARRERA + PIN_H / 2, y0 - 1, y1 + 1, Z_EJE - PIN_H / 2, Z_EJE + PIN_H / 2)
-        m = m - cil_x(y0 - CT / 2, Z_EJE, X_FIN - 7, X_FIN + 1, 9.0)
-    m = m + caja(lx0, lx1, Y_NERVIO[0], Y_NERVIO[1], Z_CAMA - PROF_NERVIO, Z_CAMA - PROF_NERVIO / 2 - 0.35)
-    for x in hx:
-        m = m - cil_z(x, ymn, Z_CAMA - PROF_NERVIO - 1, Z_CAMA - PROF_NERVIO / 2, PEG_H)
+        m = m + caja(NX1, CAMA_X[1], Y_NERVIO[0], y1, Z_CAMA - ALTO_PARED, Z_CAMA - ESP_CAMA)
+        m = m + caja(NX1 - TONG, NX1 + 0.01, Y_NERVIO[0], Y_NERVIO[1], Z_TONG - 3.0, Z_TONG + 3.0)
+        m = m + caja(X_FIN - 6, X_FIN, y0 - 14, y0, Z_EJE - 9, Z_CAMA)
+        m = m - caja(X_TEN - CARRERA_ATRAS - PIN_H / 2, X_TEN + CARRERA_ADEL + PIN_H / 2, y0 - 1, y1 + 1, Z_EJE - PIN_H / 2, Z_EJE + PIN_H / 2)
+        m = m - hueco_x(0, 0, X_FIN - 7, X_FIN + 1, 9.0).rotate((90, 0, 0)).translate((0, y0 - CT / 2, Z_EJE))   # punta del rombo hacia -Y (arriba al imprimir)
     return m
 
 
@@ -395,49 +446,48 @@ def acople():
 
 
 def soporte_motor():
-    """Base clavijada a la pared +Y y bolsa cuadrada donde el NEMA17 entra por atras. Sin tornillos."""
+    """Soporte del NEMA17 de una pieza: base que se pega a la pared +Y sobre el buje octogonal, jaula que se cierra en cono hacia la
+    placa (sin puentes) y bolsa cuadrada donde el motor entra por atrás. Se imprime con la base en la cama y la boca de la bolsa arriba."""
     x0 = X_MOT
     z_top = Z_EJE + BOLSA / 2 + 3
     z_bot = Z_EJE - BOLSA / 2 - 3
-    base = caja(x0 - 25, x0 + 25, YW, YW + 6, Z_CAMA - ALTO_PARED, z_top)
-    base = base - cil_y(x0, Z_EJE, YW - 1, YW + 7, 35.0)
-    bolsa = caja(x0 - BOLSA / 2 - 3, x0 + BOLSA / 2 + 3, Y_PLACA[0], Y_PLACA[1] + NEMA["largo"] + 0.6, z_bot, z_top)
-    bolsa = bolsa - caja(x0 - BOLSA / 2, x0 + BOLSA / 2, Y_PLACA[1], Y_PLACA[1] + NEMA["largo"] + 1.0, Z_EJE - BOLSA / 2, Z_EJE + BOLSA / 2)
-    bolsa = bolsa - cil_y(x0, Z_EJE, Y_PLACA[0] - 1, Y_PLACA[1] + 1, NEMA["pilot"] + 1.0)
-    m = base + bolsa
-    for xs in (x0 - BOLSA / 2 - 3, x0 + BOLSA / 2 - 0.0):
-        m = m + caja(xs, xs + 3, YW + 6 - 0.01, Y_PLACA[0] + 0.01, z_bot, z_top)
-    # clavijas: 4 agujeros Ø6,2 a través de la base, ciegos en la pared
-    for dx in (-19, 19):
-        for zz in (Z_CAMA - ALTO_PARED + 8, Z_CAMA - 5):
-            m = m - cil_y(x0 + dx, zz, YW - 0.01, YW + 6.01, PEG_H)
+    zb = Z_CAMA - ALTO_PARED
+    y_ini = YW
+    y_fin = Y_PLACA[1] + NEMA["largo"] + 0.6
+    base = caja(x0 - 25, x0 + 25, y_ini, y_ini + 6, zb, z_top)
+    placa = caja(x0 - BOLSA / 2 - 3, x0 + BOLSA / 2 + 3, Y_PLACA[0], Y_PLACA[1], z_bot, z_top)
+    jaula = Manifold.batch_hull([base, placa])
+    bolsa = caja(x0 - BOLSA / 2 - 3, x0 + BOLSA / 2 + 3, Y_PLACA[1], y_fin, z_bot, z_top)
+    m = jaula + bolsa
+    # interior de la jaula: caja de 34 que se cierra en cono hasta el hueco Ø23 de la placa
+    caja_int = caja(x0 - 17, x0 + 17, y_ini + 6, Y_PLACA[0] - 14, Z_EJE - 17, Z_EJE + 17)
+    cono = Manifold.batch_hull([caja_int, cil_y(x0, Z_EJE, Y_PLACA[0] - 0.2, Y_PLACA[0], 23.0)])
+    m = m - cono
+    m = m - octo_y(x0, Z_EJE, y_ini - 1, y_ini + 6.01, APOT_BUJE + 0.35)                     # calza sobre el buje de la pared
+    m = m - cil_y(x0, Z_EJE, Y_PLACA[0] - 1, Y_PLACA[1] + 1, NEMA["pilot"] + 1.0)
+    m = m - caja(x0 - BOLSA / 2, x0 + BOLSA / 2, Y_PLACA[1], y_fin + 1, Z_EJE - BOLSA / 2, Z_EJE + BOLSA / 2)
     return m
 
 
 def pata(xp):
-    """Placa contra la pared +Y (fuera del lazo, con dos clavijas) y zocalo bajo el retorno de la cinta."""
+    """Placa contra la pared +Y con dos clavijas integradas en gota, zócalo bajo el retorno de la cadena y refuerzo. Se imprime de pie."""
     y0 = YW + 3
     y1 = y0 + 7
     m = caja(xp - 10, xp + 10, y0, y1, MESA, Z_CAMA)
     m = m + caja(xp - 10, xp + 10, Y_NERVIO[0] - 4, y1, MESA, MESA + 4)
-    m = m + caja(xp - 2, xp + 2, 6.0, y0, MESA + 4, MESA + 12)
+    m = m + caja(xp - 2, xp + 2, 6.0, y0, MESA + 4, MESA + 11)
     m = m - caja(xp - 6, xp + 6, Y_NERVIO[0] + 4, 0.0, MESA - 1, MESA + 5)
     for dx in (-5, 5):
-        m = m - cil_y(xp + dx, Z_CAMA - 12, y0 - 0.01, y0 + 6.0, PEG_H)
+        m = m + clavija_y(xp + dx, Z_CAMA - 12, y0 - 8, y0 + 0.01, PEG_D)
     return m
-
-
-def clavija():
-    """Clavija Ø6 x 12 (la P02 de la etapa 1), puesta en el agujero de la pared del primer empalme."""
-    return cil_x(YW + 4, Z_CAMA - ALTO_PARED / 2, -200.0 - 6.0, -200.0 + 6.0, PEG_D)
 
 
 # =====================================================================
 # Comprados y referencias
 # =====================================================================
 def lazo_banda():
-    """Largo de la cadena por la línea de pasadores con las ruedas de radio primitivo RP."""
-    return 2 * (X_TEN - X_MOT) + 2 * math.pi * RP
+    """Largo de la cadena por la línea de pasadores: 168 eslabones de paso PASO."""
+    return N_TAB * PASO
 
 
 def nema():
@@ -472,30 +522,29 @@ def b64(a):
 
 
 def piezas():
+    """Piezas del ensamble: (id, malla, extras). Las que se imprimen en varias copias van una sola vez (cantidad en el visor)."""
     P = []
-    for i in range(len(MODULOS) - 1):
-        P.append((f"BT0{i + 1}", modulo(MODULOS[i], MODULOS[i + 1]), {}))
+    for i, m in enumerate(modulos()):
+        P.append((f"BT0{i + 1}", m, {}))
+    P.append(("BT07", tapa(True), {}))
+    P.append(("BT08", tapa(False), {}))
     for i in range(len(GUIAS) - 1):
-        P.append(("BT08", guia(GUIAS[i], GUIAS[i + 1], -1), {"tag": f"G{i + 1}"}))
+        P.append(("BT09", guia(GUIAS[i], GUIAS[i + 1], -1), {"tag": f"G{i + 1}"}))
     for i in range(len(GUIAS) - 1):
-        P.append(("BT09", guia(GUIAS[i], GUIAS[i + 1], 1), {"tag": f"G{i + 1}"}))
-    P.append(("BT10", eje(True), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT11", eje(False), {"pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT12", carro_tensor(1), {"tag": "+Y"}))
-    P.append(("BT12", carro_tensor(-1), {"tag": "-Y"}))
-    P.append(("BT13", tapa(True), {}))
-    P.append(("BT14", tapa(False), {}))
+        P.append(("BT10", guia(GUIAS[i], GUIAS[i + 1], 1), {"tag": f"G{i + 1}"}))
+    P.append(("BT11", eje(True), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT12", eje(False), {"pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT13", carro_tensor(1), {"tag": "+Y"}))
+    P.append(("BT13", carro_tensor(-1), {"tag": "-Y"}))
+    P.append(("BT14", tornillo_tensor(1), {"tag": "+Y"}))
+    P.append(("BT14", tornillo_tensor(-1), {"tag": "-Y"}))
     P.append(("BT15", soporte_motor(), {}))
+    P.append(("BT16", acople(), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT17", rueda(X_MOT), {"tag": "motriz", "pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
+    P.append(("BT17", rueda(X_TEN), {"tag": "libre", "pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
     for xp in PATAS_X:
-        P.append(("BT16", pata(xp), {}))
-    P.append(("BT17", clavija(), {}))
-    P.append(("BT18", tornillo_tensor(1), {"tag": "+Y"}))
-    P.append(("BT18", tornillo_tensor(-1), {"tag": "-Y"}))
-    P.append(("BT19", acople(), {"pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT20", rueda(X_MOT), {"tag": "motriz", "pivote": [X_MOT, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT20", rueda(X_TEN), {"tag": "libre", "pivote": [X_TEN, 0, Z_EJE], "eje": [0, 1, 0]}))
-    P.append(("BT21", tablilla(X_REF, Z_PIN), {"origen": [X_REF, 0, Z_PIN]}))
-    P.append(("BT22", pasador(X_REF, Z_PIN), {}))
+        P.append(("BT18", pata(xp), {}))
+    P.append(("BT19", seccion(X_REF, Z_PIN), {"origen": [X_REF, 0, Z_PIN]}))
     P.append(("K1", nema(), {}))
     led, foto = leds_ref()
     P.append(("K2", led, {}))
@@ -509,10 +558,13 @@ def main():
     ap.add_argument("--datos", type=Path)
     a = ap.parse_args()
     out = []
+    aux = tablilla(X_REF, Z_PIN)
     for pid, m, ex in piezas():
         v, t = malla(m)
         bb = m.bounding_box()
         out.append(dict(pid=pid, v=b64(v), t=b64(t), vol=round(m.volume() / 1000.0, 2), bb=[round(x, 1) for x in bb], **ex))
+    v, t = malla(aux)
+    out.append(dict(pid="AUX", v=b64(v), t=b64(t), vol=0, bb=[0] * 6, aux=True, origen=[X_REF, 0, Z_PIN]))
     sim = dict(z_banda=Z_BANDA, x_mot=X_MOT, x_ten=X_TEN, z_eje=Z_EJE, rp=RP, paso_cad=PASO, dientes=DIENTES, n_cad=N_TAB, z_pin=Z_PIN, esp=ESP_BANDA, ancho=ANCHO_BANDA,
                lazo=lazo_banda(), a_x=A_X, s_min=S_MIN, s_rechazo=S_RECHAZO, paso=PASO_VASO,
                x_vaso1=X_VASO1, x_rampa=X_RAMPA, cart=list(X_CART), x_ir=X_IR, z_ir=Z_IR, rec=REC,
