@@ -4,7 +4,7 @@
 
 Una banda de cadena de tablillas de 1 m bajo la torre de la etapa 1 v5. Desliza el cartucho de 9 vasos (C02 + 3 C01 + 9 V01) para poner el vaso pedido bajo el hueco del embudo o la rampa de rechazo. Un NEMA17 con A4988 la mueve en lazo abierto y una barrera infrarroja da el cero. La banda es una cadena impresa (176 tablillas de 12 × 56 × 6 mm con pasadores Ø3, 8 dientes de paso 12 mm, tipo escalera mecánica); no lleva correa, rodamientos, tornillos ni tuercas: muñones impresos, clavijas Ø6 × 12 (la P02 de la etapa 1), tornillo de tensor impreso y bolsa impresa para el motor.
 
-Se compra: NEMA17 de 48 mm, A4988, LED infrarrojo y fototransistor. Todo lo demás se imprime (≈ 1,5 kg de PETG/PLA).
+Se compra: NEMA17 de 48 mm, A4988, LED infrarrojo y fototransistor. Todo lo demás se imprime (≈ 1,5 kg: PETG para lo que gira y el motor, PLA+ para tablillas, bastidor y guías; ver CAMAS.md).
 
 | Dato | Valor |
 |---|---|

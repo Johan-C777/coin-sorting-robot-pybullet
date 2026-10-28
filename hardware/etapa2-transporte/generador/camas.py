@@ -45,6 +45,20 @@ ORI = {
 }
 
 
+PETG = 'PETG Azul 4DLAB'
+PLA_M = 'PLA+ Mármol 4DLAB'
+PLA_A = 'PLA+ Azul 4DLAB'
+PLA_N = 'PLA+ Negro 4DLAB'
+# filamento por pieza (inventario 2026-10-28); gramos disponibles
+FIL = {k: PLA_M for k in ('BT02', 'BT03', 'BT04', 'BT05', 'BT06', 'BT07', 'BT14', 'BT16')}
+FIL.update({k: PETG for k in ('BT01', 'BT13', 'BT15', 'BT10', 'BT11', 'BT12P', 'BT12M', 'BT17', 'BT18', 'BT19', 'BT20', 'BT22')})
+FIL.update({k: PLA_A for k in ('BT21',)})
+FIL.update({k: PLA_N for k in ('BT08G1', 'BT08G2', 'BT09G1', 'BT09G2')})
+STOCK = {PETG: 429, PLA_M: 1000, PLA_A: 1000, PLA_N: 647}
+TEMP = {PETG: '230–250 °C', PLA_M: '200–230 °C', PLA_A: '200–230 °C', PLA_N: '200–230 °C'}
+ORI = {k: (v[0], v[1], FIL[k]) + tuple(v[3:]) for k, v in ORI.items()}
+
+
 def prueba():
     """Pieza de prueba de tolerancias: bloque con agujero de muñón, de clavija y de rosca, mas un muñón."""
     b = g.caja(0, 40, 0, 40, 0, 14)
@@ -135,15 +149,15 @@ def main():
         piezas.append(dict(key=key, arch=arch, nom=nom, mat=mat, relleno=relleno, cant=cant, nota=nota, m=m, w=w, d=d, h=h, vol=m.volume() / 1000.0, fn=fn))
     pr, (w, d, h) = pose(prueba(), (0, 0, 0))
     (out / 'stl' / 'BT00_prueba-tolerancias.stl').write_bytes(stl_bytes([pr]))
-    prueba_p = dict(key='BT00', arch='prueba-tolerancias', nom='Prueba de tolerancias', mat='PETG', relleno='100 %', cant=1,
+    prueba_p = dict(key='BT00', arch='prueba-tolerancias', nom='Prueba de tolerancias', mat=PLA_A, relleno='100 %', cant=1,
                     nota='Muñón en agujero de 10,4, clavija en 6,2, rosca con 0,35 mm de juego y dos tablillas unidas con su pasador (deben girar libres sin holgura exagerada). Imprímela primero.',
                     m=pr, w=w, d=d, h=h, vol=pr.volume() / 1000.0, fn='BT00_prueba-tolerancias.stl')
     for pz in piezas:
         assert pz['h'] <= 250, pz['key']
     # camas por material, la prueba va sola
-    camas = [('00', 'PETG', [dict(prueba_p, i=1)])]
+    camas = [('00', PLA_A, [dict(prueba_p, i=1)])]
     n = 1
-    for mat in ('PETG', 'PLA'):
+    for mat in (PETG, PLA_A, PLA_M, PLA_N):
         items = []
         for pz in piezas:
             if pz['mat'] != mat:
@@ -160,7 +174,7 @@ def main():
                 camas.append((f"{n:02d}", mat, [dict(p['it'], px=p['x'], py=p['y'], giro=p['giro']) for p in cama['puestos']]))
                 n += 1
     # cama 00 con coordenadas
-    camas[0] = ('00', 'PETG', [dict(prueba_p, i=1, px=0, py=0, giro=0)])
+    camas[0] = ('00', PLA_A, [dict(prueba_p, i=1, px=0, py=0, giro=0)])
     filas = []
     for num, mat, its in camas:
         meshes = []
@@ -171,7 +185,7 @@ def main():
                 x0, y0, z0, x1, y1, z1 = m.bounding_box()
                 m = m.translate((-x0, -y0, -z0))
             meshes.append(m.translate((it['px'] + MARGEN, it['py'] + MARGEN, 0)))
-        (out / 'camas' / f"cama-{num}_{mat}.stl").write_bytes(stl_bytes(meshes))
+        (out / 'camas' / f"cama-{num}_{mat.split()[0].replace('+', 'mas')}-{mat.split()[1].lower().replace('á','a').replace('ó','o')}.stl").write_bytes(stl_bytes(meshes))
         filas.append((num, mat, its))
     escribir_md(out, filas, piezas, prueba_p)
     print(len(filas), 'camas', len(piezas) + 1, 'STL')
@@ -179,7 +193,7 @@ def main():
 
 def gramos(pz):
     f = 1.0 if pz['relleno'].startswith('100') else 0.6
-    dens = 1.27 if pz['mat'] == 'PETG' else 1.24
+    dens = 1.27 if pz['mat'].startswith('PETG') else 1.24
     return pz['vol'] * dens * f
 
 
@@ -189,14 +203,30 @@ def escribir_md(out, filas, piezas, prueba_p):
     L.append("Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin tornillos, tuercas, rodamientos ni correa: la banda es una cadena de tablillas impresa; todo se une con clavijas Ø6 × 12, muñones, pasadores Ø3 y un tornillo impreso.\n")
     L.append("Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene cada cama ya acomodada en un solo STL. Si prefieres acomodar tú, usa `stl/`.\n")
     L.append("## Ajustes\n")
-    L.append("- Boquilla 0,4, capa 0,2 mm, 3 paredes y 20 % de relleno salvo que la tabla diga otra cosa (lo que carga o gira lleva 4 paredes y más relleno).")
-    L.append("- PETG para lo estructural y lo que gira, PLA para las guías. Sin soportes salvo donde se indica.")
-    L.append("- Compensación de agujeros: ninguna. Las holguras ya están en el modelo (muñón 10 en 10,4; clavija 6 en 6,2; rosca con 0,35 mm).")
-    L.append("- Las estimaciones de peso son aproximadas (relleno y paredes cambian el resultado).\n")
+    L.append("- Capa 0,2 mm, 3 paredes y 20 % de relleno salvo que la tabla diga otra cosa (lo que carga o gira lleva 4 paredes y más relleno).")
+    L.append("- Boquilla 0,4. Temperaturas según el filamento (tabla de abajo). Sin soportes salvo donde se indica.")
+    L.append("- Compensación de agujeros: ninguna. Las holguras ya están en el modelo.\n")
+    L.append("## Filamentos (inventario del 2026-10-28)\n")
+    L.append("| Filamento | Para qué | Gramos necesarios | Hay | Sobra | Temp. |")
+    L.append("|---|---|---|---|---|---|")
+    uso = {PETG: 'Pasadores, clavijas, ejes, ruedas, tensor, carros, acople, soporte y módulo del motor, tapa del motor (lo que gira, se desgasta o está junto al motor)',
+           PLA_M: 'Módulos 2 a 7, tapa del tensor y patas (bastidor)',
+           PLA_A: 'Las 176 tablillas de la cadena (y la cama 00 de prueba)',
+           PLA_N: 'Guías laterales'}
+    need = {}
+    for num, mat, its in filas:
+        need[mat] = need.get(mat, 0) + sum(gramos(it) for it in its)
+    for mat in (PETG, PLA_M, PLA_A, PLA_N):
+        L.append(f"| {mat} | {uso[mat]} | {need.get(mat, 0):.0f} g | {STOCK[mat]} g | {STOCK[mat] - need.get(mat, 0):.0f} g | {TEMP[mat]} |")
+    L.append("")
+    L.append("- No se usan: PLA+ Verde, Rosado, Silk, Hyper PLA y los rollos casi agotados (sirven para pruebas); ABS Gris queda de reserva para el soporte del motor si el PETG se ablanda; TPU no hace falta.")
+    L.append("- Por qué así: el PETG (429 g) no alcanza para todo, así que sólo va a lo que lo necesita (pasadores Ø3 que flexan, ejes y ruedas que giran, y lo que queda pegado al motor, que se calienta). Las tablillas van en PLA+ Azul: son 176 piezas y se necesitan ≈ 580 g. El bastidor y las guías van en PLA+ porque no trabajan en caliente ni a flexión.")
+    L.append("- La cama 00 es una prueba dimensional: sale en PLA+ Azul con las tablillas; el pasador, el muñón y la clavija de la prueba luego se hacen en PETG y el juego es el mismo.\n")
     L.append("## Orden\n")
-    L.append("1. **Cama 00, prueba de tolerancias.** Mete el muñón en el agujero de 10,4, una clavija en el de 6,2, atornilla la rosca en el bloque y dobla las dos tablillas unidas: deben girar libres. Si algo queda flojo o no entra, dime la medida y lo corrijo antes de imprimir lo demás.")
-    L.append("2. Camas de PETG en el orden de abajo (primero las clavijas, que se necesitan para armar).")
-    L.append("3. Cama de guías en PLA al final.\n")
+    L.append("1. **Cama 00, prueba de tolerancias** (PLA+ Azul). Mete el muñón en el agujero de 10,4, una clavija en el de 6,2, atornilla la rosca en el bloque y dobla las dos tablillas unidas: deben girar libres. Si algo queda flojo o no entra, dime la medida y lo corrijo antes de imprimir lo demás.")
+    L.append("2. Camas de PETG Azul (primero pasadores y clavijas, que se necesitan para armar).")
+    L.append("3. Camas de tablillas en PLA+ Azul (176 en total; imprime 3 primero y prueba la articulación).")
+    L.append("4. Camas de bastidor en PLA+ Mármol y guías en PLA+ Negro.\n")
     L.append("## Camas\n")
     tot = 0.0
     for num, mat, its in filas:
@@ -220,7 +250,7 @@ def escribir_md(out, filas, piezas, prueba_p):
         L.append(f"- Peso aproximado de la cama: {gt:.0f} g.\n")
     L.append(f"Total aproximado: **{tot:.0f} g** en {len(filas)} camas.\n")
     L.append("## Cantidades que hay que imprimir\n")
-    L.append("| Pieza | Cant. | Material |")
+    L.append("| Pieza | Cant. | Filamento |")
     L.append("|---|---|---|")
     for pz in piezas:
         L.append(f"| `{pz['fn']}` | {pz['cant']} | {pz['mat']} |")
