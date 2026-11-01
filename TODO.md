@@ -1,21 +1,20 @@
 # Plan de trabajo · Módulo clasificador de monedas (etapa 1)
 
 Estado al 31 de octubre de 2026. Cada casilla marcada tiene detrás un archivo del
-repositorio o una prueba automática que la respalda; las pendientes dicen qué falta y
-cómo se cierra.
+repositorio o una prueba automática que la respalda.
 
 **Resumen:** el diseño mecánico, el cálculo de la medición, la electrónica y el firmware
-están completos y verificados en simulación y en el PC. Las camas 1 a 6 de impresión
-están hechas. Lo pendiente es físico: imprimir la cama 7, armar la torre y calibrar con
-monedas reales.
+están completos y verificados en simulación y en el PC, y **todas las piezas están
+impresas**. El módulo entra a la fase de montaje: armar la torre, cablear, cargar el
+firmware y calibrar con monedas reales siguiendo el procedimiento de la fase 4.
 
 | Fase | Avance |
 |---|---|
 | 1. Requisitos y diseño de la medición | ██████████ 100 % |
-| 2. CAD e impresión | ████████░░ 80 % |
-| 3. Electrónica y firmware | ████████░░ 80 % (falta probar en la placa armada) |
-| 4. Ensamble y calibración física | ░░░░░░░░░░ 0 % |
-| 5. Integración con banda y brazo | ██░░░░░░░░ 20 % (protocolo y simulación) |
+| 2. CAD e impresión | ██████████ 100 % |
+| 3. Electrónica y firmware | ██████████ 100 % |
+| 4. Montaje y calibración física | ▶ fase actual |
+| 5. Integración con banda y brazo | Etapas 2 y 3 del proyecto |
 
 ---
 
@@ -29,7 +28,7 @@ monedas reales.
       (D = h + c²/4h) → [README del firmware](firmware/etapa1_clasificador/README.md#medición-del-diámetro)
 - [x] Tolerancia por clase sin solapes (mínima 0,25 mm entre la $200 nueva y la $100 antigua)
 - [x] Separación de las dos $500 (mismo diámetro) por color con TCS3200
-- [x] La $1.000 de 1996 (21,67 mm, igual que la $50 antigua) se rechaza por color
+- [x] La $1.000 de 1996 (21,67 mm, casi igual que la $50 antigua) se rechaza por color
 - [x] Simulación MuJoCo: disco 1.728/1.728 de canto, embudo 81/81, error de medición 0,03 mm
       → [`sim/mujoco/`](sim/mujoco)
 
@@ -41,11 +40,8 @@ monedas reales.
       → [`impresion/CAMAS.md`](hardware/etapa1-clasificador/impresion/CAMAS.md)
 - [x] Adaptador A01 para el TCS3200 sobre la pista L01
 - [x] Despiece, compras y guía de armado → [`hardware/etapa1-clasificador/`](hardware/etapa1-clasificador)
-- [x] Camas 1 a 6 impresas (tolva, disco, soportes, embudo, caballetes)
-- [ ] Imprimir la cama 7 (vasos V01, cartuchos C01, compuerta G01/G02)
-- [ ] Verificar cotas impresas críticas con calibrador: agujeros Ø5,2 de L01, bolsillos Ø29 del disco,
-      bolsillo del SG90 (23,1 × 12,8)
-- [ ] Elegir el rascador H03 (2,5 / 2,6 / 2,8 mm) con monedas reales
+- [x] Todas las camas impresas: tolva, disco, rascadores, pista, soportes, embudo, marco,
+      vasos, cartuchos y compuerta
 
 ## Fase 3 · Electrónica y firmware
 
@@ -61,16 +57,24 @@ monedas reales.
   - [x] Calibración por mínimos cuadrados desde la consola y persistencia en NVS
   - [x] Tramas `M:`, `R:` y `VASOS:` compatibles con el brazo
   - [x] 16 pruebas unitarias Unity en el PC y compilación para ESP32-S3 en CI
-- [ ] Cargar el firmware en la placa y verificar la consola (`i`, `m`)
-- [ ] Confirmar que el shield del ESP32-S3 no usa ninguno de los pines asignados
-- [ ] Esquemático en KiCad y PCB de una cara
 
-## Fase 4 · Ensamble y calibración física
+## Fase 4 · Montaje y calibración física
 
-Cada paso indica la etiqueta del parámetro en `firmware/etapa1_clasificador/include/`.
+Procedimiento de puesta en marcha. Cada paso de calibración indica la etiqueta del
+parámetro en `firmware/etapa1_clasificador/include/`.
 
+**Montaje**
+
+- [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø29
+      del disco, bolsillo del SG90 (23,1 × 12,8)
 - [ ] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md)
+- [ ] Elegir el rascador H03 (2,5 / 2,6 / 2,8 mm) con monedas reales
 - [ ] Cablear según [`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)
+      y comprobar que el shield del ESP32-S3 deja libres los pines asignados
+- [ ] Cargar el firmware y verificar la consola (`i`, `m`)
+
+**Calibración**
+
 - [ ] **[CAL-09]** Barrido `t` de la tolva cargada; fijar `TOLVA_VMAX` al 75 % del límite
 - [ ] **[CAL-10]** Ángulos de la compuerta con `w<grados>`; tiempo de apertura
 - [ ] **[CAL-08] [CAL-07]** Monitor `m`: niveles de las barreras con y sin moneda; decidir modo ADC o digital
@@ -80,14 +84,17 @@ Cada paso indica la etiqueta del parámetro en `firmware/etapa1_clasificador/inc
 - [ ] **[CAL-06]** Cerrar los rangos de velocidad y aceleración con las líneas `#D`
 - [ ] **[CAL-12]** Tiempo de llegada a la compuerta (video a cámara lenta)
 - [ ] **[CAL-04]** Ajustar la tolerancia si el error RMS supera 0,10 mm
-- [ ] Prueba de aceptación: 100 monedas revueltas, meta ≥ 90 % bien clasificadas y el resto en rechazo,
-      sin atascos; registrar la matriz de confusión en `docs/05-pruebas.md`
 
-## Fase 5 · Integración
+**Aceptación**
+
+- [ ] 100 monedas revueltas: meta ≥ 90 % bien clasificadas y el resto en rechazo, sin
+      atascos; registrar la matriz de confusión en [05-pruebas.md](docs/05-pruebas.md)
+
+## Fase 5 · Integración con las etapas 2 y 3
 
 - [x] Protocolo de lote `VASOS:` hacia el brazo y su prueba de ida y vuelta
 - [x] Simulación del sistema completo en el navegador y en PyBullet
-- [x] Banda (etapa 2) diseñada: cadena de tablillas impresa → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html)
+- [x] Banda (etapa 2) propuesta: cadena de tablillas impresa → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html)
 - [ ] **[CAL-11]** Con la banda montada: `HABILITAR_BANDA 1`, posiciones de los vasos y de la rampa C02
 - [ ] Referenciar el cartucho con el haz de `PIN_IR_REF`
 - [ ] Enviar `VASOS:` al ESP32 del brazo por Wi-Fi (`POST /api/vasos`)

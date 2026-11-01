@@ -84,14 +84,12 @@ python software/apps/cli_demo.py --criterio peso
 
 ## Qué sigue
 
-| Pendiente | Para qué |
+| Siguiente paso | Para qué |
 | --- | --- |
-| Imprimir la cama 7 (vasos, cartucho y compuerta) y armar la torre v5 con su [guía](../hardware/etapa1-clasificador/README.md) | Pasar la tolva y la selección de diseño a construido |
-| Probar el 28BYJ-48 con la tolva cargada y calibrar barreras y color con monedas reales | Fijar velocidad de la tolva, `K_CUERDA` y `UMBRAL_DORADO` |
+| Armar la torre v5 (todas las piezas ya impresas) con su [guía](../hardware/etapa1-clasificador/README.md) | Pasar la tolva y la selección de diseño a construido |
+| Calibrar tolva, barreras y color con monedas reales según la [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-calibración-física) | Fijar los parámetros `[CAL-01]` a `[CAL-12]` del firmware |
 | Diseñar la banda transportadora (etapa 2) | Llevar los 9 vasos al punto A |
 | Medir L₂ y L₃ en el ensamble de SolidWorks | Cerrar el perfil real del brazo construido |
 | Llevar la evasión de obstáculos al firmware del brazo | Hoy corre en simulación y en Python |
-| Esquemático eléctrico en KiCad | Hoy está como tabla de conexiones y diagrama |
-| Sensor de color en la estación 3 | Admitir la $1.000 de 1996 |
 | Montar la celda, calibrar barreras IR y medir el ciclo real | Pasar de simulado a construido |
 | Actualizar el orquestador de PyBullet al riel de 8 estaciones | Hoy modela la familia nueva |

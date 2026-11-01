@@ -41,7 +41,7 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 | La moneda entra al embudo | `sim/mujoco/embudo.py` | 81 de 81 casos |
 | Medir diámetro por tiempo entre dos barreras | `sim/mujoco/rodar.py` | error simulado ≈ 0,03 mm (las monedas vecinas difieren 0,6 mm) |
 | Piezas cerradas, sin choques y dentro de la cama de la K1C | `scripts/generar_v5.py --ensamble` | 24 STL, 0 choques, ≈ 845 g |
-| Impresión | camas 1 a 6 impresas (oct. 2026) | falta la cama 7 (vasos, cartucho y compuerta) |
+| Impresión | 8 camas en la Creality K1C (oct. 2026) | todas las piezas impresas |
 
 No validado todavía con piezas reales: que el disco tome siempre una sola moneda,
 la compuerta, el posicionamiento del cartucho (depende de la banda) y el ruido
