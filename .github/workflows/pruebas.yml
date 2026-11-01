@@ -32,3 +32,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Compilar y correr
         run: make -C firmware/tests
+
+  clasificador:
+    name: Firmware del clasificador (etapa 1) · PlatformIO
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware/etapa1_clasificador
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/etapa1_clasificador/platformio.ini') }}
+      - name: Instalar PlatformIO
+        run: pip install platformio
+      - name: Pruebas unitarias en el PC (Unity)
+        run: pio test -e native
+      - name: Compilar para ESP32-S3
+        run: pio run -e esp32s3
+      - name: Tamaño del binario
+        run: pio run -e esp32s3 -t size
