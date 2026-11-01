@@ -3,8 +3,6 @@
 // antirrebote en la ISR; loop() consulta pulsacion(): corta = marcha/pausa, larga = paro.
 #include <Arduino.h>
 #include <esp_timer.h>
-#include <soc/gpio_reg.h>
-#include <soc/soc.h>
 
 #include "pines.h"
 
@@ -32,15 +30,7 @@ class Boton {
 
  private:
   static constexpr uint32_t ANTIRREBOTE_US = 30000, LARGA_US = 2000000;
-  static void IRAM_ATTR isr(void *arg) {
-    Boton *b = static_cast<Boton *>(arg);
-    const uint32_t t = (uint32_t)esp_timer_get_time();
-    if (t - b->ultimo_us_ < ANTIRREBOTE_US) return;
-    b->ultimo_us_ = t;
-    if (!((REG_READ(GPIO_IN_REG) >> PIN_BOTON) & 1))   // registro: seguro en IRAM
-      { b->bajada_us_ = t; b->soltado_ = false; }
-    else if (b->bajada_us_) b->soltado_ = true;
-  }
+  static void isr(void *arg);   // en Boton.cpp: IRAM_ATTR fuera del header evita el error de literales l32r
   volatile uint32_t ultimo_us_ = 0, bajada_us_ = 0;
   volatile bool soltado_ = false;
 };
