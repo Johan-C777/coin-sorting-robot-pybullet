@@ -1,5 +1,14 @@
 # Cambios
 
+## 0.8.0 · Firmware de operación del clasificador y documentación maestra
+
+- **Firmware nuevo `firmware/etapa1_clasificador/`** (PlatformIO, ESP32-S3, C++17) por capas: `lib/Clasificacion` (catálogo de 9 monedas, medición por cuerda con aceleración constante, tolerancia por clase, rechazo de la $1.000 de 1996 por color, calibrador por mínimos cuadrados), `lib/Secuenciador` (máquina de estados no bloqueante de 11 estados sobre la interfaz `Planta`) y `src/hal` (barreras por timer ISR + ADC o ISR por flanco con cola FreeRTOS, TCS3200 por PCNT, tolva con rampa en el núcleo 0, SG90, pulsador por ISR). Consola serie, NVS, watchdog, LED de estado y 12 parámetros de calibración física `[CAL-01..12]`.
+- Corrige un sesgo del firmware de banco: comparaba la cuerda tapada con el diámetro; ahora usa D = h + c²/4h con h y ancho del haz calibrables.
+- 16 pruebas Unity en el PC (`pio test -e native`) y job de CI que compila para la placa (RAM 6,5 %, flash 9,8 %). 4 pruebas de Python nuevas cruzan el firmware con `monedas.py`, el CAD v5 y los pines del banco.
+- `hardware/etapa1-clasificador/esquematico/`: lista de conexiones (`conexiones.csv`), diagrama y presupuesto de potencia.
+- GitHub Pages: visor 3D del clasificador v5 (`docs/clasificador-v5.html`) y de la banda propuesta (`docs/banda-etapa2.html`), con capturas; portada con sección del módulo clasificador.
+- README maestro centrado en el módulo (estado, arquitectura lógica, modelo matemático, especificaciones, BOM) y `TODO.md` con las fases y la calibración pendiente. Pruebas: 65 de Python y 64 de C++ en verde.
+
 ## 0.7.0 · Etapa 1 v5 y electrónica en ESP32-S3
 
 - `hardware/etapa1-clasificador/` pasa a la **torre de canto v5**: 24 STL en `stl/`, 8 camas `.3mf` en `impresion/` (orden de impresión en `CAMAS.md`), `despiece.csv`, `compras.md`, ensamble de referencia y armado en su README.

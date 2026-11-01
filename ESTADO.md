@@ -3,15 +3,23 @@
 ## Etapas
 | Etapa | Estado |
 |---|---|
-| 1 Tolva + selección | **v5 torre de canto** (0.7.0): 24 STL + 8 camas; camas 1-6 impresas, falta 7 y armar. ESP32-S3: pines y firmware en `firmware/etapa1_prueba_motor/` |
+| 1 Tolva + selección | **v5** diseño completo; camas 1-6 impresas, falta 7, armar y calibrar. Firmware de operación `firmware/etapa1_clasificador/` (0.8.0, PR #7) |
 | 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
+
+## Firmware clasificador (0.8.0, PR #7) — 2026-10-31
+- `firmware/etapa1_clasificador/`: lib portable (Clasificador, Calibrador, Secuenciador/Planta) + `src/hal` (ISR barreras timer 4 kHz+ADC o flanco, PCNT TCS3200, tolva núcleo 0, SG90, botón GPIO 9). CI compila esp32s3 (RAM 6,5 %, flash 9,8 %) + 16 Unity native.
+- Medición: D = h + c²/4h, h=10, SEP 24, MRUA 3 ecuaciones; tolerancia/clase min(0,60; vecino/2−0,05); dorado (R+G)/2B>1,30 → N500; A50 dorada → rechazo (A1000 1996).
+- Calibración física pendiente: `[CAL-01..12]` en `include/`; orden en `TODO.md` fase 4.
+- Resuelto en CI: macro `B1` de Arduino (enum → Primera/Segunda); IRAM_ATTR en header → `l32r` (ISR a `Boton.cpp`).
+- Pages: `docs/clasificador-v5.html`, `docs/banda-etapa2.html` (visibles al fusionar en main).
+- Siguiente: fusionar PR #7; imprimir cama 7; armar; cargar firmware; calibrar.
 
 ## Etapa 1 v5 (vigente, 0.7.0)
 - Piezas: `scripts/generar_v5.py --ensamble` → `hardware/etapa1-clasificador/{stl,despiece.csv,ensamble*}`; camas `scripts/armar_camas_v5.py` → `impresion/` (CAMAS.md, orden "sin electrónica primero").
 - Docs: `docs/09-clasificador-v5.md`, `docs/11-electronica-etapa1.md` (+ `img/etapa1-cableado.svg`, `img/etapa1-v5.png`).
 - Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS3200 OUT 14, S2 16, S3 17, S0 18, S1 21; banda STEP 10/DIR 11/EN 12, ref 13.
-- Pendiente: imprimir cama 7, armar, probar motor con carga, calibrar `K_CUERDA`/`UMBRAL_DORADO`, confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
+- Pendiente: imprimir cama 7, armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
 - Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/esp32_contador` es de la v4 (lo usan las pruebas).
 
 ## Histórico v4 (archivado)

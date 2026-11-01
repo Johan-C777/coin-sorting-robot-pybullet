@@ -2,8 +2,10 @@
 
 Un ESP32-S3 DevKitC-1 con su shield controla la tolva, la compuerta, las dos
 barreras IR y el sensor de color de la torre v5 ([09-clasificador-v5.md](09-clasificador-v5.md)),
-y deja reservados los pines de la banda (etapa 2). El firmware está en
-[`firmware/etapa1_prueba_motor/`](../firmware/etapa1_prueba_motor) (PlatformIO).
+y deja reservados los pines de la banda (etapa 2). El firmware de banco está en
+[`firmware/etapa1_prueba_motor/`](../firmware/etapa1_prueba_motor) y el de operación en
+[`firmware/etapa1_clasificador/`](../firmware/etapa1_clasificador/README.md) (los dos en PlatformIO, mismos pines).
+Lista de conexiones en [`esquematico/`](../hardware/etapa1-clasificador/esquematico/README.md).
 
 > Esta etapa reemplaza al "ESP32 contador" clásico de [03-electronica.md](03-electronica.md)
 > (9 barreras IR de la v4). El ESP32 del brazo no cambia.
