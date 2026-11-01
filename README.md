@@ -1,135 +1,373 @@
 # Sistema de Logística de Monedas Inteligentes
 
-Celda robótica que recibe monedas colombianas **antiguas y nuevas** en una tolva,
-las separa por denominación, las cuenta y las embala en vasos sobre una banda.
-Al final de la banda un **brazo de 5 GDL** toma cada vaso, lo lleva del **punto A
-al punto B esquivando cuatro obstáculos giratorios de dificultad creciente** y
-deja el rack **ordenado según la orden que recibe**: por valor, peso, cantidad,
-denominación o monedas antiguas.
-
-Proyecto de Micros y Laboratorio, Ingeniería Mecatrónica, Universidad Militar
-Nueva Granada.
-
-![Sistema completo en operación](docs/img/sistema-completo.png)
+### Módulo 1 · Clasificador de monedas colombianas (etapa 1)
 
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
-![ESP32](https://img.shields.io/badge/control-2%20ESP32%20%2B%20PCA9685-E06E17)
-![Simulación](https://img.shields.io/badge/simulaci%C3%B3n-Three.js%20%2B%20PyBullet-2F5878)
-![Pruebas](https://img.shields.io/badge/pruebas-61%20Python%20%2B%2048%20C%2B%2B-2C7A54)
-![Piezas](https://img.shields.io/badge/etapa%201-24%20STL%20sin%20tornillos-7A4BB8)
+![Estado](https://img.shields.io/badge/estado-dise%C3%B1o%20completo%20%C2%B7%20ensamble%20en%20curso-D9A400)
+![MCU](https://img.shields.io/badge/MCU-ESP32--S3-E7352C?logo=espressif&logoColor=white)
+![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.x-F5822A?logo=platformio&logoColor=white)
+![Framework](https://img.shields.io/badge/Arduino%20sobre%20ESP--IDF-C%2B%2B17-00878F?logo=arduino&logoColor=white)
+![Memoria](https://img.shields.io/badge/RAM%206%2C5%25%20%C2%B7%20flash%209%2C8%25-ESP32--S3-2F5878)
+![Pruebas](https://img.shields.io/badge/pruebas-65%20Python%20%2B%2064%20C%2B%2B-2C7A54)
+![Piezas](https://img.shields.io/badge/CAD-24%20STL%20sin%20tornillos%20ni%20soportes-7A4BB8)
+[![Pages](https://img.shields.io/badge/demos-GitHub%20Pages-222?logo=github)](https://johan-c777.github.io/coin-sorting-robot-pybullet/)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-687572)
 
-> **Entrega de avances del segundo parcial.** Qué pide el enunciado, dónde está
-> cada cosa en el repositorio y qué falta: [docs/00-entrega-avances.md](docs/00-entrega-avances.md).
+Torre de 33 cm que recibe monedas colombianas revueltas de **las dos familias**
+(nueva de 2012 y anterior de 1989-1996), las sube una a una con una tolva de disco,
+**mide el diámetro de cada moneda por tiempo de vuelo** con dos barreras infrarrojas,
+separa las dos $500 por color y deja cada una en su vaso de un cartucho de 9. Es la
+primera de las tres etapas de una celda robótica: después una banda lleva los vasos al
+punto A y un brazo de 5 GDL los ordena en un rack esquivando cuatro obstáculos.
 
-## Avance por etapa
+Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Militar Nueva Granada.
 
-| Etapa | Qué hace | Estado | Dónde |
-| --- | --- | --- | --- |
-| **1 · Tolva y selección** | Torre de canto v5: tolva de disco, pista con 2 barreras IR que miden el diámetro y un TCS3200 para las $500, embudo y compuerta que sueltan cada moneda en su vaso del cartucho de 9 | 24 STL sin tornillos ni soportes; camas 1 a 6 impresas, falta la 7 y armar. ESP32-S3 con pines y firmware de prueba | [diseño](docs/09-clasificador-v5.md), [piezas y armado](hardware/etapa1-clasificador), [electrónica](docs/11-electronica-etapa1.md) |
-| **2 · Transporte** | Banda que pone cada vaso del cartucho bajo el embudo y lo lleva al punto A | En diseño | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
-| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
+<p align="center">
+  <a href="https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html">
+    <img src="docs/img/clasificador-v5-visor.png" alt="Visor 3D de la torre clasificadora v5" width="900">
+  </a>
+  <br><sub>Visor 3D interactivo de la torre v5: clic en la imagen para abrirlo en el navegador.</sub>
+</p>
+
+> **Entrega de avances (Actividad 9, 31 de octubre de 2026).** El estado del módulo está
+> en la sección siguiente; el detalle de qué está hecho y qué falta, casilla por casilla,
+> en [**TODO.md**](TODO.md). El diseño completo de la torre está en
+> [09-clasificador-v5.md](docs/09-clasificador-v5.md) y el firmware en
+> [`firmware/etapa1_clasificador/`](firmware/etapa1_clasificador).
 
 ---
 
-## Demos en el navegador
+## Estado estratégico
+
+**El diseño lógico, matemático y estructural del módulo está terminado y verificado
+en simulación y en pruebas automáticas. El proyecto pasa ahora al ensamble físico.**
+
+| Frente | Estado | Evidencia en el repositorio |
+|---|---|---|
+| Diseño matemático: medición, tolerancias, calibración | ✅ Completo | Modelo de cuerda con aceleración constante; error de 0,03 mm en MuJoCo; [9 pruebas](firmware/etapa1_clasificador/test/test_clasificador/test_main.cpp) |
+| Diseño lógico: máquina de estados, interrupciones, protocolo | ✅ Completo | [Secuenciador](firmware/etapa1_clasificador/lib/Secuenciador) de 11 estados; [7 pruebas](firmware/etapa1_clasificador/test/test_secuenciador/test_main.cpp) con planta simulada |
+| Diseño estructural: CAD paramétrico v5 | ✅ Completo | [24 STL](hardware/etapa1-clasificador/stl) generados por [`generar_v5.py`](scripts/generar_v5.py), 0 choques, 8 camas `.3mf` |
+| Firmware de operación | ✅ Compila para ESP32-S3 en CI | RAM 6,5 % y flash 9,8 % ([job de CI](.github/workflows/pruebas.yml)) |
+| Impresión | 🟡 Camas 1 a 6 de 8 | Falta la [cama 7](hardware/etapa1-clasificador/impresion/CAMAS.md): vasos, cartucho y compuerta |
+| Electrónica | 🟡 Definida, sin montar | [Pines](firmware/etapa1_clasificador/include/pines.h) y [conexiones](hardware/etapa1-clasificador/esquematico) verificados por prueba; faltan componentes de [compras.md](hardware/etapa1-clasificador/compras.md) |
+| Ensamble y calibración física | ⏳ Siguiente paso | 12 parámetros marcados `[CAL-01]` a `[CAL-12]` en el firmware, con su procedimiento |
+
+Todavía **no hay mediciones con monedas reales**: todas las cifras de desempeño de este
+repositorio salen de la simulación física o de pruebas automáticas, y así se indica en
+cada caso. Las pruebas físicas y la matriz de confusión se registrarán en
+[05-pruebas.md](docs/05-pruebas.md) cuando la torre esté armada.
+
+---
+
+## Demos en el navegador (GitHub Pages)
+
+Portada: **https://johan-c777.github.io/coin-sorting-robot-pybullet/**
 
 | Demo | Qué muestra |
-| --- | --- |
-| [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las dos etapas juntas: tolva, riel de 8 ranuras, banda, punto A, los cuatro obstáculos por nivel, punto B y el rack ordenado |
-| [**Etapa 1: selección (v1)**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) | Primera versión del riel: monedas antiguas y nuevas, conteo por estación y vista de despiece |
-| [**Ensamble etapa 1 (v4, archivada)**](https://johan-c777.github.io/coin-sorting-robot-pybullet/ensamble-etapa1.html) | La versión anterior del riel de 8 ranuras: despiece, ficha de cada pieza y simulación de monedas cayendo a los 9 vasos |
-| [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y selección de servos, con calculadoras |
+|---|---|
+| [**Clasificador v5 · visor 3D**](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) | La torre completa pieza por pieza: despiece, ficha de cada pieza, camino de la moneda y simulación del ciclo |
+| [**Banda · etapa 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | Propuesta de la banda de cadena de tablillas impresa que mueve el cartucho bajo la torre |
+| [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las tres etapas: tolva, banda, punto A, los cuatro obstáculos y el rack ordenado |
+| [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y servos del brazo, con calculadoras |
+| [Etapa 1 v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) · [Ensamble v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/ensamble-etapa1.html) | Versiones anteriores de la etapa 1, archivadas como historia del diseño |
 
-Son archivos HTML autónomos (Three.js), sin instalación. También se abren desde
-la carpeta [`docs/`](docs) del repositorio.
+Son archivos HTML autónomos (Three.js) en [`docs/`](docs); no requieren instalación.
 
 ---
 
-## Cómo funciona, de punta a punta
+## Cómo funciona el clasificador
 
 ```mermaid
 flowchart LR
-    T["Tolva de disco<br/>antiguas y nuevas"] --> R["Pista de canto<br/>2 barreras IR: diámetro"]
-    R --> IR["TCS3200<br/>$500 antigua o nueva"]
-    IR --> C["Embudo y compuerta<br/>vaso del cartucho"]
-    C --> B["Banda"]
+    T["Tolva de disco<br/>28BYJ-48 · 8 bolsillos"] -->|"una moneda<br/>de canto"| P["Pista L01 a 22°<br/>barreras IR B1 y B2"]
+    P -->|"4 instantes"| D{"Diámetro<br/>± tolerancia<br/>de su clase"}
+    D -->|"$500 o $50 antigua"| C["TCS3200<br/>¿dorada?"]
+    D -->|"resto"| E["Embudo F01<br/>compuerta SG90"]
+    C --> E
+    D -->|"sin coincidencia,<br/>dos monedas, fuera de rango"| X["Rampa C02<br/>rechazo"]
+    E --> V["Vaso 0 a 8<br/>del cartucho"]
+```
+
+1. **Alimentación.** El disco gira un bolsillo con rampa trapezoidal. Cada bolsillo
+   (Ø29) sube una moneda y la deja caer de canto a la pista; el rascador H03 tumba la
+   que venga montada. Simulado en MuJoCo: 1.728 de 1.728 monedas quedan de canto.
+2. **Medición.** La moneda rueda y corta dos haces IR separados 24 mm. Una interrupción
+   marca el instante de cada flanco con resolución de microsegundos; con los cuatro
+   instantes se resuelven velocidad, aceleración y la cuerda tapada, y de ella el diámetro.
+3. **Decisión.** Vecino más cercano entre los 9 diámetros con una tolerancia propia de
+   cada clase, calculada para que ninguna medida pueda caer en dos clases.
+4. **Color.** Las dos $500 miden lo mismo (23,70 mm): el TCS3200 las separa por la
+   razón (R+G)/2B, con un umbral que se fija con monedas reales `[CAL-05]`. El color
+   también rechaza la $1.000 de 1996, que mide casi lo mismo que la $50 antigua.
+5. **Entrega.** La moneda espera en la compuerta mientras la banda pone el vaso correcto
+   bajo el embudo; la compuerta abre 60°, la moneda cae y el firmware la cuenta. Lo
+   dudoso va a la rampa de rechazo, nunca a un vaso equivocado.
+
+---
+
+## Arquitectura lógica
+
+```mermaid
+flowchart TB
+    subgraph HW["Sensores y actuadores"]
+        IR["Barreras IR B1 · B2<br/>GPIO 1 · 2"]
+        REF["Haz de referencia<br/>GPIO 13"]
+        TCS["TCS3200<br/>GPIO 14"]
+        BTN["Pulsador<br/>GPIO 9"]
+        MOT["Tolva 28BYJ-48<br/>GPIO 4-7"]
+        SRV["Compuerta SG90<br/>GPIO 15"]
+    end
+    subgraph RT["Tiempo real · src/hal"]
+        ISR["ISR del timer a 4 kHz<br/>o ISR por flanco"]
+        Q[("Cola FreeRTOS<br/>32 eventos")]
+        PCNT["Contador PCNT<br/>por hardware"]
+        STEP["Tarea de pasos<br/>núcleo 0 · rampa"]
+    end
+    subgraph APP["Lógica portable · lib/ · probada en el PC"]
+        FSM["Secuenciador<br/>11 estados, no bloqueante"]
+        CLS["Clasificador<br/>tiempos → diámetro → vaso"]
+        CAL["Calibrador<br/>mínimos cuadrados"]
+    end
+    IR --> ISR --> Q --> FSM
+    REF --> ISR
+    TCS --> PCNT --> FSM
+    BTN --> FSM
+    FSM --> CLS
+    CAL -.-> CLS
+    FSM --> STEP --> MOT
+    FSM --> SRV
+    FSM -->|"M: · R: · VASOS:"| OUT["Consola serie<br/>y brazo"]
+```
+
+La lógica (`lib/`) no conoce el hardware: habla con una interfaz `Planta` que en la
+placa implementa `src/hal/PlantaESP32` y en las pruebas una planta simulada. Por eso el
+ciclo completo, con atascos, monedas dobles, vasos llenos y paro de emergencia, se
+prueba en el PC sin placa.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Reposo
+    Reposo --> Alimentando: marcha
+    Alimentando --> EsperandoMoneda: disco quieto
+    EsperandoMoneda --> Desatascando: 1,8 s sin moneda
+    Desatascando --> EsperandoMoneda
+    EsperandoMoneda --> TolvaVacia: 8 bolsillos vacíos
+    Alimentando --> Midiendo: B1 se corta
+    EsperandoMoneda --> Midiendo: B1 se corta
+    Midiendo --> LeyendoColor: $500 o $50 antigua
+    Midiendo --> Posicionando
+    LeyendoColor --> Posicionando
+    Midiendo --> Falla: atasco en la pista
+    Posicionando --> Soltando: vaso listo
+    Soltando --> Cerrando
+    Cerrando --> Reposo: cuenta la moneda
+    Cerrando --> Falla: vaso lleno
+    Falla --> Reposo: rearmar
+```
+
+| Interrupción | Mecanismo | Por qué |
+|---|---|---|
+| Barreras B1, B2 (modo ADC, por defecto) | Timer por hardware a 4 kHz → ISR toma `esp_timer_get_time()` y despierta una tarea de prioridad 5 que lee el ADC con línea base adaptativa e histéresis 50 % / 70 % | Funciona con cualquier fototransistor; 250 µs entre muestras ≈ 0,12 mm a 500 mm/s |
+| Barreras B1, B2 (modo digital) | ISR por flanco `CHANGE` en IRAM, lee `GPIO_IN_REG`, antirrebote de 300 µs | Resolución de 1 µs si el fototransistor satura |
+| TCS3200 | Contador de pulsos PCNT | La salida llega a cientos de kHz: una ISR por pulso saturaría la CPU |
+| Haz de referencia y pulsador | ISR por flanco en IRAM | Cero del cartucho; marcha, pausa y paro (2 s) |
+| `loop()` | Watchdog `enableLoopWDT` | Si algo se cuelga, la placa se reinicia |
+
+Detalle de cada capa, consola y tramas en el
+[README del firmware](firmware/etapa1_clasificador/README.md).
+
+---
+
+## Modelo matemático de la medición
+
+El haz cruza la pista a **h = 10 mm** sobre la repisa. Una moneda de diámetro D que
+rueda de canto lo tapa a lo largo de la cuerda c:
+
+```
+c = 2·√( h·(D − h) )        ⇔        D = h + c² / (4h)
+```
+
+La moneda acelera al bajar la pista, así que no se supone velocidad constante. Con los
+cuatro instantes (entra y sale de B1 y B2, separadas L = 24 mm), T = t(B2 entra) − t(B1 entra),
+τ₁ y τ₂ los tiempos que cada haz queda tapado, y aceleración constante:
+
+```
+v₀·T          + ½·a·T²           = L
+v₀·τ₁         + ½·a·τ₁²      − c = 0
+v₀·(T + τ₂)   + ½·a·(T + τ₂)² − c = L
+```
+
+Es un sistema lineal en (v₀, a, c) que el firmware resuelve por Cramer en doble
+precisión, el mismo modelo de [`sim/mujoco/rodar.py`](sim/mujoco/rodar.py). En la
+simulación física el error es de **0,03 mm**, frente a 0,60 mm entre las dos monedas más
+parecidas. La altura y el ancho efectivos del haz se calibran con monedas conocidas por
+mínimos cuadrados ([`Calibrador`](firmware/etapa1_clasificador/lib/Clasificacion/Calibrador.cpp)).
+
+**Tolerancia por clase** = min(0,60 mm; distancia al vecino más cercano / 2 − 0,05 mm).
+Lo que no cae dentro de ninguna tolerancia, o da una velocidad o aceleración imposible,
+va a rechazo con su motivo.
+
+---
+
+## Especificaciones mecánicas
+
+### Monedas (Banco de la República)
+
+| Vaso | Código | Moneda | Diámetro (mm) | Espesor (mm) | Masa (g) | Tolerancia (mm) | Se separa por |
+|---|---|---|---|---|---|---|---|
+| 0 | N50 | $50 nueva | 17,00 | 1,30 | 2,00 | ± 0,60 | diámetro |
+| 1 | N100 | $100 nueva | 20,30 | 1,50 | 3,34 | ± 0,55 | diámetro |
+| 2 | A50 | $50 antigua | 21,50 | 1,40 | 4,50 | ± 0,40 | diámetro (y color: descarta la $1.000 de 1996) |
+| 3 | N200 | $200 nueva | 22,40 | 1,70 | 4,61 | ± 0,25 | diámetro |
+| 4 | A100 | $100 antigua | 23,00 | 1,55 | 5,31 | ± 0,25 | diámetro |
+| 5 | A500 | $500 antigua | 23,70 | 2,05 | 7,14 | ± 0,30 | diámetro + color |
+| 6 | N500 | $500 nueva | 23,70 | 2,20 | 7,14 | ± 0,30 | diámetro + color |
+| 7 | A200 | $200 antigua | 24,40 | 1,70 | 7,08 | ± 0,30 | diámetro |
+| 8 | N1000 | $1.000 nueva | 26,70 | 2,30 | 9,95 | ± 0,60 | diámetro |
+| — | — | $1.000 de 1996 | 21,67 | — | — | — | rechazo por color |
+
+El caso crítico es la pareja $200 nueva y $100 antigua, a 0,60 mm. El catálogo del
+firmware y el de Python ([`monedas.py`](software/brazo/monedas.py)) se comparan en una
+prueba automática para que no se desalineen.
+
+### Torre v5
+
+| Subsistema | Pieza | Especificación |
+|---|---|---|
+| Tolva | H01, H02, H03 | Plato a 45°; disco de 8 bolsillos Ø29; 28BYJ-48 de 2.037,9 pasos por vuelta (paso completo); rascador en tres alturas: 2,5 / 2,6 / 2,8 mm |
+| Pista | L01, B01 | Inclinación 22°; barreras a 105 y 129 mm (separación 24 mm); haz a 10 mm sobre la repisa; alojamientos Ø5,2 para LED y fototransistor de Ø5,0 |
+| Color | A01 | TCS3200 a 152 mm sobre la pista, después de las barreras |
+| Embudo | F01, F02 | Borde Ø90, pared a 45°, 60 mm adelante y 50 mm bajo el fin de la pista (simulado: 81 de 81) |
+| Compuerta | G01, G02 | Paleta sobre el eje de un SG90; alojamiento de 23,1 × 12,8 mm para un cuerpo de 22,7 × 12,2; abre 60° |
+| Cartucho | C01 ×3, C02, V01 ×9 | 9 vasos Ø34 × 60 mm unidos por cola de milano; rampa C02 de rechazo |
+| Marco | T01, S01, S02, R01, R02 | Tres caballetes de PETG; la torre se para sobre la banda (±5 mm) |
+| Uniones | P01, P02, P03 | Clavijas Ø6 y remaches impresos: **sin tornillos ni soportes de impresión** |
+
+24 STL (22 códigos), ≈ 845 g en 8 camas para la Creality K1C (PLA+ negro, PETG azul y
+PLA verde). Todo sale de un solo script paramétrico,
+[`scripts/generar_v5.py`](scripts/generar_v5.py), que también comprueba que no haya
+choques entre piezas. Despiece en [`despiece.csv`](hardware/etapa1-clasificador/despiece.csv),
+camas en [CAMAS.md](hardware/etapa1-clasificador/impresion/CAMAS.md) y armado paso a paso
+en la [guía de la etapa 1](hardware/etapa1-clasificador/README.md).
+
+![Torre v5 sobre el cartucho de 9 vasos](docs/img/etapa1-v5.png)
+
+---
+
+## Lista de materiales (BOM)
+
+### Electrónica
+
+| Cant. | Componente | Función | Conexión al ESP32-S3 | Estado |
+|---|---|---|---|---|
+| 1 | ESP32-S3-DevKitC-1 con shield | Control de la etapa 1 y de la banda | — | En inventario |
+| 1 (+1) | Motor 28BYJ-48 de 5 V con driver ULN2003 | Disco de la tolva | IN1-IN4 → GPIO 4, 5, 6, 7 | Por comprar |
+| 1 (+1) | Micro servo SG90 (sirve MG90S) | Compuerta | Señal → GPIO 15 | Por comprar |
+| 3 | LED IR 5 mm, 940 nm | Emisores de B1, B2 y del haz de referencia | 5 V con 330 Ω (≈ 11 mA) | Por comprar |
+| 3 | Fototransistor 5 mm, 940 nm | Receptores | GPIO 1, 2 y 13, emisor con 10 kΩ | Por comprar |
+| 1 | Módulo TCS3200 de 4 LED | Color de las $500 | OUT 14 · S0 18 · S1 21 · S2 16 · S3 17 | Por comprar |
+| 3 + 3 | Resistencias de 330 Ω y 10 kΩ | Polarización de las barreras | — | En inventario |
+| 1 | Electrolítico de 220 µF | Picos de corriente del servo | Junto al servo | En inventario |
+| 1 | Fuente de 5 V, 2 A o más | Motor, servo y lógica | — | En inventario |
+| 1 | Pulsador (opcional) | Marcha, pausa y paro | GPIO 9 | En inventario |
+| — | NEMA17 + A4988 | Banda (etapa 2) | STEP 10 · DIR 11 · EN 12 | Pendiente del diseño de la banda |
+
+Origen: [compras.md](hardware/etapa1-clasificador/compras.md). Diagrama, presupuesto de
+potencia y lista de conexiones en [`esquematico/`](hardware/etapa1-clasificador/esquematico)
+([`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)).
+
+### Piezas impresas
+
+| Material | Camas | Piezas |
+|---|---|---|
+| PLA+ negro | 1, 2, 3 | Pista, tolva, disco, rascadores, soportes, embudo, rampa, clavijas |
+| PETG azul | 4, 5, 6 | Caballetes y largueros del marco |
+| PLA verde | 7 | 7 vasos, 2 cartuchos y la compuerta |
+| Cualquiera (opcional) | 8 | Campana del embudo, solo si las monedas saltan |
+
+---
+
+## Firmware (PlatformIO)
+
+```
+firmware/etapa1_clasificador/
+├── platformio.ini          esp32s3 (placa) y native (pruebas en el PC)
+├── include/
+│   ├── pines.h             mapa de pines del ESP32-S3
+│   ├── config.h            muestreo, umbrales, rampas, servo, tiempos      [CAL-07..12]
+│   └── calibracion.h       valores de fábrica de la medición               [CAL-01..06]
+├── lib/
+│   ├── Clasificacion/      Monedas.h · Clasificador · Calibrador           (C++ portable)
+│   └── Secuenciador/       Planta.h (interfaz) · Secuenciador (FSM)        (C++ portable)
+├── src/
+│   ├── main.cpp            arranque, consola, NVS, LED de estado, watchdog
+│   └── hal/                Barreras (ISR) · Color (PCNT) · Actuadores · Boton · PlantaESP32
+└── test/                   16 pruebas Unity: clasificador y máquina de estados
+```
+
+```bash
+cd firmware/etapa1_clasificador
+pio test -e native                                   # 16 pruebas en el PC, sin placa
+pio run -e esp32s3 -t upload && pio device monitor   # a la placa, consola a 115200
+```
+
+Por cada moneda el firmware imprime una línea de diagnóstico y una trama que entiende
+el brazo:
+
+```
+#D n=12 v0=301 a=2448 c=21.76 D=22.42 razon=0.00 -> N200 (ok)
+M:200,3,nueva
+VASOS:50x3a1,100x2,200x4a1,500x2a1,1000x1
+```
+
+**Calibración física.** Cada valor que depende de la torre armada lleva una etiqueta
+`[CAL-xx]` en `include/` con el procedimiento para medirlo desde la consola: separación
+de los haces, altura y ancho del haz (ajuste por mínimos cuadrados con monedas conocidas,
+guardado en flash), umbral de dorado, umbrales del ADC, velocidad de la tolva, ángulos de
+la compuerta y tiempos. La tabla completa está en el
+[README del firmware](firmware/etapa1_clasificador/README.md#calibración) y el orden de
+trabajo en [TODO.md](TODO.md#fase-4--ensamble-y-calibración-física).
+
+`firmware/etapa1_prueba_motor/` es el banco de pruebas de motores y sensores con el que
+se hacen las primeras mediciones; `firmware/etapa1_clasificador/` es el firmware de operación.
+
+---
+
+## Historia del diseño de la etapa 1
+
+| Versión | Idea | Qué dejó |
+|---|---|---|
+| v1 | Riel inclinado con varillas M5 y una ranura por diámetro | Primer prototipo y las 8 estaciones por diámetro |
+| v3 | Probetas del riel de canto | Primeras pruebas de la moneda rodando de canto |
+| v4 | Riel de 8 ranuras con 9 ductos y base de PVC | La ranura crítica quedaba con 0,30 mm por lado y no separaba las dos $500 ni la $1.000 de 1996 |
+| **v5** | **Torre de canto: diámetro por tiempo con 2 barreras IR, más color** | Versión actual: sin ranuras críticas, las 9 monedas separadas, sin tornillos |
+
+Las versiones anteriores están en [`hardware/archivo/`](hardware/archivo) y
+[`docs/archivo/`](docs/archivo).
+
+---
+
+## El resto del sistema: etapas 2 y 3
+
+Las etapas 2 y 3 están diseñadas y simuladas; su montaje viene después del clasificador.
+
+```mermaid
+flowchart LR
+    C["Etapa 1<br/>clasificador"] --> B["Etapa 2<br/>banda"]
     B --> A(["Punto A"])
-    A --> O1["Nivel 1<br/>O1"] --> O2["Nivel 2<br/>O2"] --> O3["Nivel 3<br/>O3"] --> O4["Nivel 4<br/>O4"]
+    A --> O1["O1"] --> O2["O2"] --> O3["O3"] --> O4["O4"]
     O4 --> Bp(["Punto B<br/>rack ordenado"])
     APP["App Streamlit<br/>Wi-Fi"] -. "criterio y sentido" .-> Bp
 ```
 
-| Paso | Qué pasa | Dónde se ve |
-| --- | --- | --- |
-| 1. Selección | El disco de la tolva sube una moneda por bolsillo y la deja de canto en la pista; dos barreras IR miden su diámetro por tiempo y el TCS3200 separa las $500 por color | [09-clasificador-v5.md](docs/09-clasificador-v5.md), [07-monedas.md](docs/07-monedas.md) |
-| 2. Conteo | Cada medida da denominación **y familia**; lo que no encaja va al vaso de rechazo | [`firmware/etapa1_prueba_motor`](firmware/etapa1_prueba_motor) |
-| 3. Embalaje | La banda pone el vaso correcto del cartucho bajo el embudo y la compuerta suelta la moneda: 9 vasos, uno por tipo | [`hardware/etapa1-clasificador/`](hardware/etapa1-clasificador) |
-| 4. Punto A | La banda deja cada vaso en el límite del alcance del brazo | simulación |
-| 5. De A a B | El brazo cruza cuatro móviles giratorios, cada uno más difícil que el anterior | [08-obstaculos.md](docs/08-obstaculos.md) |
-| 6. Orden | Deja los vasos en el rack según la orden: valor, peso, cantidad, denominación o antiguas, ascendente o descendente | `software/brazo/planner.py` |
+| Etapa | Qué hace | Estado | Dónde |
+| --- | --- | --- | --- |
+| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseño completo; ensamble en curso | Este README, [TODO.md](TODO.md) |
+| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | Propuesta en el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
----
-
-## Etapa 1: monedas antiguas y nuevas
-
-En Colombia circulan dos familias de monedas: la nueva (2012) y la anterior
-(1989-1996). Ordenadas por diámetro quedan ocho grupos, y el riel tiene una
-ranura para cada uno:
-
-![Riel selector de ocho estaciones](docs/img/selector-monedas.png)
-
-| Estación | Moneda | Diámetro | Luz de la ranura | Masa | Vaso |
-| --- | --- | --- | --- | --- | --- |
-| E1 | $50 nueva | 17,00 mm | 17,60 mm | 2,00 g | $50 |
-| E2 | $100 nueva | 20,30 mm | 20,90 mm | 3,34 g | $100 |
-| E3 | $50 antigua | 21,50 mm | 21,95 mm | 4,50 g | $50 |
-| E4 | $200 nueva | 22,40 mm | 22,70 mm | 4,61 g | $200 |
-| E5 | $100 antigua | 23,00 mm | 23,35 mm | 5,31 g | $100 |
-| E6 | $500, las dos familias | 23,70 mm | 24,05 mm | 7,14 g | $500 |
-| E7 | $200 antigua | 24,40 mm | 25,00 mm | 7,08 g | $200 |
-| E8 | $1.000 nueva | 26,70 mm | 27,30 mm | 9,95 g | $1.000 |
-
-- **La $500 es idéntica en las dos familias** (23,70 mm y 7,14 g): comparte
-  estación, y no hace falta distinguirla porque vale y pesa lo mismo.
-- **La $1.000 de 1996 queda fuera**: mide 21,67 mm, a 0,17 mm de la $50 antigua.
-  El diseñador del riel lo detecta solo y la rechaza; se propone un sensor de
-  color para la siguiente etapa.
-- **La ranura crítica es la E4**, con 0,30 mm a cada lado. Antes de imprimir el
-  riel completo se imprime y se mide una probeta de las estaciones 3 a 6.
-- **Las antiguas pesan más** ($200 antigua 7,08 g contra 4,61 g la nueva), así
-  que el vaso guarda cuántas tiene y eso cambia el orden cuando se clasifica por
-  peso.
-
-El contador entrega el lote al brazo en una línea, donde `aN` son las antiguas:
-
-```
-VASOS:50x30a6,100x24a4,200x21a3,500x14,1000x12
-```
-
-![Etapa 1 en la simulación](docs/img/etapa1-selector.png)
-
-### La etapa 1 que se imprime (v5)
-
-![Torre v5 sobre el cartucho de 9 vasos](docs/img/etapa1-v5.png)
-
-La tabla de arriba fija qué diámetro tiene cada moneda; la pieza física es una
-torre de 33 cm que se para sobre la banda
-([09-clasificador-v5.md](docs/09-clasificador-v5.md)):
-
-- **Tolva de disco** a 45° con un 28BYJ-48: cada bolsillo sube una moneda y la deja
-  caer de canto a la pista (simulado en MuJoCo: 1.728 de 1.728).
-- **Pista** a 22° con dos barreras IR a 24 mm: el tiempo de paso da el diámetro.
-  Un **TCS3200** separa la $500 antigua de la nueva, que miden lo mismo.
-- **Embudo y compuerta** (SG90): la moneda espera hasta que la banda pone el vaso
-  correcto del cartucho debajo. Lo dudoso va por la rampa C02 a un vaso de rechazo.
-- **Sin tornillos ni soportes:** clavijas Ø6 impresas y remaches para el motor.
-  8 camas en la Creality K1C, ≈ 820 g (PLA+ negro, PETG azul y PLA verde).
-- **Electrónica:** un ESP32-S3; pines, esquema y firmware de prueba en
-  [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
-
-La versión anterior (riel de 8 ranuras con 9 ductos de PVC) quedó en
-[`hardware/archivo/etapa1-v4/`](hardware/archivo/etapa1-v4).
+![Sistema completo en operación](docs/img/sistema-completo.png)
 
 ---
 
@@ -231,9 +469,10 @@ Ordenado por etapa en [`hardware/`](hardware/README.md):
   [`despiece.csv`](hardware/etapa1-clasificador/despiece.csv),
   [`compras.md`](hardware/etapa1-clasificador/compras.md) y el armado paso a paso en su
   [README](hardware/etapa1-clasificador/README.md); cableado en
+  [`esquematico/`](hardware/etapa1-clasificador/esquematico) y
   [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
-- **Etapa 2:** banda en diseño; las medidas que deja la etapa 1 están en
-  [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
+- **Etapa 2:** banda en diseño ([visor 3D de la propuesta](docs/banda-etapa2.html)); las
+  medidas que deja la etapa 1 están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
 - **Etapa 3:** planos en SolidWorks
   ([`PLANOS BRACITO.pdf`](hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)), rack,
   bandeja de electrónica y [`bom.csv`](hardware/etapa3-brazo/bom.csv).
@@ -252,18 +491,18 @@ python scripts/generar_figuras.py
 ## Validación
 
 ```bash
-pytest software/tests -q              # 61 pruebas
-make -C firmware/tests                # 48 comprobaciones de los dos firmwares
-python scripts/verificar_alcance.py   # los dieciocho puestos y el punto A dentro del alcance
+pytest software/tests -q                                   # 65 pruebas de Python
+make -C firmware/tests                                     # 48 comprobaciones del contador v4 y del brazo
+cd firmware/etapa1_clasificador && pio test -e native      # 16 pruebas del clasificador v5
+pio run -e esp32s3                                         # compilación para la placa
+python scripts/verificar_alcance.py                        # los dieciocho puestos y el punto A dentro del alcance
 ```
 
-Hay una prueba detrás de cada número de este README: las luces del riel, el
-peso con antiguas, las cifras de cada maniobra, la inversa de R1, los pares. Dos
-pruebas cruzan lenguajes: una verifica que el firmware del contador usa las
-mismas luces y masas que el diseño en Python, y otra que el planificador de la
-página web y el de Python dan lo mismo. Las pruebas de C++ corren el firmware
-completo en el PC con un `BusServos` de banco. Detalle en
-[05-pruebas.md](docs/05-pruebas.md).
+Todo corre en GitHub Actions en cada cambio ([`pruebas.yml`](.github/workflows/pruebas.yml)).
+Hay una prueba detrás de cada número de este README. Varias cruzan lenguajes: el catálogo
+de monedas y los pines del firmware se comparan con el diseño en Python y con el CAD
+(separación y altura de las barreras), y el planificador de la página web se compara con
+el de Python. Detalle en [05-pruebas.md](docs/05-pruebas.md).
 
 ---
 
@@ -273,13 +512,14 @@ completo en el PC con un `BusServos` de banco. Detalle en
 pip install -r requirements.txt
 
 python software/apps/cli_demo.py --criterio peso --sentido asc   # lote, ruta A→B y orden
-python sim/pybullet/run_sim_integrada.py                         # las dos etapas con física
+python sim/pybullet/run_sim_integrada.py                         # las etapas con física
 streamlit run software/apps/streamlit_app.py                     # dashboard y asistente
 ```
 
-Para el hardware: copiar `secrets_example.h` como `secrets.h` en los dos
-firmwares, subirlos con el IDE de Arduino (librería Adafruit PWM Servo Driver en
-el brazo) y probar por monitor serie antes de conectar la potencia de 6 V:
+Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). Para el
+brazo: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
+(librería Adafruit PWM Servo Driver) y probar por monitor serie antes de conectar la
+potencia de 6 V:
 
 ```
 VASOS:500x12,100x30a10,1000x8,50x25a9,200x17a6
@@ -289,57 +529,62 @@ ESTADO
 
 ---
 
-## Estructura
+## Estructura del repositorio
 
 ```
-docs/
-├── 00-entrega-avances.md   qué pide el parcial y dónde está cada cosa
-├── 01-arquitectura.md … 06-medidas-cad.md
-├── 07-monedas.md           monedas antiguas y nuevas, diseño del riel
-├── 08-obstaculos.md        ruta de A a B y niveles de dificultad
-├── 09-clasificador-v5.md   etapa 1 v5: torre de canto, cambios frente a la v4 y validación
-├── 11-electronica-etapa1.md  pines del ESP32-S3, esquema de cableado y firmware de la etapa 1
-├── archivo/                documentos de las etapas 1 v1 y v4
-├── index.html              portada de las demos (GitHub Pages)
-└── ensamble-etapa1.html, simulacion_sistema_completo.html, simulacion-etapa1.html, memoria-calculo.html
-firmware/
-├── esp32_brazo/            cinemática, trayectorias, planificador, secuenciador, PCA9685, Wi-Fi
-├── etapa1_prueba_motor/    ESP32-S3 de la etapa 1 v5 (PlatformIO): tolva, 2 barreras IR, TCS3200, compuerta, banda
-├── esp32_contador/         contador de la etapa 1 v4 (9 barreras IR); lo usan las pruebas de monedas
-└── tests/                  núcleo de los dos firmwares compilado y probado en el PC
-hardware/                   por etapa: etapa1-clasificador, etapa2-transporte, etapa3-brazo, archivo
-scripts/                    generadores de STL (etapa 1 v5 y v4, brazo), camas, visor 3D, 3MF y figuras
-sim/mujoco/                 simulaciones de la etapa 1 v5 (disco, pista de canto, embudo, compuerta)
-sim/pybullet/               URDF, celda y orquestador integrado
-software/
-├── brazo/                  monedas, cinemática, obstáculos, planificador, trayectorias, protocolo
-├── apps/                   cli_demo.py y streamlit_app.py
-└── tests/                  60 pruebas con pytest
+coin-sorting-robot-pybullet/
+├── README.md · TODO.md · CHANGELOG.md · ESTADO.md · LICENSE
+├── .github/workflows/pruebas.yml   CI: Python, núcleo de firmwares en el PC y PlatformIO
+├── docs/                           documentación técnica y sitio de GitHub Pages
+│   ├── 00-entrega-avances.md       qué pide el parcial y dónde está cada cosa
+│   ├── 01-arquitectura.md … 08-obstaculos.md
+│   ├── 09-clasificador-v5.md       diseño de la torre de canto y su validación
+│   ├── 11-electronica-etapa1.md    electrónica de la etapa 1
+│   ├── index.html                  portada de las demos
+│   ├── clasificador-v5.html        visor 3D de la torre v5
+│   ├── banda-etapa2.html           visor 3D de la banda propuesta
+│   ├── memoria-calculo.html, simulacion_sistema_completo.html, …
+│   ├── img/                        figuras y capturas
+│   └── archivo/                    documentos de las versiones anteriores
+├── firmware/
+│   ├── etapa1_clasificador/        firmware de operación del clasificador (PlatformIO)
+│   ├── etapa1_prueba_motor/        banco de pruebas de motores y sensores (PlatformIO)
+│   ├── esp32_brazo/                cinemática, trayectorias, planificador, PCA9685, Wi-Fi
+│   ├── esp32_contador/             contador de la etapa 1 v4
+│   └── tests/                      núcleo de los firmwares del brazo y contador en el PC
+├── hardware/
+│   ├── etapa1-clasificador/        stl/ (24) · impresion/ (8 camas) · esquematico/ · despiece · compras · guía
+│   ├── etapa2-transporte/          medidas de interfaz para la banda
+│   ├── etapa3-brazo/               planos, rack, bandeja y BOM del brazo
+│   └── archivo/                    etapa 1 v1, v3 y v4
+├── scripts/                        generadores paramétricos de STL, camas, 3MF y figuras
+├── sim/
+│   ├── mujoco/                     disco, pista de canto, embudo y compuerta de la etapa 1
+│   └── pybullet/                   URDF, celda y orquestador integrado
+└── software/
+    ├── brazo/                      monedas, cinemática, obstáculos, planificador, protocolo
+    ├── apps/                       cli_demo.py y streamlit_app.py
+    └── tests/                      65 pruebas con pytest
 ```
 
 ---
 
-## Estado
+## Estado del sistema completo
 
-- [x] Selector de monedas antiguas y nuevas: 8 estaciones calculadas, STL y firmware
-- [x] Etapa 1 física v5: torre de canto, 24 STL sin tornillos ni soportes, 8 camas, despiece, compras y guía de armado
-- [x] Electrónica de la etapa 1 en ESP32-S3: pines, esquema de cableado y firmware de prueba (PlatformIO)
-- [x] Conteo por estación y por familia, con trama hacia el brazo
-- [x] Cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
-- [x] Ruta de A a B con cuatro obstáculos por nivel y tres maniobras
-- [x] Orden por cinco criterios en los dos sentidos
-- [x] Simulación web de las dos etapas y orquestador en PyBullet
-- [x] Firmware modular de los dos ESP32, con pruebas que corren en el PC
-- [x] App Streamlit con modo simulación y modo Wi-Fi
-- [ ] Imprimir la cama 7 (vasos, cartucho y compuerta), armar la torre y probar tolva y barreras con monedas reales
-- [ ] Diseñar la banda transportadora (etapa 2)
-- [ ] Medir L₂ y L₃ en el CAD y cerrar el perfil real del brazo
-- [ ] Llevar la evasión de obstáculos al firmware del brazo
+- [x] Etapa 1: diseño de la medición, CAD v5, simulación, electrónica y firmware de operación
+- [x] Etapa 1: camas 1 a 6 impresas
+- [ ] Etapa 1: cama 7, ensamble, calibración `[CAL-01..12]` y prueba de 100 monedas ([TODO.md](TODO.md))
+- [x] Etapa 2: propuesta de banda en visor 3D
+- [ ] Etapa 2: diseño de detalle e integración con el cartucho
+- [x] Etapa 3: cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
+- [x] Etapa 3: ruta de A a B con cuatro obstáculos por nivel y orden por cinco criterios
+- [x] Simulación web de las etapas, orquestador en PyBullet y app Streamlit
+- [ ] Etapa 3: medir L₂ y L₃ en el CAD y llevar la evasión de obstáculos al firmware
 - [ ] Montar la celda, integrar los dos ESP32 con la app y medir el ciclo real
 
-El brazo construido tiene cotas distintas de las de la simulación; el código
-trae los dos perfiles (`BRAZO_PERFIL=cad`) y lo que falta medir está en
-[06-medidas-cad.md](docs/06-medidas-cad.md). El historial de cambios está en
+El brazo construido tiene cotas distintas de las de la simulación; el código trae los
+dos perfiles (`BRAZO_PERFIL=cad`) y lo que falta medir está en
+[06-medidas-cad.md](docs/06-medidas-cad.md). Historial de cambios en
 [CHANGELOG.md](CHANGELOG.md).
 
 ---

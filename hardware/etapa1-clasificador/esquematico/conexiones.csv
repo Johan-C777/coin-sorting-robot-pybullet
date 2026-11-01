@@ -1,0 +1,32 @@
+red,desde,pin_desde,hacia,pin_hacia,nota
+5V_EXT,Fuente 5 V (>= 2 A),+,ULN2003,+5V,motor de la tolva
+5V_EXT,Fuente 5 V (>= 2 A),+,SG90,V+ (rojo),220 uF entre V+ y GND junto al servo
+5V_EXT,Fuente 5 V (>= 2 A),+,R 330 ohm (x2),1,una por LED IR
+GND,Fuente 5 V,-,ESP32-S3,GND,GND comun obligatorio
+GND,ULN2003,GND,ESP32-S3,GND,
+GND,SG90,GND (cafe),ESP32-S3,GND,
+GND,TCS3200,GND y OE,ESP32-S3,GND,OE a GND habilita la salida
+3V3,ESP32-S3,3V3,Fototransistor B1,C,
+3V3,ESP32-S3,3V3,Fototransistor B2,C,
+3V3,ESP32-S3,3V3,Fototransistor REF,C,banda (etapa 2)
+3V3,ESP32-S3,3V3,TCS3200,VCC,
+TOLVA_IN1,ESP32-S3,GPIO4,ULN2003,IN1,
+TOLVA_IN2,ESP32-S3,GPIO5,ULN2003,IN2,
+TOLVA_IN3,ESP32-S3,GPIO6,ULN2003,IN3,
+TOLVA_IN4,ESP32-S3,GPIO7,ULN2003,IN4,
+SERVO,ESP32-S3,GPIO15,SG90,senal (naranja),PWM 50 Hz 500-2400 us
+IR1,ESP32-S3,GPIO1 (ADC1_CH0),Fototransistor B1,E,10 kohm de E a GND
+IR2,ESP32-S3,GPIO2 (ADC1_CH1),Fototransistor B2,E,10 kohm de E a GND
+LED_IR1,R 330 ohm,2,LED IR B1,anodo,catodo a GND; ~11 mA
+LED_IR2,R 330 ohm,2,LED IR B2,anodo,catodo a GND; ~11 mA
+TCS_OUT,ESP32-S3,GPIO14,TCS3200,OUT,contado por PCNT
+TCS_S2,ESP32-S3,GPIO16,TCS3200,S2,
+TCS_S3,ESP32-S3,GPIO17,TCS3200,S3,
+TCS_S0,ESP32-S3,GPIO18,TCS3200,S0,alto = escala 100 % (o a 3V3 fijo)
+TCS_S1,ESP32-S3,GPIO21,TCS3200,S1,alto = escala 100 % (o a 3V3 fijo)
+BOTON,ESP32-S3,GPIO9,Pulsador NA,1,opcional; el otro terminal a GND (pull-up interno)
+REF,ESP32-S3,GPIO13,Fototransistor REF,E,banda (etapa 2); 10 kohm a GND
+STEP,ESP32-S3,GPIO10,A4988,STEP,banda (etapa 2)
+DIR,ESP32-S3,GPIO11,A4988,DIR,banda (etapa 2)
+EN,ESP32-S3,GPIO12,A4988,EN,activo en bajo; banda (etapa 2)
+12V,Fuente 12 V,+,A4988,VMOT,banda (etapa 2); 100 uF junto al A4988

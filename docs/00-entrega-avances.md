@@ -37,6 +37,7 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 
 ## Avance después de la entrega
 
+- **Módulo clasificador: firmware de operación (0.8.0, 31 oct 2026).** Firmware PlatformIO por capas en [`firmware/etapa1_clasificador/`](../firmware/etapa1_clasificador/README.md): medición del diámetro con los 4 instantes de las barreras y aceleración constante, tolerancia por clase, color para las $500, máquina de estados de 11 estados, barreras por interrupción y 12 parámetros de calibración física `[CAL-xx]`. 16 pruebas en el PC y compilación para el ESP32-S3 en CI. Plan de ensamble y calibración en [TODO.md](../TODO.md); visor 3D en [clasificador-v5.html](clasificador-v5.html). Falta el ensamble físico: aún no hay mediciones con monedas reales.
 - **Etapa 1 v5 y electrónica (0.7.0).** La etapa 1 pasó a una torre de canto: tolva de disco, pista con dos barreras IR que miden el diámetro, TCS3200 para las $500, embudo y compuerta sobre un cartucho de 9 vasos que mueve la banda. 24 STL, 8 camas (1 a 6 ya impresas), despiece y compras en [`hardware/etapa1-clasificador/`](../hardware/etapa1-clasificador/README.md); diseño y simulaciones MuJoCo en [09-clasificador-v5.md](09-clasificador-v5.md); pines del ESP32-S3, esquema y firmware en [11-electronica-etapa1.md](11-electronica-etapa1.md). La v4 quedó en `hardware/archivo/etapa1-v4/`.
 - **Nueve vasos al brazo (0.6.0).** El contador, el brazo (Python, ESP32 y simulación web) y PyBullet reciben y ordenan 9 vasos Ø34 × 60 mm en un rack de 9 puestos; las $500 antiguas y nuevas van en vasos distintos. Las ranuras del riel usan los diámetros oficiales del Banco de la República (0.5.1).
 
@@ -64,8 +65,9 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 ## Resultados verificables
 
 ```bash
-pytest software/tests -q          # 60 pruebas
-make -C firmware/tests            # 45 comprobaciones de los dos firmwares
+pytest software/tests -q          # 65 pruebas
+make -C firmware/tests            # 48 comprobaciones de los firmwares del brazo y del contador
+(cd firmware/etapa1_clasificador && pio test -e native)   # 16 pruebas del clasificador
 python scripts/verificar_alcance.py
 python software/apps/cli_demo.py --criterio peso
 ```

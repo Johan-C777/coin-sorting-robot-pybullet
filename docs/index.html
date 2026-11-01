@@ -98,7 +98,8 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
       <h1>Sistema de Logística de Monedas Inteligentes</h1>
       <p class="bajada">Monedas colombianas antiguas y nuevas entran a una tolva, se separan y cuentan, viajan en vasos por una banda y un brazo de 5 GDL las lleva del punto A al punto B esquivando cuatro obstáculos, para dejarlas ordenadas según la orden que recibe.</p>
       <div class="acciones">
-        <a class="btn primario" href="simulacion_sistema_completo.html">Abrir la simulación</a>
+        <a class="btn primario" href="clasificador-v5.html">Módulo de monedas en 3D</a>
+        <a class="btn" href="simulacion_sistema_completo.html">Sistema completo</a>
         <a class="btn" href="https://github.com/Johan-C777/coin-sorting-robot-pybullet">Repositorio</a>
       </div>
     </div>
@@ -107,9 +108,11 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
 
   <h2>El recorrido</h2>
   <ol class="flujo">
-    <li><b>Tolva</b><span>antiguas y nuevas</span></li>
-    <li><b>Riel de 8 ranuras</b><span>separa y cuenta por familia</span></li>
-    <li><b>9 vasos en la banda</b><span>uno por ducto</span></li>
+    <li><b>Tolva de disco</b><span>antiguas y nuevas, una por bolsillo</span></li>
+    <li><b>Pista de canto</b><span>2 barreras IR miden el diámetro</span></li>
+    <li><b>TCS3200</b><span>separa las dos $500</span></li>
+    <li><b>Compuerta</b><span>suelta en el vaso correcto</span></li>
+    <li><b>Banda</b><span>cartucho de 9 vasos</span></li>
     <li class="punto"><b>Punto A</b><span>fin de la banda</span></li>
     <li class="n1"><b>Nivel 1</b><span>pasar por debajo</span></li>
     <li class="n2"><b>Nivel 2</b><span>recogerse y rodear</span></li>
@@ -118,8 +121,25 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     <li class="punto"><b>Punto B</b><span>rack ordenado</span></li>
   </ol>
 
+  <h2>Módulo clasificador de monedas · etapa 1</h2>
+  <div class="cifras">
+    <div class="cifra"><b>9</b><span>tipos de moneda: $50 a $1.000, familias 1989-1996 y 2012</span></div>
+    <div class="cifra"><b>0,25 mm</b><span>tolerancia más estrecha ($200 nueva y $100 antigua)</span></div>
+    <div class="cifra"><b>24</b><span>piezas impresas sin tornillos ni soportes</span></div>
+    <div class="cifra"><b>12</b><span>parámetros de calibración física marcados en el firmware</span></div>
+  </div>
+  <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; las camas 1 a 6 ya están impresas. Lo que sigue es imprimir la cama 7, armar la torre y calibrar con monedas reales. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
+
   <h2>Demos</h2>
   <div class="demos">
+    <a class="demo" href="clasificador-v5.html">
+      <img src="img/clasificador-v5-visor.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Clasificador v5 en 3D</b><p>La torre que se imprime: echa monedas, mira cómo se mide cada una y a qué vaso va. Despiece, alturas y componentes.</p></div>
+    </a>
+    <a class="demo" href="banda-etapa2.html">
+      <img src="img/banda-etapa2.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Banda transportadora (etapa 2)</b><p>Cadena de tablillas que mueve el cartucho bajo la torre: ensamble pieza por pieza, simulación del recorrido y materiales.</p></div>
+    </a>
     <a class="demo" href="simulacion_sistema_completo.html">
       <img src="img/sistema-completo.png" alt="" loading="lazy" width="1400" height="1145">
       <div><b>Sistema completo</b><p>Las dos etapas juntas, los cuatro obstáculos por nivel y el rack ordenado por el criterio que elijas.</p></div>
@@ -140,15 +160,18 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
 
   <h2>En números</h2>
   <div class="cifras">
-    <div class="cifra"><b>8</b><span>estaciones para 9 tipos de moneda</span></div>
+    <div class="cifra"><b>9</b><span>vasos, uno por tipo de moneda</span></div>
     <div class="cifra"><b>4</b><span>obstáculos entre A y B, niveles 1 a 4</span></div>
     <div class="cifra"><b>5</b><span>criterios de orden, en los dos sentidos</span></div>
-    <div class="cifra"><b>105</b><span>pruebas: 60 en Python y 45 en C++</span></div>
+    <div class="cifra"><b>129</b><span>pruebas automáticas: 65 en Python y 64 en C++</span></div>
   </div>
 
   <h2>Documentación</h2>
   <ul class="docs">
     <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/00-entrega-avances.md">Entrega de avances</a><span>Lo que pide el parcial y dónde está cada cosa</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">Firmware del clasificador</a><span>PlatformIO, máquina de estados, interrupciones y calibración</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">Plan de trabajo</a><span>Lo hecho y lo pendiente del módulo, por fases</span></li>
+    <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/hardware/etapa1-clasificador/esquematico">Esquema de conexiones</a><span>Netlist del ESP32-S3, barreras IR, TCS3200 y potencia</span></li>
     <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/07-monedas.md">Monedas antiguas y nuevas</a><span>Catálogo del Banco de la República y diseño del riel</span></li>
     <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/08-obstaculos.md">De A a B entre obstáculos</a><span>Niveles, maniobras y cómo decide el planificador</span></li>
     <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/01-arquitectura.md">Arquitectura</a><span>Requisitos, bloques y algoritmo de orden</span></li>
