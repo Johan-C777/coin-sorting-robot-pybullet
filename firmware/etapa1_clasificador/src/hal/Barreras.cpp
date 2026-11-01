@@ -30,7 +30,7 @@ struct Canal {
   volatile uint32_t ultimo_us;
   volatile uint8_t nivel;
 };
-Canal canales[2] = {{PIN_IR1, seq::Barrera::B1, 0, 0, false, 0, 1}, {PIN_IR2, seq::Barrera::B2, 0, 0, false, 0, 1}};
+Canal canales[2] = {{PIN_IR1, seq::Barrera::Primera, 0, 0, false, 0, 1}, {PIN_IR2, seq::Barrera::Segunda, 0, 0, false, 0, 1}};
 
 // ---- Haz de referencia de la banda: siempre por flanco ---------------------------------
 void IRAM_ATTR isrReferencia() { ref_corte_us = (uint32_t)esp_timer_get_time(); }

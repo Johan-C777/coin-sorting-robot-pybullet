@@ -37,8 +37,8 @@ struct PlantaFalsa : Planta {
   void evento(Barrera b, Flanco f, uint32_t t) { cola[fin++ % 32] = {b, f, t}; }
   void moneda(double D) {        // los cuatro flancos de una moneda, en orden temporal
     const clasif::Tiempos t = sintetico::moneda(D);
-    EventoBarrera e[4] = {{Barrera::B1, Flanco::Entra, t.ent1_us}, {Barrera::B1, Flanco::Sale, t.sal1_us},
-                          {Barrera::B2, Flanco::Entra, t.ent2_us}, {Barrera::B2, Flanco::Sale, t.sal2_us}};
+    EventoBarrera e[4] = {{Barrera::Primera, Flanco::Entra, t.ent1_us}, {Barrera::Primera, Flanco::Sale, t.sal1_us},
+                          {Barrera::Segunda, Flanco::Entra, t.ent2_us}, {Barrera::Segunda, Flanco::Sale, t.sal2_us}};
     for (int i = 0; i < 4; i++)                         // ordenar por tiempo (B2 puede entrar antes de que B1 salga)
       for (int j = i + 1; j < 4; j++)
         if (e[j].t_us < e[i].t_us) { EventoBarrera x = e[i]; e[i] = e[j]; e[j] = x; }
@@ -106,7 +106,7 @@ void test_tolva_vacia_tras_ocho_bolsillos_y_desatasco() {
 void test_atasco_en_la_pista_detiene_todo_y_se_rearma() {
   s->unCiclo();
   correr(50);
-  p->evento(Barrera::B1, Flanco::Entra, 5000000);     // entra y nunca sale
+  p->evento(Barrera::Primera, Flanco::Entra, 5000000);     // entra y nunca sale
   correr(2000);
   TEST_ASSERT_EQUAL_UINT8((uint8_t)Estado::Falla, (uint8_t)s->estado());
   TEST_ASSERT_EQUAL_UINT8((uint8_t)Falla::AtascoPista, (uint8_t)s->falla());
@@ -119,11 +119,11 @@ void test_dos_monedas_pegadas_van_a_rechazo() {
   s->unCiclo();
   correr(50);
   const clasif::Tiempos t = sintetico::moneda(20.3);
-  p->evento(Barrera::B1, Flanco::Entra, t.ent1_us);
-  p->evento(Barrera::B1, Flanco::Sale, t.sal1_us);
-  p->evento(Barrera::B1, Flanco::Entra, t.sal1_us + 2000);   // la segunda, detrás
-  p->evento(Barrera::B2, Flanco::Entra, t.ent2_us);
-  p->evento(Barrera::B2, Flanco::Sale, t.sal2_us);
+  p->evento(Barrera::Primera, Flanco::Entra, t.ent1_us);
+  p->evento(Barrera::Primera, Flanco::Sale, t.sal1_us);
+  p->evento(Barrera::Primera, Flanco::Entra, t.sal1_us + 2000);   // la segunda, detrás
+  p->evento(Barrera::Segunda, Flanco::Entra, t.ent2_us);
+  p->evento(Barrera::Segunda, Flanco::Sale, t.sal2_us);
   correr(2000);
   TEST_ASSERT_EQUAL_INT8(VASO_RECHAZO, p->vaso_banda);
   TEST_ASSERT_EQUAL_UINT8((uint8_t)clasif::Motivo::DobleMoneda, (uint8_t)s->ultimo().motivo);

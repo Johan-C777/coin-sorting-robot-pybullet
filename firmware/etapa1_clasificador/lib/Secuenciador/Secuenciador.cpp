@@ -58,7 +58,7 @@ void Secuenciador::iniciarMedicion(uint32_t t_us) {
 bool Secuenciador::buscarEntradaB1() {
   EventoBarrera ev;
   while (p_.siguienteEvento(ev)) {
-    if (ev.barrera == Barrera::B1 && ev.flanco == Flanco::Entra) {
+    if (ev.barrera == Barrera::Primera && ev.flanco == Flanco::Entra) {
       iniciarMedicion(ev.t_us);
       return true;
     }
@@ -160,7 +160,7 @@ void Secuenciador::actualizar(uint32_t ahora) {
     case Estado::Midiendo: {
       EventoBarrera ev;
       while (p_.siguienteEvento(ev)) {
-        const bool b1 = ev.barrera == Barrera::B1, entra = ev.flanco == Flanco::Entra;
+        const bool b1 = ev.barrera == Barrera::Primera, entra = ev.flanco == Flanco::Entra;
         if (b1 && !entra && !(flancos_ & S1)) { tm_.sal1_us = ev.t_us; flancos_ |= S1; }
         else if (b1 && entra && (flancos_ & S1)) doble_ = true;      // otra moneda detrás
         else if (!b1 && entra && !(flancos_ & E2)) { tm_.ent2_us = ev.t_us; flancos_ |= E2; }

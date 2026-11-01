@@ -5,7 +5,7 @@
 
 namespace seq {
 
-enum class Barrera : uint8_t { B1 = 0, B2 = 1 };
+enum class Barrera : uint8_t { Primera = 0, Segunda = 1 };
 enum class Flanco : uint8_t { Entra = 0, Sale = 1 };   // Entra = la moneda corta el haz
 
 struct EventoBarrera {
