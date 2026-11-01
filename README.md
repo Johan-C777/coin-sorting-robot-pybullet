@@ -3,7 +3,7 @@
 ### Módulo 1 · Clasificador de monedas colombianas (etapa 1)
 
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
-![Estado](https://img.shields.io/badge/estado-dise%C3%B1o%20completo%20%C2%B7%20ensamble%20en%20curso-D9A400)
+![Estado](https://img.shields.io/badge/estado-dise%C3%B1o%20e%20impresi%C3%B3n%20completos%20%C2%B7%20montaje%20en%20curso-2C7A54)
 ![MCU](https://img.shields.io/badge/MCU-ESP32--S3-E7352C?logo=espressif&logoColor=white)
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.x-F5822A?logo=platformio&logoColor=white)
 ![Framework](https://img.shields.io/badge/Arduino%20sobre%20ESP--IDF-C%2B%2B17-00878F?logo=arduino&logoColor=white)
@@ -40,7 +40,8 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
 ## Estado estratégico
 
 **El diseño lógico, matemático y estructural del módulo está terminado y verificado
-en simulación y en pruebas automáticas. El proyecto pasa ahora al ensamble físico.**
+en simulación y en pruebas automáticas, y todas las piezas están impresas. El módulo
+está en la fase de montaje físico.**
 
 | Frente | Estado | Evidencia en el repositorio |
 |---|---|---|
@@ -48,14 +49,13 @@ en simulación y en pruebas automáticas. El proyecto pasa ahora al ensamble fí
 | Diseño lógico: máquina de estados, interrupciones, protocolo | ✅ Completo | [Secuenciador](firmware/etapa1_clasificador/lib/Secuenciador) de 11 estados; [7 pruebas](firmware/etapa1_clasificador/test/test_secuenciador/test_main.cpp) con planta simulada |
 | Diseño estructural: CAD paramétrico v5 | ✅ Completo | [24 STL](hardware/etapa1-clasificador/stl) generados por [`generar_v5.py`](scripts/generar_v5.py), 0 choques, 8 camas `.3mf` |
 | Firmware de operación | ✅ Compila para ESP32-S3 en CI | RAM 6,5 % y flash 9,8 % ([job de CI](.github/workflows/pruebas.yml)) |
-| Impresión | 🟡 Camas 1 a 6 de 8 | Falta la [cama 7](hardware/etapa1-clasificador/impresion/CAMAS.md): vasos, cartucho y compuerta |
-| Electrónica | 🟡 Definida, sin montar | [Pines](firmware/etapa1_clasificador/include/pines.h) y [conexiones](hardware/etapa1-clasificador/esquematico) verificados por prueba; faltan componentes de [compras.md](hardware/etapa1-clasificador/compras.md) |
-| Ensamble y calibración física | ⏳ Siguiente paso | 12 parámetros marcados `[CAL-01]` a `[CAL-12]` en el firmware, con su procedimiento |
+| Impresión | ✅ Completa | Las [8 camas](hardware/etapa1-clasificador/impresion/CAMAS.md) de la Creality K1C: 24 piezas en PLA+, PETG y PLA |
+| Electrónica | ✅ Completa | [Pines](firmware/etapa1_clasificador/include/pines.h), [lista de conexiones](hardware/etapa1-clasificador/esquematico/conexiones.csv) y presupuesto de potencia, verificados por prueba automática |
+| Montaje y calibración física | ▶ Fase actual | [Procedimiento de puesta en marcha](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
 
-Todavía **no hay mediciones con monedas reales**: todas las cifras de desempeño de este
-repositorio salen de la simulación física o de pruebas automáticas, y así se indica en
-cada caso. Las pruebas físicas y la matriz de confusión se registrarán en
-[05-pruebas.md](docs/05-pruebas.md) cuando la torre esté armada.
+Las cifras de desempeño de este repositorio salen de la simulación física y de pruebas
+automáticas, y así se indica en cada caso. Las mediciones con monedas reales y la matriz
+de confusión se registran en [05-pruebas.md](docs/05-pruebas.md) durante la calibración.
 
 ---
 
@@ -259,25 +259,27 @@ en la [guía de la etapa 1](hardware/etapa1-clasificador/README.md).
 
 ### Electrónica
 
-| Cant. | Componente | Función | Conexión al ESP32-S3 | Estado |
-|---|---|---|---|---|
-| 1 | ESP32-S3-DevKitC-1 con shield | Control de la etapa 1 y de la banda | — | En inventario |
-| 1 (+1) | Motor 28BYJ-48 de 5 V con driver ULN2003 | Disco de la tolva | IN1-IN4 → GPIO 4, 5, 6, 7 | Por comprar |
-| 1 (+1) | Micro servo SG90 (sirve MG90S) | Compuerta | Señal → GPIO 15 | Por comprar |
-| 3 | LED IR 5 mm, 940 nm | Emisores de B1, B2 y del haz de referencia | 5 V con 330 Ω (≈ 11 mA) | Por comprar |
-| 3 | Fototransistor 5 mm, 940 nm | Receptores | GPIO 1, 2 y 13, emisor con 10 kΩ | Por comprar |
-| 1 | Módulo TCS3200 de 4 LED | Color de las $500 | OUT 14 · S0 18 · S1 21 · S2 16 · S3 17 | Por comprar |
-| 3 + 3 | Resistencias de 330 Ω y 10 kΩ | Polarización de las barreras | — | En inventario |
-| 1 | Electrolítico de 220 µF | Picos de corriente del servo | Junto al servo | En inventario |
-| 1 | Fuente de 5 V, 2 A o más | Motor, servo y lógica | — | En inventario |
-| 1 | Pulsador (opcional) | Marcha, pausa y paro | GPIO 9 | En inventario |
-| — | NEMA17 + A4988 | Banda (etapa 2) | STEP 10 · DIR 11 · EN 12 | Pendiente del diseño de la banda |
+| Cant. | Componente | Función | Conexión al ESP32-S3 |
+|---|---|---|---|
+| 1 | ESP32-S3-DevKitC-1 con shield | Control de la etapa 1 y de la banda | — |
+| 1 (+1) | Motor 28BYJ-48 de 5 V con driver ULN2003 | Disco de la tolva | IN1-IN4 → GPIO 4, 5, 6, 7 |
+| 1 (+1) | Micro servo SG90 (sirve MG90S) | Compuerta | Señal → GPIO 15 |
+| 3 | LED IR 5 mm, 940 nm | Emisores de B1, B2 y del haz de referencia | 5 V con 330 Ω (≈ 11 mA) |
+| 3 | Fototransistor 5 mm, 940 nm | Receptores | GPIO 1, 2 y 13, emisor con 10 kΩ |
+| 1 | Módulo TCS3200 de 4 LED | Color de las $500 | OUT 14 · S0 18 · S1 21 · S2 16 · S3 17 |
+| 3 + 3 | Resistencias de 330 Ω y 10 kΩ | Polarización de las barreras | — |
+| 1 | Electrolítico de 220 µF | Picos de corriente del servo | Junto al servo |
+| 1 | Fuente de 5 V, 2 A o más | Motor, servo y lógica | — |
+| 1 | Pulsador (opcional) | Marcha, pausa y paro | GPIO 9 |
+| — | NEMA17 + A4988 | Banda (etapa 2) | STEP 10 · DIR 11 · EN 12 |
 
 Origen: [compras.md](hardware/etapa1-clasificador/compras.md). Diagrama, presupuesto de
 potencia y lista de conexiones en [`esquematico/`](hardware/etapa1-clasificador/esquematico)
 ([`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)).
 
 ### Piezas impresas
+
+Las 8 camas están impresas.
 
 | Material | Camas | Piezas |
 |---|---|---|
@@ -327,7 +329,7 @@ de los haces, altura y ancho del haz (ajuste por mínimos cuadrados con monedas 
 guardado en flash), umbral de dorado, umbrales del ADC, velocidad de la tolva, ángulos de
 la compuerta y tiempos. La tabla completa está en el
 [README del firmware](firmware/etapa1_clasificador/README.md#calibración) y el orden de
-trabajo en [TODO.md](TODO.md#fase-4--ensamble-y-calibración-física).
+trabajo en [TODO.md](TODO.md#fase-4--montaje-y-calibración-física).
 
 `firmware/etapa1_prueba_motor/` es el banco de pruebas de motores y sensores con el que
 se hacen las primeras mediciones; `firmware/etapa1_clasificador/` es el firmware de operación.
@@ -363,7 +365,7 @@ flowchart LR
 
 | Etapa | Qué hace | Estado | Dónde |
 | --- | --- | --- | --- |
-| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseño completo; ensamble en curso | Este README, [TODO.md](TODO.md) |
+| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso y con firmware; montaje en curso | Este README, [TODO.md](TODO.md) |
 | **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | Propuesta en el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
 | **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
@@ -572,8 +574,8 @@ coin-sorting-robot-pybullet/
 ## Estado del sistema completo
 
 - [x] Etapa 1: diseño de la medición, CAD v5, simulación, electrónica y firmware de operación
-- [x] Etapa 1: camas 1 a 6 impresas
-- [ ] Etapa 1: cama 7, ensamble, calibración `[CAL-01..12]` y prueba de 100 monedas ([TODO.md](TODO.md))
+- [x] Etapa 1: todas las piezas impresas (8 camas, 24 piezas)
+- [ ] Etapa 1: montaje, calibración `[CAL-01..12]` y prueba de 100 monedas, en curso ([TODO.md](TODO.md))
 - [x] Etapa 2: propuesta de banda en visor 3D
 - [ ] Etapa 2: diseño de detalle e integración con el cartucho
 - [x] Etapa 3: cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF

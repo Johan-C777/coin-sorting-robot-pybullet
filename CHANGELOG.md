@@ -1,5 +1,10 @@
 # Cambios
 
+## 0.8.1 · Impresión completa de la etapa 1
+
+- Todas las camas de la torre v5 están impresas. `TODO.md`, README, portada, `00-entrega-avances.md`, `09-clasificador-v5.md`, `11-electronica-etapa1.md`, `hardware/` y `ESTADO.md` lo reflejan; la fase 4 de `TODO.md` queda como procedimiento de montaje y calibración.
+- `compras.md` y la BOM del README pasan a lista de componentes, sin estado de compra.
+
 ## 0.8.0 · Firmware de operación del clasificador y documentación maestra
 
 - **Firmware nuevo `firmware/etapa1_clasificador/`** (PlatformIO, ESP32-S3, C++17) por capas: `lib/Clasificacion` (catálogo de 9 monedas, medición por cuerda con aceleración constante, tolerancia por clase, rechazo de la $1.000 de 1996 por color, calibrador por mínimos cuadrados), `lib/Secuenciador` (máquina de estados no bloqueante de 11 estados sobre la interfaz `Planta`) y `src/hal` (barreras por timer ISR + ADC o ISR por flanco con cola FreeRTOS, TCS3200 por PCNT, tolva con rampa en el núcleo 0, SG90, pulsador por ISR). Consola serie, NVS, watchdog, LED de estado y 12 parámetros de calibración física `[CAL-01..12]`.

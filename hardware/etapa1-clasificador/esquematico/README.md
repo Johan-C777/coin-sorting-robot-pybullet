@@ -54,7 +54,8 @@ flowchart LR
 
 GND de todas las fuentes unido al GND del ESP32.
 
-## Pendiente
+## Al cablear
 
-- Esquemático en KiCad y PCB de una cara para reemplazar la protoboard (ver [TODO.md](../../../TODO.md)).
-- Confirmar el modelo del shield del ESP32-S3 y que no ocupe ninguno de estos pines.
+- Comprobar que el shield del ESP32-S3 deja libres todos estos pines.
+- Unir primero las tierras y medir 5 V en el riel antes de conectar el ESP32
+  (procedimiento completo en la [fase 4 de TODO.md](../../../TODO.md#fase-4--montaje-y-calibración-física)).

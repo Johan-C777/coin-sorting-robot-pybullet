@@ -87,10 +87,11 @@ Los parámetros (pines, velocidades, ángulos del servo, umbrales y diámetros) 
 en `src/config.h`. Compila con `platform = espressif32` 7.x (Arduino-ESP32 3.x) y 6.x. La banda está desactivada (`HABILITAR_BANDA 0`) hasta que se
 monte la etapa 2.
 
-## Pendiente
+## Puesta en marcha
 
-- Probar el motor con la tolva cargada y fijar la velocidad máxima real.
-- Calibrar `K_CUERDA` y `UMBRAL_DORADO` con monedas reales (líneas `MONEDA … c1 c2 razon` de la consola y monitor `m`).
 - Montar el TCS3200 en L01 con el adaptador A01 (se corta el rebaje del TCS34725 y se pega con cianoacrilato).
-- Confirmar el modelo exacto del shield y que no use ninguno de los pines de arriba.
-- Esquemático en KiCad (el diagrama de arriba es de bloques).
+- Comprobar que el shield deja libres los pines de arriba.
+- Probar el motor con la tolva cargada y fijar la velocidad máxima real.
+- Calibrar barreras y color con monedas reales: con este firmware, `K_CUERDA` y `UMBRAL_DORADO`
+  (líneas `MONEDA … c1 c2 razon` y monitor `m`); con el de operación, los pasos `[CAL-xx]` de la
+  [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-calibración-física).

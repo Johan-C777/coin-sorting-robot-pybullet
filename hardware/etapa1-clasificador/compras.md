@@ -1,8 +1,8 @@
-# Compras etapa 1 (cruce con el inventario)
+# Componentes de la etapa 1
 
 Cotas leídas de los STL (no de memoria): bolsillos y agujeros de L01, B01, H01, H02, G01.
 
-## Faltan
+## Componentes que se compran
 | Cant. | Componente (referencia) | Cota que debe cumplir | Pieza |
 |---|---|---|---|
 | 1 (+1 repuesto) | Motor paso a paso 28BYJ-48 **5 V** con driver ULN2003 | Eje Ø5 con 2 planos a 3 mm (H02: 5,3 x 3,3). Resalte Ø9 (H01: 10 x 10). Orejas a 35 mm centro a centro (H01: agujeros 4 mm, P03 Ø3,9) | H01, H02, P03 |
@@ -13,8 +13,8 @@ Cotas leídas de los STL (no de memoria): bolsillos y agujeros de L01, B01, H01,
 | 1 | Cianoacrilato (pegante instantáneo) | Pegar el brazo del servo en G02 | G02 |
 | opc. | Cables Dupont hembra-hembra y macho-hembra (20 de cada) | Si tu kit no los trae | — |
 
-## Ya tienes (inventario)
+## Del inventario
 ESP32-S3 DevKitC-1 con shield (control de la etapa 1 y la banda), cable USB de datos, 330 Ω (x13, LED IR a 5 V ≈ 11 mA), 10 kΩ (x23, resistencia de emisor del fototransistor), 2N3904 (x5) + 1 kΩ (x11) solo si se modula el IR, electrolítico 220 µF (x1) para el servo, protoboard, jumpers, regleta 1x10, fuente 5 V (≥ 2 A; la variable 0-20 V / 1,5 A sirve ajustada a 5,0 V solo para la tolva y el servo).
 
-## No comprar todavía
+## Etapa 2
 Banda (NEMA17, A4988): depende del diseño de la etapa 2 ([`hardware/etapa2-transporte/`](../etapa2-transporte)).
