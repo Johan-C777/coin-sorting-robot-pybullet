@@ -59,3 +59,10 @@
 
 ## Siguiente paso
 Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y medir; en paralelo, diseñar la banda.
+
+## Etapa 1: montaje y primeras pruebas — 2026-11-02
+- Camas impresas; falta solo A01 (adaptador TCS3200, corte de L01 + cianoacrilato; B01/B03 de `archivo/` obsoletos). Sensor vigente = TCS3200.
+- Firmware de banco que arranca en la placa (COM8/UART0, Arduino-ESP32 3.x, LEDC servo, `pulse_cnt`) subido a `firmware/etapa1_prueba_motor/`; el del repo era la versión vieja que colgaba. `platformio.ini` apunta a pioarduino.
+- Guía: `hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md` (armado, cableado, pio, pruebas f/b, t, o/p, m, d/a).
+- Pendiente: operación (`etapa1_clasificador`) usa espressif32 6.x + CDC_ON_BOOT: adaptar a UART0/pioarduino tras validar banco; cablear; calibrar [CAL-xx] con monedas reales.
+- Siguiente: imprimir A01, cablear, `pio run -t upload`, probar `f`, `m`, `o/p`.

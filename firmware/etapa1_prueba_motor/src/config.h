@@ -26,9 +26,9 @@ constexpr uint8_t PIN_EN       = 12;            // activo en bajo
 constexpr float  TOLVA_PASOS_VUELTA = 2037.8868f;
 constexpr int    BOLSILLOS          = 8;
 constexpr int8_t TOLVA_SENTIDO      = 1;        // -1 si el disco gira al revés
-constexpr float  TOLVA_V0   = 180;               // pasos/s de arranque/parada (pull-in)
-constexpr float  TOLVA_VMAX = 800;               // pasos/s de crucero; sube con 'v'
-constexpr float  TOLVA_ACC  = 2500;              // pasos/s²
+constexpr float  TOLVA_V0   = 150;               // pasos/s de arranque/parada (pull-in)
+constexpr float  TOLVA_VMAX = 600;               // pasos/s de crucero; sube con 'v'
+constexpr float  TOLVA_ACC  = 1500;              // pasos/s²
 constexpr uint16_t TOLVA_PRE_MS  = 15;           // bobinas energizadas antes del 1er paso
 constexpr uint16_t TOLVA_POST_MS = 60;           // reposo antes de soltar bobinas
 

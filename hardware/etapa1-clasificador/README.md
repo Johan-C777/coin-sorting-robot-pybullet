@@ -11,6 +11,7 @@ Los STL ya salen orientados para imprimir. Se regeneran con
 | [`despiece.csv`](despiece.csv) | Código, cantidad, medidas, volumen, gramos y orientación de cada pieza |
 | [`compras.md`](compras.md) | Componentes electrónicos, con la cota que debe cumplir cada uno |
 | [`ensamble_referencia.stl`](ensamble_referencia.stl), `ensamble.json` | Torre armada (solo para ver, no se imprime) |
+| [`GUIA-MONTAJE-PRUEBAS.md`](GUIA-MONTAJE-PRUEBAS.md) | Sensor A01, armado en seco, cableado, subir firmware y pruebas en orden |
 | [Electrónica](../../docs/11-electronica-etapa1.md) | Pines del ESP32-S3, cableado y firmware de prueba |
 
 Las versiones anteriores (v1 con varillas, v3 de canto, v4 con riel de 8 ranuras y PVC) están en

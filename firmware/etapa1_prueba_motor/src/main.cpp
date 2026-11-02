@@ -2,6 +2,7 @@
 // ($500 A/N) -> compuerta SG90 -> (opcional) banda NEMA17/A4988.
 // Consola serie 115200: ver ayuda() abajo.
 #include <Arduino.h>
+#include <esp_rom_sys.h>
 #include "config.h"
 #include "actuadores.h"
 #include "sensores.h"
@@ -88,10 +89,10 @@ void ciclo() {
 #if HABILITAR_BANDA
           && !banda.ocupado()
 #endif
-      ) { compuerta.write(SERVO_ABIERTA); cambiar(ABRE); }
+      ) { servoGrados(SERVO_ABIERTA); cambiar(ABRE); }
       break;
     case ABRE:
-      if (millis() - t_est > COMPUERTA_ABIERTA_MS) { compuerta.write(SERVO_CERRADA); cambiar(CIERRA); }
+      if (millis() - t_est > COMPUERTA_ABIERTA_MS) { servoGrados(SERVO_CERRADA); cambiar(CIERRA); }
       break;
     case CIERRA:
       if (millis() - t_est > 250) cambiar(REPOSO);
@@ -115,19 +116,26 @@ void barrido() {                                  // 1 vuelta por velocidad: ¿d
 void consola() {
   static char buf[24];
   static uint8_t n = 0;
-  while (Serial.available()) {
+  static uint32_t t_car = 0;
+  // Ejecuta con Enter o, si no hay Enter, 60 ms después del último carácter.
+  bool listo = n && millis() - t_car > 60;
+  while (Serial.available() && !listo) {
     const char ch = Serial.read();
+    t_car = millis();
     if (ch != '\n' && ch != '\r') { if (n < sizeof(buf) - 1) buf[n++] = ch; continue; }
-    if (!n) continue;
+    listo = true;
+  }
+  if (listo) {
+    if (!n) return;
     buf[n] = 0; n = 0;
     const float x = atof(buf + 1);
     switch (buf[0]) {
       case 'a': automatico = !automatico; vacios = 0; Serial.println(automatico ? "auto ON" : "auto OFF"); break;
       case 'd': b1.borrar(); b2.borrar(); tolvaBolsillos(1); cambiar(AVANZA); break;
-      case 'f': tolvaBolsillos(1); break;
-      case 'b': tolvaBolsillos(-1); break;
-      case 'o': compuerta.write(SERVO_ABIERTA); break;
-      case 'p': compuerta.write(SERVO_CERRADA); break;
+      case 'f': tolvaBolsillos(1); Serial.println("+1 bolsillo"); break;
+      case 'b': tolvaBolsillos(-1); Serial.println("-1 bolsillo"); break;
+      case 'o': servoGrados(SERVO_ABIERTA); break;
+      case 'p': servoGrados(SERVO_CERRADA); break;
       case 'v': tolva.vmax = constrain(x, 100, 1600); Serial.printf("vmax=%.0f\n", tolva.vmax); break;
       case 'k': tolva.acc = constrain(x, 200, 20000); Serial.printf("acc=%.0f\n", tolva.acc); break;
       case 's': tolva.v0 = constrain(x, 50, 400); Serial.printf("v0=%.0f\n", tolva.v0); break;
@@ -148,16 +156,18 @@ void consola() {
 
 void setup() {
   Serial.begin(115200);
-  delay(300);
-  tolvaIniciar();
-  compuertaIniciar();
+  delay(500);
+  Serial.println(F("\n== Etapa 1 arrancando =="));
+  Serial.flush();
+  tolvaIniciar();       Serial.println(F("tolva ok"));
+  compuertaIniciar();   Serial.println(F("servo ok"));
 #if HABILITAR_BANDA
   bandaIniciar();
 #endif
   b1.iniciar(); b2.iniciar();
-  color.iniciar();
   Serial.printf("IR base: B1=%.0f B2=%.0f\n", b1.base, b2.base);
-  iniciarTareaPasos();
+  color.iniciar();      Serial.println(F("tcs ok"));
+  iniciarTareaPasos();  Serial.println(F("tarea pasos ok"));
   ayuda();
 }
 
@@ -173,4 +183,6 @@ void loop() {
     Serial.printf("IR1=%d/%.0f IR2=%d/%.0f REF=%d  TCS razon=%.2f total=%u\n", b1.raw, b1.base, b2.raw,
                   b2.base, analogRead(PIN_IR_REF), rz, tot);
   }
+  // Fuera de la medición se duerme 1 ms para que IDLE1 alimente el watchdog.
+  if (est != AVANZA && est != ESPERA && est != MIDE) delay(1);
 }
