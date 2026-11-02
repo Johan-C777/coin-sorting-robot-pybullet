@@ -198,12 +198,14 @@ def clavija_y(x, z, y0, y1, d, arriba=True):
     return gota.extrude(y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z))
 
 
-def pasador_gota(x, z, y0, y1, d=PIN_C):
-    """Pasador en rombo (cuadrado girado 45 grados) inscrito en Ø3: sus cuatro caras están a 45 grados, así que no tiene voladizo
-    ni sobre el hueco del nudillo (0,3 mm de aire) ni sobre la ranura central, y gira libre en el agujero Ø3,6 porque su círculo
-    circunscrito es el Ø3."""
+def pasador_gota(x, z, y0, y1, d=PIN_C, ranura=RANURA / 2 - 0.2):
+    """Pasador en rombo (cuadrado girado 45 grados) inscrito en Ø3: sus caras están a 45 grados y su círculo circunscrito es el Ø3,
+    así que gira libre en el agujero Ø3,6. En la ranura central, donde ningún nudillo lo sujeta, lleva una quilla de 1 mm que baja
+    hasta la cama (la rueda tiene una muesca para ella): el tramo suelto del pasador nace apoyado, no en el aire."""
     r = d / 2
-    return prisma_y(CrossSection([[(x, z - r), (x + r, z), (x, z + r), (x - r, z)]]), y0, y1)
+    rombo = prisma_y(CrossSection([[(x, z - r), (x + r, z), (x, z + r), (x - r, z)]]), y0, y1)
+    quilla = caja(x - 0.5, x + 0.5, -ranura, ranura, z - ESP_BANDA / 2, z - r * 0.5)
+    return rombo + quilla
 
 
 def hilo(x0, x1, y, z, extra=0.0):
@@ -365,6 +367,8 @@ def rueda(x):
         boca = caja(0, 12, -RUEDA_W, RUEDA_W, -(PIN_C + 0.8) / 2, (PIN_C + 0.8) / 2)
         boca = boca.rotate((0, -math.degrees(a), 0)).translate((px, 0, pz))
         disco = disco - boca
+        muesca = caja(-3.4, 0.01, -RUEDA_W, RUEDA_W, -1.7, 1.7).rotate((0, -math.degrees(a), 0)).translate((px, 0, pz))   # para la quilla del pasador
+        disco = disco - muesca
     disco = disco - hex_y(0, 0, -RUEDA_W, RUEDA_W, HEX_E + 0.4)
     return disco.translate((x, 0, Z_EJE))
 
@@ -379,17 +383,17 @@ def tablilla(x=0.0, z=0.0, primero=False):
     plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
     plate = plate - caja(-1, PASO + 1, -RANURA / 2, RANURA / 2, -h - 1, h + 1)
     seg = lambda j: (-ANCHO_BANDA / 2 + SEG * j, -ANCHO_BANDA / 2 + SEG * (j + 1))
-    for j in (1, 5):                              # muescas traseras donde entran los nudillos del eslabón anterior
+    for j in (0, 2, 4, 6):                        # muescas traseras donde entran los nudillos (con pasador) del eslabón anterior
         ya, yb = seg(j)
         plate = plate - caja(-1, KN_D / 2 + 0.6, ya, yb, -h - 1, h + 1)
-    for j in (0, 2, 4, 6):                        # muescas delanteras para los nudillos del siguiente
+    for j in (1, 5):                              # muescas delanteras para los nudillos sueltos del siguiente
         ya, yb = seg(j)
         plate = plate - caja(PASO - KN_D / 2 - 0.6, PASO + 1, ya, yb, -h - 1, h + 1)
     def nud(xn, j):
         ya, yb = seg(j)
         oct8 = [(-1.2, -3), (1.2, -3), (3.0, -1.2), (3.0, 1.2), (1.2, 3), (-1.2, 3), (-3.0, 1.2), (-3.0, -1.2)]   # canto a 45 grados: sin arco colgado contra la cama
         return prisma_y(CrossSection([[(xn + a, b) for a, b in oct8]]), ya + 0.2, yb - 0.2)
-    m = plate + union([nud(0, j) for j in (0, 2, 4, 6)] + [nud(PASO, j) for j in (1, 5)])
+    m = plate + union([nud(0, j) for j in (1, 5)] + [nud(PASO, j) for j in (0, 2, 4, 6)])
     m = m - hueco_y(0, 0, -PIN_CL, PIN_CL, PIN_CH)
     if primero:
         m = m - caja(-PIN_RANURA / 2, PIN_RANURA / 2, -PIN_CL, PIN_CL, -h - 1, 0)

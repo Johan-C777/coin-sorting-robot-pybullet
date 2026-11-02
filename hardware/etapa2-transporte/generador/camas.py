@@ -43,7 +43,7 @@ ORI = {
     'BT16': ('acople', 'Acople hexágono + D', PETG, '100 %', R_PY, 1, 'Sin soportes.'),
     'BT17': ('rueda-dentada', 'Rueda dentada de 8 dientes', PETG, '100 %', R_PY, 2, 'Plana. La motriz y la libre son iguales.'),
     'BT18': ('pata', 'Pata', PLA_M, '20 %, 3 paredes', R_0, 6, 'Acostada. Las clavijas en gota quedan horizontales y salen sin soportes.'),
-    'BT19': ('seccion-cadena', 'Sección de cadena (14 eslabones articulados)', PLA_A, '100 %', R_0, 12, 'Print-in-place: sale ya articulada. Pasador en rombo y nudillos con canto a 45°: sin soportes.'),
+    'BT19': ('seccion-cadena', 'Sección de cadena (14 eslabones articulados)', PLA_A, '100 %', R_0, 12, 'Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura y nudillos con canto a 45°: sin soportes.'),
 }
 STOCK = {PETG: 429, PLA_M: 1000, PLA_A: 1000, PLA_N: 647}
 TEMP = {PETG: '230–250 °C', PLA_M: '200–230 °C', PLA_A: '200–230 °C', PLA_N: '200–230 °C'}
@@ -248,7 +248,7 @@ def escribir_md(out, filas, piezas, prueba_p):
         L.append(f"| `{pz['fn']}` | {pz['cant']} | {pz['mat']} |")
     L.append("\n## Qué se hizo contra los fallos\n")
     L.append("- **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo y los muñones de los ejes son octogonales, los zócalos verticales de clavija terminan en cono, los bolsillos de las tapas tienen el techo en V y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición de impresión, da 0 mm² en todas las piezas salvo ≈ 1 mm² de ruido de malla en los módulos.")
-    L.append("- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°) y los nudillos tienen el canto a 45°: no hay arco colgado contra la cama ni sobre la ranura de la rueda.")
+    L.append("- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°), los nudillos tienen el canto a 45° y en la ranura de la rueda el pasador lleva una quilla que baja hasta la cama: ningún tramo de pasador nace en el aire. Lo único que queda es un puente de 8 mm del pasador (de 0,4 mm de ancho al empezar) sobre cada nudillo suelto, anclado en los dos extremos.")
     L.append("- **Pocas piezas pequeñas:** las clavijas Ø6 se integraron en guías y patas; los pasadores Ø3 son parte de cada eslabón; el rompecabezas de los módulos sustituye a todas las clavijas de unión del bastidor.")
     L.append("- **Riesgos que quedan:** (1) la tolerancia de la articulación (por eso la cama 00 primero); (2) la presilla de la sección, de PLA, puede ser frágil, y el pasador en rombo es más delgado que uno redondo; (3) el juego de 168 articulaciones alarga la cadena, por eso el tensor tiene 24 mm de recorrido; (4) el torque de un NEMA17 de 48 mm con el radio de la rueda de ≈ 0,3 N·m es justo para la carga de monedas: si patina, baja la tensión.")
     (out / 'CAMAS.md').write_text("\n".join(L) + "\n")
