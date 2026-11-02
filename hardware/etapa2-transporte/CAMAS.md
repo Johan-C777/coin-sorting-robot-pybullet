@@ -15,7 +15,7 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 
 | Filamento | Para qué | Gramos necesarios | Hay | Sobra | Temp. |
 |---|---|---|---|---|---|
-| PETG Azul 4DLAB | Módulo del motor, tapa del motor, ejes, ruedas, acople, soporte NEMA, carros y tornillos del tensor | 209 g | 429 g | 220 g | 230–250 °C |
+| PETG Azul 4DLAB | Módulo del motor, tapa del motor, ejes, ruedas, acople, soporte NEMA, carros y tornillos del tensor | 208 g | 429 g | 221 g | 230–250 °C |
 | PLA+ Mármol 4DLAB | Módulos 2 a 6, tapa del tensor y patas | 434 g | 1000 g | 566 g | 200–230 °C |
 | PLA+ Azul 4DLAB | Las 12 secciones de cadena y la cama 00 de prueba | 687 g | 1000 g | 313 g | 200–230 °C |
 | PLA+ Negro 4DLAB | Guías laterales (10) | 175 g | 647 g | 472 g | 200–230 °C |
@@ -68,13 +68,13 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 - Acostada sobre la cara interior.
 - De pie sobre el extremo de la rosca; la cabeza queda arriba.
 - De pie sobre la cola roscada. Sin soportes.
-- La base contra la cama; la jaula se cierra en cono. Sin soportes.
+- La base contra la cama; la jaula se cierra en cono. Sin soportes. Lleva una ventana en la pared −X para el conector JST del motor Folger 17HS (gira el motor para que el conector quede ahí).
 - Piso contra la cama. Sin soportes.
 - Plana. La motriz y la libre son iguales.
 - Sin soportes.
 - Tumbado (las capas corren a lo largo del eje), sobre la cara plana del octógono. Sin borde ni soportes.
 - Tumbado, igual que el motriz.
-- Peso aproximado de la cama: 209 g.
+- Peso aproximado de la cama: 208 g.
 
 ### Cama 02 · PLA+ Azul 4DLAB
 

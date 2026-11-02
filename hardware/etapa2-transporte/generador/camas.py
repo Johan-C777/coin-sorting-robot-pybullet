@@ -39,7 +39,7 @@ ORI = {
     'BT13P': ('carro-tensor-mas-Y', 'Carro del tensor +Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
     'BT13M': ('carro-tensor-menos-Y', 'Carro del tensor −Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
     'BT14': ('tornillo-tensor', 'Tornillo del tensor', PETG, '100 %', R_PX, 2, 'De pie sobre el extremo de la rosca; la cabeza queda arriba.'),
-    'BT15': ('soporte-nema17', 'Soporte del NEMA17', PETG, '30 %, 4 paredes', R_MY, 1, 'La base contra la cama; la jaula se cierra en cono. Sin soportes.'),
+    'BT15': ('soporte-nema17', 'Soporte del NEMA17', PETG, '30 %, 4 paredes', R_MY, 1, 'La base contra la cama; la jaula se cierra en cono. Sin soportes. Lleva una ventana en la pared −X para el conector JST del motor Folger 17HS (gira el motor para que el conector quede ahí).'),
     'BT16': ('acople', 'Acople hexágono + D', PETG, '100 %', R_PY, 1, 'Sin soportes.'),
     'BT17': ('rueda-dentada', 'Rueda dentada de 8 dientes', PETG, '100 %', R_PY, 2, 'Plana. La motriz y la libre son iguales.'),
     'BT18': ('pata', 'Pata', PLA_M, '20 %, 3 paredes', R_0, 6, 'Acostada. Las clavijas en gota quedan horizontales y salen sin soportes.'),

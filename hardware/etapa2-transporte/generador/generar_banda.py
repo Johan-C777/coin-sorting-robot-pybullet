@@ -481,6 +481,8 @@ def soporte_motor():
     m = m - octo_y(x0, Z_EJE, y_ini - 1, y_ini + 6.01, APOT_BUJE + 0.35)                     # calza sobre el buje de la pared
     m = m - cil_y(x0, Z_EJE, Y_PLACA[0] - 1, Y_PLACA[1] + 1, NEMA["pilot"] + 1.0)
     m = m - caja(x0 - BOLSA / 2, x0 + BOLSA / 2, Y_PLACA[1], y_fin + 1, Z_EJE - BOLSA / 2, Z_EJE + BOLSA / 2)
+    # ventana abierta hacia atrás en la pared -X para el conector JST de la tapa trasera del motor (16 × 7 mm, sobresale 5,5 mm)
+    m = m - caja(x0 - BOLSA / 2 - 4, x0 - BOLSA / 2 + 1, y_fin - 9.5, y_fin + 1, Z_EJE - 9.5, Z_EJE + 9.5)
     return m
 
 
@@ -510,7 +512,8 @@ def nema():
     m = caja(X_MOT - NEMA["lado"] / 2, X_MOT + NEMA["lado"] / 2, y0, y0 + NEMA["largo"], Z_EJE - NEMA["lado"] / 2, Z_EJE + NEMA["lado"] / 2)
     m = m + cil_y(X_MOT, Z_EJE, y0 - 2, y0, NEMA["pilot"] - 0.5)
     eje = cil_y(X_MOT, Z_EJE, y0 - NEMA["eje_l"], y0, NEMA["eje_d"]) ^ caja(X_MOT - 3, X_MOT + 2.0, y0 - 25, y0 + 1, Z_EJE - 3, Z_EJE + 3)
-    return m + eje
+    conector = caja(X_MOT - NEMA['lado'] / 2 - 5.5, X_MOT - NEMA['lado'] / 2 + 1, y0 + NEMA['largo'] - 7, y0 + NEMA['largo'], Z_EJE - 8, Z_EJE + 8)   # JST de 6 pines hacia -X
+    return m + eje + conector
 
 
 def leds_ref():
