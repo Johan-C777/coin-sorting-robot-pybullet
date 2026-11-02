@@ -34,7 +34,7 @@ ORI = {
     'BT09G2': ('guia-menos-Y', 'Guía −Y, tramos 2 a 5', PLA_N, '15 %, 3 paredes', R_VOLT, 4, 'Ala abajo, labio arriba.'),
     'BT10G1': ('guia-mas-Y-tramo1', 'Guía +Y, tramo 1 (hueco del LED)', PLA_N, '15 %, 3 paredes', R_VOLT, 1, 'Ala abajo, labio arriba.'),
     'BT10G2': ('guia-mas-Y', 'Guía +Y, tramos 2 a 5', PLA_N, '15 %, 3 paredes', R_VOLT, 4, 'Ala abajo, labio arriba.'),
-    'BT11': ('eje-motriz', 'Eje motriz', PETG, '100 %', R_0, 1, 'Tumbado (las capas corren a lo largo del eje). Borde (brim) de 5 mm. Es lo único redondo apoyado en una línea: el arco de abajo es chico y sale limpio.'),
+    'BT11': ('eje-motriz', 'Eje motriz', PETG, '100 %', R_0, 1, 'Tumbado (las capas corren a lo largo del eje), sobre la cara plana del octógono. Sin borde ni soportes.'),
     'BT12': ('eje-libre', 'Eje libre', PETG, '100 %', R_0, 1, 'Tumbado, igual que el motriz.'),
     'BT13P': ('carro-tensor-mas-Y', 'Carro del tensor +Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
     'BT13M': ('carro-tensor-menos-Y', 'Carro del tensor −Y', PETG, '40 %, 4 paredes', R_MX, 1, 'De pie sobre la cola roscada. Sin soportes.'),
@@ -43,29 +43,27 @@ ORI = {
     'BT16': ('acople', 'Acople hexágono + D', PETG, '100 %', R_PY, 1, 'Sin soportes.'),
     'BT17': ('rueda-dentada', 'Rueda dentada de 8 dientes', PETG, '100 %', R_PY, 2, 'Plana. La motriz y la libre son iguales.'),
     'BT18': ('pata', 'Pata', PLA_M, '20 %, 3 paredes', R_0, 6, 'Acostada. Las clavijas en gota quedan horizontales y salen sin soportes.'),
-    'BT19': ('seccion-cadena', 'Sección de cadena (14 eslabones articulados)', PLA_A, '100 %', R_VOLT, 12, 'Print-in-place: sale ya articulada. Tapa lisa contra la cama.'),
+    'BT19': ('seccion-cadena', 'Sección de cadena (14 eslabones articulados)', PLA_A, '100 %', R_0, 12, 'Print-in-place: sale ya articulada. Pasador en rombo y nudillos con canto a 45°: sin soportes.'),
 }
 STOCK = {PETG: 429, PLA_M: 1000, PLA_A: 1000, PLA_N: 647}
 TEMP = {PETG: '230–250 °C', PLA_M: '200–230 °C', PLA_A: '200–230 °C', PLA_N: '200–230 °C'}
 
 
 def prueba():
-    """Pieza de prueba: dos tramos de 3 eslabones articulados (uno con la presilla) + bloque con agujero de muñón, zócalo de clavija y clavija en gota."""
+    """Pieza de prueba: dos tramos de 3 eslabones articulados (uno con la presilla), un bloque con agujero de eje y zócalo de clavija,
+    un muñón octogonal tumbado y una clavija en gota (punta abajo)."""
     def tramo(n, primero):
         return g.union([g.tablilla(i * g.PASO, 0, primero=primero and i == 0) for i in range(n)])
-    t1 = tramo(3, False).rotate((180, 0, 0))
-    t2 = tramo(3, True).rotate((180, 0, 0))
-    def alza(m, y):
+    def alza(m, x, y):
         x0, y0, z0, x1, y1, z1 = m.bounding_box()
-        return m.translate((-x0, y - y0, -z0))
-    t1, t2 = alza(t1, 0), alza(t2, 62)
+        return m.translate((x - x0, y - y0, -z0))
+    t1, t2 = alza(tramo(3, False), 0, 0), alza(tramo(3, True), 0, 62)
     bq = g.caja(0, 40, 0, 40, 0, 14)
     bq = bq - g.hueco_y(10, 7, -1, 41, g.PIN_H) - g.hueco_y(30, 7, 3, 41, g.PEG_H)
     bq = bq.translate((60, 0, 0))
-    cl = g.clavija_y(0, 0, 0, g.PEG_L, g.PEG_D).rotate((0, 0, 0))
-    x0, y0, z0, x1, y1, z1 = cl.bounding_box()
-    cl = cl.translate((60 - x0, 130 - y0, -z0))
-    return t1 + t2 + bq + cl
+    cl = alza(g.clavija_y(0, 0, 0, g.PEG_L, g.PEG_D, arriba=False), 60, 130)
+    mu = alza(g.octo_y(0, 0, 0, 30, g.EJE_AP), 80, 130)
+    return t1 + t2 + bq + cl + mu
 
 
 def pose(m, rot):
@@ -146,7 +144,7 @@ def main():
     pr, (w, d, h) = pose(prueba(), (0, 0, 0))
     (out / 'stl' / 'BT00_prueba-tolerancias.stl').write_bytes(stl_bytes([pr]))
     prueba_p = dict(key='BT00', arch='prueba-tolerancias', nom='Prueba de tolerancias', mat=PLA_A, relleno='100 %', cant=1,
-                    nota='Dos tramos de 3 eslabones, uno con la presilla; un bloque con agujero de eje, zócalo de clavija y una clavija en gota.',
+                    nota='Dos tramos de 3 eslabones, uno con la presilla; un bloque con agujero de eje y zócalo de clavija; una clavija en gota y un muñón octogonal para probarlos.',
                     m=pr, w=w, d=d, h=h, vol=pr.volume() / 1000.0, fn='BT00_prueba-tolerancias.stl')
     for pz in piezas:
         assert pz['h'] <= 250 and max(pz['w'], pz['d']) <= 212, pz['key']
@@ -249,10 +247,10 @@ def escribir_md(out, filas, piezas, prueba_p):
     for pz in piezas:
         L.append(f"| `{pz['fn']}` | {pz['cant']} | {pz['mat']} |")
     L.append("\n## Qué se hizo contra los fallos\n")
-    L.append("- **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo del eje es octogonal y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición, deja sólo puentes cortos (≤ 8 mm, como los zócalos de clavija) y el arco de los primeros 0,8 mm de los nudillos de la cadena, que apoyan en la cama.")
-    L.append("- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es una gota para que no tenga voladizo al imprimirse acostado.")
+    L.append("- **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo y los muñones de los ejes son octogonales, los zócalos verticales de clavija terminan en cono, los bolsillos de las tapas tienen el techo en V y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición de impresión, da 0 mm² en todas las piezas salvo ≈ 1 mm² de ruido de malla en los módulos.")
+    L.append("- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°) y los nudillos tienen el canto a 45°: no hay arco colgado contra la cama ni sobre la ranura de la rueda.")
     L.append("- **Pocas piezas pequeñas:** las clavijas Ø6 se integraron en guías y patas; los pasadores Ø3 son parte de cada eslabón; el rompecabezas de los módulos sustituye a todas las clavijas de unión del bastidor.")
-    L.append("- **Riesgos que quedan:** (1) la tolerancia de la articulación (por eso la cama 00 primero); (2) la presilla de la sección, de PLA, puede ser frágil; (3) el juego de 168 articulaciones alarga la cadena, por eso el tensor tiene 24 mm de recorrido; (4) el torque de un NEMA17 de 48 mm con el radio de la rueda de ≈ 0,3 N·m es justo para la carga de monedas: si patina, baja la tensión.")
+    L.append("- **Riesgos que quedan:** (1) la tolerancia de la articulación (por eso la cama 00 primero); (2) la presilla de la sección, de PLA, puede ser frágil, y el pasador en rombo es más delgado que uno redondo; (3) el juego de 168 articulaciones alarga la cadena, por eso el tensor tiene 24 mm de recorrido; (4) el torque de un NEMA17 de 48 mm con el radio de la rueda de ≈ 0,3 N·m es justo para la carga de monedas: si patina, baja la tensión.")
     (out / 'CAMAS.md').write_text("\n".join(L) + "\n")
 
 
