@@ -3,9 +3,9 @@
 Dónde está cada cosa, para encontrarla rápido. Lo marcado como **archivo** son versiones
 anteriores que ya no se usan y se guardan como historia del diseño.
 
-## Si el profesor pide…
+## Acceso rápido
 
-| Pide | Dónde está |
+| Qué | Dónde está |
 |---|---|
 | El estado del módulo de monedas | [README](../README.md#estado-estratégico) y [TODO.md](../TODO.md) |
 | Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
