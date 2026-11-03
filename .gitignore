@@ -8,7 +8,7 @@ venv/
 
 # Firmware
 firmware/esp32_brazo/secrets.h
-firmware/esp32_contador/secrets.h
+firmware/archivo/esp32_contador_v4/secrets.h
 firmware/tests/test_core
 firmware/tests/test_conteo
 *.o

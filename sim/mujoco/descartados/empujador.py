@@ -4,6 +4,8 @@ import math
 import numpy as np
 import mujoco
 from entrada import construir, xml_mundo
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
 from riel_canto import MONEDAS, _quat
 
 VENT = ["N50", "N100", "A50", "N200", "A100", "A500", "A200", "N1000"]

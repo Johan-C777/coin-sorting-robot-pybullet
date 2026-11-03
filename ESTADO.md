@@ -7,6 +7,10 @@
 | 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
+## Repositorio ordenado (0.9.1) — 2026-11-03
+- Mapa completo: `docs/MAPA-DEL-REPOSITORIO.md`. Versiones viejas en carpetas `archivo/` con README: `scripts/archivo/`, `firmware/archivo/esp32_contador_v4/`, `docs/archivo/` (visores v1 y v4), `sim/mujoco/descartados/`, `hardware/archivo/`.
+- `scripts/generar_clasificador.py` sigue en `scripts/` porque `generar_v5.py` importa `escribir_stl`.
+
 ## Pruebas físicas 1ª ronda (0.9.0) — 2026-11-03
 - `docs/12-pruebas-fisicas-etapa1.md` + `docs/pruebas/etapa1/{video,img}`. OK: $100 y $500 antiguas, cartucho/vasos, torre armada.
 - H1 caída por detrás → rampa trasera. H2 bolsillos justos ($200/$500 n atascan, $1000 no entra) → disco 6 bolsillos + firmware 6/vuelta. H3 fricción disco → lijar, lubricante seco, nervios, bajar VMAX. H4 moneda se cuela en compuerta → 2ª paleta. H5 monedas verticales no se acuestan con tolva llena → abierto. H6 jumpers cortos → IR y TCS3200 sin probar.
@@ -25,11 +29,11 @@
 - Docs: `docs/09-clasificador-v5.md`, `docs/11-electronica-etapa1.md` (+ `img/etapa1-cableado.svg`, `img/etapa1-v5.png`).
 - Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS3200 OUT 14, S2 16, S3 17, S0 18, S1 21; banda STEP 10/DIR 11/EN 12, ref 13.
 - Pendiente: armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
-- Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/esp32_contador` es de la v4 (lo usan las pruebas).
+- Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/archivo/esp32_contador_v4` es de la v4 (lo usan las pruebas).
 
 ## Histórico v4 (archivado)
 ### Decisiones / parámetros v4
-- Generador único `scripts/generar_clasificador.py` (manifold3d) → `hardware/etapa1-clasificador/stl/`; visor `scripts/exportar_visor_3d.py` → `docs/ensamble-etapa1.html`.
+- Generador único `scripts/generar_clasificador.py` (manifold3d) → `hardware/etapa1-clasificador/stl/`; visor `scripts/archivo/exportar_visor_3d.py` → `docs/archivo/ensamble-etapa1-v4.html`.
 - Sin tornillos ni soportes: clavijas Ø6 (agujero 6,1; `AJUSTE_PRESION`), llaves R04, bridas.
 - Riel 22°, ranuras 17,5/20,8/22,0/22,8/23,4/24,1/24,9 + extremo (diámetros oficiales Banrep). 9 salidas ≥ 37 mm → 9 vasos Ø34×60, uno por tipo.
 - $500: TCS34725 antes de ranura 6; plato D6 SG90 55° antigua / 125° nueva.

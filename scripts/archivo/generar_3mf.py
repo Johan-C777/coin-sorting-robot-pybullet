@@ -1,6 +1,6 @@
 """Empaqueta todos los STL en un único proyecto .3mf con varias bandejas.
 
-    python scripts/generar_3mf.py
+    python scripts/archivo/generar_3mf.py
 
 Qué hace:
   * lee los STL de stl/, une vértices repetidos y deja cada malla apoyada en z = 0;
@@ -23,7 +23,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 STL = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "stl"
 STL_BRAZO = RAIZ / "hardware" / "etapa3-brazo" / "stl"
 SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "sistema_monedas_completo.3mf"

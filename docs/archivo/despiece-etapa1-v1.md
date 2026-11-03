@@ -5,7 +5,7 @@
 ![Vista de despiece](../img/etapa1-despiece.png)
 
 La misma vista se mueve en vivo desde la simulación
-([`simulacion-etapa1.html`](../simulacion-etapa1.html), pestaña **Despiece**): el
+([`simulacion-etapa1.html`](simulacion-etapa1-v1.html), pestaña **Despiece**): el
 deslizador separa las piezas y al tocar una de la lista se aísla y muestra su ficha.
 
 En esta entrega el riel pasó de 5 a **8 estaciones** para recibir monedas
@@ -74,7 +74,7 @@ Detalle con cantidades y tornillería en
    detrás del riel y los de las nuevas por delante, para que no se crucen.
 7. **Sensores.** Montar los P08 a cada lado de la ranura, con el emisor y el
    receptor enfrentados y el haz cruzando el centro del hueco. Conectar cada
-   barrera al pin de su estación (`PIN_SENSOR` en `firmware/esp32_contador/config.h`).
+   barrera al pin de su estación (`PIN_SENSOR` en `firmware/archivo/esp32_contador_v4/config.h`).
 8. **Banda.** Unir tres P10 por lado con las solapas, montar los dos P09 sobre
    ejes de 5 mm, tensar la cinta y acoplar el motor con P12. Los cinco P11 van
    sobre la cinta separados 65 mm, en el orden $50, $100, $200, $500 y $1.000.
@@ -135,7 +135,7 @@ Otros puntos que valen la calibración:
 
 ```bash
 python scripts/generar_stl.py      # 15 STL y stl/piezas.csv
-python scripts/generar_3mf.py      # 58 piezas en 9 bandejas
+python scripts/archivo/generar_3mf.py      # 58 piezas en 9 bandejas
 ```
 
 El script lee las luces de `software/brazo/monedas.py`, así que un cambio en el
