@@ -19,7 +19,7 @@ Las versiones anteriores (v1 con varillas, v3 de canto, v4 con riel de 8 ranuras
 
 ## Cómo funciona
 
-1. **Tolva de disco (H01, H02, H03).** Plato inclinado a 45°. El 28BYJ-48 gira un disco de 8 bolsillos (Ø29). Cada bolsillo sube una moneda; el rascador tumba la que venga montada.
+1. **Tolva de disco (H01, H02, H03).** Plato inclinado a 45°. El 28BYJ-48 gira un disco de 6 bolsillos (Ø33, pieza H02c). Cada bolsillo sube una moneda; el rascador tumba la que venga montada.
 2. **Cae de canto.** Arriba, el bolsillo pasa sobre un hueco y la moneda cae unos 2 cm a la pista. Queda parada contra la placa (simulado: 1728 de 1728, `sim/mujoco/disco.py`).
 3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Dos barreras IR a 105 y 129 mm miden el diámetro; el sensor de color TCS3200 a 152 mm separa las $500.
 4. **Embudo (F01, F02).** Borde Ø90, pared a 45°, 60 mm adelante y 50 mm bajo el fin de pista (simulado: 81 de 81, `sim/mujoco/embudo.py`).
@@ -35,7 +35,7 @@ Total aproximado: **842 g de PLA** (3 paredes, 20% relleno). Todas caben en la K
 | L01 | Pista con repisa, barreras y sensor de color | 1 | 179 x 23 x 60 | 38 | De pie, apoyada en la cara de abajo de la repisa. Sin soportes. |
 | B01 | Porta-emisor IR (se engancha detrás de la placa) | 2 | 27 x 15 x 14 | 4 | De lado. Sin soportes. |
 | H01 | Base de la tolva: plato inclinado, aro y soporte del motor | 1 | 129 x 113 x 43 | 49 | Con la espalda plana sobre la cama. Sin soportes. |
-| H02 | Disco de 8 bolsillos | 1 | 98 x 98 x 8 | 6 | Plano, el cubo hacia arriba. Sin soportes. |
+| H02 | Disco de 6 bolsillos Ø33 (H02c en `stl/ajustes/`; reemplaza al de 8) | 1 | 100 x 94 x 8 | 6 | Plano, el cubo hacia arriba. Sin soportes. |
 | H03 | Rascador (quita la moneda montada) | 1 | 36 x 43 x 4 | 1 | De canto. Sin soportes. Se imprimen 3 alturas: 2,5 / 2,6 / 2,8 mm. |
 | K01 | Soporte de la tolva y la pista (caballete 1) | 1 | 89 x 70 x 16 | 57 | De lado, con la cara que mira a la tolva hacia arriba. Sin soportes. |
 | K02 | Soporte de la pista (caballete 2) | 1 | 47 x 35 x 16 | 13 | De lado. Sin soportes. |
