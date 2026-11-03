@@ -1,7 +1,7 @@
 #pragma once
 // Barreras IR (fototransistor: colector a 3V3, emisor a GPIO + 10 k a GND; haz libre = alto)
 // y color TCS3200 (frecuencia por PCNT). La base de cada barrera sigue lentamente la luz ambiente.
-#include <driver/pcnt.h>
+#include <driver/pulse_cnt.h>
 #include "config.h"
 
 struct Barrera {
@@ -36,38 +36,34 @@ struct Barrera {
 // TCS3200: la salida es una onda cuadrada cuya frecuencia crece con la luz del filtro
 // elegido por S2/S3. Se cuenta con el PCNT del ESP32-S3 (sin interrupciones por flanco).
 struct Color {
-  static constexpr pcnt_unit_t U = PCNT_UNIT_0;
+  pcnt_unit_handle_t u = nullptr;
   void iniciar() {
     for (uint8_t p : {PIN_TCS_S0, PIN_TCS_S1, PIN_TCS_S2, PIN_TCS_S3}) pinMode(p, OUTPUT);
     digitalWrite(PIN_TCS_S0, HIGH);                 // escala 100 %
     digitalWrite(PIN_TCS_S1, HIGH);
-    pcnt_config_t cfg = {};
-    cfg.pulse_gpio_num = PIN_TCS_OUT;
-    cfg.ctrl_gpio_num = PCNT_PIN_NOT_USED;
-    cfg.channel = PCNT_CHANNEL_0;
-    cfg.unit = U;
-    cfg.pos_mode = PCNT_COUNT_INC;
-    cfg.neg_mode = PCNT_COUNT_DIS;
-    cfg.lctrl_mode = PCNT_MODE_KEEP;
-    cfg.hctrl_mode = PCNT_MODE_KEEP;
-    cfg.counter_h_lim = 32767;
-    cfg.counter_l_lim = -32768;
-    pcnt_unit_config(&cfg);
-    pcnt_filter_disable(U);
-    pcnt_counter_pause(U);
+    pcnt_unit_config_t uc = {};
+    uc.low_limit = -1;
+    uc.high_limit = 32767;
+    pcnt_new_unit(&uc, &u);
+    pcnt_chan_config_t cc = {};
+    cc.edge_gpio_num = PIN_TCS_OUT;
+    cc.level_gpio_num = -1;
+    pcnt_channel_handle_t ch;
+    pcnt_new_channel(u, &cc, &ch);
+    pcnt_channel_set_edge_action(ch, PCNT_CHANNEL_EDGE_ACTION_INCREASE, PCNT_CHANNEL_EDGE_ACTION_HOLD);
+    pcnt_unit_enable(u);
+    pcnt_unit_start(u);
   }
   // Pulsos contados en TCS_VENTANA_MS con el filtro (s2, s3): R=(0,0) B=(0,1) C=(1,0) G=(1,1).
   uint32_t canal(bool s2, bool s3) {
     digitalWrite(PIN_TCS_S2, s2);
     digitalWrite(PIN_TCS_S3, s3);
     delayMicroseconds(300);                         // asentamiento del filtro
-    pcnt_counter_clear(U);
-    pcnt_counter_resume(U);
+    pcnt_unit_clear_count(u);
     delayMicroseconds(TCS_VENTANA_MS * 1000UL);
-    pcnt_counter_pause(U);
-    int16_t n = 0;
-    pcnt_get_counter_value(U, &n);
-    return (uint32_t)(uint16_t)n;
+    int n = 0;
+    pcnt_unit_get_count(u, &n);
+    return n > 0 ? n : 0;
   }
   // Muestrea `ms` y devuelve la razón (R+G)/2B de la lectura con más luz (moneda centrada).
   float razonMax(uint16_t ms, uint32_t *total = nullptr) {

@@ -24,11 +24,11 @@ constexpr uint8_t PIN_EN       = 12;            // activo en bajo
 // Reductora real 63,68395:1 -> 2037,8868 pasos/vuelta (no 2048). Se acumula la
 // fracción para que el disco no se desfase tras muchas vueltas.
 constexpr float  TOLVA_PASOS_VUELTA = 2037.8868f;
-constexpr int    BOLSILLOS          = 8;
+constexpr int    BOLSILLOS          = 6;        // disco H02c (6 bolsillos Ø33)
 constexpr int8_t TOLVA_SENTIDO      = 1;        // -1 si el disco gira al revés
-constexpr float  TOLVA_V0   = 180;               // pasos/s de arranque/parada (pull-in)
-constexpr float  TOLVA_VMAX = 800;               // pasos/s de crucero; sube con 'v'
-constexpr float  TOLVA_ACC  = 2500;              // pasos/s²
+constexpr float  TOLVA_V0   = 150;               // pasos/s de arranque/parada (pull-in)
+constexpr float  TOLVA_VMAX = 600;               // pasos/s de crucero; sube con 'v'
+constexpr float  TOLVA_ACC  = 1500;              // pasos/s²
 constexpr uint16_t TOLVA_PRE_MS  = 15;           // bobinas energizadas antes del 1er paso
 constexpr uint16_t TOLVA_POST_MS = 60;           // reposo antes de soltar bobinas
 
@@ -60,8 +60,11 @@ constexpr float UMBRAL_DORADO = 1.30f;           // (R+G)/2B > umbral = dorado (
 constexpr int   VASO_RECHAZO = -1;
 
 // ---- Ciclo -----------------------------------------------------------------
-constexpr uint16_t ESPERA_MONEDA_MS = 1800;      // tras avanzar un bolsillo
-constexpr uint8_t  VACIOS_PARA_PARAR = 8;        // una vuelta sin monedas = tolva vacía
+#define GIRO_AL_ARRANCAR 1                       // 1 = la tolva gira sola al encender (solo motor, sin sensores)
+#define AUTO_AL_ARRANCAR 0                       // 1 = arranca el ciclo completo con sensores (usar con el cableado listo)
+#define PARAR_SI_VACIA 0                         // 0 = sigue girando aunque no haya monedas
+constexpr uint16_t ESPERA_MONEDA_MS = 450;      // tras avanzar un bolsillo
+constexpr uint8_t  VACIOS_PARA_PARAR = 6;        // una vuelta sin monedas = tolva vacía
 
 // ---- Banda (A4988 1/16 + NEMA17). Desactivada por defecto. ------------------------
 #define HABILITAR_BANDA 0

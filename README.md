@@ -239,7 +239,7 @@ prueba automática para que no se desalineen.
 
 | Subsistema | Pieza | Especificación |
 |---|---|---|
-| Tolva | H01, H02, H03 | Plato a 45°; disco de 8 bolsillos Ø29; 28BYJ-48 de 2.037,9 pasos por vuelta (paso completo); rascador en tres alturas: 2,5 / 2,6 / 2,8 mm |
+| Tolva | H01, H02, H03 | Plato a 45°; disco de 6 bolsillos Ø33 (H02c); 28BYJ-48 de 2.037,9 pasos por vuelta (paso completo); rascador en tres alturas: 2,5 / 2,6 / 2,8 mm |
 | Pista | L01, B01 | Inclinación 22°; barreras a 105 y 129 mm (separación 24 mm); haz a 10 mm sobre la repisa; alojamientos Ø5,2 para LED y fototransistor de Ø5,0 |
 | Color | A01 | TCS3200 a 152 mm sobre la pista, después de las barreras |
 | Embudo | F01, F02 | Borde Ø90, pared a 45°, 60 mm adelante y 50 mm bajo el fin de la pista (simulado: 81 de 81) |
