@@ -128,7 +128,10 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     <div class="cifra"><b>24</b><span>piezas impresas sin tornillos ni soportes</span></div>
     <div class="cifra"><b>12</b><span>parámetros de calibración física marcados en el firmware</span></div>
   </div>
-  <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; todas las piezas están impresas. El módulo está en la fase de montaje: armar la torre y calibrarla con monedas reales siguiendo el procedimiento de puesta en marcha. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
+  <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; todas las piezas están impresas y la torre está armada. La primera ronda de <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">pruebas físicas</a> con monedas reales dejó 6 hallazgos mecánicos que se están corrigiendo (disco de 6 bolsillos, rampa trasera, compuerta doble) antes de calibrar. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
+
+  <h2>Banda transportadora · etapa 2</h2>
+  <p><b>En rediseño, sin piezas impresas.</b> La banda pone cada vaso del cartucho bajo el embudo y lo lleva al punto A. Ya están definidos la carga, las posiciones, el motor (NEMA17 con A4988), los pines y el control en el firmware. Se estudiaron tres mecanismos (cadena de tablillas, carro sobre varillas con hilo y riel impreso con hilo) y ahora se evalúan una cremallera impresa y un cable de acero. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet#etapa-2--banda-transportadora">README</a>.</p>
 
   <h2>Demos</h2>
   <div class="demos">
@@ -136,25 +139,34 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
       <img src="img/clasificador-v5-visor.png" alt="" loading="lazy" width="1400" height="875">
       <div><b>Clasificador v5 en 3D</b><p>La torre que se imprime: echa monedas, mira cómo se mide cada una y a qué vaso va. Despiece, alturas y componentes.</p></div>
     </a>
-    <a class="demo" href="banda-etapa2.html">
-      <img src="img/banda-etapa2.png" alt="" loading="lazy" width="1400" height="875">
-      <div><b>Banda transportadora (etapa 2)</b><p>Cadena de tablillas que mueve el cartucho bajo la torre: ensamble pieza por pieza, simulación del recorrido y materiales.</p></div>
+    <a class="demo" href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">
+      <img src="pruebas/etapa1/img/montaje_final.jpg" alt="" loading="lazy">
+      <div><b>Pruebas físicas de la etapa 1</b><p>La torre armada con monedas reales: videos, fotos y los 6 hallazgos que se están corrigiendo.</p></div>
     </a>
     <a class="demo" href="simulacion_sistema_completo.html">
       <img src="img/sistema-completo.png" alt="" loading="lazy" width="1400" height="1145">
       <div><b>Sistema completo</b><p>Las dos etapas juntas, los cuatro obstáculos por nivel y el rack ordenado por el criterio que elijas.</p></div>
     </a>
-    <a class="demo" href="archivo/simulacion-etapa1-v1.html">
-      <img src="img/etapa1-selector.png" alt="" loading="lazy" width="1400" height="1145">
-      <div><b>Etapa 1: selección (v1)</b><p>Primera versión del riel: monedas antiguas y nuevas, conteo por estación, tubos colectores y vista de despiece.</p></div>
-    </a>
-    <a class="demo" href="archivo/ensamble-etapa1-v4.html">
-      <img src="img/etapa1-despiece.png" alt="" loading="lazy">
-      <div><b>Ensamble etapa 1 (v4, archivada)</b><p>La versión anterior: las 24 piezas, en posición, con despiece, ficha de cada pieza y simulación de monedas a los 9 vasos.</p></div>
-    </a>
     <a class="demo" href="memoria-calculo.html">
       <img src="img/memoria-portada.png" alt="" loading="lazy">
       <div><b>Memoria de cálculo</b><p>Cinemática, espacio de trabajo, trayectorias, pares y servos, con calculadoras en vivo.</p></div>
+    </a>
+  </div>
+
+  <h2>Proceso de diseño</h2>
+  <p>Versiones anteriores, guardadas para ver cómo evolucionó el diseño. Ninguna es la que se construye.</p>
+  <div class="demos">
+    <a class="demo" href="archivo/simulacion-etapa1-v1.html">
+      <img src="img/etapa1-selector.png" alt="" loading="lazy" width="1400" height="1145">
+      <div><b>Etapa 1 · v1</b><p>Primera versión del riel: monedas antiguas y nuevas, conteo por estación, tubos colectores y vista de despiece.</p></div>
+    </a>
+    <a class="demo" href="archivo/ensamble-etapa1-v4.html">
+      <img src="img/etapa1-despiece.png" alt="" loading="lazy">
+      <div><b>Etapa 1 · v4</b><p>La versión anterior: las 24 piezas, en posición, con despiece, ficha de cada pieza y simulación de monedas a los 9 vasos.</p></div>
+    </a>
+    <a class="demo" href="archivo/banda-etapa2-v3.html">
+      <img src="img/banda-etapa2.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Etapa 2 · banda v3 (cadena)</b><p>Primera propuesta de la banda: cadena de tablillas impresa que mueve el cartucho bajo la torre. Reemplazada mientras se elige el mecanismo definitivo.</p></div>
     </a>
   </div>
 
@@ -183,7 +195,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     <li><a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/11-electronica-etapa1.md">Electrónica de la etapa 1</a><span>Pines del ESP32-S3, esquema de cableado y firmware</span></li>
   </ul>
 
-  <footer>Johan Andrés Canchala Arenas · Ingeniería Mecatrónica, Universidad Militar Nueva Granada · Licencia MIT</footer>
+  <footer>Johan Andrés Canchala Arenas · Javier León · Samuel Rubio · Ingeniería Mecatrónica, Universidad Militar Nueva Granada · Licencia MIT</footer>
 </main>
 </body>
 </html>
