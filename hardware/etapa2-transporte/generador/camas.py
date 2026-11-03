@@ -66,6 +66,49 @@ def prueba():
     return t1 + t2 + bq + cl + mu
 
 
+def prueba_articulacion():
+    """Cama 00B: tiras de 4 eslabones (24 mm de ancho: nudillo fijo, suelto, fijo) con 3 juegos por lado (0,30 / 0,40 / 0,50 mm),
+    con y sin la lámina rompible bajo el pasador, y una presilla suelta por juego. Cada tira lleva tantos agujeros cuadrados como su número."""
+    JUEGOS = (0.30, 0.40, 0.50)
+    N = 4
+    Y0, Y1 = -ANCHO_CORTE, -4.0
+    def recorte(m):
+        return m ^ g.caja(-10, 200, Y0, Y1, -10, 10)
+    def agujeros(m, k):
+        for q in range(k):
+            m = m - g.caja(g.PASO + 4.4 + 1.4 * (q % 3), g.PASO + 5.6 + 1.4 * (q % 3), -10.6 - 2.6 * (q // 3), -9.4 - 2.6 * (q // 3), -10, 10)
+        return m
+    def tira(c, lamina, k):
+        d = g.PIN_C + 2 * c
+        m = g.union([g.tablilla(i * g.PASO, 0, banda=lamina and i > 0, ultimo=lamina and i == N - 1, pin_ch=d, gota=True) for i in range(N)])
+        return agujeros(recorte(m), k)
+    def presilla(c):
+        d = g.PIN_C + 2 * c
+        return recorte(g.tablilla(0, 0, primero=True, ultimo=True, pin_ch=d, gota=True))
+    filas, y = [], 0.0
+    items = []
+    k = 0
+    for c in JUEGOS:
+        x = 0.0
+        fila = []
+        for lamina in (True, False):
+            k += 1
+            fila.append((tira(c, lamina, k), f"{k}: juego {c:.2f} mm, {'con' if lamina else 'sin'} lámina"))
+        fila.append((presilla(c), f"presilla juego {c:.2f}"))
+        row_h = 0.0
+        for m, etiqueta in fila:
+            x0, y0, z0, x1, y1, z1 = m.bounding_box()
+            m = m.translate((x - x0, y - y0, -z0))
+            items.append((m, etiqueta))
+            x += (x1 - x0) + 6.0
+            row_h = max(row_h, y1 - y0)
+        y += row_h + 6.0
+    return items
+
+
+ANCHO_CORTE = 28.0
+
+
 def pose(m, rot):
     m = m.rotate(rot) if any(rot) else m
     x0, y0, z0, x1, y1, z1 = m.bounding_box()
@@ -148,6 +191,9 @@ def main():
                     m=pr, w=w, d=d, h=h, vol=pr.volume() / 1000.0, fn='BT00_prueba-tolerancias.stl')
     for pz in piezas:
         assert pz['h'] <= 250 and max(pz['w'], pz['d']) <= 212, pz['key']
+    art = prueba_articulacion()
+    (out / 'camas' / 'cama-00B_PETG-prueba-articulacion.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in art]))
+    (out / 'stl' / 'BT00B_prueba-articulacion.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in art]))
     camas = [('00', PLA_A, [dict(prueba_p, i=1, px=0, py=0, giro=0)])]
     n = 1
     for mat in (PETG, PLA_A, PLA_M, PLA_N):
@@ -211,6 +257,16 @@ def escribir_md(out, filas, piezas, prueba_p):
     L.append("- Si la presilla de la cadena se parte en la prueba (cama 00), reimprime sólo el primer eslabón de cada sección en PETG o baja la velocidad de las paredes a 60 mm/s y sube 5 °C.\n")
     L.append("## Orden de impresión\n")
     L.append("1. **Cama 00 (prueba, ≈ 25 min).** Dobla los dos tramos de eslabones: deben girar libres sin holgura exagerada. Encaja un tramo en el otro por la presilla del primer eslabón: tiene que entrar con un clic y no salirse al jalar. Mete la clavija en el zócalo y el eje en el agujero grande. **Si algo falla, dime la medida y lo corrijo antes de gastar filamento.**")
+    L.append("1B. **Cama 00B (prueba de la articulación, PETG Azul, ≈ 25 g y ≈ 1 h 30).** Seis tiras de 4 eslabones de 24 mm de ancho y tres presillas sueltas, para escoger el juego y el material de la cadena **antes** de imprimir las camas 02 a 05. Cada tira tiene tantos agujeros cuadrados como su número (1 a 6) y cada fila de la cama es un juego distinto:")
+    L.append("")
+    L.append("| Fila (de abajo hacia arriba) | Juego por lado | Tira izquierda (n.° impar) | Tira central (n.° par) | Presilla |")
+    L.append("|---|---|---|---|---|")
+    L.append("| 1 | 0,30 mm | n.° 1 con lámina rompible | n.° 2 sin lámina | una presilla |")
+    L.append("| 2 | 0,40 mm | n.° 3 con lámina | n.° 4 sin lámina | una presilla |")
+    L.append("| 3 | 0,50 mm | n.° 5 con lámina | n.° 6 sin lámina | una presilla |")
+    L.append("")
+    L.append("   Pruébalas así: (a) dobla cada articulación a ambos lados y anota cuál gira con un dedo sin trabarse y sin bailar; (b) en las tiras *con lámina* dobla las articulaciones hasta que se rompa la lámina; las *sin lámina* sólo puentean 8 mm el pasador (el slicer puede marcarlas): sirven para saber si la lámina era lo que trababa; (c) encaja la presilla de su fila en el pasador libre del extremo de su tira: tiene que hacer clic y no salirse. **Dime el número de tira que gira mejor** y regenero toda la cadena con ese juego.")
+    L.append("   Ajustes sugeridos para esta prueba en PETG: boquilla 0,4, capa 0,2, 230–235 °C, ventilador de pieza al 100 % desde la capa 2, paredes a 40–50 mm/s, sin «ironing», sin compensación de «elephant foot» agresiva, borde (brim) de 0 a 2 mm.\n")
     L.append("2. Camas 02 a 05, la cadena (PLA+ Azul): 4 camas de 3 secciones. Es lo que más tarda (≈ 4 h por cama), pero ya no hay que armar nada suelto.")
     L.append("3. Cama 01, PETG Azul (ejes, ruedas, carros, tornillos, acople, soporte y módulo del motor).")
     L.append("4. Camas 06 a 08 (módulos, tapa y patas, PLA+ Mármol) y 09 (guías, PLA+ Negro).\n")

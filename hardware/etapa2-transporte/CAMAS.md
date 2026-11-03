@@ -27,6 +27,17 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 ## Orden de impresión
 
 1. **Cama 00 (prueba, ≈ 25 min).** Dobla los dos tramos de eslabones: deben girar libres sin holgura exagerada. Encaja un tramo en el otro por la presilla del primer eslabón: tiene que entrar con un clic y no salirse al jalar. Mete la clavija en el zócalo y el eje en el agujero grande. **Si algo falla, dime la medida y lo corrijo antes de gastar filamento.**
+1B. **Cama 00B (prueba de la articulación, PETG Azul, ≈ 25 g y ≈ 1 h 30).** Seis tiras de 4 eslabones de 24 mm de ancho y tres presillas sueltas, para escoger el juego y el material de la cadena **antes** de imprimir las camas 02 a 05. Cada tira tiene tantos agujeros cuadrados como su número (1 a 6) y cada fila de la cama es un juego distinto:
+
+| Fila (de abajo hacia arriba) | Juego por lado | Tira izquierda (n.° impar) | Tira central (n.° par) | Presilla |
+|---|---|---|---|---|
+| 1 | 0,30 mm | n.° 1 con lámina rompible | n.° 2 sin lámina | una presilla |
+| 2 | 0,40 mm | n.° 3 con lámina | n.° 4 sin lámina | una presilla |
+| 3 | 0,50 mm | n.° 5 con lámina | n.° 6 sin lámina | una presilla |
+
+   Pruébalas así: (a) dobla cada articulación a ambos lados y anota cuál gira con un dedo sin trabarse y sin bailar; (b) en las tiras *con lámina* dobla las articulaciones hasta que se rompa la lámina; las *sin lámina* sólo puentean 8 mm el pasador (el slicer puede marcarlas): sirven para saber si la lámina era lo que trababa; (c) encaja la presilla de su fila en el pasador libre del extremo de su tira: tiene que hacer clic y no salirse. **Dime el número de tira que gira mejor** y regenero toda la cadena con ese juego.
+   Ajustes sugeridos para esta prueba en PETG: boquilla 0,4, capa 0,2, 230–235 °C, ventilador de pieza al 100 % desde la capa 2, paredes a 40–50 mm/s, sin «ironing», sin compensación de «elephant foot» agresiva, borde (brim) de 0 a 2 mm.
+
 2. Camas 02 a 05, la cadena (PLA+ Azul): 4 camas de 3 secciones. Es lo que más tarda (≈ 4 h por cama), pero ya no hay que armar nada suelto.
 3. Cama 01, PETG Azul (ejes, ruedas, carros, tornillos, acople, soporte y módulo del motor).
 4. Camas 06 a 08 (módulos, tapa y patas, PLA+ Mármol) y 09 (guías, PLA+ Negro).

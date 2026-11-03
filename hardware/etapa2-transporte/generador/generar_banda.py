@@ -180,6 +180,17 @@ def hueco_y(x, z, y0, y1, d):
     return cil_y(x, z, y0, y1, d) + losange_y(x, z, y0, y1, d / 2)
 
 
+def agujero_gota(x, z, y0, y1, d, techo=None):
+    """Agujero horizontal a lo largo de Y: círculo + V a 45° arriba (sin techo plano ancho) y SIN punta abajo (el fondo es el círculo).
+    La V se corta a `techo` mm sobre el eje (queda un techo plano de menos de 0,5 mm) para no atravesar el nudillo."""
+    r = d / 2
+    techo = min(r * math.sqrt(2) - 0.14, 2.6) if techo is None else techo   # techo plano de ~0,3-0,5 mm (una línea de extrusión) y pared de >= 0,4 mm sobre él
+    a = r / math.sqrt(2)
+    w = r * math.sqrt(2) - techo
+    v = prisma_y(CrossSection([[(-a, a), (a, a), (w, techo), (-w, techo)]]), y0, y1)
+    return (cil_y(0, 0, y0, y1, d) + v).translate((x, 0, z))
+
+
 def hueco_x(y, z, x0, x1, d):
     return cil_x(y, z, x0, x1, d) + losange_x(y, z, x0, x1, d / 2)
 
@@ -374,7 +385,7 @@ def rueda(x):
     return disco.translate((x, 0, Z_EJE))
 
 
-def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False):
+def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False, pin_ch=None, gota=False):
     """Eslabón de 12,3 × 56 × 6 mm. Adelante: nudillos con el pasador Ø3 fundido. Atrás: nudillos con agujero Ø3,4 que abraza el
     pasador del eslabón anterior (print-in-place, 0,2 mm de juego). El primer eslabón de cada sección lleva los nudillos abiertos por
     abajo (ranura de 2,7 mm): se encajan a presión en el pasador del último eslabón de la sección anterior.
@@ -382,7 +393,9 @@ def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False):
     banda=True añade, bajo el pasador del eslabón anterior, una lámina rompible de 0,4 mm en el fondo de cada nudillo suelto: el
     pasador deja de quedar en el aire (nada que puentear) y la lámina se rompe sola al flexionar la articulación por primera vez.
     ultimo=True deja, bajo el pasador que queda libre en el extremo de la sección, una aleta de 0,4 mm hasta la cama (se desprende
-    con la uña o al encajar la sección siguiente)."""
+    con la uña o al encajar la sección siguiente).
+    pin_ch/gota: diámetro del agujero del nudillo y su forma (círculo + V arriba, sin punta abajo), para la prueba de juego."""
+    pin_ch = PIN_CH if pin_ch is None else pin_ch
     h = ESP_BANDA / 2
     kr = 3.2
     plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
@@ -399,11 +412,11 @@ def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False):
         oct8 = [(-1.2, -3), (1.2, -3), (3.0, -1.2), (3.0, 1.2), (1.2, 3), (-1.2, 3), (-3.0, 1.2), (-3.0, -1.2)]   # canto a 45 grados: sin arco colgado contra la cama
         return prisma_y(CrossSection([[(xn + a, b) for a, b in oct8]]), ya + 0.2, yb - 0.2)
     m = plate + union([nud(0, j) for j in (1, 5)] + [nud(PASO, j) for j in (0, 2, 4, 6)])
-    m = m - hueco_y(0, 0, -PIN_CL, PIN_CL, PIN_CH)
+    m = m - (agujero_gota(0, 0, -PIN_CL, PIN_CL, pin_ch) if gota else hueco_y(0, 0, -PIN_CL, PIN_CL, pin_ch))
     if primero:
         m = m - caja(-PIN_RANURA / 2, PIN_RANURA / 2, -PIN_CL, PIN_CL, -h - 1, 0)
     if banda:
-        punta_hueco = PIN_CH / 2 * math.sqrt(2)          # el rombo del agujero termina en punta a 2,55 mm bajo el eje
+        punta_hueco = pin_ch / 2 if gota else pin_ch / 2 * math.sqrt(2)   # fondo del agujero bajo el eje (círculo, o punta del rombo)
         for j in (1, 5):
             ya, yb = seg(j)
             m = m + caja(-LAMINA / 2, LAMINA / 2, ya + 0.2, yb - 0.2, -punta_hueco - 0.15, -PIN_C / 2 + 0.15)
