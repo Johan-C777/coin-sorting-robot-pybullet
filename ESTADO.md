@@ -21,14 +21,14 @@
 - Calibración física: `[CAL-01..12]` en `include/`; procedimiento en `TODO.md` fase 4.
 - Resuelto en CI: macro `B1` de Arduino (enum → Primera/Segunda); IRAM_ATTR en header → `l32r` (ISR a `Boton.cpp`).
 - Pages: `docs/clasificador-v5.html`, `docs/banda-etapa2.html` (visibles al fusionar en main).
-- 2026-10-31: impresión completa (8 camas, confirmado por el usuario). Docs sin "pendiente" de impresión ni compras (0.8.1).
+- 2026-10-31: impresión completa (8 camas). Docs sin "pendiente" de impresión ni compras (0.8.1).
 - Siguiente: armar; cablear; cargar firmware; calibrar.
 
 ## Etapa 1 v5 (vigente, 0.7.0)
 - Piezas: `scripts/generar_v5.py --ensamble` → `hardware/etapa1-clasificador/{stl,despiece.csv,ensamble*}`; camas `scripts/armar_camas_v5.py` → `impresion/` (CAMAS.md, orden "sin electrónica primero").
 - Docs: `docs/09-clasificador-v5.md`, `docs/11-electronica-etapa1.md` (+ `img/etapa1-cableado.svg`, `img/etapa1-v5.png`).
 - Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS3200 OUT 14, S2 16, S3 17, S0 18, S1 21; banda STEP 10/DIR 11/EN 12, ref 13.
-- Pendiente: armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
+- Pendiente: armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil propio de la K1C) no está en el repo.
 - Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/archivo/esp32_contador_v4` es de la v4 (lo usan las pruebas).
 
 ## Histórico v4 (archivado)
