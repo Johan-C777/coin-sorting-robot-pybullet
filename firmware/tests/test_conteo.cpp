@@ -4,8 +4,8 @@
 #include <cstdio>
 #include <cstring>
 
-#include "../esp32_contador/color500.h"
-#include "../esp32_contador/conteo.h"
+#include "../archivo/esp32_contador_v4/color500.h"
+#include "../archivo/esp32_contador_v4/conteo.h"
 
 static int fallos = 0;
 static void comprobar(bool ok, const char *nombre) {

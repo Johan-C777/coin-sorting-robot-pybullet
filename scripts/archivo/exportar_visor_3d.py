@@ -1,7 +1,7 @@
 """Exporta el ensamble de la etapa 1 (tolva + selección) al visor 3D web, con simulación.
 
-Uso:  python scripts/exportar_visor_3d.py
-Genera docs/ensamble-etapa1.html (autocontenido, three.js por CDN).
+Uso:  python scripts/archivo/exportar_visor_3d.py
+Genera docs/archivo/ensamble-etapa1-v4.html (autocontenido, three.js por CDN).
 Toda la geometría sale de generar_clasificador.py: el visor muestra lo que se imprime.
 """
 import base64
@@ -11,10 +11,13 @@ from pathlib import Path
 import numpy as np
 from manifold3d import Manifold
 
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 import generar_clasificador as g
 
 RAIZ = g.RAIZ
-SALIDA = RAIZ / "docs"
+SALIDA = RAIZ / "docs" / "archivo"
 PLANTILLA = Path(__file__).with_name("visor_template.html")
 C22, S22 = g.C22, g.S22
 VASO_D, VASO_H = 34.0, 60.0
@@ -230,7 +233,7 @@ def main():
     datos = json.dumps({"piezas": piezas, "sim": sim}, separators=(",", ":"))
     html = PLANTILLA.read_text(encoding="utf-8").replace("/*DATOS*/null", datos)
     SALIDA.mkdir(parents=True, exist_ok=True)
-    ruta = SALIDA / "ensamble-etapa1.html"
+    ruta = SALIDA / "ensamble-etapa1-v4.html"
     ruta.write_text(html, encoding="utf-8")
     print(f"{len(piezas)} mallas, {len(html) / 1e6:.2f} MB -> {ruta}")
 

@@ -2,7 +2,7 @@
 
 > **Archivado (v4).** Este diseño (riel de 8 ranuras, ductos y base de PVC) se reemplazó por la torre de canto v5: [hardware/etapa1-clasificador/](../../hardware/etapa1-clasificador/README.md) y [09-clasificador-v5.md](../09-clasificador-v5.md).
 
-Todo lo necesario para imprimir, armar, cablear y probar la etapa 1, en el orden en que conviene hacerlo. Las cotas salen de `scripts/generar_clasificador.py`; el ensamble 3D está en [`docs/ensamble-etapa1.html`](../ensamble-etapa1.html); los STL, en `hardware/archivo/etapa1-v4/stl/`.
+Todo lo necesario para imprimir, armar, cablear y probar la etapa 1, en el orden en que conviene hacerlo. Las cotas salen de `scripts/generar_clasificador.py`; el ensamble 3D está en [`docs/archivo/ensamble-etapa1-v4.html`](ensamble-etapa1-v4.html); los STL, en `hardware/archivo/etapa1-v4/stl/`.
 
 **Qué hace la etapa 1:** la tolva suelta una moneda cada 1,5 s al riel de 22°. El riel las separa por diámetro en 7 ranuras y un extremo abierto. Cada moneda cruza una barrera infrarroja (cuenta) y cae por un tubo de PVC a su vaso. Las dos $500 (antigua y nueva) pasan antes bajo un sensor de color que mueve un plato, y salen por dos columnas distintas. Son 9 vasos en total. La banda y los vasos son de la etapa siguiente; aquí solo se deja el espacio y se prueba con vasos sueltos.
 
@@ -176,7 +176,7 @@ Resultado: hueco libre de 123 mm de ancho × 490 mm de largo para la banda, con 
 
 ## 5. Cableado
 
-Todo está definido en `firmware/esp32_contador/config.h`.
+Todo está definido en `firmware/archivo/esp32_contador_v4/config.h`.
 
 | Función | Pin del ESP32 |
 |---|---|
@@ -198,7 +198,7 @@ El orden de las barreras importa: el ducto 1 es la ranura 1 ($50 nueva), y así 
 
 1. Arduino IDE con el paquete **ESP32**; placa «ESP32 Dev Module». No necesita librerías externas.
 2. Copia `secrets_example.h` como `secrets.h` y pon tu red Wi-Fi y la IP del brazo (etapa 2).
-3. Abre `firmware/esp32_contador/esp32_contador.ino` y sube. Abre el monitor serie a 115200.
+3. Abre `firmware/archivo/esp32_contador_v4/esp32_contador.ino` y sube. Abre el monitor serie a 115200.
 4. Las pruebas del código sin hardware: `make -C firmware/tests`.
 
 ---

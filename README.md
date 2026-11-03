@@ -73,7 +73,7 @@ Portada: **https://johan-c777.github.io/coin-sorting-robot-pybullet/**
 | [**Banda · etapa 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | Propuesta de la banda de cadena de tablillas impresa que mueve el cartucho bajo la torre |
 | [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las tres etapas: tolva, banda, punto A, los cuatro obstáculos y el rack ordenado |
 | [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y servos del brazo, con calculadoras |
-| [Etapa 1 v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion-etapa1.html) · [Ensamble v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/ensamble-etapa1.html) | Versiones anteriores de la etapa 1, archivadas como historia del diseño |
+| [Etapa 1 v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/simulacion-etapa1-v1.html) · [Ensamble v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/ensamble-etapa1-v4.html) | Versiones anteriores de la etapa 1, archivadas como historia del diseño |
 
 Son archivos HTML autónomos (Three.js) en [`docs/`](docs); no requieren instalación.
 
@@ -537,39 +537,38 @@ ESTADO
 
 ## Estructura del repositorio
 
+El detalle de cada carpeta y archivo, y dónde buscar cada cosa, está en el
+[**mapa del repositorio**](docs/MAPA-DEL-REPOSITORIO.md).
+
 ```
 coin-sorting-robot-pybullet/
 ├── README.md · TODO.md · CHANGELOG.md · ESTADO.md · LICENSE
-├── .github/workflows/pruebas.yml   CI: Python, núcleo de firmwares en el PC y PlatformIO
+├── .github/workflows/pruebas.yml   pruebas automáticas: Python, firmwares en el PC y PlatformIO
 ├── docs/                           documentación técnica y sitio de GitHub Pages
-│   ├── 00-entrega-avances.md       qué pide el parcial y dónde está cada cosa
-│   ├── 01-arquitectura.md … 08-obstaculos.md
-│   ├── 09-clasificador-v5.md       diseño de la torre de canto y su validación
-│   ├── 11-electronica-etapa1.md    electrónica de la etapa 1
-│   ├── index.html                  portada de las demos
-│   ├── clasificador-v5.html        visor 3D de la torre v5
-│   ├── banda-etapa2.html           visor 3D de la banda propuesta
-│   ├── memoria-calculo.html, simulacion_sistema_completo.html, …
-│   ├── img/                        figuras y capturas
-│   └── archivo/                    documentos de las versiones anteriores
+│   ├── 00 … 12-*.md                documentos numerados (09 diseño v5, 12 pruebas físicas)
+│   ├── MAPA-DEL-REPOSITORIO.md     dónde está cada cosa
+│   ├── *.html                      visores 3D y simulaciones (Pages)
+│   ├── pruebas/etapa1/             videos y fotos de las pruebas físicas
+│   ├── img/                        figuras
+│   └── archivo/                    documentos de las versiones v1 y v4
 ├── firmware/
-│   ├── etapa1_clasificador/        firmware de operación del clasificador (PlatformIO)
-│   ├── etapa1_prueba_motor/        banco de pruebas de motores y sensores (PlatformIO)
-│   ├── esp32_brazo/                cinemática, trayectorias, planificador, PCA9685, Wi-Fi
-│   ├── esp32_contador/             contador de la etapa 1 v4
-│   └── tests/                      núcleo de los firmwares del brazo y contador en el PC
+│   ├── etapa1_clasificador/        firmware de operación del clasificador (vigente)
+│   ├── etapa1_prueba_motor/        banco de pruebas de motores y sensores
+│   ├── esp32_brazo/                firmware del brazo (etapa 3)
+│   ├── tests/                      firmwares compilados y probados en el PC
+│   └── archivo/                    contador de la v4
 ├── hardware/
-│   ├── etapa1-clasificador/        stl/ (24) · impresion/ (8 camas) · esquematico/ · despiece · compras · guía
-│   ├── etapa2-transporte/          medidas de interfaz para la banda
+│   ├── etapa1-clasificador/        torre v5: stl/, impresion/, esquematico/, despiece, compras, guía
+│   ├── etapa2-transporte/          interfaz para la banda
 │   ├── etapa3-brazo/               planos, rack, bandeja y BOM del brazo
 │   └── archivo/                    etapa 1 v1, v3 y v4
-├── scripts/                        generadores paramétricos de STL, camas, 3MF y figuras
+├── scripts/                        generadores de piezas, camas y figuras (archivo/: v1, v3, v4)
 ├── sim/
-│   ├── mujoco/                     disco, pista de canto, embudo y compuerta de la etapa 1
-│   └── pybullet/                   URDF, celda y orquestador integrado
+│   ├── mujoco/                     simulaciones de la torre v5 (descartados/: ideas previas)
+│   └── pybullet/                   brazo, celda y simulación integrada
 └── software/
     ├── brazo/                      monedas, cinemática, obstáculos, planificador, protocolo
-    ├── apps/                       cli_demo.py y streamlit_app.py
+    ├── apps/                       demo en consola y dashboard Streamlit
     └── tests/                      65 pruebas con pytest
 ```
 

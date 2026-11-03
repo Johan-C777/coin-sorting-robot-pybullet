@@ -12,7 +12,7 @@ from brazo.planner import orden_objetivo
 from brazo.protocol import parsear_vasos, trama_vasos
 
 RAIZ = Path(__file__).resolve().parents[2]
-CONFIG_CONTADOR = RAIZ / "firmware" / "esp32_contador" / "config.h"
+CONFIG_CONTADOR = RAIZ / "firmware" / "archivo" / "esp32_contador_v4" / "config.h"
 GENERADOR = RAIZ / "scripts" / "generar_clasificador.py"
 ADMITIDAS = [m for m in CATALOGO if m.clave not in FUERA_DE_ALCANCE]
 

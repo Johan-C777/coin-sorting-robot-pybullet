@@ -1,8 +1,8 @@
 """Riel de monedas de canto (v3): placa inclinada con repisa y ventanas de altura creciente.
 
     pip install manifold3d numpy
-    python scripts/generar_canto.py            # STL + verificación
-    python scripts/generar_canto.py --probeta  # solo la probeta de ventanas y su cuña
+    python scripts/archivo/generar_canto.py            # STL + verificación
+    python scripts/archivo/generar_canto.py --probeta  # solo la probeta de ventanas y su cuña
 
 Idea: la moneda va de pie (de canto) en la esquina entre una placa inclinada LEAN grados hacia
 atrás y una repisa perpendicular a ella. Un empujador lento la lleva por una pista horizontal.
@@ -25,7 +25,7 @@ from pathlib import Path
 import numpy as np
 from manifold3d import CrossSection, Manifold, set_circular_segments
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from generar_clasificador import SALIDA as _SALIDA_V2, caja, escribir_stl  # noqa: E402
 
 SALIDA = _SALIDA_V2.parents[1] / "etapa1-v3-canto"
