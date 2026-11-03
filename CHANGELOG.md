@@ -1,5 +1,11 @@
 # Cambios
 
+## 0.10.0 · Entrega de avances de las etapas 1 y 2
+
+- README: entrega de las etapas 1 y 2, equipo, sección de la etapa 2 (requisitos, mecanismos estudiados y estado de rediseño) y de la etapa 3.
+- Disco de 6 bolsillos Ø33 (H02c) en el README, el diseño v5 y el plan de correcciones.
+- GitHub Pages: versiones vigentes arriba y sección aparte de proceso de diseño con las versiones anteriores; la banda de cadena pasa a `docs/archivo/banda-etapa2-v3.html`.
+
 ## 0.9.1 · Repositorio ordenado
 
 - Versiones que ya no se usan, a carpetas `archivo/` con un README que explica cada una: generadores v1/v3/v4 a `scripts/archivo/`, contador v4 a `firmware/archivo/esp32_contador_v4/`, visores v1 y v4 a `docs/archivo/`, simulaciones de ideas descartadas a `sim/mujoco/descartados/`.

@@ -65,7 +65,7 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 
 **Montaje**
 
-- [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø29
+- [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø33
       del disco, bolsillo del SG90 (23,1 × 12,8)
 - [x] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md) → [foto](docs/12-pruebas-fisicas-etapa1.md#montaje-general)
 - [x] Primera ronda de pruebas mecánicas con monedas reales: 13 evidencias y 6 hallazgos
@@ -78,7 +78,8 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 **Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#hallazgos-y-correcciones))
 
 - [ ] H1 · Rampa trasera para que la moneda no caiga por detrás del disco
-- [ ] H2 · Disco de 6 bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan) y firmware a 6 bolsillos por vuelta
+- [ ] H2 · Disco de 6 bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan): diseñado
+      ([`H02c`](hardware/etapa1-clasificador/stl/ajustes)) y firmware ya a 6 bolsillos por vuelta; falta imprimirlo y probarlo
 - [ ] H3 · Lijar portadisco y disco, lubricante seco, nervios de apoyo, bajar `TOLVA_VMAX` `[CAL-09]`
 - [ ] H4 · Segunda paleta en la compuerta
 - [ ] H5 · Monedas verticales que no se acuestan con la tolva llena (abierto)
@@ -105,7 +106,7 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 
 - [x] Protocolo de lote `VASOS:` hacia el brazo y su prueba de ida y vuelta
 - [x] Simulación del sistema completo en el navegador y en PyBullet
-- [x] Banda (etapa 2) propuesta: cadena de tablillas impresa → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html)
+- [x] Banda (etapa 2) propuesta: cadena de tablillas impresa → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html)
 - [ ] **[CAL-11]** Con la banda montada: `HABILITAR_BANDA 1`, posiciones de los vasos y de la rampa C02
 - [ ] Referenciar el cartucho con el haz de `PIN_IR_REF`
 - [ ] Enviar `VASOS:` al ESP32 del brazo por Wi-Fi (`POST /api/vasos`)

@@ -1,9 +1,10 @@
 # Sistema de Logística de Monedas Inteligentes
 
-### Módulo 1 · Clasificador de monedas colombianas (etapa 1)
+### Avances: etapa 1 (clasificador de monedas) y etapa 2 (banda transportadora)
 
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
-![Estado](https://img.shields.io/badge/estado-dise%C3%B1o%20e%20impresi%C3%B3n%20completos%20%C2%B7%20montaje%20en%20curso-2C7A54)
+![Estado](https://img.shields.io/badge/etapa%201-montaje%20y%20correcciones-2C7A54)
+![Etapa 2](https://img.shields.io/badge/etapa%202-en%20redise%C3%B1o-B8860B)
 ![MCU](https://img.shields.io/badge/MCU-ESP32--S3-E7352C?logo=espressif&logoColor=white)
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.x-F5822A?logo=platformio&logoColor=white)
 ![Framework](https://img.shields.io/badge/Arduino%20sobre%20ESP--IDF-C%2B%2B17-00878F?logo=arduino&logoColor=white)
@@ -22,6 +23,8 @@ punto A y un brazo de 5 GDL los ordena en un rack esquivando cuatro obstáculos.
 
 Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Militar Nueva Granada.
 
+**Equipo:** Johan Canchala · Javier León · Samuel Rubio
+
 <p align="center">
   <a href="https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html">
     <img src="docs/img/clasificador-v5-visor.png" alt="Visor 3D de la torre clasificadora v5" width="900">
@@ -29,11 +32,14 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
   <br><sub>Visor 3D interactivo de la torre v5: clic en la imagen para abrirlo en el navegador.</sub>
 </p>
 
-> **Entrega de avances (Actividad 9, 31 de octubre de 2026).** El estado del módulo está
-> en la sección siguiente; el detalle de qué está hecho y qué falta, casilla por casilla,
-> en [**TODO.md**](TODO.md). El diseño completo de la torre está en
-> [09-clasificador-v5.md](docs/09-clasificador-v5.md) y el firmware en
-> [`firmware/etapa1_clasificador/`](firmware/etapa1_clasificador).
+> **Entrega de avances de las etapas 1 y 2 (noviembre de 2026).**
+> - **Etapa 1, clasificador:** diseño, firmware e impresión completos; torre armada y primera
+>   ronda de [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) hecha. Ahora se corrigen
+>   los 6 hallazgos de esas pruebas. Detalle casilla por casilla en [**TODO.md**](TODO.md).
+> - **Etapa 2, banda transportadora:** en rediseño, sin piezas impresas. Estado y versiones
+>   estudiadas en [Etapa 2](#etapa-2--banda-transportadora).
+> - Todo se puede ver en el navegador en el [sitio de demos](https://johan-c777.github.io/coin-sorting-robot-pybullet/).
+>   Las versiones anteriores quedan aparte, en [Proceso de diseño](#proceso-de-diseño-versiones-anteriores).
 
 ---
 
@@ -51,7 +57,8 @@ está en la fase de montaje físico.**
 | Firmware de operación | ✅ Compila para ESP32-S3 en CI | RAM 6,5 % y flash 9,8 % ([job de CI](.github/workflows/pruebas.yml)) |
 | Impresión | ✅ Completa | Las [8 camas](hardware/etapa1-clasificador/impresion/CAMAS.md) de la Creality K1C: 24 piezas en PLA+, PETG y PLA |
 | Electrónica | ✅ Completa | [Pines](firmware/etapa1_clasificador/include/pines.h), [lista de conexiones](hardware/etapa1-clasificador/esquematico/conexiones.csv) y presupuesto de potencia, verificados por prueba automática |
-| Montaje y pruebas físicas | ▶ Fase actual | Torre armada; [primera ronda de pruebas](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias y 6 hallazgos mecánicos en corrección (rampa trasera, disco de 6 bolsillos, compuerta doble) |
+| Montaje y pruebas físicas | ▶ Fase actual | Torre armada; [primera ronda de pruebas](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias y 6 hallazgos mecánicos |
+| Correcciones de la primera ronda | ▶ En curso | Disco de 6 bolsillos Ø33 diseñado ([H02c](hardware/etapa1-clasificador/stl/ajustes)) y firmware a 6 bolsillos; rampa trasera, segunda paleta de la compuerta y lijado del portadisco en proceso; barreras IR y TCS3200 se prueban con jumpers más largos |
 | Calibración física | ⏳ Después de las correcciones | [Procedimiento](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
 
 Las cifras de desempeño de este repositorio salen de la simulación física y de pruebas
@@ -63,17 +70,63 @@ de confusión se registran en [05-pruebas.md](docs/05-pruebas.md) durante la cal
 
 ---
 
+## Etapa 2 · Banda transportadora
+
+**Estado: en rediseño, sin piezas impresas.** La banda lleva el cartucho de 9 vasos bajo la
+torre para que la compuerta deje cada moneda en su vaso, y luego lo lleva al punto A, donde
+lo recoge el brazo. Lo que ya está definido:
+
+| Requisito | Valor |
+|---|---|
+| Carga | Cartucho de 9 vasos Ø34 × 60 mm más la rampa de rechazo C02 |
+| Posiciones | Cada vaso bajo la boca del embudo, la rampa de rechazo y el punto A |
+| Actuador | NEMA17 con A4988 en lazo abierto; cero con una barrera IR |
+| Pines (ESP32-S3 de la etapa 1) | STEP 10 · DIR 11 · EN 12 · referencia 13 ([`pines.h`](firmware/etapa1_clasificador/include/pines.h)) |
+| Firmware | El secuenciador ya mueve la banda entre vasos cuando `HABILITAR_BANDA = 1` `[CAL-11]` |
+
+Mecanismos estudiados hasta ahora:
+
+| Versión | Mecanismo | Resultado |
+|---|---|---|
+| v3 | Cadena de tablillas impresa | 46 piezas en 10 camas (≈ 1,5 kg de filamento); [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html) |
+| v4 | Carro sobre dos varillas, movido por hilo | ≈ 143 g de PETG más dos varillas compradas |
+| v5 | Riel impreso por tramos, carro e hilo | Sin compras (≈ 268 g); queda la duda de si el hilo da la precisión de posición necesaria |
+| Siguiente | Cremallera impresa o cable de acero | En evaluación |
+
+Los archivos de la banda están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
+
+## Etapa 3 · Brazo
+
+En diseño en SolidWorks; algunas piezas ya se están imprimiendo. La cinemática, el
+planificador entre obstáculos y el firmware ya están hechos y probados en simulación
+([memoria de cálculo](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html),
+[`software/brazo/`](software/brazo), [`firmware/esp32_brazo/`](firmware/esp32_brazo)).
+
+---
+
 ## Demos en el navegador (GitHub Pages)
 
 Portada: **https://johan-c777.github.io/coin-sorting-robot-pybullet/**
 
+**Versiones vigentes**
+
 | Demo | Qué muestra |
 |---|---|
 | [**Clasificador v5 · visor 3D**](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) | La torre completa pieza por pieza: despiece, ficha de cada pieza, camino de la moneda y simulación del ciclo |
-| [**Banda · etapa 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | Propuesta de la banda de cadena de tablillas impresa que mueve el cartucho bajo la torre |
+| [**Pruebas físicas de la etapa 1**](docs/12-pruebas-fisicas-etapa1.md) | Videos y fotos de la torre armada con monedas reales |
 | [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las tres etapas: tolva, banda, punto A, los cuatro obstáculos y el rack ordenado |
 | [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y servos del brazo, con calculadoras |
-| [Etapa 1 v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/simulacion-etapa1-v1.html) · [Ensamble v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/ensamble-etapa1-v4.html) | Versiones anteriores de la etapa 1, archivadas como historia del diseño |
+
+### Proceso de diseño (versiones anteriores)
+
+Se conservan para ver cómo evolucionó el diseño. Ninguna es la versión que se construye.
+
+| Versión | Qué fue |
+|---|---|
+| [Etapa 1 · v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/simulacion-etapa1-v1.html) | Riel con varillas M5 y una estación por diámetro |
+| [Etapa 1 · v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/ensamble-etapa1-v4.html) | Riel de 8 ranuras con ductos de PVC; no separaba las dos $500 ([por qué](hardware/archivo/README.md)) |
+| [Etapa 2 · v3](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html) | Banda de cadena de tablillas impresa |
+| [Entrega del segundo parcial](docs/00-entrega-avances.md) | Estado del proyecto en la entrega anterior |
 
 Son archivos HTML autónomos (Three.js) en [`docs/`](docs); no requieren instalación.
 
@@ -83,7 +136,7 @@ Son archivos HTML autónomos (Three.js) en [`docs/`](docs); no requieren instala
 
 ```mermaid
 flowchart LR
-    T["Tolva de disco<br/>28BYJ-48 · 8 bolsillos"] -->|"una moneda<br/>de canto"| P["Pista L01 a 22°<br/>barreras IR B1 y B2"]
+    T["Tolva de disco<br/>28BYJ-48 · 6 bolsillos"] -->|"una moneda<br/>de canto"| P["Pista L01 a 22°<br/>barreras IR B1 y B2"]
     P -->|"4 instantes"| D{"Diámetro<br/>± tolerancia<br/>de su clase"}
     D -->|"$500 o $50 antigua"| C["TCS3200<br/>¿dorada?"]
     D -->|"resto"| E["Embudo F01<br/>compuerta SG90"]
@@ -93,7 +146,7 @@ flowchart LR
 ```
 
 1. **Alimentación.** El disco gira un bolsillo con rampa trapezoidal. Cada bolsillo
-   (Ø29) sube una moneda y la deja caer de canto a la pista; el rascador H03 tumba la
+   (Ø33, disco H02c) sube una moneda y la deja caer de canto a la pista; el rascador H03 tumba la
    que venga montada. Simulado en MuJoCo: 1.728 de 1.728 monedas quedan de canto.
 2. **Medición.** La moneda rueda y corta dos haces IR separados 24 mm. Una interrupción
    marca el instante de cada flanco con resolución de microsegundos; con los cuatro
@@ -156,7 +209,7 @@ stateDiagram-v2
     Alimentando --> EsperandoMoneda: disco quieto
     EsperandoMoneda --> Desatascando: 1,8 s sin moneda
     Desatascando --> EsperandoMoneda
-    EsperandoMoneda --> TolvaVacia: 8 bolsillos vacíos
+    EsperandoMoneda --> TolvaVacia: 6 bolsillos vacíos
     Alimentando --> Midiendo: B1 se corta
     EsperandoMoneda --> Midiendo: B1 se corta
     Midiendo --> LeyendoColor: $500 o $50 antigua
@@ -356,7 +409,7 @@ Las versiones anteriores están en [`hardware/archivo/`](hardware/archivo) y
 
 ## El resto del sistema: etapas 2 y 3
 
-Las etapas 2 y 3 están diseñadas y simuladas; su montaje viene después del clasificador.
+La etapa 2 está en rediseño y la etapa 3 está en diseño mecánico; las dos ya están simuladas.
 
 ```mermaid
 flowchart LR
@@ -369,9 +422,9 @@ flowchart LR
 
 | Etapa | Qué hace | Estado | Dónde |
 | --- | --- | --- | --- |
-| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso y con firmware; montaje en curso | Este README, [TODO.md](TODO.md) |
-| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | Propuesta en el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/banda-etapa2.html) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
-| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; falta montar | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
+| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
+| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | En rediseño, sin piezas impresas ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; diseño en SolidWorks y piezas en impresión | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
 
@@ -477,7 +530,7 @@ Ordenado por etapa en [`hardware/`](hardware/README.md):
   [README](hardware/etapa1-clasificador/README.md); cableado en
   [`esquematico/`](hardware/etapa1-clasificador/esquematico) y
   [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
-- **Etapa 2:** banda en diseño ([visor 3D de la propuesta](docs/banda-etapa2.html)); las
+- **Etapa 2:** banda en rediseño ([estado y versiones](#etapa-2--banda-transportadora)); las
   medidas que deja la etapa 1 están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
 - **Etapa 3:** planos en SolidWorks
   ([`PLANOS BRACITO.pdf`](hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)), rack,
@@ -580,21 +633,22 @@ coin-sorting-robot-pybullet/
 - [x] Etapa 1: todas las piezas impresas (8 camas, 24 piezas)
 - [x] Etapa 1: torre armada y primera ronda de pruebas mecánicas ([registro](docs/12-pruebas-fisicas-etapa1.md))
 - [ ] Etapa 1: correcciones H1 a H6, calibración `[CAL-01..12]` y prueba de 100 monedas ([TODO.md](TODO.md))
-- [x] Etapa 2: propuesta de banda en visor 3D
-- [ ] Etapa 2: diseño de detalle e integración con el cartucho
+- [x] Etapa 2: requisitos, pines y control en el firmware de la etapa 1
+- [x] Etapa 2: tres mecanismos estudiados (cadena, varillas, riel impreso)
+- [ ] Etapa 2: elegir el mecanismo definitivo, imprimir e integrar con el cartucho
 - [x] Etapa 3: cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
 - [x] Etapa 3: ruta de A a B con cuatro obstáculos por nivel y orden por cinco criterios
 - [x] Simulación web de las etapas, orquestador en PyBullet y app Streamlit
 - [ ] Etapa 3: medir L₂ y L₃ en el CAD y llevar la evasión de obstáculos al firmware
 - [ ] Montar la celda, integrar los dos ESP32 con la app y medir el ciclo real
 
-El brazo construido tiene cotas distintas de las de la simulación; el código trae los
+El brazo de SolidWorks tiene cotas distintas de las de la simulación; el código trae los
 dos perfiles (`BRAZO_PERFIL=cad`) y lo que falta medir está en
 [06-medidas-cad.md](docs/06-medidas-cad.md). Historial de cambios en
 [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-Autor: Johan Andrés Canchala Arenas ([@Johan-C777](https://github.com/Johan-C777)).
+Equipo: Johan Andrés Canchala Arenas ([@Johan-C777](https://github.com/Johan-C777)), Javier León y Samuel Rubio.
 Universidad Militar Nueva Granada, Ingeniería Mecatrónica. Licencia [MIT](LICENSE).
 Repositorio base del curso: [dialejobv/U_Militar](https://github.com/dialejobv/U_Militar).

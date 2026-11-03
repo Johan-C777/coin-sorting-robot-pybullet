@@ -18,8 +18,9 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 
 ## Recorrido de una moneda
 
-1. **Tolva de disco (H01, H02, H03).** Plato a 45°; el 28BYJ-48 gira un disco de 8
-   bolsillos Ø29. El rascador H03 tumba la moneda que venga montada sobre otra.
+1. **Tolva de disco (H01, H02, H03).** Plato a 45°; el 28BYJ-48 gira un disco de 6
+   bolsillos Ø33 (H02c). El primer disco, de 8 bolsillos Ø29, dejaba justas las
+   monedas grandes (hallazgo H2 de las pruebas físicas). El rascador H03 tumba la moneda que venga montada sobre otra.
 2. **Caída de canto.** Arriba, el bolsillo pasa sobre un hueco y la moneda cae unos
    2 cm a la pista, parada contra la placa.
 3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Barreras IR a

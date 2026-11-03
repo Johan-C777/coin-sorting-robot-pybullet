@@ -8,10 +8,11 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | Qué | Dónde está |
 |---|---|
 | El estado del módulo de monedas | [README](../README.md#estado-estratégico) y [TODO.md](../TODO.md) |
+| El estado de la banda (etapa 2) | [README, sección Etapa 2](../README.md#etapa-2--banda-transportadora) |
 | Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
 | El diseño de la torre clasificadora | [09-clasificador-v5.md](09-clasificador-v5.md) y el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) |
 | Las piezas para imprimir | [`hardware/etapa1-clasificador/stl/`](../hardware/etapa1-clasificador/stl) y las camas en [`impresion/`](../hardware/etapa1-clasificador/impresion) |
-| La guía de armado | [`hardware/etapa1-clasificador/README.md`](../hardware/etapa1-clasificador/README.md) |
+| La guía de armado | [`hardware/etapa1-clasificador/README.md`](../hardware/etapa1-clasificador/README.md) y la [guía de montaje y pruebas](../hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md) |
 | La lista de materiales (BOM) | [README, sección BOM](../README.md#lista-de-materiales-bom), [`despiece.csv`](../hardware/etapa1-clasificador/despiece.csv) y [`compras.md`](../hardware/etapa1-clasificador/compras.md) |
 | El esquema eléctrico y los pines | [`esquematico/`](../hardware/etapa1-clasificador/esquematico) y [`pines.h`](../firmware/etapa1_clasificador/include/pines.h) |
 | El código del clasificador | [`firmware/etapa1_clasificador/`](../firmware/etapa1_clasificador) (máquina de estados en `lib/Secuenciador`, interrupciones en `src/hal/Barreras.cpp`) |
@@ -53,12 +54,11 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y hallazgos** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
-| `banda-etapa2.html` | Visor 3D de la banda (etapa 2) |
 | `simulacion_sistema_completo.html` | Simulación del sistema completo |
 | `memoria-calculo.html` | Memoria de cálculo del brazo con calculadoras |
 | `img/` | Figuras del README y la documentación |
 | `pruebas/etapa1/` | Videos (`video/`), fotos, miniaturas y GIF (`img/`) de las pruebas físicas |
-| `archivo/` | **Archivo:** documentos y visores de la v1 y la v4 ([qué es cada uno](archivo/README.md)) |
+| `archivo/` | **Archivo:** documentos y visores de la etapa 1 (v1, v4) y de la banda v3 ([qué es cada uno](archivo/README.md)) |
 
 ## `firmware/`: código de los microcontroladores
 
@@ -75,10 +75,11 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | Carpeta | Contenido | Estado |
 |---|---|---|
 | `etapa1-clasificador/stl/` | 24 piezas de la torre v5 y el adaptador del TCS3200 | **Vigente**, impresas |
+| `etapa1-clasificador/stl/ajustes/` | Correcciones tras las pruebas: disco H02c de 6 bolsillos Ø33 | Diseñado, por imprimir |
 | `etapa1-clasificador/impresion/` | 8 camas `.3mf` para la Creality K1C y `CAMAS.md` | Vigente |
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
-| `etapa1-clasificador/` (raíz) | Guía de armado, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
-| `etapa2-transporte/` | Medidas de interfaz para la banda | En diseño |
+| `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
+| `etapa2-transporte/` | Medidas de interfaz para la banda | En rediseño |
 | `etapa3-brazo/` | Planos del brazo (PDF de SolidWorks), puesto del rack, bandeja y BOM | Diseñado |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |
@@ -90,6 +91,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `generar_v5.py` | **Las 24 piezas de la torre v5**, el despiece y el ensamble (y revisa choques) |
 | `armar_camas_v5.py` | Las camas `.3mf` de impresión |
 | `generar_adaptador_tcs3200.py` | El adaptador A01 del sensor de color |
+| `generar_ajustes_tolva.py` | Las piezas de ajuste de la tolva (disco H02c de 6 bolsillos) |
 | `generar_clasificador.py` | Riel v4; se conserva porque `generar_v5.py` y las pruebas lo usan |
 | `generar_stl.py`, `geometria_stl.py` | Rack y bandeja del brazo |
 | `generar_figuras.py` | Figuras de la documentación |
