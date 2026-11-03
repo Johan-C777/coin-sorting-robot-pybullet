@@ -60,7 +60,8 @@ constexpr float UMBRAL_DORADO = 1.30f;           // (R+G)/2B > umbral = dorado (
 constexpr int   VASO_RECHAZO = -1;
 
 // ---- Ciclo -----------------------------------------------------------------
-#define AUTO_AL_ARRANCAR 1                       // 1 = arranca solo, sin comandos
+#define GIRO_AL_ARRANCAR 1                       // 1 = la tolva gira sola al encender (solo motor, sin sensores)
+#define AUTO_AL_ARRANCAR 0                       // 1 = arranca el ciclo completo con sensores (usar con el cableado listo)
 #define PARAR_SI_VACIA 0                         // 0 = sigue girando aunque no haya monedas
 constexpr uint16_t ESPERA_MONEDA_MS = 450;      // tras avanzar un bolsillo
 constexpr uint8_t  VACIOS_PARA_PARAR = 8;        // una vuelta sin monedas = tolva vacía

@@ -14,12 +14,13 @@ enum Estado { REPOSO, AVANZA, ESPERA, MIDE, POSICIONA, ABRE, CIERRA } est = REPO
 bool automatico = AUTO_AL_ARRANCAR, monitor = false;
 uint32_t t_est = 0, t_mon = 0;
 uint8_t vacios = 0;
+bool giro = false;                                // giro continuo de la tolva (sin sensores)
 uint16_t espera_ms = ESPERA_MONEDA_MS;           // 'e<ms>' lo cambia en caliente
 int vaso = VASO_RECHAZO;
 uint16_t cuenta[10] = {};                         // 0..8 vasos, 9 rechazo
 
 void ayuda() {
-  Serial.println(F("a=auto on/off  d=1 ciclo  f/b=1 bolsillo  o/p=abrir/cerrar compuerta\n"
+  Serial.println(F("g=giro continuo del motor  a=auto on/off  d=1 ciclo  f/b=1 bolsillo  o/p=abrir/cerrar compuerta\n"
                    "v<pps>=vmax  k<pps2>=acel  s<pps>=v0 (tolva)  e<ms>=espera por bolsillo  t=barrido\n"
                    "m=monitor sensores  r=resumen  x<mm>/z<vaso>=banda (HABILITAR_BANDA)"));
 }
@@ -136,7 +137,10 @@ void consola() {
     buf[n] = 0; n = 0;
     const float x = atof(buf + 1);
     switch (buf[0]) {
-      case 'a': automatico = !automatico; vacios = 0; Serial.println(automatico ? "auto ON" : "auto OFF"); break;
+      case 'g': giro = !giro; if (giro) { automatico = false; tolva.mover(100000000L * TOLVA_SENTIDO); } else tolva.parar();
+                Serial.println(giro ? "giro continuo ON ('g' para parar, v<pps> cambia la velocidad)" : "giro OFF"); break;
+      case 'a': if (giro) { giro = false; tolva.parar(); }
+                automatico = !automatico; vacios = 0; Serial.println(automatico ? "auto ON" : "auto OFF"); break;
       case 'd': b1.borrar(); b2.borrar(); tolvaBolsillos(1); cambiar(AVANZA); break;
       case 'f': tolvaBolsillos(1); Serial.println("+1 bolsillo"); break;
       case 'b': tolvaBolsillos(-1); Serial.println("-1 bolsillo"); break;
@@ -177,6 +181,10 @@ void setup() {
   iniciarTareaPasos();  Serial.println(F("tarea pasos ok"));
   ayuda();
   if (automatico) Serial.println(F("AUTO ON: ciclo continuo ('a' alterna)"));
+#if GIRO_AL_ARRANCAR
+  giro = true; tolva.mover(100000000L * TOLVA_SENTIDO);
+  Serial.println(F("GIRO CONTINUO ON: solo motor, sin sensores ('g' para/arranca, 'a' = ciclo completo)"));
+#endif
 }
 
 void loop() {
