@@ -66,7 +66,6 @@ Reporta aquí cualquier línea rara de la consola y se ajusta; no se inventan va
 ## F. Ajustes tras la primera ronda de pruebas (`stl/ajustes/`, generador `scripts/generar_ajustes_tolva.py`)
 
 - **H02c** disco de **6 bolsillos Ø33** (antes 8 de Ø29), con entrada achaflanada de 0,6 mm, 6 radios de apoyo de 0,4 mm en la cara trasera (menos contacto con el plato), radio 50 y un bolsillo en la posición de salida. Mismo eje y grosor total que H02; sirve con H01 y con H03a/b/c (para la $1.000 usa H03c, 2,8 mm). El firmware pasa a `BOLSILLOS = 6`.
-- **Segunda paleta (H4):** imprime otra G02 igual y pégala encima de la actual; no hace falta pieza nueva.
-- **H04 tope trasero (H1):** bloque de 40 × 14 × 14 mm que rellena la cuña entre L01 y el aro de H01 por encima del hueco de salida (por ahí la moneda rebota y cae detrás de L01). Cara plana contra la placa de L01, centrado sobre el hueco (s = 2…42 mm, t = 44…58 mm sobre la repisa), cianoacrilato. Sin choques con H01, H02 ni L01 en el modelo.
-- **H03d** rascador de 3,0 mm: más holgura para la $1.000 (2,7 mm de grosor) que H03c (2,8 mm).
+- **H04 tope trasero:** rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01, centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia arriba no salga por la cuña abierta entre L01 y el aro de H01.
+- **G03 paleta plana:** rectángulo extruido de 34 × 34 × 2,5 mm (las medidas de G02, sin bisagra, cubo ni rebaje del servo) para pegar encima de G02 y tapar los huecos.
 - Sin probar con monedas reales.
