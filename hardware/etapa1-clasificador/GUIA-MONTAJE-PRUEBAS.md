@@ -62,3 +62,9 @@ pio device monitor         # consola 115200
 6. **Ciclo completo.** `d` = una moneda (avanza, mide, abre compuerta); `a` = automático; `r` = resumen. Calibra con la fase 4 de [`TODO.md`](../../TODO.md).
 
 Reporta aquí cualquier línea rara de la consola y se ajusta; no se inventan valores sin monedas reales.
+
+## F. Ajustes tras la primera prueba (`stl/ajustes/`, generador `scripts/generar_ajustes_tolva.py`)
+
+- **H02b** disco v2: bolsillos Ø30 (antes Ø29) con entrada achaflanada de 0,5 mm; mismo grosor (2,4) y eje, sirve con H01 y H03a/b/c. Para la $1.000 (2,7 mm de grosor) usa el rascador H03c (2,8 mm).
+- **H04** cuña de apoyo: rellena el hueco de 6-13 mm entre la espalda de H01 y L01 (entre la zona apoyada en K01 y las almohadillas) para que H01 no se incline. Pegar con cianoacrilato a la espalda de H01, ventana w = -6…34 mm, 0,3 mm de holgura con L01, sin choques con H01, L01 ni K01. Se imprime con la cara de pegado sobre la cama.
+- Sin probar con monedas reales. Si H04 sobra o falta, cambia `W0`, `W1`, `PROF` del script o escala en el slicer.

@@ -66,3 +66,6 @@ Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y 
 - Guía: `hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md` (armado, cableado, pio, pruebas f/b, t, o/p, m, d/a).
 - Pendiente: operación (`etapa1_clasificador`) usa espressif32 6.x + CDC_ON_BOOT: adaptar a UART0/pioarduino tras validar banco; cablear; calibrar [CAL-xx] con monedas reales.
 - Siguiente: imprimir A01, cablear, `pio run -t upload`, probar `f`, `m`, `o/p`.
+- 2026-11-03 usuario: $200 antigua (Ø24,4×1,7) atasca el disco y algunas monedas caen en la subida (H01 queda algo inclinado). Hecho: `scripts/generar_ajustes_tolva.py` → `stl/ajustes/` H02b (bolsillo Ø30 + chaflán 0,5) y H04 (cuña de apoyo H01↔L01, 45 cm³). Sin probar con monedas.
+- ERROR de catálogo: NO existe $1000 antigua (solo 1: Ø26,7×2,7); `monedas.py`/firmware/tests aún tienen A1000 (21,67) y 9 vasos → pendiente corregir. Grosores reales: $50 N 1,3; $100 N 1,5; $200 N 1,6; $500 N 2,2; $1000 2,7; antiguas $50 Ø21,0×1,3; $100 Ø23,0×1,5; $200 24,4×1,7; $500 Ø23,5×2,0.
+- Siguiente: probar H02b/H04; decidir si se corrige el catálogo a 8 monedas.
