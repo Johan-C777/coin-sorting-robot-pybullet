@@ -11,7 +11,7 @@ Barrera b1(PIN_IR1), b2(PIN_IR2);
 Color color;
 
 enum Estado { REPOSO, AVANZA, ESPERA, MIDE, POSICIONA, ABRE, CIERRA } est = REPOSO;
-bool automatico = false, monitor = false;
+bool automatico = AUTO_AL_ARRANCAR, monitor = false;
 uint32_t t_est = 0, t_mon = 0;
 uint8_t vacios = 0;
 int vaso = VASO_RECHAZO;
@@ -66,8 +66,13 @@ void ciclo() {
       else if (est == ESPERA && millis() - t_est > ESPERA_MONEDA_MS) {
         Serial.println(F("bolsillo vacio"));
         if (++vacios >= VACIOS_PARA_PARAR) {
-          automatico = false; vacios = 0;
+          vacios = 0;
+#if PARAR_SI_VACIA
+          automatico = false;
           Serial.println(F("TOLVA VACIA: auto apagado"));
+#else
+          Serial.println(F("una vuelta sin monedas (sigue girando; 'a' para parar)"));
+#endif
         }
         cambiar(REPOSO);
       }
@@ -169,6 +174,7 @@ void setup() {
   color.iniciar();      Serial.println(F("tcs ok"));
   iniciarTareaPasos();  Serial.println(F("tarea pasos ok"));
   ayuda();
+  if (automatico) Serial.println(F("AUTO ON: ciclo continuo ('a' alterna)"));
 }
 
 void loop() {
