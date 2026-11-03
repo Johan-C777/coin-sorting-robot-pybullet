@@ -1,6 +1,5 @@
 """Análisis tipo rebanador: por cada capa, lo que no apoya en la capa anterior (con 45 grados de tolerancia)."""
-import os
-import sys, numpy as np
+import os, sys, numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import generar_banda as g, analisis as an
 from manifold3d import CrossSection, JoinType
