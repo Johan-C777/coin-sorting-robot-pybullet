@@ -65,7 +65,7 @@ Reporta aquí cualquier línea rara de la consola y se ajusta; no se inventan va
 
 ## F. Ajustes tras la primera ronda de pruebas (`stl/ajustes/`, generador `scripts/generar_ajustes_tolva.py`)
 
-- **H02c** disco de **6 bolsillos Ø33** (antes 8 de Ø29), con entrada achaflanada de 0,6 mm, 6 radios de apoyo de 0,4 mm en la cara trasera (menos contacto con el plato), radio 50 y un bolsillo en la posición de salida. Mismo eje y grosor total que H02; sirve con H01 y con H03a/b/c (para la $1.000 usa H03c, 2,8 mm). El firmware pasa a `BOLSILLOS = 6`.
+- **H02c** disco de **6 bolsillos Ø33** (antes 8 de Ø29), con un bolsillo en la posición de salida y radio 50. Cara trasera plana como el H02 anterior, sin soportes. Mismo eje y grosor; sirve con H01 y con H03a/b/c (para la $1.000 usa H03c, 2,8 mm). El firmware pasa a `BOLSILLOS = 6`.
 - **H04 tope trasero:** rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01, centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia arriba no salga por la cuña abierta entre L01 y el aro de H01.
 - **G03 paleta plana:** rectángulo extruido de 34 × 34 × 2,5 mm (las medidas de G02, sin bisagra, cubo ni rebaje del servo) para pegar encima de G02 y tapar los huecos.
 - Sin probar con monedas reales.

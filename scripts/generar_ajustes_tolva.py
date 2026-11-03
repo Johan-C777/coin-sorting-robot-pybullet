@@ -1,8 +1,8 @@
 """Piezas corregidas tras la primera ronda de pruebas físicas (2026-11-03). No toca los STL de generar_v5.py.
 
-  H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), con entrada achaflanada, 6 radios de apoyo
-        de 0,4 mm en la cara trasera y un bolsillo en la posición de salida (90°). Mismo eje,
-        mismo grosor total (2,4) y misma distancia al plato: sirve con H01 y con H03a/b/c.
+  H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), un bolsillo en la posición de salida (90°).
+        Cara trasera plana como el H02 anterior (sin soportes). Mismo eje, grosor y distancia al plato:
+        sirve con H01 y con H03a/b/c.
   H04  Tope trasero: rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01,
         centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia
         arriba no salga por la cuña abierta entre L01 y el aro de H01 (la moneda mide ≤ 2,7 mm).
@@ -17,8 +17,7 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
 import generar_v5 as g
 
 SAL = g.SALIDA / "stl" / "ajustes"
-N, POCKET, CHAFLAN = 6, 33.0, 0.6
-RELIEVE, RADIO_W, CUBO_R = 0.4, 4.0, 13.0       # altura de los radios, semiancho, radio del apoyo central
+N, POCKET = 6, 33.0
 
 
 def rot(a):
@@ -26,21 +25,18 @@ def rot(a):
 
 
 def disco_c():
-    E, R, RP = g.DISCO_E, 50.0, g.R_PASO       # radio 50 (H02 era 51): holgura con el aro de H01
+    """Igual que H02 (generar_v5.disco) pero con 6 bolsillos Ø33, uno en la posición de salida (90°) y radio 50.
+    Cara trasera plana: se imprime como el H02 anterior, sin soportes."""
+    E, R, RP = g.DISCO_E, 50.0, g.R_PASO
     r = POCKET / 2
-    m = Manifold.cylinder(E - RELIEVE, R).translate((0, 0, RELIEVE))           # cuerpo, 0,4 sobre el plato
-    m += Manifold.cylinder(RELIEVE + 0.01, CUBO_R)                              # apoyo central
-    for i in range(N):                                                           # radios de apoyo en las paredes entre bolsillos
-        a = 2 * math.pi * i / N
-        m += g.caja(0, R - 1, -RADIO_W, RADIO_W, 0, RELIEVE + 0.01).transform(rot(a))
+    m = Manifold.cylinder(E, R)
     for i in range(N):
-        a = math.pi / 2 + 2 * math.pi * i / N                                    # un bolsillo en 90° (salida)
+        a = math.pi / 2 + 2 * math.pi * i / N
         c = (RP * math.cos(a), RP * math.sin(a))
         bolsa = Manifold.cylinder(E + 2, r).translate((c[0], c[1], -1))
-        cono = Manifold.cylinder(CHAFLAN + 0.01, r, r + CHAFLAN + 0.01).translate((c[0], c[1], E - CHAFLAN))
         canal = g.caja(RP, R + 5, -r, r, -1, E + 1).transform(rot(a))
-        m -= bolsa + cono + canal
-    m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))                        # cubo hacia el frente
+        m -= bolsa + canal
+    m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))
     m += Manifold.cylinder(E, 12.0)
     h = g.HOLGURA
     eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 5)
