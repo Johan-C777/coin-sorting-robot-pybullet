@@ -65,6 +65,7 @@ ANCHO_BANDA, ESP_BANDA = 56.0, 6.0      # ancho y espesor de la tablilla
 SEG = 8.0                               # 7 segmentos de 8 mm: nudillos alternados y ranura central
 KN_D = 6.0                              # nudillo (se aplana a la altura de la tablilla)
 PIN_C, PIN_CH, PIN_CL = 3.0, 3.6, 57.0  # pasador, agujero del nudillo (0,3 mm de juego por lado: es el mínimo para que no se suelden al imprimir) y largo de corte
+LAMINA = 0.4                            # grosor de la lámina rompible bajo el pasador (una sola línea de extrusión)
 PIN_RANURA = 2.7                        # boca de los nudillos que encajan a presión entre secciones
 RANURA, RUEDA_W = 8.4, 7.8              # ranura de la tablilla y grosor de la rueda dentada
 RP = PASO / (2 * math.sin(math.pi / DIENTES))      # radio primitivo (centros de pasadores)
@@ -373,11 +374,15 @@ def rueda(x):
     return disco.translate((x, 0, Z_EJE))
 
 
-def tablilla(x=0.0, z=0.0, primero=False):
+def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False):
     """Eslabón de 12,3 × 56 × 6 mm. Adelante: nudillos con el pasador Ø3 fundido. Atrás: nudillos con agujero Ø3,4 que abraza el
     pasador del eslabón anterior (print-in-place, 0,2 mm de juego). El primer eslabón de cada sección lleva los nudillos abiertos por
     abajo (ranura de 2,7 mm): se encajan a presión en el pasador del último eslabón de la sección anterior.
-    Se imprime con la cara de arriba contra la cama; ningún voladizo pasa de 45 grados."""
+    Se imprime con la cara de arriba contra la cama; ningún voladizo pasa de 45 grados.
+    banda=True añade, bajo el pasador del eslabón anterior, una lámina rompible de 0,4 mm en el fondo de cada nudillo suelto: el
+    pasador deja de quedar en el aire (nada que puentear) y la lámina se rompe sola al flexionar la articulación por primera vez.
+    ultimo=True deja, bajo el pasador que queda libre en el extremo de la sección, una aleta de 0,4 mm hasta la cama (se desprende
+    con la uña o al encajar la sección siguiente)."""
     h = ESP_BANDA / 2
     kr = 3.2
     plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
@@ -397,13 +402,22 @@ def tablilla(x=0.0, z=0.0, primero=False):
     m = m - hueco_y(0, 0, -PIN_CL, PIN_CL, PIN_CH)
     if primero:
         m = m - caja(-PIN_RANURA / 2, PIN_RANURA / 2, -PIN_CL, PIN_CL, -h - 1, 0)
+    if banda:
+        punta_hueco = PIN_CH / 2 * math.sqrt(2)          # el rombo del agujero termina en punta a 2,55 mm bajo el eje
+        for j in (1, 5):
+            ya, yb = seg(j)
+            m = m + caja(-LAMINA / 2, LAMINA / 2, ya + 0.2, yb - 0.2, -punta_hueco - 0.15, -PIN_C / 2 + 0.15)
+    if ultimo:
+        for j in (1, 5):
+            ya, yb = seg(j)
+            m = m + caja(PASO - LAMINA / 2, PASO + LAMINA / 2, ya + 0.2, yb - 0.2, -h, -PIN_C / 2 + 0.15)
     m = m + pasador_gota(PASO, 0, -27.5, 27.5)
     return m.translate((x, 0, z))
 
 
 def seccion(x=0.0, z=0.0):
     """Sección de 14 eslabones que se imprime ya articulada (print-in-place); la rueda toma los pasadores por la ranura central."""
-    return union([tablilla(i * PASO, 0, primero=i == 0) for i in range(SECC_N)]).translate((x, 0, z))
+    return union([tablilla(i * PASO, 0, primero=i == 0, banda=i > 0, ultimo=i == SECC_N - 1) for i in range(SECC_N)]).translate((x, 0, z))
 
 
 def carro_tensor(lado):

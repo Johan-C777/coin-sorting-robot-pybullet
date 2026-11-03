@@ -17,7 +17,7 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 |---|---|---|---|---|---|
 | PETG Azul 4DLAB | Módulo del motor, tapa del motor, ejes, ruedas, acople, soporte NEMA, carros y tornillos del tensor | 208 g | 429 g | 221 g | 230–250 °C |
 | PLA+ Mármol 4DLAB | Módulos 2 a 6, tapa del tensor y patas | 434 g | 1000 g | 566 g | 200–230 °C |
-| PLA+ Azul 4DLAB | Las 12 secciones de cadena y la cama 00 de prueba | 687 g | 1000 g | 313 g | 200–230 °C |
+| PLA+ Azul 4DLAB | Las 12 secciones de cadena y la cama 00 de prueba | 689 g | 1000 g | 311 g | 200–230 °C |
 | PLA+ Negro 4DLAB | Guías laterales (10) | 175 g | 647 g | 472 g | 200–230 °C |
 
 - El PETG (429 g) sólo va a lo que gira o está junto al motor. La cadena va en PLA+ Azul porque necesita ≈ 640 g; el bastidor y las guías van en PLA+ porque no trabajan en caliente ni a flexión.
@@ -80,37 +80,37 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 
 | Pieza | Qué es | Cant. | Relleno | Medidas en cama (mm) | g aprox. |
 |---|---|---|---|---|---|
-| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 160 |
+| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 161 |
 
-- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura y nudillos con canto a 45°: sin soportes.
-- Peso aproximado de la cama: 160 g.
+- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura, láminas rompibles de 0,4 mm bajo el pasador y nudillos con canto a 45°: sin soportes. Dobla cada articulación al sacarla para romper las láminas.
+- Peso aproximado de la cama: 161 g.
 
 ### Cama 03 · PLA+ Azul 4DLAB
 
 | Pieza | Qué es | Cant. | Relleno | Medidas en cama (mm) | g aprox. |
 |---|---|---|---|---|---|
-| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 160 |
+| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 161 |
 
-- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura y nudillos con canto a 45°: sin soportes.
-- Peso aproximado de la cama: 160 g.
+- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura, láminas rompibles de 0,4 mm bajo el pasador y nudillos con canto a 45°: sin soportes. Dobla cada articulación al sacarla para romper las láminas.
+- Peso aproximado de la cama: 161 g.
 
 ### Cama 04 · PLA+ Azul 4DLAB
 
 | Pieza | Qué es | Cant. | Relleno | Medidas en cama (mm) | g aprox. |
 |---|---|---|---|---|---|
-| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 160 |
+| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 161 |
 
-- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura y nudillos con canto a 45°: sin soportes.
-- Peso aproximado de la cama: 160 g.
+- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura, láminas rompibles de 0,4 mm bajo el pasador y nudillos con canto a 45°: sin soportes. Dobla cada articulación al sacarla para romper las láminas.
+- Peso aproximado de la cama: 161 g.
 
 ### Cama 05 · PLA+ Azul 4DLAB
 
 | Pieza | Qué es | Cant. | Relleno | Medidas en cama (mm) | g aprox. |
 |---|---|---|---|---|---|
-| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 160 |
+| `BT19_seccion-cadena.stl` | Sección de cadena (14 eslabones articulados) | 3 | 100 % | 178 × 56 × 6 | 161 |
 
-- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura y nudillos con canto a 45°: sin soportes.
-- Peso aproximado de la cama: 160 g.
+- Print-in-place: sale ya articulada. Pasador en rombo con quilla en la ranura, láminas rompibles de 0,4 mm bajo el pasador y nudillos con canto a 45°: sin soportes. Dobla cada articulación al sacarla para romper las láminas.
+- Peso aproximado de la cama: 161 g.
 
 ### Cama 06 · PLA+ Mármol 4DLAB
 
@@ -161,7 +161,7 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 - Ala abajo, labio arriba.
 - Peso aproximado de la cama: 175 g.
 
-Total aproximado: **1504 g** en 10 camas.
+Total aproximado: **1505 g** en 10 camas.
 
 ## Cantidades
 
@@ -193,6 +193,6 @@ Total aproximado: **1504 g** en 10 camas.
 ## Qué se hizo contra los fallos
 
 - **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo y los muñones de los ejes son octogonales, los zócalos verticales de clavija terminan en cono, los bolsillos de las tapas tienen el techo en V y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición de impresión, da 0 mm² en todas las piezas salvo ≈ 1 mm² de ruido de malla en los módulos.
-- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°), los nudillos tienen el canto a 45° y en la ranura de la rueda el pasador lleva una quilla que baja hasta la cama: ningún tramo de pasador nace en el aire. Lo único que queda es un puente de 8 mm del pasador (de 0,4 mm de ancho al empezar) sobre cada nudillo suelto, anclado en los dos extremos.
+- **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°), los nudillos tienen el canto a 45° y en la ranura de la rueda el pasador lleva una quilla que baja hasta la cama: ningún tramo de pasador nace en el aire. Bajo el pasador, en el fondo de cada nudillo suelto, hay una lámina de 0,4 mm que lo sostiene mientras se imprime, y en el último pasador de cada sección una aleta de 0,4 mm hasta la cama. **Al doblar cada articulación por primera vez esas láminas se rompen solas** (hazlo a mano al sacar la pieza de la cama, doblando cada articulación a ambos lados unos 60°); si alguna aleta del extremo estorba al encajar la sección siguiente, quítala con la uña.
 - **Pocas piezas pequeñas:** las clavijas Ø6 se integraron en guías y patas; los pasadores Ø3 son parte de cada eslabón; el rompecabezas de los módulos sustituye a todas las clavijas de unión del bastidor.
 - **Riesgos que quedan:** (1) la tolerancia de la articulación (por eso la cama 00 primero); (2) la presilla de la sección, de PLA, puede ser frágil, y el pasador en rombo es más delgado que uno redondo; (3) el juego de 168 articulaciones alarga la cadena, por eso el tensor tiene 24 mm de recorrido; (4) el torque de un NEMA17 de 48 mm con el radio de la rueda de ≈ 0,3 N·m es justo para la carga de monedas: si patina, baja la tensión.
