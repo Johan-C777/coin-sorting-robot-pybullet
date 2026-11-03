@@ -109,6 +109,33 @@ def prueba_articulacion():
 ANCHO_CORTE = 28.0
 
 
+def prueba_suelto():
+    """Cama 00C: pasador SEPARADO. Tres juegos axiales entre nudillos (0,30 / 0,40 / 0,50 mm en total); cada uno son dos mitades de
+    2 eslabones de 24 mm de ancho con los agujeros Ø2,4 vacíos: se deslizan una contra otra por los nudillos y se les mete un trozo
+    de filamento 1,75 o de alambre de 2 mm como pasador. Cada mitad A lleva tantos agujeros cuadrados como su número."""
+    AXIAL = (0.30, 0.40, 0.50)
+    Y0, Y1 = -ANCHO_CORTE, -4.0
+    caja = g.caja
+    def recorte(m):
+        return m ^ caja(-10, 200, Y0, Y1, -10, 10)
+    def mitad(ax, n, k):
+        m = g.union([g.tablilla(i * g.PASO, 0, pin_ch=2.4, gota=True, sin_pasador=True, ax=ax / 2) for i in range(n)])
+        m = recorte(m)
+        for q in range(k):
+            m = m - caja(4.4 + 1.4 * (q % 3), 5.6 + 1.4 * (q % 3), -10.6 - 2.6 * (q // 3), -9.4 - 2.6 * (q // 3), -10, 10)
+        return m
+    items, y = [], 0.0
+    for k, ax in enumerate(AXIAL, 1):
+        x, row_h = 0.0, 0.0
+        for etiqueta, m in ((f"{k}A: juego axial {ax:.2f} mm, mitad A", mitad(ax, 2, k)), (f"{k}B: mitad B", mitad(ax, 2, 0))):
+            x0, y0, z0, x1, y1, z1 = m.bounding_box()
+            items.append((m.translate((x - x0, y - y0, -z0)), etiqueta))
+            x += (x1 - x0) + 8.0
+            row_h = max(row_h, y1 - y0)
+        y += row_h + 6.0
+    return items
+
+
 def pose(m, rot):
     m = m.rotate(rot) if any(rot) else m
     x0, y0, z0, x1, y1, z1 = m.bounding_box()
@@ -194,6 +221,9 @@ def main():
     art = prueba_articulacion()
     (out / 'camas' / 'cama-00B_PETG-prueba-articulacion.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in art]))
     (out / 'stl' / 'BT00B_prueba-articulacion.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in art]))
+    sue = prueba_suelto()
+    (out / 'camas' / 'cama-00C_PETG-prueba-pasador-suelto.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in sue]))
+    (out / 'stl' / 'BT00C_prueba-pasador-suelto.stl').write_bytes(stl_bytes([m.translate((MARGEN, MARGEN, 0)) for m, _ in sue]))
     camas = [('00', PLA_A, [dict(prueba_p, i=1, px=0, py=0, giro=0)])]
     n = 1
     for mat in (PETG, PLA_A, PLA_M, PLA_N):
@@ -267,6 +297,8 @@ def escribir_md(out, filas, piezas, prueba_p):
     L.append("")
     L.append("   Pruébalas así: (a) dobla cada articulación a ambos lados y anota cuál gira con un dedo sin trabarse y sin bailar; (b) en las tiras *con lámina* dobla las articulaciones hasta que se rompa la lámina; las *sin lámina* sólo puentean 8 mm el pasador (el slicer puede marcarlas): sirven para saber si la lámina era lo que trababa; (c) encaja la presilla de su fila en el pasador libre del extremo de su tira: tiene que hacer clic y no salirse. **Dime el número de tira que gira mejor** y regenero toda la cadena con ese juego.")
     L.append("   Ajustes sugeridos para esta prueba en PETG: boquilla 0,4, capa 0,2, 230–235 °C, ventilador de pieza al 100 % desde la capa 2, paredes a 40–50 mm/s, sin «ironing», sin compensación de «elephant foot» agresiva, borde (brim) de 0 a 2 mm.\n")
+    L.append("1C. **Cama 00C (prueba con pasador separado, PETG Azul, ≈ 15 g y ≈ 50 min).** Es la alternativa si en la 00B ninguna tira gira bien: los eslabones salen **sin pasador** (agujeros vacíos de Ø2,4 en todos los nudillos) y el pasador es un trozo de **filamento de 1,75 mm** (o alambre de 2 mm de ferretería) que se mete después. La articulación ya no depende de un juego de décimas de milímetro ni de un pasador de 3 mm que se rompe; los nudillos tienen paredes de ≥ 1,8 mm. Son 3 filas (juego axial entre nudillos de 0,30 / 0,40 / 0,50 mm); cada fila trae dos mitades de 2 eslabones, la mitad A con tantos agujeros cuadrados como el número de la fila.")
+    L.append("   Pruébala así: (a) libera cada eslabón (deben quedar sueltos sin esfuerzo); (b) desliza la mitad B contra la A por los nudillos (de lado, como los dientes de dos peines) hasta que los agujeros queden alineados; (c) mete 3 trozos de filamento de 24 mm por los agujeros y dobla: tiene que girar con un dedo en toda la fila. **Dime el número de fila que gira mejor.** Así se uniría también una sección con la siguiente (sin presillas).\n")
     L.append("2. Camas 02 a 05, la cadena (PLA+ Azul): 4 camas de 3 secciones. Es lo que más tarda (≈ 4 h por cama), pero ya no hay que armar nada suelto.")
     L.append("3. Cama 01, PETG Azul (ejes, ruedas, carros, tornillos, acople, soporte y módulo del motor).")
     L.append("4. Camas 06 a 08 (módulos, tapa y patas, PLA+ Mármol) y 09 (guías, PLA+ Negro).\n")

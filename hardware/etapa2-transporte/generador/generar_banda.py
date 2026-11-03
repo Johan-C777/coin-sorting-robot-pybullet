@@ -385,7 +385,7 @@ def rueda(x):
     return disco.translate((x, 0, Z_EJE))
 
 
-def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False, pin_ch=None, gota=False):
+def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False, pin_ch=None, gota=False, sin_pasador=False, ax=0.2):
     """Eslabón de 12,3 × 56 × 6 mm. Adelante: nudillos con el pasador Ø3 fundido. Atrás: nudillos con agujero Ø3,4 que abraza el
     pasador del eslabón anterior (print-in-place, 0,2 mm de juego). El primer eslabón de cada sección lleva los nudillos abiertos por
     abajo (ranura de 2,7 mm): se encajan a presión en el pasador del último eslabón de la sección anterior.
@@ -396,6 +396,8 @@ def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False, pin_ch=None
     con la uña o al encajar la sección siguiente).
     pin_ch/gota: diámetro del agujero del nudillo y su forma (círculo + V arriba, sin punta abajo), para la prueba de juego."""
     pin_ch = PIN_CH if pin_ch is None else pin_ch
+    # sin_pasador=True: eslabón con agujeros vacíos en TODOS los nudillos (diámetro pin_ch); el pasador es un trozo de alambre o de
+    # filamento que se mete después. ax = holgura axial por lado entre nudillos vecinos.
     h = ESP_BANDA / 2
     kr = 3.2
     plate = caja(0, PASO, -ANCHO_BANDA / 2, ANCHO_BANDA / 2, -h, h)
@@ -410,8 +412,11 @@ def tablilla(x=0.0, z=0.0, primero=False, banda=False, ultimo=False, pin_ch=None
     def nud(xn, j):
         ya, yb = seg(j)
         oct8 = [(-1.2, -3), (1.2, -3), (3.0, -1.2), (3.0, 1.2), (1.2, 3), (-1.2, 3), (-3.0, 1.2), (-3.0, -1.2)]   # canto a 45 grados: sin arco colgado contra la cama
-        return prisma_y(CrossSection([[(xn + a, b) for a, b in oct8]]), ya + 0.2, yb - 0.2)
+        return prisma_y(CrossSection([[(xn + a, b) for a, b in oct8]]), ya + ax, yb - ax)
     m = plate + union([nud(0, j) for j in (1, 5)] + [nud(PASO, j) for j in (0, 2, 4, 6)])
+    if sin_pasador:
+        m = m - agujero_gota(0, 0, -PIN_CL, PIN_CL, pin_ch) - agujero_gota(PASO, 0, -PIN_CL, PIN_CL, pin_ch)
+        return m.translate((x, 0, z))
     m = m - (agujero_gota(0, 0, -PIN_CL, PIN_CL, pin_ch) if gota else hueco_y(0, 0, -PIN_CL, PIN_CL, pin_ch))
     if primero:
         m = m - caja(-PIN_RANURA / 2, PIN_RANURA / 2, -PIN_CL, PIN_CL, -h - 1, 0)
