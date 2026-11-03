@@ -14,12 +14,13 @@ enum Estado { REPOSO, AVANZA, ESPERA, MIDE, POSICIONA, ABRE, CIERRA } est = REPO
 bool automatico = AUTO_AL_ARRANCAR, monitor = false;
 uint32_t t_est = 0, t_mon = 0;
 uint8_t vacios = 0;
+uint16_t espera_ms = ESPERA_MONEDA_MS;           // 'e<ms>' lo cambia en caliente
 int vaso = VASO_RECHAZO;
 uint16_t cuenta[10] = {};                         // 0..8 vasos, 9 rechazo
 
 void ayuda() {
   Serial.println(F("a=auto on/off  d=1 ciclo  f/b=1 bolsillo  o/p=abrir/cerrar compuerta\n"
-                   "v<pps>=vmax  k<pps2>=acel  s<pps>=v0 (tolva)  t=barrido de velocidad\n"
+                   "v<pps>=vmax  k<pps2>=acel  s<pps>=v0 (tolva)  e<ms>=espera por bolsillo  t=barrido\n"
                    "m=monitor sensores  r=resumen  x<mm>/z<vaso>=banda (HABILITAR_BANDA)"));
 }
 
@@ -63,7 +64,7 @@ void ciclo() {
     case ESPERA:
       if (b1.nueva_ent) { vacios = 0; cambiar(MIDE); break; }
       if (est == AVANZA && !tolva.ocupado()) cambiar(ESPERA);
-      else if (est == ESPERA && millis() - t_est > ESPERA_MONEDA_MS) {
+      else if (est == ESPERA && millis() - t_est > espera_ms) {
         Serial.println(F("bolsillo vacio"));
         if (++vacios >= VACIOS_PARA_PARAR) {
           vacios = 0;
@@ -144,6 +145,7 @@ void consola() {
       case 'v': tolva.vmax = constrain(x, 100, 1600); Serial.printf("vmax=%.0f\n", tolva.vmax); break;
       case 'k': tolva.acc = constrain(x, 200, 20000); Serial.printf("acc=%.0f\n", tolva.acc); break;
       case 's': tolva.v0 = constrain(x, 50, 400); Serial.printf("v0=%.0f\n", tolva.v0); break;
+      case 'e': espera_ms = constrain((int)x, 150, 5000); Serial.printf("espera=%u ms\n", espera_ms); break;
       case 't': barrido(); break;
       case 'm': monitor = !monitor; break;
       case 'r':
