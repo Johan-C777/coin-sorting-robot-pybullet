@@ -13,7 +13,7 @@ firmware y calibrar con monedas reales siguiendo el procedimiento de la fase 4.
 | 1. Requisitos y diseño de la medición | ██████████ 100 % |
 | 2. CAD e impresión | ██████████ 100 % |
 | 3. Electrónica y firmware | ██████████ 100 % |
-| 4. Montaje y calibración física | ▶ fase actual |
+| 4. Montaje y calibración física | ▶ fase actual: torre armada, primera ronda de pruebas hecha |
 | 5. Integración con banda y brazo | Etapas 2 y 3 del proyecto |
 
 ---
@@ -67,11 +67,22 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 
 - [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø29
       del disco, bolsillo del SG90 (23,1 × 12,8)
-- [ ] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md)
+- [x] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md) → [foto](docs/12-pruebas-fisicas-etapa1.md#montaje-general)
+- [x] Primera ronda de pruebas mecánicas con monedas reales: 13 evidencias y 6 hallazgos
+      → [12-pruebas-fisicas-etapa1.md](docs/12-pruebas-fisicas-etapa1.md)
 - [ ] Elegir el rascador H03 (2,5 / 2,6 / 2,8 mm) con monedas reales
 - [ ] Cablear según [`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)
       y comprobar que el shield del ESP32-S3 deja libres los pines asignados
 - [ ] Cargar el firmware y verificar la consola (`i`, `m`)
+
+**Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#hallazgos-y-correcciones))
+
+- [ ] H1 · Rampa trasera para que la moneda no caiga por detrás del disco
+- [ ] H2 · Disco de 6 bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan) y firmware a 6 bolsillos por vuelta
+- [ ] H3 · Lijar portadisco y disco, lubricante seco, nervios de apoyo, bajar `TOLVA_VMAX` `[CAL-09]`
+- [ ] H4 · Segunda paleta en la compuerta
+- [ ] H5 · Monedas verticales que no se acuestan con la tolva llena (abierto)
+- [ ] H6 · Jumpers más largos para probar barreras IR y TCS3200
 
 **Calibración**
 

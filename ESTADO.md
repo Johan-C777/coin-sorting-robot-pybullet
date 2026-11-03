@@ -7,6 +7,10 @@
 | 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
+## Pruebas físicas 1ª ronda (0.9.0) — 2026-11-03
+- `docs/12-pruebas-fisicas-etapa1.md` + `docs/pruebas/etapa1/{video,img}`. OK: $100 y $500 antiguas, cartucho/vasos, torre armada.
+- H1 caída por detrás → rampa trasera. H2 bolsillos justos ($200/$500 n atascan, $1000 no entra) → disco 6 bolsillos + firmware 6/vuelta. H3 fricción disco → lijar, lubricante seco, nervios, bajar VMAX. H4 moneda se cuela en compuerta → 2ª paleta. H5 monedas verticales no se acuestan con tolva llena → abierto. H6 jumpers cortos → IR y TCS3200 sin probar.
+
 ## Firmware clasificador (0.8.0, PR #7) — 2026-10-31
 - `firmware/etapa1_clasificador/`: lib portable (Clasificador, Calibrador, Secuenciador/Planta) + `src/hal` (ISR barreras timer 4 kHz+ADC o flanco, PCNT TCS3200, tolva núcleo 0, SG90, botón GPIO 9). CI compila esp32s3 (RAM 6,5 %, flash 9,8 %) + 16 Unity native.
 - Medición: D = h + c²/4h, h=10, SEP 24, MRUA 3 ecuaciones; tolerancia/clase min(0,60; vecino/2−0,05); dorado (R+G)/2B>1,30 → N500; A50 dorada → rechazo (A1000 1996).
