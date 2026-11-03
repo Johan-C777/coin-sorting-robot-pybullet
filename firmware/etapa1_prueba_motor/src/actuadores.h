@@ -1,6 +1,5 @@
 #pragma once
 // Motor de la tolva (28BYJ-48 + ULN2003), compuerta SG90 y banda (A4988).
-#include <ESP32Servo.h>
 #include "config.h"
 #include "rampa.h"
 
@@ -31,12 +30,14 @@ inline void tolvaBolsillos(float n) {
   tolva.ir(lroundf(bolsillo_acum * TOLVA_PASOS_VUELTA / BOLSILLOS) * TOLVA_SENTIDO);
 }
 
-// ---- Compuerta ----
-Servo compuerta;
+// ---- Compuerta: SG90 por LEDC directo (50 Hz, 14 bits) ----
+inline void servoGrados(int g) {
+  const uint32_t us = SERVO_US_MIN + (uint32_t)constrain(g, 0, 180) * (SERVO_US_MAX - SERVO_US_MIN) / 180;
+  ledcWrite(PIN_SERVO, us * 16383UL / 20000UL);
+}
 inline void compuertaIniciar() {
-  compuerta.setPeriodHertz(50);
-  compuerta.attach(PIN_SERVO, SERVO_US_MIN, SERVO_US_MAX);
-  compuerta.write(SERVO_CERRADA);
+  ledcAttach(PIN_SERVO, 50, 14);
+  servoGrados(SERVO_CERRADA);
 }
 
 // ---- Banda: A4988 STEP/DIR/EN ----
@@ -67,12 +68,14 @@ inline void tareaPasos(void *) {
 #if HABILITAR_BANDA
     banda.run();
 #endif
-    taskYIELD();
+    bool trabajando = tolva.ocupado();
+#if HABILITAR_BANDA
+    trabajando = trabajando || banda.ocupado();
+#endif
+    if (trabajando) taskYIELD(); else vTaskDelay(1);   // en reposo deja correr IDLE0
   }
 }
 inline void iniciarTareaPasos() {
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-  disableCore0WDT();                              // la tarea no duerme nunca
-#endif
-  xTaskCreatePinnedToCore(tareaPasos, "pasos", 4096, nullptr, 2, nullptr, 0);
+  // Prioridad 0 (= IDLE): taskYIELD() alterna con IDLE0 y el watchdog queda contento sin desactivarlo.
+  xTaskCreatePinnedToCore(tareaPasos, "pasos", 4096, nullptr, tskIDLE_PRIORITY, nullptr, 0);
 }

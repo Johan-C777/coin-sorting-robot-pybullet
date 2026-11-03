@@ -1,5 +1,16 @@
 # Cambios
 
+## 0.9.1 · Repositorio ordenado
+
+- Versiones que ya no se usan, a carpetas `archivo/` con un README que explica cada una: generadores v1/v3/v4 a `scripts/archivo/`, contador v4 a `firmware/archivo/esp32_contador_v4/`, visores v1 y v4 a `docs/archivo/`, simulaciones de ideas descartadas a `sim/mujoco/descartados/`.
+- Se borran 3 imágenes que nada usaba.
+- `docs/MAPA-DEL-REPOSITORIO.md`: dónde está cada cosa.
+
+## 0.9.0 · Primera ronda de pruebas físicas de la etapa 1
+
+- `docs/12-pruebas-fisicas-etapa1.md`: torre armada y probada con monedas reales; 13 evidencias (videos y fotos en `docs/pruebas/etapa1/`) y 6 hallazgos con su corrección: rampa trasera (H1), disco de 6 bolsillos (H2), fricción del disco (H3), segunda paleta de la compuerta (H4), monedas verticales en la tolva llena (H5, abierto) y jumpers cortos (H6).
+- `TODO.md`, README, `05-pruebas.md` y ESTADO al día.
+
 ## 0.8.1 · Impresión completa de la etapa 1
 
 - Todas las camas de la torre v5 están impresas. `TODO.md`, README, portada, `00-entrega-avances.md`, `09-clasificador-v5.md`, `11-electronica-etapa1.md`, `hardware/` y `ESTADO.md` lo reflejan; la fase 4 de `TODO.md` queda como procedimiento de montaje y calibración.

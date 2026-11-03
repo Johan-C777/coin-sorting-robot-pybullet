@@ -7,7 +7,7 @@ CXXFLAGS ?= -std=c++17 -O2 -Wall -Wextra
 BRAZO = test_core.cpp stub_servo_bus.cpp ../esp32_brazo/kinematics.cpp \
         ../esp32_brazo/trajectory.cpp ../esp32_brazo/planner.cpp \
         ../esp32_brazo/cups.cpp ../esp32_brazo/protocol.cpp ../esp32_brazo/sequencer.cpp
-CONTADOR = test_conteo.cpp ../esp32_contador/conteo.cpp
+CONTADOR = test_conteo.cpp ../archivo/esp32_contador_v4/conteo.cpp
 
 all: test_core test_conteo
 	./test_core

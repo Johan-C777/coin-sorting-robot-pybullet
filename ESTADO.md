@@ -7,25 +7,33 @@
 | 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
+## Repositorio ordenado (0.9.1) — 2026-11-03
+- Mapa completo: `docs/MAPA-DEL-REPOSITORIO.md`. Versiones viejas en carpetas `archivo/` con README: `scripts/archivo/`, `firmware/archivo/esp32_contador_v4/`, `docs/archivo/` (visores v1 y v4), `sim/mujoco/descartados/`, `hardware/archivo/`.
+- `scripts/generar_clasificador.py` sigue en `scripts/` porque `generar_v5.py` importa `escribir_stl`.
+
+## Pruebas físicas 1ª ronda (0.9.0) — 2026-11-03
+- `docs/12-pruebas-fisicas-etapa1.md` + `docs/pruebas/etapa1/{video,img}`. OK: $100 y $500 antiguas, cartucho/vasos, torre armada.
+- H1 caída por detrás → rampa trasera. H2 bolsillos justos ($200/$500 n atascan, $1000 no entra) → disco 6 bolsillos + firmware 6/vuelta. H3 fricción disco → lijar, lubricante seco, nervios, bajar VMAX. H4 moneda se cuela en compuerta → 2ª paleta. H5 monedas verticales no se acuestan con tolva llena → abierto. H6 jumpers cortos → IR y TCS3200 sin probar.
+
 ## Firmware clasificador (0.8.0, PR #7) — 2026-10-31
 - `firmware/etapa1_clasificador/`: lib portable (Clasificador, Calibrador, Secuenciador/Planta) + `src/hal` (ISR barreras timer 4 kHz+ADC o flanco, PCNT TCS3200, tolva núcleo 0, SG90, botón GPIO 9). CI compila esp32s3 (RAM 6,5 %, flash 9,8 %) + 16 Unity native.
 - Medición: D = h + c²/4h, h=10, SEP 24, MRUA 3 ecuaciones; tolerancia/clase min(0,60; vecino/2−0,05); dorado (R+G)/2B>1,30 → N500; A50 dorada → rechazo (A1000 1996).
 - Calibración física: `[CAL-01..12]` en `include/`; procedimiento en `TODO.md` fase 4.
 - Resuelto en CI: macro `B1` de Arduino (enum → Primera/Segunda); IRAM_ATTR en header → `l32r` (ISR a `Boton.cpp`).
 - Pages: `docs/clasificador-v5.html`, `docs/banda-etapa2.html` (visibles al fusionar en main).
-- 2026-10-31: impresión completa (8 camas, confirmado por el usuario). Docs sin "pendiente" de impresión ni compras (0.8.1).
+- 2026-10-31: impresión completa (8 camas). Docs sin "pendiente" de impresión ni compras (0.8.1).
 - Siguiente: armar; cablear; cargar firmware; calibrar.
 
 ## Etapa 1 v5 (vigente, 0.7.0)
 - Piezas: `scripts/generar_v5.py --ensamble` → `hardware/etapa1-clasificador/{stl,despiece.csv,ensamble*}`; camas `scripts/armar_camas_v5.py` → `impresion/` (CAMAS.md, orden "sin electrónica primero").
 - Docs: `docs/09-clasificador-v5.md`, `docs/11-electronica-etapa1.md` (+ `img/etapa1-cableado.svg`, `img/etapa1-v5.png`).
 - Pines S3: tolva 4,5,6,7; SG90 15; IR 1,2 (ADC1); TCS3200 OUT 14, S2 16, S3 17, S0 18, S1 21; banda STEP 10/DIR 11/EN 12, ref 13.
-- Pendiente: armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil K1C del usuario) no está en el repo.
-- Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/esp32_contador` es de la v4 (lo usan las pruebas).
+- Pendiente: armar, probar motor con carga, calibrar `[CAL-xx]` (firmware 0.8.0), confirmar shield; `Ajustes.3mf` (perfil propio de la K1C) no está en el repo.
+- Archivo: v4 → `hardware/archivo/etapa1-v4/`, probetas v3 → `hardware/archivo/etapa1-v3-canto/`, docs v4 → `docs/archivo/*-v4.md`. `firmware/archivo/esp32_contador_v4` es de la v4 (lo usan las pruebas).
 
 ## Histórico v4 (archivado)
 ### Decisiones / parámetros v4
-- Generador único `scripts/generar_clasificador.py` (manifold3d) → `hardware/etapa1-clasificador/stl/`; visor `scripts/exportar_visor_3d.py` → `docs/ensamble-etapa1.html`.
+- Generador único `scripts/generar_clasificador.py` (manifold3d) → `hardware/etapa1-clasificador/stl/`; visor `scripts/archivo/exportar_visor_3d.py` → `docs/archivo/ensamble-etapa1-v4.html`.
 - Sin tornillos ni soportes: clavijas Ø6 (agujero 6,1; `AJUSTE_PRESION`), llaves R04, bridas.
 - Riel 22°, ranuras 17,5/20,8/22,0/22,8/23,4/24,1/24,9 + extremo (diámetros oficiales Banrep). 9 salidas ≥ 37 mm → 9 vasos Ø34×60, uno por tipo.
 - $500: TCS34725 antes de ranura 6; plato D6 SG90 55° antigua / 125° nueva.
@@ -59,3 +67,17 @@
 
 ## Siguiente paso
 Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y medir; en paralelo, diseñar la banda.
+
+## Etapa 1: montaje y primeras pruebas — 2026-11-02
+- Camas impresas; falta solo A01 (adaptador TCS3200, corte de L01 + cianoacrilato; B01/B03 de `archivo/` obsoletos). Sensor vigente = TCS3200.
+- Firmware de banco que arranca en la placa (COM8/UART0, Arduino-ESP32 3.x, LEDC servo, `pulse_cnt`) subido a `firmware/etapa1_prueba_motor/`; el del repo era la versión vieja que colgaba. `platformio.ini` apunta a pioarduino.
+- Guía: `hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md` (armado, cableado, pio, pruebas f/b, t, o/p, m, d/a).
+- Pendiente: operación (`etapa1_clasificador`) usa espressif32 6.x + CDC_ON_BOOT: adaptar a UART0/pioarduino tras validar banco; cablear; calibrar [CAL-xx] con monedas reales.
+- Siguiente: imprimir A01, cablear, `pio run -t upload`, probar `f`, `m`, `o/p`.
+- 2026-11-03 usuario: $200 antigua (Ø24,4×1,7) atasca el disco y algunas monedas caen en la subida (H01 queda algo inclinado). Hecho: `scripts/generar_ajustes_tolva.py` → `stl/ajustes/` H02b (bolsillo Ø30 + chaflán 0,5) y H04 (cuña de apoyo H01↔L01, 45 cm³). Sin probar con monedas.
+- Confirmado usuario: 9 vasos OK (50×2, 100×2, 200×2, 500×2, 1000×1) + vaso de rechazo = 10. La entrada A1000 (21,67 mm) de `monedas.py` no existe como moneda real (solo se rechazaba); no cambia vasos ni firmware. Grosores reales: $50 N 1,3; $100 N 1,5; $200 N 1,6; $500 N 2,2; $1000 2,7; antiguas $50 Ø21,0×1,3; $100 Ø23,0×1,5; $200 24,4×1,7; $500 Ø23,5×2,0.
+- Siguiente: probar H02b/H04 con monedas reales.
+- 2026-11-03 banco en modo continuo: `AUTO_AL_ARRANCAR 1`, `PARAR_SI_VACIA 0`, espera por bolsillo 1200 ms (config.h/main.cpp de `etapa1_prueba_motor`). Sin compilar aquí; probar en placa. Siguiente: subir y ver ciclo con monedas.
+- 2026-11-03 banco subido a la placa desde el PC (COM8, pio ok). Motor: `GIRO_AL_ARRANCAR 1` gira continuo sin sensores (`g` alterna, `v<pps>` velocidad); `AUTO_AL_ARRANCAR 0`. BUG pendiente: barreras IR leen ~30/4095 (base 26) = sin cablear/LED IR apagado; GPIO13 flota (banda sin montar). Siguiente: cablear barreras, `m`, luego `a`.
+- 2026-11-03 (ronda 1 de pruebas) retirada la cuña H04 (bloqueaba el pasillo H01↔L01) y H02b. Nuevo `stl/ajustes/H02c_disco_6_bolsillos.stl`: 6 bolsillos Ø33, radio 50, 6 radios de apoyo 0,4 mm, bolsillo a 90°; 0 choques con H01/H03. `BOLSILLOS=6` (operación y banco), vacíos=6. 2ª paleta: reimprimir G02. Pendiente: rampa trasera H1 (confirmar por dónde se escapa la moneda), H5 monedas verticales. Siguiente: imprimir H02c, probar con las 7 monedas.
+- 2026-11-03 H04 tope trasero (6 cm³, 40×14×14) y H03d (3,0 mm) en `stl/ajustes/` (generar_ajustes_tolva.py). H1: la moneda sale a veces por la cuña L01-aro H01 sobre el hueco. $1000 en H02c: Ø33 vs 26,7 (3,15 mm/lado); sobresale 0,3 mm del disco → usar H03c/d. Sin probar.

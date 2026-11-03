@@ -29,7 +29,7 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/archivo/etapa1-v4/st
 | `P01_base_extremo` | 2 | Base de ABS de un extremo: dos zócalos para tubo PVC de 3/4" unidos por una viga de 150 mm |
 
 `hardware/archivo/etapa1-v4/stl/ensamble/ensamble_referencia.stl` muestra todo en posición;
-[`docs/ensamble-etapa1.html`](../ensamble-etapa1.html) es el visor 3D con la simulación.
+[`docs/archivo/ensamble-etapa1-v4.html`](ensamble-etapa1-v4.html) es el visor 3D con la simulación.
 
 ## Parámetros fijados
 
@@ -62,7 +62,7 @@ mariposa y bridas de nailon. Detalle y medidas en `hardware/archivo/etapa1-v4/st
 
 Los largos de las tees suponen 11 mm del centro al fondo de la copa (`F_ACC`): mide la tuya y, si cambia, corre el generador.
 
-## Electrónica (firmware/esp32_contador/config.h)
+## Electrónica (firmware/archivo/esp32_contador_v4/config.h)
 
 | Función | GPIO |
 |---|---|

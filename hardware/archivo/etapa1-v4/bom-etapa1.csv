@@ -1,5 +1,5 @@
 cantidad,componente,detalle,uso,nota
-1,ESP32 DevKit V1,30 pines,controlador de la etapa,pines en firmware/esp32_contador/config.h
+1,ESP32 DevKit V1,30 pines,controlador de la etapa,pines en firmware/archivo/esp32_contador_v4/config.h
 1,Motor 28BYJ-48 + driver ULN2003,5 V,disco dosificador de la tolva,1 moneda cada 1.5 s
 1,Micro-servo SG90,9 g,plato basculante de D6 ($500),55 grados antigua / 125 grados nueva
 1,Sensor de color TCS34725,I2C 0x29,separa $500 antigua y nueva,va en el puente B03 antes de la ranura 6

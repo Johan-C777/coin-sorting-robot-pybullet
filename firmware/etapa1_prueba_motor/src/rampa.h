@@ -38,7 +38,7 @@ class Rampa {
   }
   bool ocupado() const { return moviendo_ || post_pend_; }
   long pos() const { return pos_; }
-  void cero(long p = 0) { portENTER_CRITICAL(&mux_); pos_ = destino_ = p; portEXIT_CRITICAL(&mux_); }
+  void cero(long p = 0) { portENTER_CRITICAL(&mux_); pos_ = p; destino_ = p; portEXIT_CRITICAL(&mux_); }
   void alEnergizar(void (*f)()) { energizar_ = f; }
 
   void run() {

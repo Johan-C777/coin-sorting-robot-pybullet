@@ -5,6 +5,9 @@ entre qué marcas cae cada una y con eso se fijan los anchos de las ranuras del 
 
     python3 scripts/generar_cuna_prueba.py      # -> hardware/archivo/etapa1-v3-canto/P00_cuna_calibracion.stl
 """
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1]))
 import generar_clasificador as g
 from generar_clasificador import B, ALA, ESP_BASE, ALTO_PARED, ESP_PARED, PERALTE_T, ALTO_LABIO, caja, prisma_yz, seccion, union
 
