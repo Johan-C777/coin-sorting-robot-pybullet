@@ -12,7 +12,7 @@ Reemplaza la banda de cadena de la v3 (46 piezas, 1.506 g). **No se compra nada.
 
 ## Qué se usa de la casa
 
-- Hilo de coser grueso de poliéster (doblado), hilo dental o cordón fino: unos 3 m. Que no estire.
+- **Hilo: caña de pescar trenzada (PE) de 0,2 a 0,3 mm (10 a 20 lb), unos 3 m. Es lo único que conviene comprar (unos pocos dólares).** Ver "Qué hilo" abajo. Si no, hilo de coser grueso de poliéster en 4 cabos, con peor precisión.
 - Cinta de doble cara o cinta de enmascarar ancha para pegar el pie del riel a la mesa.
 - Una brida plástica o una liga gruesa para sujetar el motor.
 - Una vela, jabón seco o cera para frotar la cabeza del riel.
@@ -26,7 +26,7 @@ Reemplaza la banda de cadena de la v3 (46 piezas, 1.506 g). **No se compra nada.
 | 2 | Tramos 1, 2 y 4 del riel | PLA+ |
 | 3 | Tramo 5, bloque del motor, bloque del extremo | PLA+ (tramo) y PETG (bloques) |
 
-`camas/` trae las 3 camas acomodadas; `stl/` trae cada pieza en su posición de impresión. Con la cama 1 puedes probar el carro sobre el tramo 3 **antes de imprimir el resto**: debe resbalar con un dedo, sin juego visible. Si queda justo, lija la cabeza del riel con una lija de uñas; si baila o traba, dime y cambio el juego (0,5 mm hoy).
+`camas/` trae las 3 camas acomodadas; `stl/` trae cada pieza en su posición de impresión. Con la cama 1 puedes probar el carro sobre el tramo 3 **antes de imprimir el resto**: debe resbalar con un dedo, sin juego visible. Si queda justo, lija la cabeza del riel con una lija de uñas; si baila o traba, se cambia el juego `CL` (0,5 mm hoy) en `generador/generar_v5.py`.
 
 El PETG va en lo que está junto al motor y gira. El riel va en PLA+ porque no trabaja en caliente y PETG sobre PLA+ desliza mejor que PETG sobre PETG.
 
@@ -81,7 +81,7 @@ La resolución depende del hilo real: **calibra** mandando 20.000 pasos y midien
 4. Desliza el carro por el extremo libre del tramo 5 y encaja el bloque del extremo.
 5. Pega el pie del riel a la mesa con cinta, centrado en la banda y recto con una regla.
 6. Pon el motor en su cuna con la brida; monta el tambor en el eje (el agujero lleva el plano de la D del eje) y el eje octogonal con la polea libre entre las mejillas.
-7. Hilo: pasa un cabo por el agujero del lado Y = 18,5 hasta el otro extremo del carro y anúdalo; dale 3 vueltas al tambor, baja por el tramo de abajo, rodea la polea y sube; pasa el otro cabo por el agujero del lado Y = 23,5 y anúdalo. Tensa con las cuñas hasta que el hilo suene como una cuerda floja.
+7. Hilo: pasa un cabo por el agujero del lado Y = 18,5 hasta el otro extremo del carro y anúdalo; dale 3 vueltas al tambor, baja por el tramo de abajo, rodea la polea y sube; pasa el otro cabo por el agujero del lado Y = 23,5 y anúdalo. Tensa con las cuñas: con trenzado, una cuña de 1 mm da unos 3 N; busca 3 a 5 N (el hilo suena como cuerda de guitarra floja). Anuda con 3 nudos y una gota de pegamento.
 8. Frota la cabeza del riel con cera o jabón seco.
 
 ## Comprobaciones hechas en el modelo
@@ -101,3 +101,18 @@ La resolución depende del hilo real: **calibra** mandando 20.000 pasos y midien
 ## Archivos
 
 `generador/` tiene `generar_v5.py`, `exportar_v5.py`, `numeros_v5.py`, `masa_v5.py`, `revisar_v5.py`, `choques_v5.py`, `torre_ref.py`, `analisis.py`, `capas.py` y `camas.py`; necesitan `pip install manifold3d numpy`. `visor/visor-v5.html` es el visor 3D.
+
+## Qué hilo (simulación, `generador/sim_hilo.py`)
+
+El agarre en el tambor no es el problema: con 3 vueltas basta una tensión del lazo de 3 a 4,5 N aunque el hilo sea liso (μ entre 0,08 y 0,3). **El problema es que el hilo estira**: el carro queda atrás de donde lo manda el motor en (fricción del carro × elasticidad del hilo), y más aún en el extremo lejano del riel.
+
+Error de parada tras mover 38 mm, con el carro y el cartucho a 0,6 kg (valores de EA estimados de hojas típicas, no medidos):
+
+| Hilo | Fricción del carro 1 N | 2,5 N | 5 N |
+|---|---|---|---|
+| Costura, 1 cabo | hasta 4 mm | hasta 8 mm | hasta 38 mm |
+| Costura, 4 cabos | hasta 2 mm | hasta 2,4 mm | hasta 8 mm |
+| Nylon liso 0,4 mm | hasta 0,6 mm | hasta 2,3 mm | hasta 5 mm |
+| **Trenzado PE de caña** | **0,0 mm** | **0,3 mm** | **0,6 mm** |
+
+El trenzado también deja sin problema la tensión: la fuerza máxima en el hilo es 4 N en una carrera larga. El carro debe deslizar con un empujón de dedo (fricción real esperada: 1 a 1,5 N con cera).
