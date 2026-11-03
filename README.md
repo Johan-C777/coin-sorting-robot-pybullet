@@ -51,10 +51,14 @@ está en la fase de montaje físico.**
 | Firmware de operación | ✅ Compila para ESP32-S3 en CI | RAM 6,5 % y flash 9,8 % ([job de CI](.github/workflows/pruebas.yml)) |
 | Impresión | ✅ Completa | Las [8 camas](hardware/etapa1-clasificador/impresion/CAMAS.md) de la Creality K1C: 24 piezas en PLA+, PETG y PLA |
 | Electrónica | ✅ Completa | [Pines](firmware/etapa1_clasificador/include/pines.h), [lista de conexiones](hardware/etapa1-clasificador/esquematico/conexiones.csv) y presupuesto de potencia, verificados por prueba automática |
-| Montaje y calibración física | ▶ Fase actual | [Procedimiento de puesta en marcha](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
+| Montaje y pruebas físicas | ▶ Fase actual | Torre armada; [primera ronda de pruebas](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias y 6 hallazgos mecánicos en corrección (rampa trasera, disco de 6 bolsillos, compuerta doble) |
+| Calibración física | ⏳ Después de las correcciones | [Procedimiento](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
 
 Las cifras de desempeño de este repositorio salen de la simulación física y de pruebas
-automáticas, y así se indica en cada caso. Las mediciones con monedas reales y la matriz
+automáticas, y así se indica en cada caso. Las pruebas con la torre armada están en
+[12-pruebas-fisicas-etapa1.md](docs/12-pruebas-fisicas-etapa1.md).
+
+<p align="center"><img src="docs/pruebas/etapa1/img/montaje_final.jpg" alt="Torre v5 armada" width="600"><br><sub>Torre v5 armada con el ESP32-S3, primera ronda de pruebas.</sub></p> Las mediciones con monedas reales y la matriz
 de confusión se registran en [05-pruebas.md](docs/05-pruebas.md) durante la calibración.
 
 ---
@@ -575,7 +579,8 @@ coin-sorting-robot-pybullet/
 
 - [x] Etapa 1: diseño de la medición, CAD v5, simulación, electrónica y firmware de operación
 - [x] Etapa 1: todas las piezas impresas (8 camas, 24 piezas)
-- [ ] Etapa 1: montaje, calibración `[CAL-01..12]` y prueba de 100 monedas, en curso ([TODO.md](TODO.md))
+- [x] Etapa 1: torre armada y primera ronda de pruebas mecánicas ([registro](docs/12-pruebas-fisicas-etapa1.md))
+- [ ] Etapa 1: correcciones H1 a H6, calibración `[CAL-01..12]` y prueba de 100 monedas ([TODO.md](TODO.md))
 - [x] Etapa 2: propuesta de banda en visor 3D
 - [ ] Etapa 2: diseño de detalle e integración con el cartucho
 - [x] Etapa 3: cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF

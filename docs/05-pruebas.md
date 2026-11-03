@@ -1,5 +1,8 @@
 # Pruebas
 
+> Las pruebas físicas con la torre armada (videos, fotos y hallazgos) están en
+> [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md).
+
 Todo lo que se afirma en la documentación está respaldado por una prueba que se
 corre en el PC, sin hardware. En GitHub las corre Actions en cada push
 (`.github/workflows/pruebas.yml`).
