@@ -4,7 +4,7 @@
 | Etapa | Estado |
 |---|---|
 | 1 Tolva + selección | **v5** diseño completo y **todas las camas impresas**; en montaje y calibración. Firmware de operación `firmware/etapa1_clasificador/` (0.8.0, PR #7 fusionado) |
-| 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
+| 2 Banda transportadora | En rediseño: v6 con cremallera modelada y revisada (0 choques, 278 g, sin soportes), sin imprimir; v3 a v5 en el proceso de diseño |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
 ## Repositorio ordenado (0.9.1) — 2026-11-03

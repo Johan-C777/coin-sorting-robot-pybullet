@@ -90,8 +90,8 @@ Mecanismos estudiados hasta ahora:
 |---|---|---|
 | v3 | Cadena de tablillas impresa | 46 piezas en 10 camas (≈ 1,5 kg de filamento); [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html) |
 | v4 | Carro sobre dos varillas, movido por hilo | ≈ 143 g de PETG más dos varillas compradas |
-| v5 | Riel impreso por tramos, carro e hilo | Sin compras (≈ 268 g); queda la duda de si el hilo da la precisión de posición necesaria |
-| Siguiente | Cremallera impresa o cable de acero | En evaluación |
+| v5 | Riel impreso por tramos, carro e hilo | Sin compras (≈ 268 g); se dejó porque el hilo estira y limita la precisión de posición ([visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/proceso/v5-riel.html)) |
+| **v6** | Riel impreso con cremallera y motor con piñón sobre el carro | Vigente: sin compras, ≈ 278 g, sin soportes; 0 choques en el modelo, pendiente de la primera prueba física ([visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v6-cremallera.html)) |
 
 Los archivos de la banda están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
 
@@ -113,6 +113,7 @@ Portada: **https://johan-c777.github.io/coin-sorting-robot-pybullet/**
 | Demo | Qué muestra |
 |---|---|
 | [**Clasificador v5 · visor 3D**](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) | La torre completa pieza por pieza: despiece, ficha de cada pieza, camino de la moneda y simulación del ciclo |
+| [**Etapa 2 · banda v6 (cremallera)**](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v6-cremallera.html) | El riel con cremallera, el carro y el motor con piñón: recorrido, corte, piezas, cálculos y armado |
 | [**Pruebas físicas de la etapa 1**](docs/12-pruebas-fisicas-etapa1.md) | Videos y fotos de la torre armada con monedas reales |
 | [**Sistema completo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/simulacion_sistema_completo.html) | Las tres etapas: tolva, banda, punto A, los cuatro obstáculos y el rack ordenado |
 | [**Memoria de cálculo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html) | Cinemática, espacio de trabajo, trayectorias, pares y servos del brazo, con calculadoras |
@@ -126,6 +127,8 @@ Se conservan para ver cómo evolucionó el diseño. Ninguna es la versión que s
 | [Etapa 1 · v1](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/simulacion-etapa1-v1.html) | Riel con varillas M5 y una estación por diámetro |
 | [Etapa 1 · v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/ensamble-etapa1-v4.html) | Riel de 8 ranuras con ductos de PVC; no separaba las dos $500 ([por qué](hardware/archivo/README.md)) |
 | [Etapa 2 · v3](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html) | Banda de cadena de tablillas impresa |
+| [Etapa 2 · v4](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/proceso/v4-varillas.html) | Carro sobre varillas de acero con hilo |
+| [Etapa 2 · v5](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/proceso/v5-riel.html) | Riel impreso con carro movido por hilo |
 | [Entrega del segundo parcial](docs/00-entrega-avances.md) | Estado del proyecto en la entrega anterior |
 
 Son archivos HTML autónomos (Three.js) en [`docs/`](docs); no requieren instalación.
@@ -423,7 +426,7 @@ flowchart LR
 | Etapa | Qué hace | Estado | Dónde |
 | --- | --- | --- | --- |
 | **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
-| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | En rediseño, sin piezas impresas ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
+| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | En rediseño: v6 (cremallera) modelada y revisada, sin piezas impresas ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
 | **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; diseño en SolidWorks y piezas en impresión | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
