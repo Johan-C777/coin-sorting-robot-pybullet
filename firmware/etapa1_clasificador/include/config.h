@@ -28,7 +28,7 @@ constexpr uint32_t ANTIRREBOTE_US = 300;       // modo digital
 // ---- Tolva: 28BYJ-48 en paso completo, 2 bobinas (máximo par) -------------------------
 // Reductora real 63,68395:1 -> 2037,8868 pasos/vuelta. Se acumula la fracción.
 constexpr float TOLVA_PASOS_VUELTA = 2037.8868f;
-constexpr int BOLSILLOS = 4;                  // disco H02d (4 bolsillos Ø36)
+constexpr int BOLSILLOS = 5;                  // disco H02e (5 bolsillos Ø40)
 constexpr int8_t TOLVA_SENTIDO = 1;            // [CAL-09] -1 si el disco gira al revés
 constexpr float TOLVA_V0 = 180;                // [CAL-09] pasos/s de arranque (pull-in)
 constexpr float TOLVA_VMAX = 800;              // [CAL-09] >>> barrido 't' con carga; usar 75 % del límite

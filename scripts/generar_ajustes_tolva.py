@@ -3,7 +3,7 @@
   H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), con entrada achaflanada, 6 radios de apoyo
         de 0,4 mm en la cara trasera y un bolsillo en la posición de salida (90°). Mismo eje,
         mismo grosor total (2,4) y misma distancia al plato: sirve con H01 y con H03a/b/c.
-  H02d Disco de 4 bolsillos Ø36 (misma geometría que H02c; bolsillo a 90°, radio de paso 42).
+  H02e Disco de 5 bolsillos Ø40 (misma geometría que H02c; bolsillo a 90°, radio de paso 42).
   H04  Tope trasero: bloque que rellena la cuña abierta entre la pista L01 y el aro de H01 por encima del
         hueco de salida (t = 44…58 mm sobre la repisa), por donde la moneda rebota y cae detrás de L01.
         Se pega con cianoacrilato sobre la cara de la placa de L01 (cara plana contra la placa).
@@ -74,12 +74,12 @@ if __name__ == "__main__":
     m = g.a_cama(d, [g.UD, g.WD, g.ND])
     print("H02c", [round(b - a, 1) for a, b in zip(m.bounding_box()[:3], m.bounding_box()[3:])], round(m.volume() / 1000, 1), "cm3", m.status().name)
     g.escribir_stl(m, SAL / "H02c_disco_6_bolsillos.stl", "H02c")
-    d4 = disco_c(4, 36.0, 45.5)                         # H02d: 4 bolsillos Ø36 (la $1.000 no entraba en los de Ø33)
-    print("H02d cuerpos", len(d4.decompose()), "| choque H01", round((d4 ^ H).volume(), 3),
+    d4 = disco_c(5, 40.0, 45.5)                         # H02e: 5 bolsillos Ø40 (la $1.000 no entraba en los de Ø33; Ø40 < 2×21 mm: no caben 2 monedas)
+    print("H02e cuerpos", len(d4.decompose()), "| choque H01", round((d4 ^ H).volume(), 3),
           "| H03a/b/c/d", [round((d4 ^ g.rascador(x)).volume(), 3) for x in (*g.RASC_GAP, 3.0)])
     m4 = g.a_cama(d4, [g.UD, g.WD, g.ND])
-    print("H02d", [round(b - a, 1) for a, b in zip(m4.bounding_box()[:3], m4.bounding_box()[3:])], round(m4.volume() / 1000, 1), "cm3", m4.status().name)
-    g.escribir_stl(m4, SAL / "H02d_disco_4_bolsillos.stl", "H02d")
+    print("H02e", [round(b - a, 1) for a, b in zip(m4.bounding_box()[:3], m4.bounding_box()[3:])], round(m4.volume() / 1000, 1), "cm3", m4.status().name)
+    g.escribir_stl(m4, SAL / "H02e_disco_5_bolsillos.stl", "H02e")
     t = tope()
     print("H04 tope: choques H01", round((t ^ g.base_tolva()).volume(), 3), "L01", round((t ^ g.pista()).volume(), 3),
           "H02", round((t ^ g.disco()).volume(), 3), "vol", round(t.volume() / 1000, 2), "cm3")

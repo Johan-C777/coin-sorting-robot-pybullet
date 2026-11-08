@@ -24,7 +24,7 @@ constexpr uint8_t PIN_EN       = 12;            // activo en bajo
 // Reductora real 63,68395:1 -> 2037,8868 pasos/vuelta (no 2048). Se acumula la
 // fracción para que el disco no se desfase tras muchas vueltas.
 constexpr float  TOLVA_PASOS_VUELTA = 2037.8868f;
-constexpr int    BOLSILLOS          = 4;        // disco H02d (4 bolsillos Ø36)
+constexpr int    BOLSILLOS          = 5;        // disco H02e (5 bolsillos Ø40)
 constexpr int8_t TOLVA_SENTIDO      = 1;        // -1 si el disco gira al revés
 constexpr float  TOLVA_V0   = 150;               // pasos/s de arranque/parada (pull-in)
 constexpr float  TOLVA_VMAX = 600;               // pasos/s de crucero; sube con 'v'
