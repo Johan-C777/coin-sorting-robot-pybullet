@@ -85,6 +85,6 @@ Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y 
 ## Disco H02e (5 bolsillos Ø40) — 2026-11-08
 - La $1.000 seguía sin entrar en H02c (6×Ø33). Nuevo `stl/ajustes/H02e_disco_5_bolsillos.stl` (`generar_ajustes_tolva.py`): 5 bolsillos Ø40 (<2×21 mm: no caben 2 monedas), radio de paso 42, bolsillo de salida a 90°, radio del disco 45,5 (antes 50). `BOLSILLOS=5` en `etapa1_clasificador/include/config.h` y `etapa1_prueba_motor/src/config.h`; pasos/bolsillo = 2037,9/5 ≈ 407,6 (automático).
 - Bug hallado: H02/H02c (R 50–51) chocan al girar con la esquina de la almohadilla de H01 (≈25 mm³, ángulos 35–55°); el chequeo estático no lo veía. H02e barrido 0–72° sin choques con H01 ni H03a–d. Posible causa de los atascos H3.
-- Voladizo corregido: el relieve trasero de 0,4 mm dejaba 389 mm² colgando; H02c y H02e ahora con cara trasera plana (0 mm²). Lubricar/lijar la cara trasera por fricción.
+- Voladizo corregido (también el techo cerrado del agujero del eje, ahora pasante): el relieve trasero de 0,4 mm dejaba 389 mm² colgando; H02c y H02e ahora con cara trasera plana (0 mm²). Lubricar/lijar la cara trasera por fricción.
 - Pendiente: probar H02e con las 7 monedas; si la $1.000 sigue sin entrar, el fallo no es el diámetro (revisar profundidad 2,4 vs grosor 2,7 y rascador H03d); H1 rampa trasera, H4 2ª paleta G02, H5 monedas verticales, H6 jumpers largos, H3 lijar/lubricar; no compilado el firmware aquí.
 - Siguiente: imprimir H02e (+H03d, H04), probar.

@@ -43,8 +43,8 @@ def disco_c(N=N, POCKET=POCKET, R=50.0):
     m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))                        # cubo hacia el frente
     m += Manifold.cylinder(E, 12.0)
     h = g.HOLGURA
-    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 5)
-    eje = eje ^ Manifold.cylinder(E + 7, 2.5 + h / 2).translate((0, 0, -1))
+    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 8)   # pasante: sin techo cerrado (puente de 16 mm²)
+    eje = eje ^ Manifold.cylinder(E + 10, 2.5 + h / 2).translate((0, 0, -1))
     return g.marco_disco((m - eje).translate((0, 0, 0.05)))
 
 
