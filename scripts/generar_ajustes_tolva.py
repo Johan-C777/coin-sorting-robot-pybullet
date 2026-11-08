@@ -18,7 +18,7 @@ import generar_v5 as g
 
 SAL = g.SALIDA / "stl" / "ajustes"
 N, POCKET, CHAFLAN = 6, 33.0, 0.6
-RELIEVE, RADIO_W, CUBO_R = 0.4, 4.0, 13.0       # altura de los radios, semiancho, radio del apoyo central
+RELIEVE, RADIO_W, CUBO_R = 0.0, 4.0, 13.0       # sin relieve: cara trasera plana sobre la cama (con 0,4 había 389 mm² de voladizo)
 
 
 def rot(a):
