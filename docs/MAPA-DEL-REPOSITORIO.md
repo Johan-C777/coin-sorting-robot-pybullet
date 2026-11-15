@@ -79,7 +79,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `etapa1-clasificador/impresion/` | 8 camas `.3mf` para la Creality K1C y `CAMAS.md` | Vigente |
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
 | `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
-| `etapa2-transporte/` | Medidas de interfaz para la banda | En rediseño |
+| `etapa2-transporte/` | Banda: versión vigente v6 (cremallera) y versiones v3 a v5 del proceso | En rediseño |
 | `etapa3-brazo/` | Planos del brazo (PDF de SolidWorks), puesto del rack, bandeja y BOM | Diseñado |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |

@@ -1,5 +1,11 @@
 # Cambios
 
+## 0.10.1 · Etapa 2: banda v6 con cremallera
+
+- `hardware/etapa2-transporte/v6-cremallera/`: riel con cremallera de módulo 1,5 y motor con piñón sobre el carro, 7 piezas sin soportes (≈ 278 g, sin compras), camas para la K1C, pieza de prueba del engrane, generador y comprobaciones de choques, voladizos y holguras.
+- Visor 3D `docs/etapa2/v6-cremallera.html`; v4 y v5 pasan a `docs/etapa2/proceso/`.
+- La etapa 2 sigue en rediseño: nada impreso.
+
 ## 0.10.0 · Entrega de avances de las etapas 1 y 2
 
 - README: entrega de las etapas 1 y 2, equipo, sección de la etapa 2 (requisitos, mecanismos estudiados y estado de rediseño) y de la etapa 3.
