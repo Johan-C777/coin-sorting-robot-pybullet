@@ -3,9 +3,12 @@
   H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), con entrada achaflanada, 6 radios de apoyo
         de 0,4 mm en la cara trasera y un bolsillo en la posición de salida (90°). Mismo eje,
         mismo grosor total (2,4) y misma distancia al plato: sirve con H01 y con H03a/b/c.
-  H04  Tope trasero: bloque que rellena la cuña abierta entre la pista L01 y el aro de H01 por encima del
-        hueco de salida (t = 44…58 mm sobre la repisa), por donde la moneda rebota y cae detrás de L01.
-        Se pega con cianoacrilato sobre la cara de la placa de L01 (cara plana contra la placa).
+  H02e Disco de 5 bolsillos Ø40 (misma geometría que H02c; bolsillo a 90°, radio de paso 42).
+  H04  Tope trasero: rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01,
+        centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia
+        arriba no salga por la cuña abierta entre L01 y el aro de H01 (la moneda mide ≤ 2,7 mm).
+  G03  Paleta plana: rectángulo extruido de 34 × 34 × 2,5 mm (medidas de G02 sin bisagra, cubo ni rebaje del servo)
+        para pegar encima de G02 y tapar los huecos.
   H03d  Rascador de 3,0 mm: más holgura para la $1.000 (2,7 mm de grosor) que el de 2,8.
 Salida: hardware/etapa1-clasificador/stl/ajustes/
 """
@@ -17,15 +20,15 @@ import generar_v5 as g
 
 SAL = g.SALIDA / "stl" / "ajustes"
 N, POCKET, CHAFLAN = 6, 33.0, 0.6
-RELIEVE, RADIO_W, CUBO_R = 0.4, 4.0, 13.0       # altura de los radios, semiancho, radio del apoyo central
+RELIEVE, RADIO_W, CUBO_R = 0.0, 4.0, 13.0       # sin relieve: cara trasera plana sobre la cama (con 0,4 había 389 mm² de voladizo)
 
 
 def rot(a):
     return np.array([[math.cos(a), -math.sin(a), 0, 0], [math.sin(a), math.cos(a), 0, 0], [0, 0, 1, 0]])
 
 
-def disco_c():
-    E, R, RP = g.DISCO_E, 50.0, g.R_PASO       # radio 50 (H02 era 51): holgura con el aro de H01
+def disco_c(N=N, POCKET=POCKET, R=50.0):
+    E, RP = g.DISCO_E, g.R_PASO                # radio 50 (H02 era 51): holgura con el aro de H01
     r = POCKET / 2
     m = Manifold.cylinder(E - RELIEVE, R).translate((0, 0, RELIEVE))           # cuerpo, 0,4 sobre el plato
     m += Manifold.cylinder(RELIEVE + 0.01, CUBO_R)                              # apoyo central
@@ -42,8 +45,8 @@ def disco_c():
     m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))                        # cubo hacia el frente
     m += Manifold.cylinder(E, 12.0)
     h = g.HOLGURA
-    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 5)
-    eje = eje ^ Manifold.cylinder(E + 7, 2.5 + h / 2).translate((0, 0, -1))
+    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 8)   # pasante: sin techo cerrado (puente de 16 mm²)
+    eje = eje ^ Manifold.cylinder(E + 10, 2.5 + h / 2).translate((0, 0, -1))
     return g.marco_disco((m - eje).translate((0, 0, 0.05)))
 
 
@@ -54,13 +57,11 @@ def inflar(m, d=0.3):
     return r
 
 
-S0, S1, T0, T1, NMAX = 2.0, 42.0, 44.0, 58.0, 14.0
+S0, S1, T0, T1, NTOPE = 2.0, 42.0, 48.0, 58.0, 3.0
 
 
 def tope():
-    caja = g.marco_pista(g.caja(S0, S1, T0, T1, 0.0, NMAX))
-    m = caja - inflar(g.base_tolva()) - inflar(g.disco())
-    return max(m.decompose(), key=lambda c: c.volume())
+    return g.marco_pista(g.caja(S0, S1, T0, T1, 0.0, NTOPE))
 
 
 if __name__ == "__main__":
@@ -73,13 +74,21 @@ if __name__ == "__main__":
     m = g.a_cama(d, [g.UD, g.WD, g.ND])
     print("H02c", [round(b - a, 1) for a, b in zip(m.bounding_box()[:3], m.bounding_box()[3:])], round(m.volume() / 1000, 1), "cm3", m.status().name)
     g.escribir_stl(m, SAL / "H02c_disco_6_bolsillos.stl", "H02c")
+    d4 = disco_c(5, 40.0, 45.5)                         # H02e: 5 bolsillos Ø40 (la $1.000 no entraba en los de Ø33; Ø40 < 2×21 mm: no caben 2 monedas)
+    print("H02e cuerpos", len(d4.decompose()), "| choque H01", round((d4 ^ H).volume(), 3),
+          "| H03a/b/c/d", [round((d4 ^ g.rascador(x)).volume(), 3) for x in (*g.RASC_GAP, 3.0)])
+    m4 = g.a_cama(d4, [g.UD, g.WD, g.ND])
+    print("H02e", [round(b - a, 1) for a, b in zip(m4.bounding_box()[:3], m4.bounding_box()[3:])], round(m4.volume() / 1000, 1), "cm3", m4.status().name)
+    g.escribir_stl(m4, SAL / "H02e_disco_5_bolsillos.stl", "H02e")
     t = tope()
-    print("H04 tope: choques H01", round((t ^ g.base_tolva()).volume(), 3), "L01", round((t ^ g.pista()).volume(), 3),
-          "H02", round((t ^ g.disco()).volume(), 3), "vol", round(t.volume() / 1000, 2), "cm3")
-    R = np.array([g.SV, g.TV, g.NV])            # cara contra la placa (n = 0) sobre la cama: z = n
-    q = g.a_cama(t, R)
-    print("H04", [round(b - a, 1) for a, b in zip(q.bounding_box()[:3], q.bounding_box()[3:])], q.status().name, len(q.decompose()))
+    print("H04 tope: choques H01", round((t ^ inflar(g.base_tolva())).volume(), 3), "L01", round((t ^ g.pista()).volume(), 3),
+          "H02", round((t ^ inflar(g.disco())).volume(), 3))
+    q = g.a_cama(t, np.array([g.SV, g.TV, g.NV]))          # cara contra la placa (n = 0) sobre la cama: z = n
+    print("H04", [round(b - a, 1) for a, b in zip(q.bounding_box()[:3], q.bounding_box()[3:])], q.status().name)
     g.escribir_stl(q, SAL / "H04_tope_trasero.stl", "H04")
+    pal = Manifold.cube((2 * g.PAL, 2 * g.PAL, g.PAL_E))                 # 34 x 34 x 2,5
+    g.escribir_stl(pal, SAL / "G03_paleta_plana.stl", "G03")
+    print("G03", [round(b - a, 1) for a, b in zip(pal.bounding_box()[:3], pal.bounding_box()[3:])])
     r = g.rascador_cama(3.0)
     g.verificar(r, "H03d")
     g.escribir_stl(r, SAL / "H03d_rascador_3mm0.stl", "H03d")

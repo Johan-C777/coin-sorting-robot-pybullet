@@ -3,8 +3,8 @@
 ## Etapas
 | Etapa | Estado |
 |---|---|
-| 1 Tolva + selección | **v5** diseño completo y **todas las camas impresas**; en montaje y calibración. Firmware de operación `firmware/etapa1_clasificador/` (0.8.0, PR #7 fusionado) |
-| 2 Banda transportadora | Cadena de tablillas impresa, PR #5 abierto |
+| 1 Tolva + selección | **v5** impresa y armada; correcciones H02e (5 bolsillos Ø40), H04, G03 impresas y en prueba. Firmware `firmware/etapa1_clasificador/` (BOLSILLOS = 5) |
+| 2 Banda transportadora | En rediseño: v6 con cremallera modelada y revisada (0 choques, 278 g, sin soportes), sin imprimir; v3 a v5 en el proceso de diseño |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
 ## Repositorio ordenado (0.9.1) — 2026-11-03
@@ -81,3 +81,18 @@ Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y 
 - 2026-11-03 banco subido a la placa desde el PC (COM8, pio ok). Motor: `GIRO_AL_ARRANCAR 1` gira continuo sin sensores (`g` alterna, `v<pps>` velocidad); `AUTO_AL_ARRANCAR 0`. BUG pendiente: barreras IR leen ~30/4095 (base 26) = sin cablear/LED IR apagado; GPIO13 flota (banda sin montar). Siguiente: cablear barreras, `m`, luego `a`.
 - 2026-11-03 (ronda 1 de pruebas) retirada la cuña H04 (bloqueaba el pasillo H01↔L01) y H02b. Nuevo `stl/ajustes/H02c_disco_6_bolsillos.stl`: 6 bolsillos Ø33, radio 50, 6 radios de apoyo 0,4 mm, bolsillo a 90°; 0 choques con H01/H03. `BOLSILLOS=6` (operación y banco), vacíos=6. 2ª paleta: reimprimir G02. Pendiente: rampa trasera H1 (confirmar por dónde se escapa la moneda), H5 monedas verticales. Siguiente: imprimir H02c, probar con las 7 monedas.
 - 2026-11-03 H04 tope trasero (6 cm³, 40×14×14) y H03d (3,0 mm) en `stl/ajustes/` (generar_ajustes_tolva.py). H1: la moneda sale a veces por la cuña L01-aro H01 sobre el hueco. $1000 en H02c: Ø33 vs 26,7 (3,15 mm/lado); sobresale 0,3 mm del disco → usar H03c/d. Sin probar.
+- 2026-11-03 H04 pasa a rectángulo simple 40×10×3 (t=48…58 sobre L01); H03d retirado; nueva G03 paleta plana 34×34×2,5 para pegar sobre G02. Sin probar.
+- 2026-11-03 H02c rehecho igual que H02 (cara trasera plana, sin relieve ni chaflán, 16,3 mm² de voladizo = igual que el anterior): solo 6 bolsillos Ø33, radio 50.
+
+## Disco H02e (5 bolsillos Ø40) — 2026-11-08
+- La $1.000 seguía sin entrar en H02c (6×Ø33). Nuevo `stl/ajustes/H02e_disco_5_bolsillos.stl` (`generar_ajustes_tolva.py`): 5 bolsillos Ø40 (<2×21 mm: no caben 2 monedas), radio de paso 42, bolsillo de salida a 90°, radio del disco 45,5 (antes 50). `BOLSILLOS=5` en `etapa1_clasificador/include/config.h` y `etapa1_prueba_motor/src/config.h`; pasos/bolsillo = 2037,9/5 ≈ 407,6 (automático).
+- Bug hallado: H02/H02c (R 50–51) chocan al girar con la esquina de la almohadilla de H01 (≈25 mm³, ángulos 35–55°); el chequeo estático no lo veía. H02e barrido 0–72° sin choques con H01 ni H03a–d. Posible causa de los atascos H3.
+- Voladizo corregido (también el techo cerrado del agujero del eje, ahora pasante): el relieve trasero de 0,4 mm dejaba 389 mm² colgando; H02c y H02e ahora con cara trasera plana (0 mm²). Lubricar/lijar la cara trasera por fricción.
+- Pendiente: probar H02e con las 7 monedas; si la $1.000 sigue sin entrar, el fallo no es el diámetro (revisar profundidad 2,4 vs grosor 2,7 y rascador H03d); H1 rampa trasera, H4 2ª paleta G02, H5 monedas verticales, H6 jumpers largos, H3 lijar/lubricar; no compilado el firmware aquí.
+- Siguiente: imprimir H02e (+H03d, H04), probar.
+
+## Etapas 1 y 2 montadas (0.11.0) — 2026-11-15
+- Integradas las ramas de H04/G03, H02c/H02e y banda v3–v6. Banda v7 en `hardware/etapa2-transporte/v7-motor-fijo/` (42,44 pasos/mm, carrera 774 mm, rechazo u = 342). v6 al proceso.
+- Visores: `docs/etapa2/v7-motor-fijo.html`, `docs/visor-etapas-1-2.html` (generador `scripts/visor_etapas/`).
+- Pendiente: fijar el NEMA17 en su soporte, que el piñón no resbale en el eje, calibrar pasos/mm de la banda (`HABILITAR_BANDA 1`, [CAL-11]), probar H02e/H04/G03 con monedas, IR y TCS3200 con jumpers largos.
+- Siguiente: corregir los fallos que salgan en las pruebas de ambas etapas.

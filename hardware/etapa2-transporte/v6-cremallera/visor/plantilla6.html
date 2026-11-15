@@ -1,0 +1,360 @@
+<title>Cremallera Impresa v6</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@400;500&display=swap">
+<style>
+.dim{font:500 3px var(--f-mono);fill:var(--ink2)}
+.sv-motor{fill:var(--stage);stroke:var(--ink);stroke-width:.35}
+.sv-pinon{fill:#c4301f;fill-opacity:.7;stroke:var(--ink);stroke-width:.3}
+.sv-ref{stroke:var(--ink2);stroke-width:.3;stroke-dasharray:2 1.5;fill:none}
+.sv-riel{fill:var(--rail);stroke:var(--ink);stroke-width:.35}
+.sv-carro{fill:var(--accent);fill-opacity:.55;stroke:var(--ink);stroke-width:.35}
+.sv-mesa{stroke:var(--ink2);stroke-width:.5}
+.lista-i{display:flex;gap:8px;align-items:center;font-size:14px}
+.lista-i .m{color:var(--ink2);margin-left:auto}
+/* Visor de la etapa 2 v6: escena 3D arriba, ficha y control del carro al lado, hoja de compras y cálculos debajo. */
+:root{
+  --bg:#eceee9; --panel:#f6f7f4; --ink:#1b2125; --ink2:#55606a; --line:#cfd4d0;
+  --accent:#c4570a; --accent-ink:#ffffff; --stage:#dfe3de; --ok:#2a7d4f; --bad:#b3261e; --rail:#9db8a6;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
+  --f-body:"Barlow",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --ok:#5cc58a; --bad:#ff7a70; --rail:#3f6a52; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1316; --panel:#151c20; --ink:#e6eae8; --ink2:#93a09f; --line:#26323a;
+  --accent:#f0a23a; --accent-ink:#1a1206; --stage:#0b1013; --ok:#5cc58a; --bad:#ff7a70; --rail:#3f6a52; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font:700 30px/1.1 var(--f-display);margin:0;text-wrap:balance}
+h2{font:600 22px/1.2 var(--f-display);margin:0 0 8px;text-wrap:balance}
+h3{font:600 12px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 6px}
+p{margin:0 0 8px;max-width:70ch}
+.sub{color:var(--ink2);max-width:75ch}
+.top{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+#cv{position:relative;background:var(--stage);border:1px solid var(--line);min-height:460px;height:62vh;max-height:700px;min-width:0}
+#cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vistas{position:absolute;left:8px;top:8px;display:flex;gap:6px;flex-wrap:wrap}
+button{font:500 13px var(--f-mono);color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.side{background:var(--panel);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.ctrl label{display:flex;justify-content:space-between;font:500 13px var(--f-mono)}
+.ctrl input[type=range]{width:100%;accent-color:var(--accent)}
+.fila{display:flex;gap:6px;flex-wrap:wrap}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+#ficha{border-top:1px solid var(--line);padding-top:12px;font-size:14px}
+#ficha b{font-family:var(--f-display);font-size:17px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px;min-width:0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font:500 12px var(--f-mono);padding:2px 8px;border:1px solid var(--ok);color:var(--ok)}
+.pill.w{border-color:var(--accent);color:var(--accent)}
+code,.m{font-family:var(--f-mono);font-size:13px}
+ol,ul{margin:0 0 8px;padding-left:20px}
+li{margin-bottom:3px}
+@media (max-width:900px){.top{grid-template-columns:minmax(0,1fr)} #cv{height:52vh;min-height:340px}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Cremallera impresa, etapa 2 v6</h1>
+    <p class="sub">Un riel impreso por tramos con dientes en un costado, un carro que lo abraza y un motor con un piñón que camina por esos dientes. Sin hilo, sin soportes y sin comprar nada: unos 278 g de plástico.</p>
+  </header>
+
+  <section class="top">
+    <div id="cv">
+      <div class="vistas">
+        <button id="vIso" aria-pressed="true">Isométrica</button>
+        <button id="vArr" aria-pressed="false">Desde arriba</button>
+        <button id="vLat" aria-pressed="false">De lado</button>
+        <button id="vMot" aria-pressed="false">Motor y piñón</button>
+        <button id="vCar" aria-pressed="false">Carro y riel</button>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="ctrl">
+        <label for="u"><span>Posición del carro</span><span id="uT">u = 0 mm</span></label>
+        <input id="u" type="range" min="0" max="774" step="1" value="0">
+        <div class="fila" style="margin-top:8px">
+          <button id="p0">Vaso 9 bajo el embudo</button>
+          <button id="p1">Rechazo</button>
+          <button id="p2">Vaso 1 en A</button>
+        </div>
+        <div class="fila" style="margin-top:8px"><button id="anim" aria-pressed="false">Animar</button></div>
+        <p class="m" id="pasos" style="margin-top:8px;color:var(--ink2)"></p>
+      </div>
+      <div>
+        <h3>Mostrar</h3>
+        <label class="chk"><input type="checkbox" id="cTor" checked> Torre y cartucho de la etapa 1 (atenuados)</label>
+      </div>
+      <div id="ficha"><h3>Pieza</h3><p style="color:var(--ink2)">Toca una pieza del modelo para ver qué es.</p></div>
+    </aside>
+  </section>
+
+  <section class="cols">
+    <div class="card">
+      <h2>Corte del carro, el motor y la cremallera</h2>
+      <p class="sub">Vista de frente, en milímetros, en un plano que pasa por el centro del piñón. La cremallera está en el pie del riel, del lado −Y; el motor cuelga de los brazos del carro y su eje apunta al riel.</p>
+      <div class="tw"><svg id="svgCorte" viewBox="-92 -62 130 66" width="100%" style="max-width:760px;display:block" role="img" aria-label="Corte frontal: riel con cremallera, carro, piñón y motor"></svg></div>
+      <p class="m" style="color:var(--ink2);margin-top:6px"><span style="color:var(--ok)">■</span> riel y cremallera &nbsp; <span style="color:var(--accent)">■</span> carro &nbsp; <span style="color:#c4301f">■</span> piñón &nbsp; <span style="color:var(--ink2)">■</span> motor (el eje y el piñón están cortados por el centro)</p>
+    </div>
+    <div class="card">
+      <h2>Piezas</h2>
+      <p class="sub">Marca o desmarca para ocultar una pieza y mirar por dentro.</p>
+      <div id="lista" style="display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="card" style="grid-column:span 2">
+      <h2>Comparación con las versiones anteriores</h2>
+      <div class="tw"><table>
+        <thead><tr><th></th><th class="n">v3 cadena</th><th class="n">v5 hilo</th><th class="n">v6 cremallera</th></tr></thead>
+        <tbody>
+          <tr><td>Plástico impreso</td><td class="n">1.506 g</td><td class="n">≈ 268 g</td><td class="n">≈ 278 g</td></tr>
+          <tr><td>Piezas impresas</td><td class="n">46</td><td class="n">11 + 6 cuñas</td><td class="n">7</td></tr>
+          <tr><td>Camas de impresión</td><td class="n">10</td><td class="n">3</td><td class="n">3</td></tr>
+          <tr><td>Articulaciones que se pueden trabar</td><td class="n">168</td><td class="n">0</td><td class="n">0</td></tr>
+          <tr><td>Soportes al imprimir</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+          <tr><td>Error de parada</td><td class="n">por medir</td><td class="n">0,3 a 8 mm</td><td class="n">≈ 0,1 mm</td></tr>
+          <tr><td>Compras</td><td class="n">ninguna</td><td class="n">hilo</td><td class="n">ninguna</td></tr>
+        </tbody>
+      </table></div>
+      <p class="sub" style="margin-top:8px">Los gramos cuentan 3 paredes y 15 % de relleno (el piñón, 100 %). Macizas, las piezas de la v6 pesarían 663 g. Los errores de la v5 salen de una simulación del hilo; el de la v6 es el juego entre los flancos de los dientes.</p>
+    </div>
+
+    <div class="card">
+      <h2>Qué se usa de la casa</h2>
+      <ul>
+        <li><b>Cinta de doble cara</b> o cinta de enmascarar ancha para pegar el pie del riel a la mesa.</li>
+        <li><b>Una brida plástica o una liga gruesa</b> para sujetar el motor entre los brazos.</li>
+        <li><b>Una vela, jabón seco o cera</b> para frotar la cabeza del riel y los dientes.</li>
+        <li>NEMA17, A4988 y LED infrarrojo ya están disponibles. No hay hilo, tornillos ni rodamientos.</li>
+      </ul>
+    </div>
+
+  </section>
+
+  <section class="cols">
+    <div class="card">
+      <h2>Cálculos</h2>
+      <div class="tw"><table id="tabCalc"><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Cómo funciona</h2>
+      <ul>
+        <li>El <b>riel</b> es el de la v5 (pie plano pegado a la mesa, cuello de 7 mm, cabeza de 17 mm con los lados a 45°), 912 mm en 5 tramos. Ahora lleva una <b>cremallera</b> de 8,5 mm de ancho al costado del pie, del lado −Y: 172 dientes de módulo 1,5.</li>
+        <li>Los tramos <b>se cortan en el centro de un valle</b> entre dos dientes. Al encajar la lengüeta, el paso de los dientes sigue sin saltos de un tramo al otro.</li>
+        <li>El <b>carro</b> (69 g) conserva las dos zonas de agarre de la v5 y suma <b>dos brazos y una placa</b> que se imprimen de pie, sin soportes, y sostienen el NEMA17 con el eje apuntando al riel.</li>
+        <li>El <b>piñón</b> de 18 dientes (Ø27 mm) va en el eje, entre la placa y la pared del carro. La punta del eje entra en la cavidad del carro por un agujero de Ø8.</li>
+        <li>El <b>peso del motor</b> (≈ 280 g) cuelga a un costado: una parte la sostienen los agarres del riel y otra la cremallera, porque el piñón rueda sobre ella.</li>
+        <li>La <b>barrera infrarroja</b> está en el primer tramo, y el borde izquierdo de la placa del carro corta el haz en u = 2 mm.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Armado</h2>
+      <ol>
+        <li>Imprime primero la <b>prueba de engrane</b> (16 dientes y un piñón, unos 25 g). Monta el piñón en el eje del motor y ruédalo a mano por los dientes: debe girar libre, sin saltar ni pegarse.</li>
+        <li>Imprime la cama 1 (carro y piñón, PETG) y las camas 2 y 3 (rieles, PLA+).</li>
+        <li>Encaja los 5 tramos por las lengüetas, con los dientes hacia el mismo lado, y pega el pie a la mesa, recto con una regla.</li>
+        <li>Monta el piñón en el eje del motor (el plano de la D hacia el plano del eje). Mete el motor por atrás entre los brazos hasta que el piloto asiente en la placa, y sujétalo con brida o liga en las ranuras.</li>
+        <li>Desliza el carro por el extremo libre del tramo 5 hasta que el piñón engrane con la cremallera; gíralo con un dedo. Frota los dientes con cera.</li>
+        <li>Deja el cable del motor con holgura y fíjalo al carro; que no roce con la mesa.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h2>Firmware</h2>
+      <ul>
+        <li><code>STEPS_MM</code> = <b>37,73</b> pasos/mm (3200 por vuelta ÷ 84,82 mm de circunferencia primitiva).</li>
+        <li><b>Calibra:</b> manda 20.000 pasos, mide cuánto avanzó el carro y divide.</li>
+        <li>Carrera 774 mm = 29.200 pasos. Un vaso son 38 mm = 1.434 pasos. Rechazo en u = 342 mm = 12.902 pasos.</li>
+        <li>Referencia: el borde del carro corta el haz en u = 2 mm (75 pasos). Busca la referencia moviendo el carro hacia −X.</li>
+        <li>Llega a cada vaso siempre desde el mismo sentido: el juego de los flancos es de 0,11 mm.</li>
+        <li>Corriente del A4988: unos 0,8 A.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Riesgos que quedan</h2>
+      <ul>
+        <li><span class="pill w">Dientes</span> Los dientes de módulo 1,5 tienen valles de 1 mm; por eso va primero la prueba de engrane.</li>
+        <li><span class="pill w">Motor</span> Cuelga en voladizo: ≈ 280 g a 58 mm del riel. El carro se inclina hasta que el piñón apoya en la cremallera (menos de 1°).</li>
+        <li><span class="pill w">Cable</span> El cable del motor viaja con el carro; hay que dejarlo con holgura y sujeto.</li>
+        <li><span class="pill w">Fase</span> Al montar, el piñón se gira a mano hasta engranar; el firmware llega siempre desde el mismo lado.</li>
+        <li><span class="pill w">Torre</span> El motor pasa a 2 o 3 mm de los patines de la torre; con 3 mm de margen ya hay choque.</li>
+        <li><span class="pill">Choques</span> 0 con la torre, el cartucho real, el vaso de rechazo, el riel y la cremallera, en 130 posiciones.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="card" style="grid-column:1/-1">
+      <h2>Cómo se llegó aquí</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Versión</th><th>Mecanismo</th><th class="n">Plástico</th><th>Por qué se dejó</th></tr></thead>
+        <tbody>
+          <tr><td>v3</td><td>Cadena de 168 eslabones impresos con bastidor de 6 módulos</td><td class="n">1.506 g</td><td>Demasiado material y 168 articulaciones que atascan.</td></tr>
+          <tr><td>v4</td><td>Carro sobre varillas de acero con hilo</td><td class="n">≈ 300 g</td><td>Obliga a comprar las varillas.</td></tr>
+          <tr><td>v5</td><td>Un riel impreso con carro e hilo de 3 vueltas al tambor</td><td class="n">≈ 268 g</td><td>El hilo estira: el carro queda corto al parar, hasta 8 mm con hilo de coser, y la precisión es difícil de garantizar.</td></tr>
+          <tr><td><b>v6</b></td><td><b>El mismo riel con cremallera, motor y piñón sobre el carro</b></td><td class="n"><b>≈ 278 g</b></td><td>Versión actual: sin hilo, sin compras y con error de parada de unas décimas de mm.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const D = /*DATOS*/null;
+const $ = id => document.getElementById(id);
+const b64 = (s, T) => { const b = atob(s), u = new Uint8Array(b.length); for (let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return new T(u.buffer); };
+const fmt = (n, d=1) => n.toLocaleString('es-CO', {minimumFractionDigits:d, maximumFractionDigits:d});
+const dark = () => document.documentElement.dataset.theme==='dark' || (document.documentElement.dataset.theme!=='light' && matchMedia('(prefers-color-scheme: dark)').matches);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const COL = {pinon:[0xe5484d,0xc4301f], carro:[0xf0a23a,0xc4570a], bloque:[0x8aa0b6,0x6f8196], rail:[0x9db8a6,0x6f9a80], motor:[0xb6bdc4,0x9aa2ab], torre:[0xb7c0c9,0x9aa5b0], cart:[0xe3c07e,0xd1ad68]};
+
+const cv = $('cv');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+cv.insertBefore(renderer.domElement, cv.firstChild);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30,1,5,9000);
+camera.up.set(0,0,1);
+scene.add(new THREE.HemisphereLight(0xffffff,0x445566,.85));
+const sun = new THREE.DirectionalLight(0xffffff,.9); sun.position.set(200,-300,500); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff,.35); fill.position.set(-300,200,-100); scene.add(fill);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = .12;
+
+const fijos = new THREE.Group(), carroG = new THREE.Group(), cartG = new THREE.Group(), torreG = new THREE.Group(), pinG = new THREE.Group();
+scene.add(fijos, carroG, cartG, torreG, pinG);
+const mats = [];
+function malla(vv, tt, key, op=1, bordes=true) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(b64(vv, Float32Array), 3));
+  geo.setIndex(new THREE.BufferAttribute(b64(tt, Uint32Array), 1));
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({color:COL[key][0], roughness:.55, metalness:.08, flatShading:true, side:THREE.DoubleSide,
+    transparent:op<1, opacity:op, polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1});
+  const mesh = new THREE.Mesh(geo, mat); mats.push([mat, key]);
+  if (bordes) {
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 35), new THREE.LineBasicMaterial({color:0x000000, transparent:true, opacity:.3}));
+    mesh.add(e); mesh.userData.edge = e;
+  }
+  return mesh;
+}
+const clicables = [];
+let pinMesh = null;
+for (const p of D.piezas) {
+  const m = malla(p.v, p.t, p.col); m.userData.p = p;
+  if (p.mov === 2) { pinMesh = malla(D.pinion.v, D.pinion.t, 'pinon'); pinMesh.userData.p = p; pinMesh.position.set(D.x0, 0, D.zc); pinG.add(pinMesh); clicables.push(pinMesh); continue; }
+  (p.mov ? carroG : fijos).add(m); clicables.push(m);
+}
+for (const p of D.torre) {
+  const m = malla(p.v, p.t, p.cart ? 'cart' : 'torre', p.cart ? .8 : .28, false);
+  (p.cart ? cartG : torreG).add(m);
+}
+
+let u = 0;
+const A0 = D.num.a0, PI180 = Math.PI/180;
+function poner(nu) {
+  u = nu;
+  carroG.position.x = u; cartG.position.x = D.desp0 + u;
+  const xc = D.x0 + u;
+  pinMesh.position.x = xc;
+  pinMesh.rotation.y = -(A0*PI180 - (xc - 40)/D.rp);
+  $('u').value = u; $('uT').textContent = 'u = ' + fmt(u,0) + ' mm';
+  $('pasos').textContent = 'Pasos desde u = 0: ' + fmt(u*D.num.spm,0);
+}
+$('u').oninput = e => poner(+e.target.value);
+$('p0').onclick = () => poner(0); $('p1').onclick = () => poner(342); $('p2').onclick = () => poner(774);
+$('cTor').onchange = e => { torreG.visible = e.target.checked; cartG.visible = e.target.checked; };
+
+// vistas
+const CEN = new THREE.Vector3(230, 0, 40);
+function vista(n) {
+  const xc = D.x0 + u;
+  const dir = {iso:[.55,-.95,.7], arr:[0,-.001,1], lat:[0,-1,.08], mot:[.5,-.9,.55], car:[.5,-.8,.45]}[n];
+  const dist = n==='mot' ? 260 : n==='car' ? 330 : 1250, c = n==='mot' ? new THREE.Vector3(xc,-30,22) : n==='car' ? new THREE.Vector3(xc,0,38) : CEN;
+  const d = new THREE.Vector3(...dir).normalize().multiplyScalar(dist);
+  camera.position.copy(c).add(d); controls.target.copy(c); controls.update();
+  for (const [k,id] of [['iso','vIso'],['arr','vArr'],['lat','vLat'],['mot','vMot'],['car','vCar']]) $(id).setAttribute('aria-pressed', String(k===n));
+}
+$('vIso').onclick = () => vista('iso'); $('vArr').onclick = () => vista('arr'); $('vLat').onclick = () => vista('lat'); $('vMot').onclick = () => vista('mot'); $('vCar').onclick = () => vista('car');
+
+// selección
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let sel = null;
+renderer.domElement.addEventListener('pointerdown', e => { renderer.domElement._d = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  const d0 = renderer.domElement._d; if (!d0 || Math.hypot(e.clientX-d0[0], e.clientY-d0[1]) > 4) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(mouse, camera);
+  const h = ray.intersectObjects(clicables, false)[0];
+  sel = h ? h.object : null;
+  const f = $('ficha');
+  f.innerHTML = '<h3>Pieza</h3>' + (sel ? `<p><b>${sel.userData.p.n}</b> <span class="m">(${sel.userData.p.c})</span></p><p>${sel.userData.p.d}</p>` : '<p style="color:var(--ink2)">Toca una pieza del modelo para ver qué es.</p>');
+  clicables.forEach(m => m.material.emissive.setHex(m===sel ? 0x553300 : 0x000000));
+});
+
+// lista de piezas
+const gramos = {CA:69, PI:4, K1:0, R1:50, R2:39, R3:39, R4:39, R5:38};
+$('lista').innerHTML = D.piezas.map((p,i) => `<label class="lista-i"><input type="checkbox" data-i="${i}" checked> ${p.n}<span class="m">${p.c==='K1' ? 'disponible' : (gramos[p.c]||0)+' g'}</span></label>`).join('');
+$('lista').addEventListener('change', e => { const i = e.target.dataset.i; if (i!==undefined) clicables[+i].visible = e.target.checked; });
+
+// corte
+(function(){
+  const C = D.corte, svg = $('svgCorte');
+  const path = rs => rs.map(r => 'M' + r.map(q => q[0].toFixed(2)+','+(-q[1]).toFixed(2)).join('L') + 'Z').join('');
+  const P = (k, cl) => `<path class="${cl}" fill-rule="evenodd" d="${path(C[k])}"/>`;
+  svg.innerHTML = `<line class="sv-mesa" x1="-92" y1="0" x2="38" y2="0"/>` +
+    P('riel','sv-riel') + P('carro','sv-carro') + P('motor','sv-motor') + P('pinon','sv-pinon') +
+    `<line class="sv-ref" x1="-92" y1="-50" x2="38" y2="-50"/><text class="dim" x="-90" y="-52">fondo del cartucho, Z = 50</text>` +
+    `<line class="sv-ref" x1="-83" y1="-60" x2="-83" y2="0"/><text class="dim" x="-82" y="-57">patines de la torre, Y = −83</text>` +
+    ``;
+})();
+// animación
+let animando = false, dirA = 1;
+$('anim').onclick = () => { animando = !animando; $('anim').setAttribute('aria-pressed', String(animando)); $('anim').textContent = animando ? 'Detener' : 'Animar'; };
+// tabla de cálculos
+const N = D.num;
+const filas = [
+  ['Piñón', '18 dientes, m = 1,5', 'Ø primitivo 27 mm, punta Ø30'],
+  ['Circunferencia primitiva', fmt(N.circ,2)+' mm', 'avance del carro por vuelta del motor'],
+  ['Resolución', fmt(N.spm,2)+' pasos/mm', '1/16 de micropaso: 0,027 mm por paso'],
+  ['Carrera', fmt(D.umax,0)+' mm', fmt(N.carrera,0)+' pasos'],
+  ['Vaso y rechazo', fmt(N.vaso,0)+' y '+fmt(N.rechazo,0)+' pasos', '38 mm y 342 mm'],
+  ['Cremallera', fmt(N.dientes,0)+' dientes', 'de X = '+fmt(N.x0,0)+' a '+fmt(N.x1,0)+' mm; paso '+fmt(N.paso,3)+' mm'],
+  ['Empuje del NEMA17', fmt(N.empuje,1)+' N', '0,4 N·m ÷ 13,5 mm; el carro pide ≈ 5 N como peor caso'],
+  ['Juego entre flancos', fmt(N.juego,2)+' mm', 'por 0,15 mm de holgura entre centros'],
+  ['Cero infrarrojo', 'u = '+fmt(N.cero_u,0)+' mm', fmt(N.cero_pasos,0)+' pasos'],
+  ['Largo del riel', fmt(N.riel,0)+' mm', '5 tramos de 174 a 209 mm'],
+  ['Holgura motor–torre', '2 a 3 mm', 'medida inflando el motor en el modelo'],
+  ['Masa impresa', '≈ 278 g', '73 g de PETG (carro y piñón) y 205 g de PLA+ (rieles)']
+];
+$('tabCalc').querySelector('tbody').innerHTML = filas.map(f => `<tr><td>${f[0]}</td><td class="n">${f[1]}</td><td style="color:var(--ink2)">${f[2]}</td></tr>`).join('');
+
+function tema() {
+  const k = dark() ? 0 : 1;
+  renderer.setClearColor(new THREE.Color(css('--stage') || '#0b1013'), 1);
+  for (const [m,key] of mats) m.color.setHex(COL[key][k]);
+  const ec = dark() ? 0xcfe0ea : 0x1b2125;
+  scene.traverse(o => { if (o.userData.edge) o.userData.edge.material.color.setHex(ec); });
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', tema);
+new MutationObserver(tema).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+function resize() {
+  const w = cv.clientWidth, h = cv.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(cv);
+tema(); poner(0); resize(); vista('iso');
+(function frame() { if (animando) { let nu = u + dirA*3; if (nu>D.umax) { nu = D.umax; dirA=-1; } if (nu<0) { nu = 0; dirA=1; } poner(nu); } controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame); })();
+</script>

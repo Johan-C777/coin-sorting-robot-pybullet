@@ -131,7 +131,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
   <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; todas las piezas están impresas y la torre está armada. La primera ronda de <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">pruebas físicas</a> con monedas reales dejó 6 hallazgos mecánicos que se están corrigiendo (disco de 6 bolsillos, rampa trasera, compuerta doble) antes de calibrar. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
 
   <h2>Banda transportadora · etapa 2</h2>
-  <p><b>En rediseño, sin piezas impresas.</b> La banda pone cada vaso del cartucho bajo el embudo y lo lleva al punto A. Ya están definidos la carga, las posiciones, el motor (NEMA17 con A4988), los pines y el control en el firmware. Se estudiaron tres mecanismos (cadena de tablillas, carro sobre varillas con hilo y riel impreso con hilo) y ahora se evalúan una cremallera impresa y un cable de acero. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet#etapa-2--banda-transportadora">README</a>.</p>
+  <p><b>Impresa, montada y conectada; en ajustes.</b> La banda pone cada vaso del cartucho bajo el embudo y lo lleva al punto A. Se estudiaron cinco mecanismos (cadena de tablillas, carro sobre varillas con hilo, riel impreso con hilo, riel con cremallera y motor sobre el carro, y motor fijo con barra dentada). La vigente es la v7: el NEMA17 y su piñón quedan quietos y una barra dentada de 810 mm arrastra el carro, sin compras y sin soportes (≈ 372 g). Quedan por corregir el motor que se desplaza en su soporte y el piñón que resbala en el eje. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet#etapa-2--banda-transportadora">README</a>.</p>
 
   <h2>Demos</h2>
   <div class="demos">
@@ -146,6 +146,14 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     <a class="demo" href="simulacion_sistema_completo.html">
       <img src="img/sistema-completo.png" alt="" loading="lazy" width="1400" height="1145">
       <div><b>Sistema completo</b><p>Las dos etapas juntas, los cuatro obstáculos por nivel y el rack ordenado por el criterio que elijas.</p></div>
+    </a>
+    <a class="demo" href="visor-etapas-1-2.html">
+      <img src="img/visor-etapas-1-2.png" alt="" loading="lazy" width="1400" height="860">
+      <div><b>Etapas 1 y 2 · visor 3D con electrónica</b><p>Torre y banda juntas con los colores de filamento, la electrónica numerada con sus pines, el cableado y dónde va la protoboard.</p></div>
+    </a>
+    <a class="demo" href="etapa2/v7-motor-fijo.html">
+      <img src="img/banda-etapa2-v7.png" alt="" loading="lazy" width="1400" height="860">
+      <div><b>Etapa 2 · banda v7 (motor fijo)</b><p>Motor y piñón quietos, barra dentada de 810 mm que arrastra el carro sobre el riel. Recorrido de 774 mm, corte, piezas, cálculos y armado.</p></div>
     </a>
     <a class="demo" href="memoria-calculo.html">
       <img src="img/memoria-portada.png" alt="" loading="lazy">
@@ -166,7 +174,19 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     </a>
     <a class="demo" href="archivo/banda-etapa2-v3.html">
       <img src="img/banda-etapa2.png" alt="" loading="lazy" width="1400" height="875">
-      <div><b>Etapa 2 · banda v3 (cadena)</b><p>Primera propuesta de la banda: cadena de tablillas impresa que mueve el cartucho bajo la torre. Reemplazada mientras se elige el mecanismo definitivo.</p></div>
+      <div><b>Etapa 2 · banda v3 (cadena)</b><p>Primera propuesta de la banda: cadena de tablillas impresa que mueve el cartucho bajo la torre. Pedía demasiado material.</p></div>
+    </a>
+    <a class="demo" href="etapa2/proceso/v4-varillas.html">
+      <img src="img/banda-etapa2-v4.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Etapa 2 · banda v4 (varillas)</b><p>Carro sobre dos varillas de acero movido por hilo. Obligaba a comprar las varillas.</p></div>
+    </a>
+    <a class="demo" href="etapa2/proceso/v5-riel.html">
+      <img src="img/banda-etapa2-v5.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Etapa 2 · banda v5 (riel con hilo)</b><p>Riel impreso por tramos y carro movido por hilo. El hilo estira y limita la precisión de parada.</p></div>
+    </a>
+    <a class="demo" href="etapa2/proceso/v6-cremallera.html">
+      <img src="img/banda-etapa2-v6.png" alt="" loading="lazy" width="1400" height="875">
+      <div><b>Etapa 2 · banda v6 (cremallera)</b><p>Riel con cremallera y el motor con su piñón sobre el carro. Se cambió para no llevar el motor y su cable en movimiento.</p></div>
     </a>
   </div>
 

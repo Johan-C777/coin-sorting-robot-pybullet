@@ -77,11 +77,11 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 
 **Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#hallazgos-y-correcciones))
 
-- [ ] H1 · Rampa trasera para que la moneda no caiga por detrás del disco
-- [ ] H2 · Disco de 6 bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan): diseñado
-      ([`H02c`](hardware/etapa1-clasificador/stl/ajustes)) y firmware ya a 6 bolsillos por vuelta; falta imprimirlo y probarlo
+- [ ] H1 · Que la moneda no caiga por detrás del disco: tope trasero H04 (40 × 10 × 3) impreso, en prueba
+- [ ] H2 · Disco con bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan): diseñado
+      ([`H02e`](hardware/etapa1-clasificador/stl/ajustes), 5 bolsillos Ø40) y firmware a 5 bolsillos por vuelta; impreso, en prueba
 - [ ] H3 · Lijar portadisco y disco, lubricante seco, nervios de apoyo, bajar `TOLVA_VMAX` `[CAL-09]`
-- [ ] H4 · Segunda paleta en la compuerta
+- [ ] H4 · Segunda paleta en la compuerta: paleta plana G03 impresa, en prueba
 - [ ] H5 · Monedas verticales que no se acuestan con la tolva llena (abierto)
 - [ ] H6 · Jumpers más largos para probar barreras IR y TCS3200
 
@@ -106,7 +106,10 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 
 - [x] Protocolo de lote `VASOS:` hacia el brazo y su prueba de ida y vuelta
 - [x] Simulación del sistema completo en el navegador y en PyBullet
-- [x] Banda (etapa 2) propuesta: cadena de tablillas impresa → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/archivo/banda-etapa2-v3.html)
+- [x] Banda (etapa 2) v7, motor fijo con barra dentada: impresa, montada y conectada → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v7-motor-fijo.html)
+- [ ] Banda: fijar el NEMA17 en su soporte (se desplaza al arrancar y frenar)
+- [ ] Banda: que el piñón no resbale en el eje del motor
+- [ ] Banda: calibrar pasos/mm (mandar 20.000 pasos y medir el avance; modelo 42,44)
 - [ ] **[CAL-11]** Con la banda montada: `HABILITAR_BANDA 1`, posiciones de los vasos y de la rampa C02
 - [ ] Referenciar el cartucho con el haz de `PIN_IR_REF`
 - [ ] Enviar `VASOS:` al ESP32 del brazo por Wi-Fi (`POST /api/vasos`)
