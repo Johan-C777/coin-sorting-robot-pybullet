@@ -11,6 +11,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | El estado de la banda (etapa 2) | [README, sección Etapa 2](../README.md#etapa-2--banda-transportadora) |
 | Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
 | El diseño de la torre clasificadora | [09-clasificador-v5.md](09-clasificador-v5.md) y el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) |
+| Las etapas 1 y 2 juntas con la electrónica | [Visor 3D de las etapas 1 y 2](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html) |
 | Las piezas para imprimir | [`hardware/etapa1-clasificador/stl/`](../hardware/etapa1-clasificador/stl) y las camas en [`impresion/`](../hardware/etapa1-clasificador/impresion) |
 | La guía de armado | [`hardware/etapa1-clasificador/README.md`](../hardware/etapa1-clasificador/README.md) y la [guía de montaje y pruebas](../hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md) |
 | La lista de materiales (BOM) | [README, sección BOM](../README.md#lista-de-materiales-bom), [`despiece.csv`](../hardware/etapa1-clasificador/despiece.csv) y [`compras.md`](../hardware/etapa1-clasificador/compras.md) |
@@ -54,6 +55,8 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y hallazgos** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
+| `visor-etapas-1-2.html` | Visor 3D de las etapas 1 y 2 con la electrónica, el cableado y los colores de filamento (generador en `scripts/visor_etapas/`) |
+| `etapa2/` | Visor de la banda v7 vigente; `etapa2/proceso/` guarda los visores v4, v5 y v6 |
 | `simulacion_sistema_completo.html` | Simulación del sistema completo |
 | `memoria-calculo.html` | Memoria de cálculo del brazo con calculadoras |
 | `img/` | Figuras del README y la documentación |
@@ -79,7 +82,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `etapa1-clasificador/impresion/` | 8 camas `.3mf` para la Creality K1C y `CAMAS.md` | Vigente |
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
 | `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
-| `etapa2-transporte/` | Banda: versión vigente v6 (cremallera) y versiones v3 a v5 del proceso | En rediseño |
+| `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada, en ajustes |
 | `etapa3-brazo/` | Planos del brazo (PDF de SolidWorks), puesto del rack, bandeja y BOM | Diseñado |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |

@@ -1,5 +1,13 @@
 # Cambios
 
+## 0.11.0 · Etapas 1 y 2 montadas
+
+- Etapa 2: banda **v7** (motor fijo, piñón de 16 dientes y barra dentada de 810 mm en 4 tramos) en `hardware/etapa2-transporte/v7-motor-fijo/`: 13 piezas sin soportes (≈ 372 g, sin compras), 4 camas para la K1C, piezas de prueba, generador y comprobaciones. Impresa, montada y conectada. La v6 pasa al proceso de diseño (`docs/etapa2/proceso/v6-cremallera.html`).
+- Visor 3D de la banda v7 en `docs/etapa2/v7-motor-fijo.html`.
+- Visor 3D de las etapas 1 y 2 juntas en `docs/visor-etapas-1-2.html`: colores reales de filamento, 19 componentes electrónicos numerados con sus pines, cableado, ubicación sugerida de la caja de electrónica, vistas, capas y movimiento del cartucho. Generador en `scripts/visor_etapas/`.
+- Etapa 1: disco **H02e** de 5 bolsillos Ø40 (firmware a 5 bolsillos), H02c con la cara trasera plana, tope trasero H04 como rectángulo de 40 × 10 × 3, paleta plana G03 para la compuerta y rascador H03d; todo en `stl/ajustes/` desde `scripts/generar_ajustes_tolva.py`.
+- README, Pages, TODO y mapa del repositorio al día con el estado de montaje.
+
 ## 0.10.1 · Etapa 2: banda v6 con cremallera
 
 - `hardware/etapa2-transporte/v6-cremallera/`: riel con cremallera de módulo 1,5 y motor con piñón sobre el carro, 7 piezas sin soportes (≈ 278 g, sin compras), camas para la K1C, pieza de prueba del engrane, generador y comprobaciones de choques, voladizos y holguras.

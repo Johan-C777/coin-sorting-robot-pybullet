@@ -3,7 +3,7 @@
 ## Etapas
 | Etapa | Estado |
 |---|---|
-| 1 Tolva + selección | **v5** diseño completo y **todas las camas impresas**; en montaje y calibración. Firmware de operación `firmware/etapa1_clasificador/` (0.8.0, PR #7 fusionado) |
+| 1 Tolva + selección | **v5** impresa y armada; correcciones H02e (5 bolsillos Ø40), H04, G03 impresas y en prueba. Firmware `firmware/etapa1_clasificador/` (BOLSILLOS = 5) |
 | 2 Banda transportadora | En rediseño: v6 con cremallera modelada y revisada (0 choques, 278 g, sin soportes), sin imprimir; v3 a v5 en el proceso de diseño |
 | 3 Brazo A→B + orden | Recibe 9 vasos (9+9 puestos); simulado, firmware probado en PC (61 pytest, 48 C++); falta montar |
 
@@ -90,3 +90,9 @@ Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y 
 - Voladizo corregido (también el techo cerrado del agujero del eje, ahora pasante): el relieve trasero de 0,4 mm dejaba 389 mm² colgando; H02c y H02e ahora con cara trasera plana (0 mm²). Lubricar/lijar la cara trasera por fricción.
 - Pendiente: probar H02e con las 7 monedas; si la $1.000 sigue sin entrar, el fallo no es el diámetro (revisar profundidad 2,4 vs grosor 2,7 y rascador H03d); H1 rampa trasera, H4 2ª paleta G02, H5 monedas verticales, H6 jumpers largos, H3 lijar/lubricar; no compilado el firmware aquí.
 - Siguiente: imprimir H02e (+H03d, H04), probar.
+
+## Etapas 1 y 2 montadas (0.11.0) — 2026-11-15
+- Integradas las ramas de H04/G03, H02c/H02e y banda v3–v6. Banda v7 en `hardware/etapa2-transporte/v7-motor-fijo/` (42,44 pasos/mm, carrera 774 mm, rechazo u = 342). v6 al proceso.
+- Visores: `docs/etapa2/v7-motor-fijo.html`, `docs/visor-etapas-1-2.html` (generador `scripts/visor_etapas/`).
+- Pendiente: fijar el NEMA17 en su soporte, que el piñón no resbale en el eje, calibrar pasos/mm de la banda (`HABILITAR_BANDA 1`, [CAL-11]), probar H02e/H04/G03 con monedas, IR y TCS3200 con jumpers largos.
+- Siguiente: corregir los fallos que salgan en las pruebas de ambas etapas.
