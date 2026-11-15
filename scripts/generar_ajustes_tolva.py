@@ -1,13 +1,15 @@
 """Piezas corregidas tras la primera ronda de pruebas físicas (2026-11-03). No toca los STL de generar_v5.py.
 
-  H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), un bolsillo en la posición de salida (90°).
-        Cara trasera plana como el H02 anterior (sin soportes). Mismo eje, grosor y distancia al plato:
-        sirve con H01 y con H03a/b/c.
+  H02c  Disco de 6 bolsillos Ø33 (antes 8 de Ø29), con entrada achaflanada, 6 radios de apoyo
+        de 0,4 mm en la cara trasera y un bolsillo en la posición de salida (90°). Mismo eje,
+        mismo grosor total (2,4) y misma distancia al plato: sirve con H01 y con H03a/b/c.
+  H02e Disco de 5 bolsillos Ø40 (misma geometría que H02c; bolsillo a 90°, radio de paso 42).
   H04  Tope trasero: rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01,
         centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia
         arriba no salga por la cuña abierta entre L01 y el aro de H01 (la moneda mide ≤ 2,7 mm).
   G03  Paleta plana: rectángulo extruido de 34 × 34 × 2,5 mm (medidas de G02 sin bisagra, cubo ni rebaje del servo)
         para pegar encima de G02 y tapar los huecos.
+  H03d  Rascador de 3,0 mm: más holgura para la $1.000 (2,7 mm de grosor) que el de 2,8.
 Salida: hardware/etapa1-clasificador/stl/ajustes/
 """
 import math, sys
@@ -17,30 +19,34 @@ sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
 import generar_v5 as g
 
 SAL = g.SALIDA / "stl" / "ajustes"
-N, POCKET = 6, 33.0
+N, POCKET, CHAFLAN = 6, 33.0, 0.6
+RELIEVE, RADIO_W, CUBO_R = 0.0, 4.0, 13.0       # sin relieve: cara trasera plana sobre la cama (con 0,4 había 389 mm² de voladizo)
 
 
 def rot(a):
     return np.array([[math.cos(a), -math.sin(a), 0, 0], [math.sin(a), math.cos(a), 0, 0], [0, 0, 1, 0]])
 
 
-def disco_c():
-    """Igual que H02 (generar_v5.disco) pero con 6 bolsillos Ø33, uno en la posición de salida (90°) y radio 50.
-    Cara trasera plana: se imprime como el H02 anterior, sin soportes."""
-    E, R, RP = g.DISCO_E, 50.0, g.R_PASO
+def disco_c(N=N, POCKET=POCKET, R=50.0):
+    E, RP = g.DISCO_E, g.R_PASO                # radio 50 (H02 era 51): holgura con el aro de H01
     r = POCKET / 2
-    m = Manifold.cylinder(E, R)
+    m = Manifold.cylinder(E - RELIEVE, R).translate((0, 0, RELIEVE))           # cuerpo, 0,4 sobre el plato
+    m += Manifold.cylinder(RELIEVE + 0.01, CUBO_R)                              # apoyo central
+    for i in range(N):                                                           # radios de apoyo en las paredes entre bolsillos
+        a = 2 * math.pi * i / N
+        m += g.caja(0, R - 1, -RADIO_W, RADIO_W, 0, RELIEVE + 0.01).transform(rot(a))
     for i in range(N):
-        a = math.pi / 2 + 2 * math.pi * i / N
+        a = math.pi / 2 + 2 * math.pi * i / N                                    # un bolsillo en 90° (salida)
         c = (RP * math.cos(a), RP * math.sin(a))
         bolsa = Manifold.cylinder(E + 2, r).translate((c[0], c[1], -1))
+        cono = Manifold.cylinder(CHAFLAN + 0.01, r, r + CHAFLAN + 0.01).translate((c[0], c[1], E - CHAFLAN))
         canal = g.caja(RP, R + 5, -r, r, -1, E + 1).transform(rot(a))
-        m -= bolsa + canal
-    m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))
+        m -= bolsa + cono + canal
+    m += Manifold.cylinder(6.0, 7.0).translate((0, 0, E))                        # cubo hacia el frente
     m += Manifold.cylinder(E, 12.0)
     h = g.HOLGURA
-    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 5)
-    eje = eje ^ Manifold.cylinder(E + 7, 2.5 + h / 2).translate((0, 0, -1))
+    eje = g.caja(-2.5 - h / 2, 2.5 + h / 2, -1.5 - h / 2, 1.5 + h / 2, -1, E + 8)   # pasante: sin techo cerrado (puente de 16 mm²)
+    eje = eje ^ Manifold.cylinder(E + 10, 2.5 + h / 2).translate((0, 0, -1))
     return g.marco_disco((m - eje).translate((0, 0, 0.05)))
 
 
@@ -68,6 +74,12 @@ if __name__ == "__main__":
     m = g.a_cama(d, [g.UD, g.WD, g.ND])
     print("H02c", [round(b - a, 1) for a, b in zip(m.bounding_box()[:3], m.bounding_box()[3:])], round(m.volume() / 1000, 1), "cm3", m.status().name)
     g.escribir_stl(m, SAL / "H02c_disco_6_bolsillos.stl", "H02c")
+    d4 = disco_c(5, 40.0, 45.5)                         # H02e: 5 bolsillos Ø40 (la $1.000 no entraba en los de Ø33; Ø40 < 2×21 mm: no caben 2 monedas)
+    print("H02e cuerpos", len(d4.decompose()), "| choque H01", round((d4 ^ H).volume(), 3),
+          "| H03a/b/c/d", [round((d4 ^ g.rascador(x)).volume(), 3) for x in (*g.RASC_GAP, 3.0)])
+    m4 = g.a_cama(d4, [g.UD, g.WD, g.ND])
+    print("H02e", [round(b - a, 1) for a, b in zip(m4.bounding_box()[:3], m4.bounding_box()[3:])], round(m4.volume() / 1000, 1), "cm3", m4.status().name)
+    g.escribir_stl(m4, SAL / "H02e_disco_5_bolsillos.stl", "H02e")
     t = tope()
     print("H04 tope: choques H01", round((t ^ inflar(g.base_tolva())).volume(), 3), "L01", round((t ^ g.pista()).volume(), 3),
           "H02", round((t ^ inflar(g.disco())).volume(), 3))
@@ -77,3 +89,7 @@ if __name__ == "__main__":
     pal = Manifold.cube((2 * g.PAL, 2 * g.PAL, g.PAL_E))                 # 34 x 34 x 2,5
     g.escribir_stl(pal, SAL / "G03_paleta_plana.stl", "G03")
     print("G03", [round(b - a, 1) for a, b in zip(pal.bounding_box()[:3], pal.bounding_box()[3:])])
+    r = g.rascador_cama(3.0)
+    g.verificar(r, "H03d")
+    g.escribir_stl(r, SAL / "H03d_rascador_3mm0.stl", "H03d")
+    print("H03d choque con H02c", round((g.rascador(3.0) ^ d).volume(), 3))
