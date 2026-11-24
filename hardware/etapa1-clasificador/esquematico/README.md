@@ -54,6 +54,21 @@ flowchart LR
 
 GND de todas las fuentes unido al GND del ESP32.
 
+## Driver de la banda (A4988)
+
+| Pin del A4988 | Va a |
+|---|---|
+| STEP / DIR / EN | GPIO 10 / 11 / 12 (EN activo en bajo) |
+| MS1, MS2, MS3 | 3V3 (1/16 de paso, 42,44 pasos/mm con el piñón v7) |
+| RESET ↔ SLEEP | puenteados entre sí |
+| VDD / GND lógico | 3V3 / GND del ESP32 |
+| VMOT / GND motor | +12 V / GND, con 100 µF entre ambos junto al driver |
+| 1A-1B, 2A-2B | un par de bobinas del NEMA17 cada uno (2 a 4 Ω dentro del par); si gira al revés, invertir 1A y 1B |
+| Vref | ≈ 0,8 V con resistencia R100, ≈ 0,4 V con R050 |
+
+El cero de la banda es la posición al encender: antes de dar energía, el vaso 9 va bajo el embudo.
+Nunca conectar ni quitar el motor con 12 V aplicados.
+
 ## Al cablear
 
 - Comprobar que el shield del ESP32-S3 deja libres todos estos pines.

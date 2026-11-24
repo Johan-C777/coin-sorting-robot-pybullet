@@ -1,5 +1,10 @@
 # Cambios
 
+## 0.11.1 · Firmware con la banda v7
+
+- Firmware 0.9.0: banda activada (`HABILITAR_BANDA 1`) con la calibración de la v7: 42,44 pasos/mm, 38 mm entre vasos, aceleración de 8.000 pasos/s² y 2.500 pasos/s máx. para que el piñón no patine. Igual en `firmware/etapa1_prueba_motor/`.
+- Esquema de conexiones con el cableado completo del A4988 (micropasos, RESET/SLEEP, bobinas, Vref) y del haz de referencia.
+
 ## 0.11.0 · Etapas 1 y 2 montadas
 
 - Etapa 2: banda **v7** (motor fijo, piñón de 16 dientes y barra dentada de 810 mm en 4 tramos) en `hardware/etapa2-transporte/v7-motor-fijo/`: 13 piezas sin soportes (≈ 372 g, sin compras), 4 camas para la K1C, piezas de prueba, generador y comprobaciones. Impresa, montada y conectada. La v6 pasa al proceso de diseño (`docs/etapa2/proceso/v6-cremallera.html`).
