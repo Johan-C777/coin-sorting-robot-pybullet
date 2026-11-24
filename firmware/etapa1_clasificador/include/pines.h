@@ -31,7 +31,11 @@ constexpr uint8_t PIN_DIR = 11;
 constexpr uint8_t PIN_EN = 12;                   // activo en bajo
 constexpr uint8_t PIN_IR_REF = 13;               // mismo circuito que las barreras
 
+// Con BANDA_RAMBO = 1 la banda va por UART a la RAMBo en lugar de STEP/DIR/EN:
+constexpr uint8_t PIN_RAMBO_TX = 41;             // -> RX1 (D19) de la RAMBo, directo
+constexpr uint8_t PIN_RAMBO_RX = 42;             // <- TX1 (D18) de la RAMBo con divisor 1 kΩ / 2 kΩ
+
 // ---- Operador (opcional): pulsador NA a GND, marcha/pausa; mantener 2 s = paro --------
 constexpr uint8_t PIN_BOTON = 9;
 
-// Libres: 8, 38, 39, 40, 41, 42, 47
+// Libres: 8, 38, 39, 40, 47 (41 y 42 solo con BANDA_RAMBO)
