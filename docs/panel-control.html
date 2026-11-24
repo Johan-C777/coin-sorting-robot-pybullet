@@ -86,6 +86,9 @@ th{color:var(--mut);font-weight:600;font-size:12px}
     <h2>Banda (RAMBo)</h2>
     <div class="row" id="zbtn"></div>
     <div class="row"><button data-c="z-1">Rechazo</button><button data-c="z8">Inicio (vaso 9)</button></div>
+    <div class="row"><label style="width:70px">posición</label><input type="range" id="xpos" min="0" max="350" step="1" value="0"><span class="num" style="width:120px" id="xval">0 mm · 0 pasos</span></div>
+    <div class="row"><label style="width:70px">velocidad</label><input type="range" id="xvel" min="5" max="60" step="5" value="30"><span class="num" style="width:120px" id="xvv">30 mm/s</span></div>
+    <div class="row"><button data-j="-10">−10 mm</button><button data-j="-1">−1 mm</button><button data-j="1">+1 mm</button><button data-j="10">+10 mm</button><button id="bx0">Fijar cero aquí</button><button id="bxoff">Soltar motor</button></div>
     <div class="row"><input type="text" id="gcode" placeholder="G-code directo (ej. G91 / G1 X10 F600)" style="flex:1"><button id="bg">Enviar a RAMBo</button></div>
     <p class="mut">Al encender, el vaso 9 debe quedar bajo el embudo: esa es la posición cero.</p>
   </section>
@@ -203,6 +206,15 @@ async function conectar(){
 }
 $("bcon").onclick=conectar;
 $("brcon").onclick=conectarRambo;
+const PASOS_MM=42.44;let xmm=0;
+function mostrarX(){$("xpos").value=xmm;$("xval").textContent=`${xmm.toFixed(1)} mm · ${Math.round(xmm*PASOS_MM)} pasos`}
+async function irX(mm){xmm=Math.max(-50,Math.min(400,mm));mostrarX();await aRambo("G90");await aRambo(`G1 X${xmm.toFixed(2)} F${$("xvel").value*60}`)}
+$("xpos").oninput=()=>{$("xval").textContent=`${(+$("xpos").value).toFixed(1)} mm · ${Math.round($("xpos").value*PASOS_MM)} pasos`};
+$("xpos").onchange=()=>irX(+$("xpos").value);
+$("xvel").oninput=()=>$("xvv").textContent=$("xvel").value+" mm/s";
+document.querySelectorAll("[data-j]").forEach(b=>b.onclick=()=>irX(xmm+ +b.dataset.j));
+$("bx0").onclick=async()=>{await aRambo("G92 X0");xmm=0;mostrarX()};
+$("bxoff").onclick=()=>aRambo("M18 X");
 $("bg").onclick=()=>{const g=$("gcode").value.trim();if(g){aRambo(g);$("gcode").value=""}};
 $("gcode").onkeydown=e=>{if(e.key==="Enter")$("bg").click()};
 document.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)enviar(b.dataset.c)});
