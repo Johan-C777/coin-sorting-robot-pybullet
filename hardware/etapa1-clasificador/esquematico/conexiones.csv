@@ -30,3 +30,13 @@ STEP,ESP32-S3,GPIO10,A4988,STEP,banda (etapa 2)
 DIR,ESP32-S3,GPIO11,A4988,DIR,banda (etapa 2)
 EN,ESP32-S3,GPIO12,A4988,EN,activo en bajo; banda (etapa 2)
 12V,Fuente 12 V,+,A4988,VMOT,banda (etapa 2); 100 uF junto al A4988
+GND,Fuente 12 V,-,ESP32-S3,GND,banda (etapa 2); GND comun obligatorio
+3V3,ESP32-S3,3V3,A4988,VDD,logica del driver a 3,3 V
+GND,A4988,GND (logica),ESP32-S3,GND,
+GND,A4988,GND (motor),Fuente 12 V,-,
+MS,ESP32-S3,3V3,A4988,MS1 MS2 MS3,los tres en alto = 1/16 de paso (42,44 pasos/mm)
+RST_SLP,A4988,RESET,A4988,SLEEP,puenteados entre si
+BOBINA_1,A4988,1A 1B,NEMA17,par 1,mismo par = 2 a 4 ohm; si gira al reves invertir 1A y 1B
+BOBINA_2,A4988,2A 2B,NEMA17,par 2,no conectar ni quitar el motor con 12 V aplicados
+LED_IR_REF,R 330 ohm,2,LED IR REF,anodo,catodo a GND; banda (etapa 2)
+5V_EXT,Fuente 5 V (>= 2 A),+,R 330 ohm (REF),1,banda (etapa 2)

@@ -66,9 +66,9 @@ constexpr int   VASO_RECHAZO = -1;
 constexpr uint16_t ESPERA_MONEDA_MS = 450;      // tras avanzar un bolsillo
 constexpr uint8_t  VACIOS_PARA_PARAR = 6;        // una vuelta sin monedas = tolva vacía
 
-// ---- Banda (A4988 1/16 + NEMA17). Desactivada por defecto. ------------------------
-#define HABILITAR_BANDA 0
-constexpr float BANDA_PASOS_MM = 33.3f;          // cadena de tablillas (ESTADO)
-constexpr float BANDA_V0 = 400, BANDA_VMAX = 3300, BANDA_ACC = 20000;  // pasos/s, /s²
-constexpr float BANDA_PITCH_MM = 40.0f;          // PROVISIONAL: separación entre vasos
+// ---- Banda v7 (A4988 1/16 + NEMA17, piñón de 16 dientes m1,5) ---------------------
+#define HABILITAR_BANDA 1
+constexpr float BANDA_PASOS_MM = 42.44f;         // 75,40 mm por vuelta a 1/16 de paso
+constexpr float BANDA_V0 = 400, BANDA_VMAX = 2500, BANDA_ACC = 8000;   // pasos/s, /s² (suave: el piñón no patina)
+constexpr float BANDA_PITCH_MM = 38.0f;          // separación entre vasos del cartucho v5
 constexpr float BANDA_RECHAZO_MM = 342.0f;       // ESTADO: posición de la rampa C02

@@ -43,11 +43,11 @@ constexpr int SERVO_US_MIN = 500, SERVO_US_MAX = 2400;
 
 // ---- Banda (etapa 2) --------------------------------------------------------------------
 #ifndef HABILITAR_BANDA
-#define HABILITAR_BANDA 0                      // 1 cuando la banda esté montada
+#define HABILITAR_BANDA 1                      // banda v7 montada (0 = solo la torre)
 #endif
-constexpr float BANDA_PASOS_MM = 33.3f;        // A4988 1/16 + NEMA17, cadena de tablillas (banda v3)
-constexpr float BANDA_V0 = 400, BANDA_VMAX = 3300, BANDA_ACC = 20000;   // pasos/s, pasos/s²
-constexpr float BANDA_PASO_VASO_MM = 40.0f;    // [CAL-11] >>> medir entre centros de V01 en C01
+constexpr float BANDA_PASOS_MM = 42.44f;       // [CAL-11] A4988 1/16 + piñón v7 de 16 dientes m1,5 (75,40 mm/vuelta)
+constexpr float BANDA_V0 = 400, BANDA_VMAX = 2500, BANDA_ACC = 8000;    // pasos/s, pasos/s² (suave: el piñón no patina)
+constexpr float BANDA_PASO_VASO_MM = 38.0f;    // [CAL-11] entre centros de vasos del cartucho v5
 constexpr float BANDA_RECHAZO_MM = 342.0f;     // [CAL-11] posición de la rampa C02 (diseño de la banda)
 
 // ---- Ciclo (ms) ---------------------------------------------------------------------------
