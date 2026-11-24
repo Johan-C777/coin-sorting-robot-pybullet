@@ -19,3 +19,6 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+
+# Videos de las pruebas físicas sí van al repo
+!docs/pruebas/**/*.mp4

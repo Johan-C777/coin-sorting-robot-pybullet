@@ -1,10 +1,11 @@
 # Sistema de Logística de Monedas Inteligentes
 
-### Avances: etapa 1 (clasificador de monedas) y etapa 2 (banda transportadora)
+### Entrega final: etapa 1 (clasificador), etapa 2 (banda transportadora) y etapa 3 (brazo)
 
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
-![Estado](https://img.shields.io/badge/etapa%201-montaje%20y%20correcciones-2C7A54)
+![Etapa 1](https://img.shields.io/badge/etapa%201-armada%20y%20en%20pruebas-2C7A54)
 ![Etapa 2](https://img.shields.io/badge/etapa%202-montada%20y%20en%20ajustes-2C7A54)
+![Etapa 3](https://img.shields.io/badge/etapa%203-simulada%20y%20en%20impresi%C3%B3n-C88A12)
 ![MCU](https://img.shields.io/badge/MCU-ESP32--S3-E7352C?logo=espressif&logoColor=white)
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.x-F5822A?logo=platformio&logoColor=white)
 ![Framework](https://img.shields.io/badge/Arduino%20sobre%20ESP--IDF-C%2B%2B17-00878F?logo=arduino&logoColor=white)
@@ -32,13 +33,15 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
   <br><sub>Visor 3D interactivo de la torre v5: clic en la imagen para abrirlo en el navegador.</sub>
 </p>
 
-> **Estado de las etapas 1 y 2 (noviembre de 2026).**
-> - **Etapa 1, clasificador:** diseño, firmware e impresión completos; torre armada y primera
->   ronda de [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) hecha. Las correcciones de esa
->   ronda (disco H02e de 5 bolsillos, tope H04, paleta G03) están impresas y en prueba.
->   Detalle casilla por casilla en [**TODO.md**](TODO.md).
-> - **Etapa 2, banda transportadora:** v7 (motor fijo con barra dentada) impresa, montada y
->   conectada; mueve el cartucho y quedan dos fallos por corregir. Ver [Etapa 2](#etapa-2--banda-transportadora).
+> **Estado final de las tres etapas (noviembre de 2026).** Qué funciona, qué falla, por qué y
+> cómo se corrige, etapa por etapa: [**13-estado-final-y-fallos.md**](docs/13-estado-final-y-fallos.md).
+>
+> | Etapa | Estado |
+> |---|---|
+> | **1 · Clasificador** | Diseñada, impresa, armada y con firmware; primera ronda de [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) con monedas reales y sus correcciones impresas |
+> | **2 · Banda** | v7 (motor fijo con barra dentada) impresa, montada y conectada; mueve el cartucho de punta a punta y tiene dos fallos mecánicos abiertos ([detalle](#etapa-2--banda-transportadora)) |
+> | **3 · Brazo** | Cinemática, planificador entre obstáculos, firmware y app probados en simulación; planos en SolidWorks y piezas en impresión ([detalle](#etapa-3--brazo)) |
+>
 > - [**Visor 3D de las etapas 1 y 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html)
 >   con la electrónica señalada, su cableado y los colores reales de filamento.
 > - Todo se puede ver en el navegador en el [sitio de demos](https://johan-c777.github.io/coin-sorting-robot-pybullet/).
@@ -85,7 +88,7 @@ lo recoge el brazo. Lo que ya está definido:
 | Posiciones | Cada vaso bajo la boca del embudo, la rampa de rechazo y el punto A |
 | Actuador | NEMA17 con A4988 en lazo abierto; cero con una barrera IR |
 | Pines (ESP32-S3 de la etapa 1) | STEP 10 · DIR 11 · EN 12 · referencia 13 ([`pines.h`](firmware/etapa1_clasificador/include/pines.h)) |
-| Firmware | El secuenciador ya mueve la banda entre vasos cuando `HABILITAR_BANDA = 1` `[CAL-11]` |
+| Firmware | 0.9.0: banda activada, 42,44 pasos/mm y 38 mm entre vasos; el secuenciador pone cada vaso bajo el embudo `[CAL-11]` |
 
 Mecanismos estudiados:
 

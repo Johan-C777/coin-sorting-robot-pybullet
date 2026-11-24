@@ -181,7 +181,7 @@ con piezas reales: hoy valen lo que dicen el CAD y la simulación.
 | CAL-08 | Umbrales del ADC | 50 % / 70 % de la base | Monitor `m`: la moneda debe bajar la lectura bien por debajo del 50 % |
 | CAL-09 | Velocidad de la tolva | 800 pasos/s | Barrido `t` con la tolva cargada; usar el 75 % del límite |
 | CAL-10 | Ángulos y tiempo de la compuerta | 0° / 60°, 350 ms | `w<grados>` hasta paleta horizontal y caída limpia |
-| CAL-11 | Posiciones de la banda | paso 40 mm, rechazo 342 mm | Con la banda montada, `z<vaso>` y medir |
+| CAL-11 | Posiciones de la banda | 42,44 pasos/mm, paso 38 mm, rechazo 342 mm | Con la banda montada, `z<vaso>` y medir |
 | CAL-12 | Llegada a la compuerta | 500 ms | Video a cámara lenta del fin de pista a la paleta |
 
 ## Pines

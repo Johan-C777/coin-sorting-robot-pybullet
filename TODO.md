@@ -110,7 +110,8 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 - [ ] Banda: fijar el NEMA17 en su soporte (se desplaza al arrancar y frenar)
 - [ ] Banda: que el piñón no resbale en el eje del motor
 - [ ] Banda: calibrar pasos/mm (mandar 20.000 pasos y medir el avance; modelo 42,44)
-- [ ] **[CAL-11]** Con la banda montada: `HABILITAR_BANDA 1`, posiciones de los vasos y de la rampa C02
+- [x] Firmware 0.9.0 con la banda activada (`HABILITAR_BANDA 1`), 42,44 pasos/mm y 38 mm entre vasos
+- [ ] **[CAL-11]** Medir con `z<vaso>` las posiciones reales de los vasos y de la rampa C02
 - [ ] Referenciar el cartucho con el haz de `PIN_IR_REF`
 - [ ] Enviar `VASOS:` al ESP32 del brazo por Wi-Fi (`POST /api/vasos`)
 - [ ] Medir el ciclo real moneda a moneda y compararlo con la simulación
