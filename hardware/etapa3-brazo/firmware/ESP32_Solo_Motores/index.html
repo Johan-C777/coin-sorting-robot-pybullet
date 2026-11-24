@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solo Motores — ESP32 (Web Serial)</title>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --border: #334155;
+      --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8;
+      --ok: #22c55e; --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 20px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .panel {
+      width: 100%; max-width: 560px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px;
+    }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    h1 { margin: 0; font-size: 1.2rem; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--err); display: inline-block; margin-right: 6px; }
+    .dot.ok { background: var(--ok); }
+    .row { display: flex; gap: 8px; margin-bottom: 14px; }
+    button {
+      flex: 1; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; background: #273549; color: var(--text);
+    }
+    button:hover { background: #334155; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-connect { background: var(--accent); color: #082f49; border: none; }
+    .btn-stop { background: var(--err); color: #fff; border: none; }
+    .motor {
+      padding: 14px; margin-bottom: 12px;
+      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .motor-top { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 8px; }
+    .val { color: var(--accent); font-family: monospace; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); margin-bottom: 8px; }
+    .btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .note { text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="header">
+      <h1>Control Directo 3 Motores</h1>
+      <div><span class="dot" id="dot"></span><span id="status">Desconectado</span></div>
+    </div>
+
+    <div class="row">
+      <button id="connectBtn" class="btn-connect">Conectar ESP32 (USB Serial)</button>
+      <button id="zeroBtn" disabled>Cero (0)</button>
+      <button id="stopBtn" class="btn-stop" disabled>STOP</button>
+    </div>
+
+    <div class="motor">
+      <div class="motor-top">
+        <span>Velocidad</span>
+        <span class="val"><span id="spdVal">1200</span> pasos/s</span>
+      </div>
+      <input type="range" id="spdSlider" min="50" max="3000" step="50" value="1200" disabled />
+    </div>
+
+    <div class="motor">
+      <div class="motor-top"><span>Motor 1 — Base (GPIO 26/25)</span><span class="val"><span id="v1">0</span> pasos</span></div>
+      <input type="range" id="s1" min="-1000" max="1000" step="1" value="0" disabled />
+      <div class="btns">
+        <button class="mv" data-m="1" data-d="-200" disabled>-200</button>
+        <button class="mv" data-m="1" data-d="-50" disabled>-50</button>
+        <button class="mv" data-m="1" data-d="50" disabled>+50</button>
+        <button class="mv" data-m="1" data-d="200" disabled>+200</button>
+      </div>
+    </div>
+
+    <div class="motor">
+      <div class="motor-top"><span>Motor 2 — Hombro (GPIO 33/32)</span><span class="val"><span id="v2">0</span> pasos</span></div>
+      <input type="range" id="s2" min="-1000" max="1000" step="1" value="0" disabled />
+      <div class="btns">
+        <button class="mv" data-m="2" data-d="-200" disabled>-200</button>
+        <button class="mv" data-m="2" data-d="-50" disabled>-50</button>
+        <button class="mv" data-m="2" data-d="50" disabled>+50</button>
+        <button class="mv" data-m="2" data-d="200" disabled>+200</button>
+      </div>
+    </div>
+
+    <div class="motor">
+      <div class="motor-top"><span>Motor 3 — Codo (GPIO 27/14)</span><span class="val"><span id="v3">0</span> pasos</span></div>
+      <input type="range" id="s3" min="-1000" max="1000" step="1" value="0" disabled />
+      <div class="btns">
+        <button class="mv" data-m="3" data-d="-200" disabled>-200</button>
+        <button class="mv" data-m="3" data-d="-50" disabled>-50</button>
+        <button class="mv" data-m="3" data-d="50" disabled>+50</button>
+        <button class="mv" data-m="3" data-d="200" disabled>+200</button>
+      </div>
+    </div>
+
+    <div class="note">Ábrelo en Chrome o Edge (Web Serial directo, sin servidor Python). Servos GPIO 18 y 19 fijos en 90°.</div>
+  </div>
+
+  <script>
+    const encoder = new TextEncoder();
+    let port = null, writer = null;
+
+    const connectBtn = document.getElementById('connectBtn');
+    const zeroBtn = document.getElementById('zeroBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const spdSlider = document.getElementById('spdSlider');
+    const spdVal = document.getElementById('spdVal');
+    const dot = document.getElementById('dot');
+    const statusEl = document.getElementById('status');
+
+    const sliders = [null, document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+    const vals = [null, document.getElementById('v1'), document.getElementById('v2'), document.getElementById('v3')];
+    const mvBtns = document.querySelectorAll('.mv');
+
+    function setConnected(on) {
+      dot.classList.toggle('ok', on);
+      statusEl.textContent = on ? 'Conectado' : 'Desconectado';
+      connectBtn.textContent = on ? 'Desconectar' : 'Conectar ESP32 (USB Serial)';
+      zeroBtn.disabled = !on;
+      stopBtn.disabled = !on;
+      spdSlider.disabled = !on;
+      for (let i = 1; i <= 3; i++) sliders[i].disabled = !on;
+      mvBtns.forEach(b => b.disabled = !on);
+    }
+
+    async function send(cmd) {
+      if (!writer) return;
+      await writer.write(encoder.encode(cmd + '\n'));
+    }
+
+    for (let i = 1; i <= 3; i++) {
+      let last = 0, timer = null;
+      const emit = () => { last = performance.now(); send(`M${i} ${sliders[i].value}`); };
+      sliders[i].addEventListener('input', () => {
+        vals[i].textContent = sliders[i].value;
+        clearTimeout(timer);
+        const now = performance.now();
+        if (now - last >= 50) emit();
+        else timer = setTimeout(emit, 50 - (now - last));
+      });
+      sliders[i].addEventListener('change', () => { clearTimeout(timer); emit(); });
+    }
+
+    mvBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = Number(btn.dataset.m);
+        const d = Number(btn.dataset.d);
+        const next = Number(sliders[m].value) + d;
+        sliders[m].value = next;
+        vals[m].textContent = next;
+        send(`R${m} ${d}`);
+      });
+    });
+
+    spdSlider.addEventListener('input', () => { spdVal.textContent = spdSlider.value; });
+    spdSlider.addEventListener('change', () => send(`SPEED ${spdSlider.value}`));
+
+    zeroBtn.addEventListener('click', () => {
+      for (let i = 1; i <= 3; i++) { sliders[i].value = 0; vals[i].textContent = '0'; }
+      send('ZERO');
+    });
+
+    stopBtn.addEventListener('click', () => send('STOP'));
+
+    connectBtn.addEventListener('click', async () => {
+      if (port) {
+        try { writer.releaseLock(); } catch (_) {}
+        try { await port.close(); } catch (_) {}
+        port = null; writer = null;
+        setConnected(false);
+        return;
+      }
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+        writer = port.writable.getWriter();
+        setConnected(true);
+      } catch (e) {
+        port = null; writer = null;
+        setConnected(false);
+      }
+    });
+  </script>
+</body>
+</html>

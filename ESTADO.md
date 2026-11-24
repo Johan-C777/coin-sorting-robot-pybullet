@@ -96,3 +96,10 @@ Imprimir camas 1 y 2 de prueba (R01, patas R03_1, D1 adaptador, D6, B02, B03) y 
 - Visores: `docs/etapa2/v7-motor-fijo.html`, `docs/visor-etapas-1-2.html` (generador `scripts/visor_etapas/`).
 - Pendiente: fijar el NEMA17 en su soporte, que el piñón no resbale en el eje, calibrar pasos/mm de la banda (`HABILITAR_BANDA 1`, [CAL-11]), probar H02e/H04/G03 con monedas, IR y TCS3200 con jumpers largos.
 - Siguiente: corregir los fallos que salgan en las pruebas de ambas etapas.
+
+## 2026-11-24 Etapa 3: entrega del brazo real importada
+- Llegó `Entrega_Robot_4GDL.zip` (Javier León y Samuel Rubio): brazo doble paralelogramo 4 GDL (3 NEMA17+planetaria 16:1 con TB6560/TB6600 a 24 V, 2 SG90), garra SG90, reductora, firmware ESP32 clásica de calibración. Medidas: hombro 197, L1 155, L2 130, muñeca 28, garra 90 mm; alcance punta ≈ 362-378 mm.
+- Repo: `hardware/etapa3-brazo/` (nuevo), brazo v1 de 5 servos a `hardware/archivo/etapa3-brazo-v1/`; `docs/13-etapa3-brazo.md` (integración, diferencias con la simulación, plan, riesgos); README/MAPA/hardware al día. 65 pytest ok.
+- Decisiones: 2 controladores (S3 etapas 1-2 + ESP32 clásica brazo; pines 26-37 no existen en S3), tierra común, enlace serie S3 GPIO38/39 ↔ ESP32 16/17 con trama `VASOS:`; rack en arco 270-330 mm; agarre lateral (garra horizontal).
+- Pendiente: perfil `entrega` y cinemática del paralelogramo en software/brazo, rack/bandeja B11/B12 nuevos, visor 3D 3 etapas, firmware de ángulos, fotos de etapas 1-3, JSON de calibración, microstepping único (guía dice 1/8, README 1/2), carga máxima por vaso (SG90).
+- Siguiente: recibir fotos/datos y hacer cinemática + comprobación de alcance de A, B y 9 puestos.

@@ -544,9 +544,9 @@ Ordenado por etapa en [`hardware/`](hardware/README.md):
   [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
 - **Etapa 2:** banda v7 montada y en ajustes ([estado y versiones](#etapa-2--banda-transportadora)); las
   medidas que deja la etapa 1 están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
-- **Etapa 3:** planos en SolidWorks
-  ([`PLANOS BRACITO.pdf`](hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)), rack,
-  bandeja de electrónica y [`bom.csv`](hardware/etapa3-brazo/bom.csv).
+- **Etapa 3:** brazo de 4 GDL con garra SG90 y reductoras planetarias 16:1 (SolidWorks), firmware de
+  calibración y [`bom.csv`](hardware/etapa3-brazo/bom.csv); integración en
+  [`docs/13-etapa3-brazo.md`](docs/13-etapa3-brazo.md).
 - **Archivo:** las etapas 1 anteriores (v1 con varillas M5, probetas v3 y v4 con
   riel de 8 ranuras y PVC) quedan en [`hardware/archivo/`](hardware/archivo) como referencia.
 
@@ -625,7 +625,7 @@ coin-sorting-robot-pybullet/
 ├── hardware/
 │   ├── etapa1-clasificador/        torre v5: stl/, impresion/, esquematico/, despiece, compras, guía
 │   ├── etapa2-transporte/          interfaz para la banda
-│   ├── etapa3-brazo/               planos, rack, bandeja y BOM del brazo
+│   ├── etapa3-brazo/               brazo 4 GDL, garra, reductora, firmware de calibración y BOM
 │   └── archivo/                    etapa 1 v1, v3 y v4
 ├── scripts/                        generadores de piezas, camas y figuras (archivo/: v1, v3, v4)
 ├── sim/
