@@ -13,6 +13,12 @@ namespace hal {
 namespace {
 
 QueueHandle_t cola = nullptr;
+#if UNA_BARRERA
+volatile uint8_t canal_unico = 0;                      // 0 = GPIO 1, 1 = GPIO 2
+volatile uint32_t dt_virtual_us = (uint32_t)(24.0f / UNA_BARRERA_V_MM_S * 1e6f);
+bool hay_virtual = false;
+seq::EventoBarrera ev_virtual;
+#endif
 volatile uint32_t perdidos = 0;
 volatile uint32_t ref_corte_us = 0;
 
@@ -93,7 +99,12 @@ void tareaMuestreo(void *) {
   for (;;) {
     ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
     const uint32_t t = t_muestra;
+#if UNA_BARRERA
+    Canal &c = canales[canal_unico];
+    procesar(c, analogRead(c.pin), t);
+#else
     for (Canal &c : canales) procesar(c, analogRead(c.pin), t);
+#endif
   }
 }
 
@@ -130,8 +141,34 @@ void barrerasIniciar() {
   attachInterrupt(PIN_IR_REF, isrReferencia, FALLING);
 }
 
+#if UNA_BARRERA
+// Con una sola barrera, cada flanco real genera el de una segunda barrera "virtual" situada a
+// sep_barreras_mm aguas abajo y desfasada dt = sep / v. El medidor de dos barreras queda con
+// velocidad constante v y la cuerda sale de v × tiempo de oclusión.
+bool barrerasEvento(seq::EventoBarrera &ev) {
+  if (hay_virtual) { ev = ev_virtual; hay_virtual = false; return true; }
+  const seq::Barrera fisica = canal_unico ? seq::Barrera::Segunda : seq::Barrera::Primera;
+  do {
+    if (xQueueReceive(cola, &ev, 0) != pdTRUE) return false;
+  } while (ev.barrera != fisica);                     // el otro haz se ignora
+  ev.barrera = seq::Barrera::Primera;
+  ev_virtual = {seq::Barrera::Segunda, ev.flanco, ev.t_us + dt_virtual_us};
+  hay_virtual = true;
+  return true;
+}
+void barreraUnicaCanal(uint8_t canal) { canal_unico = canal & 1; xQueueReset(cola); }
+uint8_t barreraUnicaCanal() { return canal_unico; }
+void barreraUnicaVelocidad(float v_mm_s, float sep_mm) { dt_virtual_us = (uint32_t)(sep_mm / v_mm_s * 1e6f); }
+float barreraUnicaVelocidad(float sep_mm) { return sep_mm / (dt_virtual_us * 1e-6f); }
+#else
 bool barrerasEvento(seq::EventoBarrera &ev) { return xQueueReceive(cola, &ev, 0) == pdTRUE; }
-void barrerasDescartar() { xQueueReset(cola); }
+#endif
+void barrerasDescartar() {
+  xQueueReset(cola);
+#if UNA_BARRERA
+  hay_virtual = false;
+#endif
+}
 uint32_t barrerasPerdidos() { return perdidos; }
 
 DiagBarrera barrerasDiag(uint8_t i) {

@@ -16,6 +16,15 @@
 //                   fototransistor sature (o una etapa 2N3904/LM393). Verificar con 'm'.
 #define BARRERAS_ADC 0
 #define BARRERAS_DIGITAL 1
+// UNA_BARRERA = 1: mide con un solo haz y supone velocidad constante (menos precisión).
+// Consola: j1 / j2 elige el haz (GPIO 1 o 2); y<mm/s> fija la velocidad; q<vaso> la calcula
+// con la última moneda conocida que pasó.
+#ifndef UNA_BARRERA
+#define UNA_BARRERA 0
+#endif
+#ifndef UNA_BARRERA_V_MM_S
+#define UNA_BARRERA_V_MM_S 600.0f                // [CAL-13] velocidad de la moneda en el haz
+#endif
 #ifndef BARRERAS_MODO
 #define BARRERAS_MODO BARRERAS_ADC   // [CAL-07] >>> pasar a DIGITAL si 'm' muestra niveles limpios
 #endif

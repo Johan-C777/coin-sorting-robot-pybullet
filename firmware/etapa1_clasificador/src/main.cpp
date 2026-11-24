@@ -186,6 +186,22 @@ static void consola() {
         calibrador.reiniciar();
         break;
       }
+#if UNA_BARRERA
+      case 'j': hal::barreraUnicaCanal(x >= 2 ? 1 : 0); Serial.printf("barrera unica en GPIO %d\n", hal::barreraUnicaCanal() + 1); break;
+      case 'y': if (x > 20) hal::barreraUnicaVelocidad(x, cal.sep_barreras_mm);
+                Serial.printf("v supuesta=%.0f mm/s\n", hal::barreraUnicaVelocidad(cal.sep_barreras_mm)); break;
+      case 'q': {
+        const clasif::Medicion &m = ciclo.ultimo().medicion;
+        if (!con_numero || x < 0 || x >= monedas::N_VASOS || m.v0_mm_s <= 0 || m.cuerda_mm <= 0) {
+          Serial.println(F("q<vaso>: pasa antes una moneda de ese vaso")); break;
+        }
+        const float tau = (m.cuerda_mm + cal.ancho_haz_mm) / m.v0_mm_s;   // tiempo de oclusión (s)
+        const float c = clasif::cuerdaDesdeDiametro(TIPOS[(int)x].diametro_mm, cal.h_haz_mm) + cal.ancho_haz_mm;
+        hal::barreraUnicaVelocidad(c / tau, cal.sep_barreras_mm);
+        Serial.printf("v calculada=%.0f mm/s con %s\n", c / tau, TIPOS[(int)x].codigo);
+        break;
+      }
+#endif
       case 'u': cal.umbral_dorado = x; ciclo.calibracion(cal); Serial.printf("umbral dorado=%.2f\n", x); break;
       case 'g': nvs::guardar(ciclo.calibracion()); Serial.println(F("calibracion guardada en flash")); break;
       case 'l': if (nvs::cargar(cal)) ciclo.calibracion(cal); info(); break;
