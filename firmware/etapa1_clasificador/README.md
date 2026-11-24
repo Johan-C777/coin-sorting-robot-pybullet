@@ -48,7 +48,7 @@ flowchart TB
 | Calibración | `lib/Clasificacion/Calibrador.*` | Ajusta por mínimos cuadrados la altura y el ancho efectivos del haz con monedas conocidas. |
 | Ciclo | `lib/Secuenciador/*` | Máquina de estados no bloqueante; el tiempo se inyecta, así que se prueba completa en el PC con una planta simulada. |
 | Hardware | `src/hal/*` | ISR, timer, PCNT, pasos con rampa, servo, pulsador. |
-| Configuración | `include/pines.h`, `include/config.h`, `include/calibracion.h` | Pines, tiempos y valores de fábrica de la calibración, cada uno con su etiqueta `[CAL-xx]`. |
+| Configuración | `include/pines.h`, `include/config.h`, `include/calibracion_fabrica.h` | Pines, tiempos y valores de fábrica de la calibración, cada uno con su etiqueta `[CAL-xx]`. |
 
 ## Medición del diámetro
 

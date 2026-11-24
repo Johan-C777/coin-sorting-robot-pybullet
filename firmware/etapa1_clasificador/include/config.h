@@ -1,6 +1,6 @@
 #pragma once
 // Parámetros del sistema (no dependen de la moneda). Los marcados [CAL-xx] se ajustan
-// con el prototipo armado; ver include/calibracion.h y README.md#calibración.
+// con el prototipo armado; ver include/calibracion_fabrica.h y README.md#calibración.
 #include <stdint.h>
 
 #include "Secuenciador.h"

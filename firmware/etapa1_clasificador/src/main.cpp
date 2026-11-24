@@ -16,7 +16,7 @@
 
 #include "Calibrador.h"
 #include "Secuenciador.h"
-#include "calibracion.h"
+#include "calibracion_fabrica.h"
 #include "config.h"
 #include "hal/Actuadores.h"
 #include "hal/Barreras.h"

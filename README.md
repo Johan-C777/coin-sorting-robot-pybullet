@@ -370,7 +370,7 @@ firmware/etapa1_clasificador/
 ├── include/
 │   ├── pines.h             mapa de pines del ESP32-S3
 │   ├── config.h            muestreo, umbrales, rampas, servo, tiempos      [CAL-07..12]
-│   └── calibracion.h       valores de fábrica de la medición               [CAL-01..06]
+│   └── calibracion_fabrica.h valores de fábrica de la medición               [CAL-01..06]
 ├── lib/
 │   ├── Clasificacion/      Monedas.h · Clasificador · Calibrador           (C++ portable)
 │   └── Secuenciador/       Planta.h (interfaz) · Secuenciador (FSM)        (C++ portable)
