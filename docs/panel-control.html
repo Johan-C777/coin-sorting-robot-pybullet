@@ -47,7 +47,9 @@ th{color:var(--mut);font-weight:600;font-size:12px}
   <h1>Clasificador de monedas · etapa 1</h1>
   <span id="est" class="pill">sin conexión</span>
   <span id="auto" class="pill">auto —</span>
-  <button id="bcon" class="pri">Conectar</button>
+  <button id="bcon" class="pri">Conectar ESP32</button>
+  <button id="brcon">Conectar RAMBo</button>
+  <span id="rest" class="pill">RAMBo —</span>
   <button class="bad" data-c="e">PARO</button>
 </header>
 <main>
@@ -78,6 +80,14 @@ th{color:var(--mut);font-weight:600;font-size:12px}
     <h2>Compuerta (servo)</h2>
     <div class="row"><button data-c="o">Abrir</button><button data-c="p">Cerrar</button></div>
     <div class="row"><label style="width:70px">ángulo</label><input type="range" min="0" max="180" step="5" value="90" data-p="w"><span class="num" style="width:48px">90</span></div>
+  </section>
+
+  <section>
+    <h2>Banda (RAMBo)</h2>
+    <div class="row" id="zbtn"></div>
+    <div class="row"><button data-c="z-1">Rechazo</button><button data-c="z8">Inicio (vaso 9)</button></div>
+    <div class="row"><input type="text" id="gcode" placeholder="G-code directo (ej. G91 / G1 X10 F600)" style="flex:1"><button id="bg">Enviar a RAMBo</button></div>
+    <p class="mut">Al encender, el vaso 9 debe quedar bajo el embudo: esa es la posición cero.</p>
   </section>
 
   <section>
@@ -121,6 +131,28 @@ th{color:var(--mut);font-weight:600;font-size:12px}
 const VASOS=[["N50","$50 nueva",17.0],["N100","$100 nueva",20.3],["A50","$50 antigua",21.5],["N200","$200 nueva",22.4],["A100","$100 antigua",23.0],["A500","$500 antigua",23.7],["N500","$500 nueva",23.7],["A200","$200 antigua",24.4],["N1000","$1000",26.7]];
 const $=id=>document.getElementById(id);
 let port=null,writer=null,reader=null,monitor=false,cuentas=Array(9).fill(0);
+let rport=null,rwriter=null,rreader=null;
+$("zbtn").innerHTML=Array.from({length:9},(_,i)=>`<button data-c="z${i}">Vaso ${i}</button>`).join("");
+async function aRambo(g){if(!rwriter){log("! RAMBo sin conectar: "+g);return}await rwriter.write(new TextEncoder().encode(g+"\n"));log("→ RAMBo "+g)}
+async function leerLineas(p,cb,setReader){const dec=new TextDecoderStream();p.readable.pipeTo(dec.writable).catch(()=>{});const r=dec.readable.getReader();setReader(r);let buf="";
+  try{for(;;){const {value,done}=await r.read();if(done)break;buf+=value;let k;while((k=buf.indexOf("\n"))>=0){const l=buf.slice(0,k).replace(/\r$/,"");buf=buf.slice(k+1);if(l)cb(l)}}}catch(e){log("! "+e.message)}}
+function rLinea(l){
+  if(/^ok/.test(l)){if(writer)enviarRaw("@ok");return}
+  if(/^echo:busy/.test(l))return;
+  log("RAMBo: "+l);
+  if(/^Error/i.test(l)&&writer)enviarRaw("@"+l.slice(0,20));
+}
+async function enviarRaw(c){if(writer)await writer.write(new TextEncoder().encode(c+"\n"))}
+async function conectarRambo(){
+  if(rport){try{if(rreader)await rreader.cancel()}catch(e){}try{rwriter&&rwriter.releaseLock()}catch(e){}try{await rport.close()}catch(e){}
+    rport=rwriter=rreader=null;$("brcon").textContent="Conectar RAMBo";$("rest").textContent="RAMBo —";$("rest").className="pill";return}
+  if(!("serial" in navigator)){alert("Abre este panel en Chrome o Edge: usa Web Serial.");return}
+  try{rport=await navigator.serial.requestPort();await rport.open({baudRate:115200});rwriter=rport.writable.getWriter();
+    $("brcon").textContent="Desconectar RAMBo";$("rest").textContent="RAMBo conectada";$("rest").className="pill ok";log("* RAMBo conectada (arranca en 3 s)");
+    leerLineas(rport,rLinea,r=>rreader=r);
+    setTimeout(()=>{aRambo("M115");enviarRaw("@reset")},3500);
+  }catch(e){log("! "+e.message);rport=null}
+}
 const sel=$("selv");VASOS.forEach((v,i)=>sel.add(new Option(`${i} · ${v[1]} (${v[2]} mm)`,i)));
 function pintarVasos(){$("vasos").innerHTML=VASOS.map((v,i)=>`<tr><td>${i}</td><td>${v[1]}</td><td>${v[2].toFixed(1)}</td><td class="num">${cuentas[i]}</td><td><button data-c="x${i}" style="min-height:28px;padding:2px 8px">Vaciar</button></td></tr>`).join("")}
 pintarVasos();
@@ -131,6 +163,7 @@ function barra(id,vid,crudo,base,cut){const m=$(id);m.querySelector("i").style.w
 const ult=[];
 function linea(t){
   let m;
+  if(t[0]==="@"){aRambo(t.slice(1));return}
   if(m=t.match(/estado (\S+) \| falla: (.+) \| auto (ON|OFF)/))estado(m[1],m[2],m[3]);
   if(m=t.match(/IR1=(\d+)\/(\d+)(\*?)\s+IR2=(\d+)\/(\d+)(\*?)\s+\| TCS R=(\d+) G=(\d+) B=(\d+) razon=([\d.]+) \| (\S+)/)){
     barra("m1","v1",+m[1],+m[2],m[3]==="*");barra("m2","v2",+m[4],+m[5],m[6]==="*");
@@ -156,7 +189,7 @@ async function conectar(){
     try{if(writer){writer.releaseLock()}}catch(e){}
     try{await port.close()}catch(e){}
     port=writer=reader=null;monitor=false;$("bmon").textContent="Ver sensores";
-    $("bcon").textContent="Conectar";const p=$("est");p.textContent="sin conexión";p.className="pill";return}
+    $("bcon").textContent="Conectar ESP32";const p=$("est");p.textContent="sin conexión";p.className="pill";return}
   if(!("serial" in navigator)){alert("Abre este panel en Chrome o Edge: usa Web Serial.");return}
   try{
     port=await navigator.serial.requestPort();
@@ -169,6 +202,9 @@ async function conectar(){
   }catch(e){log("! "+e.message);port=null}
 }
 $("bcon").onclick=conectar;
+$("brcon").onclick=conectarRambo;
+$("bg").onclick=()=>{const g=$("gcode").value.trim();if(g){aRambo(g);$("gcode").value=""}};
+$("gcode").onkeydown=e=>{if(e.key==="Enter")$("bg").click()};
 document.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)enviar(b.dataset.c)});
 document.querySelectorAll("input[data-p]").forEach(r=>{const out=r.nextElementSibling;r.oninput=()=>out.textContent=r.value;r.onchange=()=>enviar(r.dataset.p+r.value)});
 $("bmon").onclick=()=>{monitor=!monitor;$("bmon").textContent=monitor?"Ocultar sensores":"Ver sensores";enviar("m")};

@@ -10,8 +10,31 @@ namespace {
 
 #if HABILITAR_BANDA && BANDA_RAMBO
 // ---- Enlace serie con la RAMBo ----------------------------------------------------------
-HardwareSerial rambo(1);
 volatile int oks_pendientes = 0;
+
+// Una línea que respondió la RAMBo: cuenta los "ok" y muestra lo demás.
+void ramboLineaRx(const char *l) {
+  if (l[0] == 'o' && l[1] == 'k') { if (oks_pendientes > 0) oks_pendientes--; }
+  else if (l[0] && strncmp(l, "echo:busy", 9) != 0) Serial.printf("RAMBO: %s\n", l);
+}
+
+#if BANDA_PUENTE_PC
+// La RAMBo va por USB al PC y el panel web hace de puente: cada línea de G-code sale por la
+// consola con el prefijo '@', y las respuestas de la RAMBo llegan por la consola como "@ok".
+void ramboLeer() {}
+void ramboEnviar(const char *g, int oks) {
+  oks_pendientes += oks;
+  const char *p = g;
+  while (*p) {
+    const char *f = strchr(p, '\n');
+    const int n = f ? (int)(f - p) : (int)strlen(p);
+    if (n) Serial.printf("@%.*s\n", n, p);
+    p += n + (f ? 1 : 0);
+  }
+}
+void ramboIniciar() {}                  // Marlin ya trae pasos/mm, sin límites y sin apagado por inactividad
+#else
+HardwareSerial rambo(1);
 char rx_buf[64];
 uint8_t rx_n = 0;
 
@@ -20,8 +43,7 @@ void ramboLeer() {
     char c = rambo.read();
     if (c == '\n' || c == '\r') {
       rx_buf[rx_n] = 0;
-      if (rx_n >= 2 && rx_buf[0] == 'o' && rx_buf[1] == 'k' && oks_pendientes > 0) oks_pendientes--;
-      else if (rx_n && strncmp(rx_buf, "echo:busy", 9) != 0) Serial.printf("RAMBO: %s\n", rx_buf);
+      ramboLineaRx(rx_buf);
       rx_n = 0;
     } else if (rx_n < sizeof rx_buf - 1) {
       rx_buf[rx_n++] = c;
@@ -33,7 +55,6 @@ void ramboEnviar(const char *g, int oks) {
   oks_pendientes += oks;
   rambo.print(g);
 }
-bool ramboOcupada() { ramboLeer(); return oks_pendientes > 0; }
 void ramboIniciar() {
   rambo.begin(RAMBO_BAUD, SERIAL_8N1, PIN_RAMBO_RX, PIN_RAMBO_TX);
   delay(2500);                          // por si la RAMBo todavía está arrancando
@@ -45,6 +66,8 @@ void ramboIniciar() {
            (int)(BANDA_VMAX / BANDA_PASOS_MM), (int)(BANDA_ACC / BANDA_PASOS_MM));
   ramboEnviar(cfg, 8);                  // sin motor apagado por inactividad, pasos/mm, rampa, cero aquí
 }
+#endif
+bool ramboOcupada() { ramboLeer(); return oks_pendientes > 0; }
 #endif
 
 
@@ -138,6 +161,8 @@ void bandaMm(float mm) {
 }
 void bandaVaso(int8_t v) { bandaMm(v < 0 ? BANDA_RECHAZO_MM : (8 - v) * BANDA_PASO_VASO_MM); }
 bool bandaOcupada() { return ramboOcupada(); }
+void bandaRespuesta(const char *linea) { ramboLineaRx(linea); }
+void bandaReiniciarEnlace() { oks_pendientes = 0; }
 void bandaParar() { ramboEnviar("M410\n", 1); }      // parada rápida
 #elif HABILITAR_BANDA
 // El cero de la banda es el vaso 8 bajo el embudo (referencia por el haz PIN_IR_REF).

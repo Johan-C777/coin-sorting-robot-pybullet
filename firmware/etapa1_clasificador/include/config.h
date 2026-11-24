@@ -57,6 +57,9 @@ constexpr int SERVO_US_MIN = 500, SERVO_US_MAX = 2400;
 #ifndef BANDA_RAMBO
 #define BANDA_RAMBO 0                          // 1 = la banda la mueve una RAMBo (Marlin) por UART
 #endif
+#ifndef BANDA_PUENTE_PC
+#define BANDA_PUENTE_PC 0                       // 1 = la RAMBo va por USB al PC; el panel web hace de puente
+#endif
 constexpr long RAMBO_BAUD = 115200;
 constexpr float RAMBO_F_MM_MIN = 3500;         // 58 mm/s, la misma velocidad que con el A4988
 constexpr float BANDA_PASOS_MM = 42.44f;       // [CAL-11] A4988 1/16 + piñón v7 de 16 dientes m1,5 (75,40 mm/vuelta)

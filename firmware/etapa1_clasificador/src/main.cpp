@@ -202,6 +202,12 @@ static void consola() {
         break;
       }
 #endif
+#if HABILITAR_BANDA && BANDA_RAMBO
+      case '@':                                   // respuesta de la RAMBo reenviada por el puente
+        if (!strcmp(buf + 1, "reset")) { hal::bandaReiniciarEnlace(); Serial.println(F("enlace RAMBo reiniciado")); }
+        else hal::bandaRespuesta(buf + 1);
+        break;
+#endif
       case 'u': cal.umbral_dorado = x; ciclo.calibracion(cal); Serial.printf("umbral dorado=%.2f\n", x); break;
       case 'g': nvs::guardar(ciclo.calibracion()); Serial.println(F("calibracion guardada en flash")); break;
       case 'l': if (nvs::cargar(cal)) ciclo.calibracion(cal); info(); break;
