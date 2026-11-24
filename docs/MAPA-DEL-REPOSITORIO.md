@@ -7,7 +7,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 
 | Qué | Dónde está |
 |---|---|
-| El estado final de las tres etapas, fallos y correcciones | [13-estado-final-y-fallos.md](13-estado-final-y-fallos.md) |
+| El estado final de las tres etapas, fallos y correcciones | [14-estado-final-y-fallos.md](14-estado-final-y-fallos.md) |
 | El estado del módulo de monedas | [README](../README.md#estado-estratégico) y [TODO.md](../TODO.md) |
 | El estado de la banda (etapa 2) | [README, sección Etapa 2](../README.md#etapa-2--banda-transportadora) |
 | Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
@@ -54,7 +54,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `09-clasificador-v5.md` | **Diseño de la torre clasificadora v5 (vigente)** |
 | `11-electronica-etapa1.md` | Pines, alimentación y sensores del ESP32-S3 |
 | `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y hallazgos** |
-| `13-estado-final-y-fallos.md` | **Estado final de las tres etapas: qué funciona, fallos, causas y correcciones** |
+| `14-estado-final-y-fallos.md` | **Estado final de las tres etapas: qué funciona, fallos, causas y correcciones** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
 | `visor-etapas-1-2.html` | Visor 3D de las etapas 1 y 2 con la electrónica, el cableado y los colores de filamento (generador en `scripts/visor_etapas/`) |

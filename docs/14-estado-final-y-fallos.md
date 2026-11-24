@@ -10,7 +10,7 @@ salen de una prueba física están marcados como simulación.
 |---|---|---|---|---|
 | **1 · Clasificador** | ✅ CAD paramétrico v5, 24 piezas sin tornillos ni soportes | ✅ Impresa y armada; correcciones de la primera ronda impresas | ✅ ESP32-S3, firmware 0.9.0 con 16 pruebas en el PC y compilación en CI | ⚠️ Primera ronda hecha con monedas reales ([12](12-pruebas-fisicas-etapa1.md)); el ciclo automático completo aún no |
 | **2 · Banda** | ✅ v7 motor fijo con barra dentada, 0 choques en 130 posiciones | ✅ Impresa (13 piezas, ≈ 372 g), montada y conectada | ✅ A4988 + NEMA17 desde el mismo ESP32-S3; banda activada en el firmware 0.9.0 | ⚠️ Mueve el cartucho de punta a punta; pierde posición por dos fallos mecánicos |
-| **3 · Brazo** | ✅ Cinemática, planificador entre 4 obstáculos y trayectorias; planos en SolidWorks | ⏳ Piezas en impresión | ✅ Firmware del ESP32 del brazo y app Streamlit, probados en el PC | ⏳ Sin montaje completo |
+| **3 · Brazo** | ✅ Brazo real de 4 GDL (25 STL, garra y reductora 16:1); planificador entre 4 obstáculos | ⏳ En impresión y armado ([13](13-etapa3-brazo.md)) | ✅ Firmware de calibración del brazo; app Streamlit probada en el PC | ⏳ Sin prueba completa |
 
 ---
 
@@ -67,20 +67,27 @@ las posiciones de cada vaso con `z<vaso>` `[CAL-11]` y la rutina de cero con el 
 
 ## Etapa 3 · Brazo
 
+El brazo construido es de 4 GDL con doble paralelogramo: J1, J2 y J3 con NEMA17 y reductora
+planetaria impresa 16:1, cabeceo y pinza con SG90, y su propia ESP32. Medidas, integración con las
+etapas 1 y 2, diferencias con el modelo simulado, plan y riesgos en
+[13-etapa3-brazo.md](13-etapa3-brazo.md).
+
 ### Qué está hecho
 
-- Cadena de 5 GDL más pinza con cinemática inversa cerrada ([02-cinematica.md](02-cinematica.md)).
-- Planificador que lleva cada vaso del punto A al rack entre los cuatro obstáculos, probado en
-  Python y en la página web con la misma respuesta ([08-obstaculos.md](08-obstaculos.md)).
-- Firmware del ESP32 del brazo ([`firmware/esp32_brazo/`](../firmware/esp32_brazo)): PCA9685,
-  trayectorias quínticas, protocolo por Wi-Fi.
-- App Streamlit con dashboard y asistente ([`software/apps/`](../software/apps)).
-- Planos en SolidWorks ([`PLANOS BRACITO.pdf`](../hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)) y BOM.
+- Brazo diseñado (25 STL, garra en SolidWorks, reductora) y firmware de calibración con interfaz web
+  ([`hardware/etapa3-brazo/`](../hardware/etapa3-brazo)).
+- Planificador de la ruta del punto A al rack entre los cuatro obstáculos, probado en Python y en la
+  página web con la misma respuesta ([08-obstaculos.md](08-obstaculos.md)), y app Streamlit con
+  dashboard y asistente ([`software/apps/`](../software/apps)). Se hicieron con el modelo simulado de
+  5 servos y se están pasando al brazo real.
 
-### Lo que falta
+### Riesgos abiertos
 
-Terminar la impresión y el montaje del brazo, medir L₂ y L₃ reales en el CAD, calibrar el cero
-de cada servo y probar la ruta de A a B con el brazo real.
+| Riesgo | Causa | Corrección propuesta |
+|---|---|---|
+| La pinza no sostiene un vaso lleno | El SG90 da ≈ 1,8 kg·cm y un vaso con 40 monedas pesa ≈ 430 g | Limitar la carga por vaso o reforzar la pinza con almohadillas de TPU |
+| Agarre distinto al simulado | La garra del brazo real queda siempre horizontal | Agarre lateral del vaso y rack recalculado para el arco real |
+| Ceros de los ejes a mano | No hay finales de carrera | Interfaz de calibración y medir la repetibilidad antes de fijar los puestos del rack |
 
 ---
 

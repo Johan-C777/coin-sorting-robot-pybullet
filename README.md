@@ -34,13 +34,13 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
 </p>
 
 > **Estado final de las tres etapas (noviembre de 2026).** Qué funciona, qué falla, por qué y
-> cómo se corrige, etapa por etapa: [**13-estado-final-y-fallos.md**](docs/13-estado-final-y-fallos.md).
+> cómo se corrige, etapa por etapa: [**14-estado-final-y-fallos.md**](docs/14-estado-final-y-fallos.md).
 >
 > | Etapa | Estado |
 > |---|---|
 > | **1 · Clasificador** | Diseñada, impresa, armada y con firmware; primera ronda de [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) con monedas reales y sus correcciones impresas |
 > | **2 · Banda** | v7 (motor fijo con barra dentada) impresa, montada y conectada; mueve el cartucho de punta a punta y tiene dos fallos mecánicos abiertos ([detalle](#etapa-2--banda-transportadora)) |
-> | **3 · Brazo** | Cinemática, planificador entre obstáculos, firmware y app probados en simulación; planos en SolidWorks y piezas en impresión ([detalle](#etapa-3--brazo)) |
+> | **3 · Brazo** | Brazo real de 4 GDL (NEMA17 con reductora 16:1 y 2 SG90) diseñado y en impresión; planificador entre obstáculos y app probados en simulación ([detalle](docs/13-etapa3-brazo.md)) |
 >
 > - [**Visor 3D de las etapas 1 y 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html)
 >   con la electrónica señalada, su cableado y los colores reales de filamento.
