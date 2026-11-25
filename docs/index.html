@@ -128,12 +128,15 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     <div class="cifra"><b>24</b><span>piezas impresas sin tornillos ni soportes</span></div>
     <div class="cifra"><b>12</b><span>parámetros de calibración física marcados en el firmware</span></div>
   </div>
-  <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; todas las piezas están impresas y la torre está armada. La primera ronda de <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">pruebas físicas</a> con monedas reales dejó 6 hallazgos mecánicos; sus correcciones (disco de 5 bolsillos Ø40, tope trasero, paleta plana en la compuerta) están impresas y en prueba antes de calibrar. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
+  <p>El diseño mecánico, el cálculo de la medición y el firmware están cerrados y probados en simulación y en el PC; todas las piezas están impresas y la torre está armada. Las <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">pruebas físicas</a> con monedas reales llevaron a una segunda versión de piezas (disco de 5 bolsillos Ø40, tope trasero, paleta plana en la compuerta), ya impresa y montada. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/TODO.md">plan de trabajo</a> y el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/tree/main/firmware/etapa1_clasificador">firmware</a>.</p>
 
   <h2>Banda transportadora · etapa 2</h2>
   <p><b>Impresa, montada y conectada; en ajustes.</b> La banda pone cada vaso del cartucho bajo el embudo y lo lleva al punto A. Se estudiaron cinco mecanismos (cadena de tablillas, carro sobre varillas con hilo, riel impreso con hilo, riel con cremallera y motor sobre el carro, y motor fijo con barra dentada). La vigente es la v7: el NEMA17 y su piñón quedan quietos y una barra dentada de 810 mm arrastra el carro, sin compras y sin soportes (≈ 372 g). Quedan por corregir el motor que se desplaza en su soporte y el piñón que resbala en el eje. Detalle en el <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet#etapa-2--banda-transportadora">README</a>.</p>
 
-  <p><b>Estado final de las tres etapas:</b> qué funciona, qué falla, por qué y cómo se corrige, en <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/14-estado-final-y-fallos.md">14-estado-final-y-fallos</a>.</p>
+  <p><b>Estado final de las tres etapas:</b> arquitectura, resultados y ajustes de cada etapa en <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/14-estado-final.md">14-estado-final</a>.</p>
+  <h2>Brazo · etapa 3</h2>
+  <p><b>Impreso, armado y moviéndose.</b> Brazo de 4 GDL de doble paralelogramo: tres NEMA 17 con reductora planetaria impresa 16:1 (base, hombro y codo) y dos SG90 (cabeceo y pinza). Los motores quedan quietos en la torreta y la garra se mantiene horizontal. Tiene su propia ESP32 con drivers TB6560/TB6600 y una interfaz web de calibración. En la prueba toma un vaso del cartucho, lo levanta y lo traslada. <a href="pruebas/etapa3/video/brazo_toma_vaso.mp4">Video</a> · explicación completa en <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/13-etapa3-brazo.md">13-etapa3-brazo</a>.</p>
+  <p><img src="pruebas/etapa3/secuencia_brazo.jpg" alt="Secuencia del brazo tomando un vaso" style="width:100%;max-width:820px;border-radius:8px"></p>
 
   <h2>Demos</h2>
   <div class="demos">
@@ -143,7 +146,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--linea);color:
     </a>
     <a class="demo" href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/12-pruebas-fisicas-etapa1.md">
       <img src="pruebas/etapa1/img/montaje_final.jpg" alt="" loading="lazy">
-      <div><b>Pruebas físicas de la etapa 1</b><p>La torre armada con monedas reales: videos, fotos y los 6 hallazgos que se están corrigiendo.</p></div>
+      <div><b>Pruebas físicas de la etapa 1</b><p>La torre armada con monedas reales: videos, fotos y los ajustes de diseño que salieron de ellas.</p></div>
     </a>
     <a class="demo" href="simulacion_sistema_completo.html">
       <img src="img/sistema-completo.png" alt="" loading="lazy" width="1400" height="1145">

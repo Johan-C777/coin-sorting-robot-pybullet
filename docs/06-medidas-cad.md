@@ -1,6 +1,8 @@
 # Medidas del CAD frente a las del código
 
-El brazo físico está modelado en SolidWorks (`hardware/etapa3-brazo/PLANOS BRACITO.pdf`). Sus cotas
+> Este documento describe el brazo anterior de 5 servos. Las medidas del brazo construido están en [`13-etapa3-brazo.md`](13-etapa3-brazo.md).
+
+El brazo físico está modelado en SolidWorks (`hardware/archivo/etapa3-brazo-v1/PLANOS BRACITO.pdf`). Sus cotas
 no coinciden con las que usan la simulación y la memoria de cálculo, así que el
 código trae dos perfiles y se cambia de uno a otro en un solo sitio:
 

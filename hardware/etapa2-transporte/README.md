@@ -1,6 +1,6 @@
 # Etapa 2: transporte del cartucho
 
-**Estado:** la v7 (motor fijo con barra dentada) está **impresa, montada y conectada**, y mueve el cartucho de punta a punta. Quedan dos fallos abiertos en la prueba física: el NEMA17 se desplaza en su soporte y el piñón resbala en el eje. Las versiones anteriores se conservan porque documentan el proceso de diseño.
+**Estado:** la v7 (motor fijo con barra dentada) está **impresa, montada y conectada**, y lleva el cartucho bajo la torre movida por una RAMBo con Marlin ([video](../../docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4)). Las versiones anteriores se conservan porque documentan el proceso de diseño.
 
 El cartucho de 9 vasos (C02 + 3 C01 + 9 V01) de la etapa 1 v5 debe recorrer 774 mm bajo la torre: el vaso 9 queda bajo el embudo en u = 0, el rechazo en u = 342 mm y el vaso 1 en el punto A en u = 774 mm. Un NEMA17 con A4988 lo mueve en lazo abierto y una barrera infrarroja da el cero. El requisito de diseño es imprimir casi todo, con el mínimo de material, sin soportes y sin comprar piezas.
 
@@ -24,12 +24,10 @@ Visores en 3D: [v7 (vigente)](../../docs/etapa2/v7-motor-fijo.html) y el [conjun
 - Resolución: 75,40 mm por vuelta, **42,44 pasos/mm** a 1/16 de paso; carrera de 774 mm = 32.850 pasos; un vaso (38 mm) = 1.613 pasos; rechazo en u = 342 mm.
 - Ocupa 1,58 m de mesa en X: detrás de la torre sobresale la cola de la barra (unos 420 mm).
 
-## Fallos abiertos en la prueba física (2026-11)
+## Control y mejoras previstas
 
-| Fallo | Qué se ve | Primeras medidas a probar |
-|---|---|---|
-| Motor que se desplaza | El NEMA17 se mueve en el soporte al arrancar y frenar | Sujetar el motor con brida por las ranuras del soporte, pegar la base a la mesa, bajar la aceleración `[CAL-11]` |
-| Piñón que resbala en el eje | El piñón gira respecto al eje y la barra pierde pasos | Revisar el plano de la D, una gota de cianoacrilato o un prisionero, y un piñón con más ajuste |
+- **Controlador:** RAMBo con Marlin 2.1.2.5, NEMA17 en el driver X (42,44 pasos/mm, corriente por `M907`). La ESP32-S3 de la etapa 1 pide cada vaso en G-code y espera el `ok` de `M400` ([arquitectura](../../docs/14-estado-final.md)).
+- **Mejoras para la siguiente iteración:** prisionero M3 en el cubo del piñón, brida de sujeción del soporte del motor y búsqueda automática del cero con la barrera IR.
 
 ## v6 (proceso): cómo funcionaba
 

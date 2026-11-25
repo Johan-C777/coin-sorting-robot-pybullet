@@ -20,7 +20,7 @@ Torre de 33 cm que recibe monedas colombianas revueltas de **las dos familias**
 **mide el diámetro de cada moneda por tiempo de vuelo** con dos barreras infrarrojas,
 separa las dos $500 por color y deja cada una en su vaso de un cartucho de 9. Es la
 primera de las tres etapas de una celda robótica: después una banda lleva los vasos al
-punto A y un brazo de 5 GDL los ordena en un rack esquivando cuatro obstáculos.
+punto A y un brazo de 4 GDL los ordena en un rack esquivando cuatro obstáculos.
 
 Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Militar Nueva Granada.
 
@@ -33,14 +33,15 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
   <br><sub>Visor 3D interactivo de la torre v5: clic en la imagen para abrirlo en el navegador.</sub>
 </p>
 
-> **Estado final de las tres etapas (noviembre de 2026).** Qué funciona, qué falla, por qué y
-> cómo se corrige, etapa por etapa: [**14-estado-final-y-fallos.md**](docs/14-estado-final-y-fallos.md).
+> **Estado final de las tres etapas (noviembre de 2026).** Arquitectura, resultados, ajustes y
+> siguientes mejoras, etapa por etapa: [**14-estado-final.md**](docs/14-estado-final.md).
+> Todo se controla desde el [**panel de control web**](docs/panel-control.html) (Chrome o Edge, por USB).
 >
-> | Etapa | Estado |
-> |---|---|
-> | **1 · Clasificador** | Diseñada, impresa, armada y con firmware; primera ronda de [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) con monedas reales y sus correcciones impresas |
-> | **2 · Banda** | v7 (motor fijo con barra dentada) impresa, montada y conectada; mueve el cartucho de punta a punta y tiene dos fallos mecánicos abiertos ([detalle](#etapa-2--banda-transportadora)) |
-> | **3 · Brazo** | Brazo real de 4 GDL (NEMA17 con reductora 16:1 y 2 SG90) diseñado y en impresión; planificador entre obstáculos y app probados en simulación ([detalle](docs/13-etapa3-brazo.md)) |
+> | Etapa | Controlador | Estado |
+> |---|---|---|
+> | **1 · Clasificador** | ESP32-S3 | Impresa, armada y con firmware 0.9.0; [pruebas físicas](docs/12-pruebas-fisicas-etapa1.md) con monedas reales y piezas ajustadas |
+> | **2 · Banda** | RAMBo (Marlin) | v7 impresa y montada; lleva el cartucho bajo la torre a la posición que pide la etapa 1 ([video](docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4)) |
+> | **3 · Brazo** | ESP32 propia | 4 GDL impreso, armado y tomando un vaso del cartucho ([detalle](docs/13-etapa3-brazo.md)) |
 >
 > - [**Visor 3D de las etapas 1 y 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html)
 >   con la electrónica señalada, su cableado y los colores reales de filamento.
@@ -63,7 +64,7 @@ está en la fase de montaje físico.**
 | Firmware de operación | ✅ Compila para ESP32-S3 en CI | RAM 6,5 % y flash 9,8 % ([job de CI](.github/workflows/pruebas.yml)) |
 | Impresión | ✅ Completa | Las [8 camas](hardware/etapa1-clasificador/impresion/CAMAS.md) de la Creality K1C: 24 piezas en PLA+, PETG y PLA |
 | Electrónica | ✅ Completa | [Pines](firmware/etapa1_clasificador/include/pines.h), [lista de conexiones](hardware/etapa1-clasificador/esquematico/conexiones.csv) y presupuesto de potencia, verificados por prueba automática |
-| Montaje y pruebas físicas | ▶ Fase actual | Torre armada; [primera ronda de pruebas](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias y 6 hallazgos mecánicos |
+| Montaje y pruebas físicas | ✅ Hecho | Torre armada; [pruebas con monedas reales](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias en video y foto |
 | Correcciones de la primera ronda | ▶ En curso | Disco de 5 bolsillos Ø40 ([H02e](hardware/etapa1-clasificador/stl/ajustes)) con el firmware a 5 bolsillos, tope trasero H04 y paleta plana G03 impresos y en prueba; lijado del portadisco en proceso; barreras IR y TCS3200 se prueban con jumpers más largos |
 | Calibración física | ⏳ Después de las correcciones | [Procedimiento](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
 
@@ -100,17 +101,38 @@ Mecanismos estudiados:
 | v6 | Riel impreso con cremallera y motor con piñón sobre el carro | Sin compras (≈ 278 g); se dejó porque el motor y su cable viajaban en el carro ([visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/proceso/v6-cremallera.html)) |
 | **v7** | Motor y piñón fijos en la mesa; barra dentada de 810 mm en 4 tramos que arrastra el carro sobre el riel | **Vigente, impresa y montada:** sin compras, ≈ 372 g, sin soportes, 42,44 pasos/mm ([visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v7-motor-fijo.html)) |
 
-Fallos abiertos de la v7 en la prueba física: el NEMA17 se desplaza en su soporte y el piñón
-resbala en el eje. Detalle en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte/README.md).
+La v7 lleva el cartucho bajo la torre con la RAMBo: la ESP32-S3 de la etapa 1 pide el vaso de
+cada moneda y la RAMBo lo posiciona y confirma con `M400` antes de que abra la compuerta
+([video de la prueba](docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4),
+[arquitectura](docs/14-estado-final.md#arquitectura-final-cada-etapa-con-su-controlador)).
 
 Los archivos de la banda están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
 
 ## Etapa 3 · Brazo
 
-En diseño en SolidWorks; algunas piezas ya se están imprimiendo. La cinemática, el
-planificador entre obstáculos y el firmware ya están hechos y probados en simulación
-([memoria de cálculo](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html),
-[`software/brazo/`](software/brazo), [`firmware/esp32_brazo/`](firmware/esp32_brazo)).
+<p align="center">
+  <img src="docs/pruebas/etapa3/secuencia_brazo.jpg" alt="El brazo toma un vaso del cartucho y lo traslada" width="820">
+  <br><sub>Brazo de 4 GDL impreso y armado: baja sobre un vaso del cartucho, lo agarra, lo levanta, gira y
+  lo deja al otro lado. <a href="docs/pruebas/etapa3/video/brazo_toma_vaso.mp4">Video de la prueba</a>.</sub>
+</p>
+
+Brazo de **doble paralelogramo** diseñado en SolidWorks: tres NEMA 17 con reductora planetaria impresa
+**16:1** mueven la base, el hombro y el codo, y dos SG90 el cabeceo y la pinza. Los motores quedan
+quietos en la torreta y el paralelogramo mantiene la garra horizontal, así que el vaso no se inclina.
+El brazo tiene **su propia ESP32** con dos drivers TB6560 y un TB6600 a 24 V, una interfaz web de
+calibración por USB y los ceros guardados en la placa.
+
+| | |
+|---|---|
+| Medidas | hombro a 197 mm · L₁ 155 · L₂ 130 · muñeca 28 · garra 90 mm; alcance ≈ 40 cm |
+| Par en el hombro | 5,0 N·m disponibles frente a 0,83 N·m pedidos con el brazo estirado (FS ≈ 6) |
+| Resolución | 17,8 pasos por grado: 0,056° por paso, 0,39 mm en la punta |
+| Pinza | Sostiene ≈ 0,18 kg (un vaso con ~15 monedas de $1.000) |
+| Cinemática | Directa e inversa cerradas en [`software/brazo/brazo4gdl.py`](software/brazo/brazo4gdl.py), que también genera los comandos para la ESP32 |
+
+**Todo explicado paso a paso** (cómo funciona el paralelogramo y la reductora, cálculos, electrónica,
+control, cinemática, espacio de trabajo y pruebas): [**docs/13-etapa3-brazo.md**](docs/13-etapa3-brazo.md).
+Piezas, garra, reductora y BOM en [`hardware/etapa3-brazo/`](hardware/etapa3-brazo).
 
 ---
 
@@ -424,7 +446,7 @@ Las versiones anteriores están en [`hardware/archivo/`](hardware/archivo) y
 
 ## El resto del sistema: etapas 2 y 3
 
-La etapa 2 está montada y en ajustes, y la etapa 3 está en diseño mecánico; las dos ya están simuladas.
+La etapa 2 está montada y en ajustes, y el brazo de la etapa 3 está impreso, armado y moviendo vasos.
 
 ```mermaid
 flowchart LR
@@ -439,7 +461,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
 | **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | v7 (motor fijo y barra dentada) impresa y montada, en ajustes ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
-| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; diseño en SolidWorks y piezas en impresión | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Brazo de 4 GDL impreso, armado y con su propia ESP32; toma y traslada un vaso. Ruta entre obstáculos probada en simulación | [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
 
@@ -468,7 +490,12 @@ recorrido y 400 poses aleatorias: la diferencia máxima es de 10⁻¹⁴ cm.
 
 ---
 
-## El brazo
+## El brazo simulado (planificador de obstáculos)
+
+El brazo construido es el de 4 GDL de la [sección Etapa 3](#etapa-3--brazo). La ruta entre
+obstáculos, la app y la memoria de cálculo se desarrollaron antes, con este modelo de 5 GDL y servos;
+sirven como base del planificador y se pasan al brazo real cambiando la cinemática por la de
+[`brazo4gdl.py`](software/brazo/brazo4gdl.py).
 
 Cadena antropomórfica de 5 GDL más pinza, con los tres ejes centrales
 paralelos, así que la inversa es cerrada y el ESP32 la resuelve sin iterar.
@@ -505,6 +532,20 @@ Desarrollo completo en [02-cinematica.md](docs/02-cinematica.md), la
 ---
 
 ## Arquitectura y comunicación
+
+Montaje físico: cada etapa con su controlador.
+
+```mermaid
+flowchart LR
+    C["ESP32-S3 · etapa 1<br/>2 IR · tolva · color · compuerta"]
+    R["RAMBo · Marlin · etapa 2"]
+    C -->|"G-code"| R
+    R --> BA["NEMA 17 banda"]
+    E["ESP32 · etapa 3"] -->|"STEP/DIR"| DR["2 TB6560 + TB6600"] --> BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
+    E -->|PWM| SG["SG90 cabeceo y pinza"]
+```
+
+Arquitectura del modelo simulado (app, protocolo y planificador):
 
 ```mermaid
 flowchart LR
@@ -547,9 +588,9 @@ Ordenado por etapa en [`hardware/`](hardware/README.md):
   [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
 - **Etapa 2:** banda v7 montada y en ajustes ([estado y versiones](#etapa-2--banda-transportadora)); las
   medidas que deja la etapa 1 están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
-- **Etapa 3:** planos en SolidWorks
-  ([`PLANOS BRACITO.pdf`](hardware/etapa3-brazo/PLANOS%20BRACITO.pdf)), rack,
-  bandeja de electrónica y [`bom.csv`](hardware/etapa3-brazo/bom.csv).
+- **Etapa 3:** brazo de 4 GDL con garra SG90 y reductoras planetarias 16:1 (SolidWorks), firmware de
+  calibración y [`bom.csv`](hardware/etapa3-brazo/bom.csv); integración en
+  [`docs/13-etapa3-brazo.md`](docs/13-etapa3-brazo.md).
 - **Archivo:** las etapas 1 anteriores (v1 con varillas M5, probetas v3 y v4 con
   riel de 8 ranuras y PVC) quedan en [`hardware/archivo/`](hardware/archivo) como referencia.
 
@@ -588,10 +629,12 @@ pip install -r requirements.txt
 python software/apps/cli_demo.py --criterio peso --sentido asc   # lote, ruta A→B y orden
 python sim/pybullet/run_sim_integrada.py                         # las etapas con física
 streamlit run software/apps/streamlit_app.py                     # dashboard y asistente
+cd software && python -m brazo.brazo4gdl                          # brazo real: alcance y pasos/°
 ```
 
-Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). Para el
-brazo: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
+Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). El brazo real se
+mueve con su firmware de ESP32 y la interfaz de calibración ([13-etapa3-brazo.md § 5](docs/13-etapa3-brazo.md#5-control)).
+Para el brazo simulado: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
 (librería Adafruit PWM Servo Driver) y probar por monitor serie antes de conectar la
 potencia de 6 V:
 
@@ -628,7 +671,7 @@ coin-sorting-robot-pybullet/
 ├── hardware/
 │   ├── etapa1-clasificador/        torre v5: stl/, impresion/, esquematico/, despiece, compras, guía
 │   ├── etapa2-transporte/          interfaz para la banda
-│   ├── etapa3-brazo/               planos, rack, bandeja y BOM del brazo
+│   ├── etapa3-brazo/               brazo 4 GDL, garra, reductora, firmware de calibración y BOM
 │   └── archivo/                    etapa 1 v1, v3 y v4
 ├── scripts/                        generadores de piezas, camas y figuras (archivo/: v1, v3, v4)
 ├── sim/

@@ -1,6 +1,6 @@
 # Etapa 2 v7: motor fijo, barra dentada en la mesa
 
-> **Estado (2026-11):** impresa, montada y conectada; mueve el cartucho de punta a punta. Fallos abiertos: el motor se desplaza en el soporte y el piñón resbala en el eje. Las secciones de riesgos y plan por fases de abajo son las del diseño, antes de imprimir.
+> **Estado (2026-11):** impresa, montada y movida por la RAMBo con Marlin; lleva el cartucho bajo la torre. Las secciones de riesgos y plan por fases de abajo son las del diseño, antes de imprimir.
 
 El motor NEMA17 y su piñón **no se mueven**. Una **barra dentada** impresa descansa en la mesa pegada al piñón y arrastra el carro por un **brazo** con cola de milano. Al girar el motor solo se mueven la barra, el carro y los vasos; el cable queda quieto. Todo se imprime como está, **sin soportes y sin comprar nada**. ≈ **372 g** de plástico.
 

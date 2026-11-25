@@ -68,14 +68,14 @@ parámetro en `firmware/etapa1_clasificador/include/`.
 - [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø33
       del disco, bolsillo del SG90 (23,1 × 12,8)
 - [x] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md) → [foto](docs/12-pruebas-fisicas-etapa1.md#montaje-general)
-- [x] Primera ronda de pruebas mecánicas con monedas reales: 13 evidencias y 6 hallazgos
+- [x] Primera ronda de pruebas mecánicas con monedas reales: 13 evidencias y 6 ajustes de diseño
       → [12-pruebas-fisicas-etapa1.md](docs/12-pruebas-fisicas-etapa1.md)
 - [ ] Elegir el rascador H03 (2,5 / 2,6 / 2,8 mm) con monedas reales
 - [ ] Cablear según [`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)
       y comprobar que el shield del ESP32-S3 deja libres los pines asignados
 - [ ] Cargar el firmware y verificar la consola (`i`, `m`)
 
-**Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#hallazgos-y-correcciones))
+**Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#observaciones-y-ajustes))
 
 - [ ] H1 · Que la moneda no caiga por detrás del disco: tope trasero H04 (40 × 10 × 3) impreso, en prueba
 - [ ] H2 · Disco con bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan): diseñado
