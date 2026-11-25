@@ -43,6 +43,8 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
 > | **2 · Banda** | RAMBo (Marlin) | v7 impresa y montada; lleva el cartucho bajo la torre a la posición que pide la etapa 1 ([video](docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4)) |
 > | **3 · Brazo** | ESP32 propia | 4 GDL impreso, armado y tomando un vaso del cartucho ([detalle](docs/13-etapa3-brazo.md)) |
 >
+> - [**Visor 3D del brazo de 4 GDL**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html):
+>   el ensamble real con sus articulaciones móviles, la posición de la punta y los pasos de motor.
 > - [**Visor 3D de las etapas 1 y 2**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html)
 >   con la electrónica señalada, su cableado y los colores reales de filamento.
 > - Todo se puede ver en el navegador en el [sitio de demos](https://johan-c777.github.io/coin-sorting-robot-pybullet/).
@@ -130,6 +132,9 @@ calibración por USB y los ceros guardados en la placa.
 | Pinza | Sostiene ≈ 0,18 kg (un vaso con ~15 monedas de $1.000) |
 | Cinemática | Directa e inversa cerradas en [`software/brazo/brazo4gdl.py`](software/brazo/brazo4gdl.py), que también genera los comandos para la ESP32 |
 
+[**Visor 3D del brazo**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html):
+mueve cada articulación sobre el ensamble real.
+
 **Todo explicado paso a paso** (cómo funciona el paralelogramo y la reductora, cálculos, electrónica,
 control, cinemática, espacio de trabajo y pruebas): [**docs/13-etapa3-brazo.md**](docs/13-etapa3-brazo.md).
 Piezas, garra, reductora y BOM en [`hardware/etapa3-brazo/`](hardware/etapa3-brazo).
@@ -145,6 +150,7 @@ Portada: **https://johan-c777.github.io/coin-sorting-robot-pybullet/**
 | Demo | Qué muestra |
 |---|---|
 | [**Clasificador v5 · visor 3D**](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) | La torre completa pieza por pieza: despiece, ficha de cada pieza, camino de la moneda y simulación del ciclo |
+| [**Etapa 3 · brazo de 4 GDL en 3D**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html) | Ensamble real con las piezas impresas; cada articulación se mueve con un deslizador y muestra la punta de la garra y los pasos de motor |
 | [**Etapas 1 y 2 · visor 3D con electrónica**](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html) | Torre y banda juntas con los colores de filamento, la electrónica numerada con sus pines, el cableado y la ubicación sugerida de la protoboard |
 | [**Etapa 2 · banda v7 (motor fijo)**](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v7-motor-fijo.html) | El motor fijo, el piñón, la barra dentada y el carro: recorrido, corte, piezas, cálculos y armado |
 | [**Pruebas físicas de la etapa 1**](docs/12-pruebas-fisicas-etapa1.md) | Videos y fotos de la torre armada con monedas reales |

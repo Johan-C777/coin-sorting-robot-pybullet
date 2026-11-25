@@ -13,6 +13,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | Las pruebas físicas (videos y fotos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
 | El brazo (etapa 3): mecánica, cálculos, electrónica, G-code, cinemática y su video | [13-etapa3-brazo.md](13-etapa3-brazo.md) |
 | El diseño de la torre clasificadora | [09-clasificador-v5.md](09-clasificador-v5.md) y el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) |
+| El brazo de 4 GDL en 3D, con sus articulaciones móviles | [Visor 3D del brazo](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html) |
 | Las etapas 1 y 2 juntas con la electrónica | [Visor 3D de las etapas 1 y 2](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html) |
 | Las piezas para imprimir | [`hardware/etapa1-clasificador/stl/`](../hardware/etapa1-clasificador/stl) y las camas en [`impresion/`](../hardware/etapa1-clasificador/impresion) |
 | La guía de armado | [`hardware/etapa1-clasificador/README.md`](../hardware/etapa1-clasificador/README.md) y la [guía de montaje y pruebas](../hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md) |
@@ -59,6 +60,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `14-estado-final.md` | **Estado final de las tres etapas: arquitectura, resultados, ajustes realizados y siguientes mejoras** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
+| `visor-brazo-4gdl.html` | Visor 3D del brazo de 4 GDL: ensamble real, articulaciones móviles, punta y pasos de motor |
 | `visor-etapas-1-2.html` | Visor 3D de las etapas 1 y 2 con la electrónica, el cableado y los colores de filamento (generador en `scripts/visor_etapas/`) |
 | `etapa2/` | Visor de la banda v7 vigente; `etapa2/proceso/` guarda los visores v4, v5 y v6 |
 | `simulacion_sistema_completo.html` | Simulación del sistema completo |

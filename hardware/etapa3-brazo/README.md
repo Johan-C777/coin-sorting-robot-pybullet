@@ -10,6 +10,8 @@ cinemática y pruebas): [`docs/13-etapa3-brazo.md`](../../docs/13-etapa3-brazo.m
 
 <p align="center"><img src="../../docs/pruebas/etapa3/secuencia_brazo.jpg" alt="Prueba del brazo" width="700"></p>
 
+[Visor 3D del ensamble](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html) (fuente en [`docs/visor-brazo-4gdl.html`](../../docs/visor-brazo-4gdl.html)).
+
 | Carpeta | Contenido |
 |---|---|
 | [`brazo/`](brazo) | 25 STL (`stl/`), ensamble y actuadores en STEP (`step/`), [`GUIA_IMPRESION.md`](brazo/GUIA_IMPRESION.md), [`INFORME_CAD.md`](brazo/INFORME_CAD.md), scripts generadores |

@@ -12,6 +12,12 @@ SolidWorks; todas las piezas están impresas en 3D.
   lo deja al otro lado. <a href="pruebas/etapa3/video/brazo_toma_vaso.mp4">Video completo (1 min 41 s)</a>.</sub>
 </p>
 
+**[Visor 3D del brazo](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html)**:
+el ensamble real con las piezas impresas; cada articulación se mueve con un deslizador y el panel
+muestra la posición de la punta y los pasos de motor.
+
+<p align="center"><a href="https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html"><img src="img/visor-brazo-4gdl.png" alt="Visor 3D del brazo de 4 GDL" width="820"></a></p>
+
 **Contenido:** [1. Resumen](#1-resumen) · [2. Mecánica](#2-mecánica) ·
 [3. Cálculos](#3-cálculos-de-diseño) · [4. Electrónica](#4-electrónica) ·
 [5. Control](#5-control) · [6. Cinemática](#6-cinemática) ·
