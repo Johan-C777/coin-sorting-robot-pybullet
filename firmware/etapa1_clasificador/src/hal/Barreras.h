@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "Planta.h"
+#include "config.h"
 
 namespace hal {
 
@@ -19,6 +20,14 @@ bool barrerasEvento(seq::EventoBarrera &ev);
 void barrerasDescartar();
 DiagBarrera barrerasDiag(uint8_t i);
 uint32_t barrerasPerdidos();        // eventos que no cupieron en la cola
+
+#if UNA_BARRERA
+// Modo de una sola barrera: canal físico (0 = GPIO 1, 1 = GPIO 2) y velocidad supuesta.
+void barreraUnicaCanal(uint8_t canal);
+uint8_t barreraUnicaCanal();
+void barreraUnicaVelocidad(float v_mm_s, float sep_mm);
+float barreraUnicaVelocidad(float sep_mm);
+#endif
 
 // Haz de referencia del cartucho (banda): instante del último corte, 0 si no hubo.
 uint32_t referenciaUltimoCorte();

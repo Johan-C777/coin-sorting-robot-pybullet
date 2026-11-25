@@ -1,6 +1,8 @@
 # Medidas del CAD frente a las del código
 
-El brazo físico está modelado en SolidWorks (`hardware/etapa3-brazo/PLANOS BRACITO.pdf`). Sus cotas
+> Registro del diseño anterior del brazo (5 servos), reemplazado por el brazo de 4 GDL de doble paralelogramo. Las medidas del brazo construido están en [`13-etapa3-brazo.md`](13-etapa3-brazo.md).
+
+El brazo físico está modelado en SolidWorks (`hardware/archivo/etapa3-brazo-v1/PLANOS BRACITO.pdf`). Sus cotas
 no coinciden con las que usan la simulación y la memoria de cálculo, así que el
 código trae dos perfiles y se cambia de uno a otro en un solo sitio:
 
@@ -15,18 +17,18 @@ BRAZO_PERFIL=cad python software/apps/cli_demo.py      # Python
 | --- | --- | --- | --- | --- |
 | d₁, eje del hombro sobre la mesa | hoja 3 (base 50 mm) + hoja 4 (hombro 36,61 mm) | 87 mm | 110 mm | −23 mm |
 | L₁, hombro a codo | hoja 5: 140 mm totales menos los cubos R17,5 y R22,5 | 100 mm | 160 mm | −60 mm |
-| L₂, codo a muñeca | hojas 6, 7 y 8: acotadas por caras, no entre ejes | 95 mm **por medir** | 150 mm | — |
-| L₃, muñeca al TCP | hojas 10 y 12: pinza de 65,31 mm y base de 47,50 mm | 60 mm **por medir** | 80 mm | — |
+| L₂, codo a muñeca | hojas 6, 7 y 8: acotadas por caras, no entre ejes | 95 mm (estimado) | 150 mm | — |
+| L₃, muñeca al TCP | hojas 10 y 12: pinza de 65,31 mm y base de 47,50 mm | 60 mm (estimado) | 80 mm | — |
 | Alcance | suma de los tres eslabones | 255 mm | 390 mm | −135 mm |
 | Radio del arco de puestos | calculado, no está en el plano | 97 mm | 230 mm | −133 mm |
 
 Otras cotas del plano que ya están en el código: base Ø100 × 50 mm (hoja 3),
 disco del hombro Ø110 mm (hoja 4), apertura útil de la pinza y vaso de 34 mm (el de la etapa 1).
 
-## Las dos cotas que faltan
+## Las dos cotas estimadas
 
-El plano acota el codo y la mano por sus caras, no entre ejes. En SolidWorks,
-sobre el ensamble, mide estas dos distancias y reemplázalas en los dos archivos:
+El plano acota el codo y la mano por sus caras, no entre ejes, así que estas dos distancias
+se estimaron. Se definen así:
 
 1. **L₂**: del eje del codo (agujero Ø18 de la hoja 6) al eje de cabeceo de la
    muñeca (agujero Ø5 de Mano 1, hoja 7).
@@ -56,6 +58,9 @@ a 17 cm obliga a trabajar cerca de la base. Tres salidas, en orden de esfuerzo:
    sigue pasando por encima de los demás (los vasos llenos llegan a 8,9 cm).
 2. Acercar el rack a 97 mm de radio, que es lo que ya quedó en el perfil CAD.
 3. Alargar L₂ unos 40 mm en el CAD si se quiere conservar la celda actual.
+
+Este límite de alcance fue una de las razones para pasar al brazo de 4 GDL de doble
+paralelogramo (L₁ = 155 mm, L₂ = 130 mm), con un alcance de la punta de unos 40 cm.
 
 ## Qué revisar después de cambiar de perfil
 

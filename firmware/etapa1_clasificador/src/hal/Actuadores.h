@@ -1,4 +1,5 @@
 #pragma once
+#include "config.h"
 // Tolva (28BYJ-48 + ULN2003), compuerta (SG90) y banda (A4988 + NEMA17, etapa 2).
 // Los pasos se generan en una tarea dedicada en el núcleo 0; loop() y la máquina de estados
 // corren en el núcleo 1 y nunca esperan a un motor.
@@ -25,5 +26,9 @@ void bandaVaso(int8_t vaso);           // 0..8 o -1 (rampa de rechazo)
 void bandaMm(float mm);
 bool bandaOcupada();
 void bandaParar();
+#if HABILITAR_BANDA && BANDA_RAMBO
+void bandaRespuesta(const char *linea);   // línea recibida de la RAMBo ("ok", ...)
+void bandaReiniciarEnlace();               // olvida los "ok" pendientes
+#endif
 
 }  // namespace hal

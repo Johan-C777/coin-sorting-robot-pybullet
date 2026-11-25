@@ -31,7 +31,7 @@ Regla: **primero tierras, luego 5 V medidos con multímetro, y el ESP32 al final
 | Barrera 1 (a 105 mm) | LED IR: 5 V → 330 Ω → ánodo, cátodo a GND. Fototransistor: C → 3V3, E → GPIO **1** y de E a GND 10 kΩ |
 | Barrera 2 (a 129 mm) | igual, E → GPIO **2** |
 | TCS3200 | VCC → 3V3; GND y **OE** → GND; OUT → GPIO **14**; S2 → **16**; S3 → **17**; S0 → **18**; S1 → **21** |
-| Banda (etapa 2) | no conectar aún (STEP 10, DIR 11, EN 12, haz ref 13) |
+| Banda (etapa 2) | no se conecta a la S3: la mueve la RAMBo (pines reservados STEP 10, DIR 11, EN 12, haz ref 13) |
 
 Fototransistor: la pata larga (emisor en la mayoría) va al GPIO + 10 kΩ; si lees siempre 0 o siempre 4095, invierte C y E.
 El LED IR se ve con la cámara del celular (luz violeta).
@@ -61,11 +61,11 @@ pio device monitor         # consola 115200
 5. **TCS3200.** Con `m`, `total` debe ser > 0 y cambiar al tapar el sensor. Moneda dorada ($500 nueva) frente a A01: `razon` > 1,30; plateada < 1,30. Ajusta `UMBRAL_DORADO`.
 6. **Ciclo completo.** `d` = una moneda (avanza, mide, abre compuerta); `a` = automático; `r` = resumen. Calibra con la fase 4 de [`TODO.md`](../../TODO.md).
 
-Reporta aquí cualquier línea rara de la consola y se ajusta; no se inventan valores sin monedas reales.
+Los parámetros se ajustan solo con lecturas de monedas reales en la consola, nunca a ojo.
 
-## F. Ajustes tras la primera ronda de pruebas (`stl/ajustes/`, generador `scripts/generar_ajustes_tolva.py`)
+## F. Ajustes de diseño tras las pruebas (`stl/ajustes/`, generador `scripts/generar_ajustes_tolva.py`)
 
-- **H02c** disco de **6 bolsillos Ø33** (antes 8 de Ø29), con un bolsillo en la posición de salida y radio 50. Cara trasera plana como el H02 anterior, sin soportes. Mismo eje y grosor; sirve con H01 y con H03a/b/c (para la $1.000 usa H03c, 2,8 mm). El firmware pasa a `BOLSILLOS = 6`.
+- **H02e** disco de **5 bolsillos Ø40** (antes 8 de Ø29), con un bolsillo en la posición de salida, radio de paso 42 mm y cara trasera plana, sin soportes. Mismo eje y grosor; sirve con H01 y con los rascadores H03. Admite todas las denominaciones, incluida la $1.000 (26,70 mm). El firmware usa `BOLSILLOS = 5`. El H02c (6 bolsillos Ø33) fue el paso intermedio y se conserva en `stl/ajustes/`.
 - **H04 tope trasero:** rectángulo extruido de 40 × 10 × 3 mm. Se pega con cianoacrilato sobre la placa de L01, centrado sobre el hueco de salida y a 48 mm sobre la repisa, para que la moneda que rebota hacia arriba no salga por la cuña abierta entre L01 y el aro de H01.
 - **G03 paleta plana:** rectángulo extruido de 34 × 34 × 2,5 mm (las medidas de G02, sin bisagra, cubo ni rebaje del servo) para pegar encima de G02 y tapar los huecos.
-- Sin probar con monedas reales.
+- Las tres piezas están impresas y montadas en la torre ([pruebas físicas](../../docs/12-pruebas-fisicas-etapa1.md)).

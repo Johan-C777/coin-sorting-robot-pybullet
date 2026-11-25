@@ -1,5 +1,7 @@
 # Etapa 2 v6: cremallera impresa, motor y piñón sobre el carro
 
+> **Versión del proceso de diseño, reemplazada por la [v7](../v7-motor-fijo/LEEME.md) (vigente, impresa y montada).** Se conserva como registro de las decisiones; las notas de verificación son las del diseño.
+
 Reemplaza el hilo de la v5. El riel conserva su perfil y se imprime por tramos; ahora lleva una **cremallera** en el costado del pie. El carro lleva el motor NEMA17 y un **piñón** que camina por los dientes. Todo se imprime como está, **sin soportes y sin comprar nada**. ≈ **278 g** de plástico (v3 cadena: 1.506 g; v5 hilo: ≈ 268 g).
 
 | | v3 cadena | v5 hilo | **v6 cremallera** |
@@ -8,7 +10,7 @@ Reemplaza el hilo de la v5. El riel conserva su perfil y se imprime por tramos; 
 | Piezas impresas | 46 | 11 + 6 cuñas | **7** |
 | Camas | 10 | 3 | **3** |
 | Soportes | 0 | 0 | **0** |
-| Error de parada | por medir | 0,3 a 8 mm (hilo estirando) | **≈ 0,1 mm (juego de flancos)** |
+| Error de parada | no medido | 0,3 a 8 mm (hilo estirando) | **≈ 0,1 mm (juego de flancos)** |
 | Compras | ninguna | hilo | **ninguna** |
 
 ## Piezas, camas y materiales
@@ -65,7 +67,7 @@ La resolución depende del piñón real: **calibra** mandando 20.000 pasos y mid
 
 Los scripts están en `generador/`: `generar_v6.py` (piezas), `choques_v6.py`, `holguras_v6.py`, `revisar_v6.py`, `masa_v6.py`, `numeros_v6.py`, `exportar_v6.py` (stl y camas), `construir_visor6.py` (visor). Requieren `manifold3d` y `numpy`.
 
-## Qué hay que confirmar con el motor real
+## Puntos que dependían del motor real
 
 - Cuerpo de 42,3 mm, largo de 48 mm, piloto Ø22 de 2 mm de alto, eje Ø5 con plano a 2 mm y **24 mm de largo** (con 20 mm el piñón sigue alcanzando).
 - Si el motor es más largo, el extremo trasero se acerca a los patines de la torre (hoy 2 a 3 mm de margen).

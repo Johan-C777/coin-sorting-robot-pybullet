@@ -245,7 +245,7 @@ footer.end{max-width:1260px;margin:0 auto;padding:0 28px 60px;font-family:var(--
 
 <header class="hero">
   <h1>Brazo clasificador de vasos de monedas</h1>
-  <p class="note"><b>Versión 0.5.</b> Esta memoria conserva los números del perfil anterior (5 vasos de 52 mm, 5 puestos por zona, agarre a 6,8 cm). El código ya trabaja con 9 vasos de 34 mm, 9 puestos por zona entre 12° y 88° y agarre a 4,8 cm; las cifras vigentes están en <code>docs/02-cinematica.md</code> y <code>docs/01-arquitectura.md</code>.</p>
+  <p class="note"><b>Alcance de esta memoria.</b> Es la memoria de cálculo del brazo simulado de 6 servos, el modelo de referencia con el que se diseñó el ciclo completo en simulación. El brazo construido es el de 4 GDL de doble paralelogramo, con sus cálculos de par, reducción y cinemática en <a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/13-etapa3-brazo.md">13-etapa3-brazo.md</a>. Esta memoria conserva los números del perfil anterior (5 vasos de 52 mm, 5 puestos por zona, agarre a 6,8 cm). El código ya trabaja con 9 vasos de 34 mm, 9 puestos por zona entre 12° y 88° y agarre a 4,8 cm; las cifras vigentes están en <code>docs/02-cinematica.md</code> y <code>docs/01-arquitectura.md</code>.</p>
   <p class="sub">Memoria de cálculo del módulo 6 del Sistema de Logística de Monedas Inteligentes: geometría, cinemática directa e inversa, espacio de trabajo, trayectorias, cargas, actuadores, electrónica y comunicación. Todos los números salen de los mismos parámetros que usa la simulación 3D, y las calculadoras de esta página corren el mismo código.</p>
 
   <figure class="sheet">
@@ -286,7 +286,7 @@ footer.end{max-width:1260px;margin:0 auto;padding:0 28px 60px;font-family:var(--
       <li><a href="#s13">Materiales</a></li>
       <li><a href="#s14">Código de referencia</a></li>
       <li><a href="#s15">Verificación numérica</a></li>
-      <li><a href="#s16">Pendientes de integración</a></li>
+      <li><a href="#s16">Del modelo al brazo construido</a></li>
     </ol>
     </details>
   </nav>
@@ -340,7 +340,7 @@ footer.end{max-width:1260px;margin:0 auto;padding:0 28px 60px;font-family:var(--
       <li>La app en Streamlit decide qué ordenar y muestra ruta, valor, peso y cantidad. No calcula cinemática.</li>
       <li>El ESP32 del brazo guarda el estado de los diez puestos, planifica la secuencia de movimientos (sección 9), resuelve la cinemática inversa (sección 5) y comanda los ángulos.</li>
       <li>El PCA9685 genera los seis PWM a 50 Hz, de modo que el ESP32 no gasta temporizadores ni se ve afectado por el Wi-Fi.</li>
-      <li>La simulación 3D reemplaza al hardware mientras se construye: produce exactamente la misma trama de servos que saldría por el puerto serie.</li>
+      <li>La simulación 3D sirve de banco de pruebas del hardware: produce exactamente la misma trama de servos que saldría por el puerto serie.</li>
     </ul>
   </section>
 
@@ -680,7 +680,7 @@ footer.end{max-width:1260px;margin:0 auto;padding:0 28px 60px;font-family:var(--
     <h2>Estática y selección de servos</h2>
     <p>El caso de carga es un vaso con 40 monedas de $1.000: \(18+40\times9{,}95=416\) g. El par que soporta cada articulación es la suma de los momentos de todo lo que cuelga más allá de ella, medidos con el brazo de palanca horizontal dentro del plano:</p>
     <div class="eq">\[\tau_j=g\sum_{k\,\gt\,j} m_k\,(x_k-x_j)\]</div>
-    <p>Las masas de los eslabones son estimaciones de piezas en PETG con 35 % de relleno, para reemplazar por los valores del CAD cuando esté el modelo definitivo. Las de los servos son de catálogo.</p>
+    <p>Las masas de los eslabones son estimaciones de piezas en PETG con 35 % de relleno, estimadas en la etapa de diseño. Las de los servos son de catálogo.</p>
 
     <div class="tbl">
       <table>
@@ -996,14 +996,12 @@ if __name__ == "__main__":
 
   <!-- ============ 16 ============ -->
   <section id="s16">
-    <h2>Pendientes de integración</h2>
-    <p>Lo que sigue, en orden, para cerrar la entrega del parcial:</p>
+    <h2>Del modelo al brazo construido</h2>
+    <p>Cómo se usó esta memoria en el resto del proyecto:</p>
     <ol class="steps">
-      <li>Llevar el modelo a URDF sobre el repositorio base del curso y correrlo en PyBullet con la misma cinemática de esta memoria. La tabla de abajo tiene los datos listos en metros y radianes.</li>
-      <li>Imprimir eslabones y pinza, montar los seis servos y calibrar los desfases reales de cada bocina contra los ángulos de la sección 3.</li>
-      <li>Cargar el firmware, verificar la trama por monitor serie y recién ahí conectar la potencia de 6 V.</li>
-      <li>Levantar el servidor Wi-Fi del ESP32 y conectarlo con la app Streamlit y con el módulo contador.</li>
-      <li>Medir el tiempo de ciclo real y la repetibilidad en los diez puestos, y comparar contra las secciones 8 y 11.</li>
+      <li>El modelo pasó a URDF y corre en PyBullet (<code>sim/pybullet/</code>) con la misma cinemática de esta memoria. La tabla de abajo tiene sus datos en metros y radianes.</li>
+      <li>El firmware del brazo simulado, la trama de servos y la app Streamlit se verificaron contra la simulación (pruebas en <code>software/tests</code> y <code>firmware/tests</code>).</li>
+      <li>Para el brazo físico se pasó a un diseño de 4 GDL de doble paralelogramo con motores paso a paso y reductora 16:1, que da más alcance y un factor de seguridad de par cercano a 6. Está impreso, armado y probado tomando y trasladando un vaso (<a href="https://github.com/Johan-C777/coin-sorting-robot-pybullet/blob/main/docs/13-etapa3-brazo.md">13-etapa3-brazo.md</a>).</li>
     </ol>
 
     <div class="tbl">
@@ -1026,7 +1024,7 @@ if __name__ == "__main__":
 </div>
 
 <footer class="end">
-  <p>Memoria de cálculo del brazo clasificador. Las cifras corresponden a la simulación 3D del mismo módulo; las masas de los eslabones son estimaciones que se reemplazan con los datos del CAD.</p>
+  <p>Memoria de cálculo del brazo clasificador. Las cifras corresponden a la simulación 3D del mismo módulo; las masas de los eslabones son estimaciones de diseño.</p>
 </footer>
 <script>
 (function(){

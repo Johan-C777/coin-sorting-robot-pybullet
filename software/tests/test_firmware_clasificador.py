@@ -11,7 +11,7 @@ from brazo.monedas import ANTIGUA, POR_CLAVE
 RAIZ = Path(__file__).resolve().parents[2]
 FW = RAIZ / "firmware" / "etapa1_clasificador"
 MONEDAS_H = (FW / "lib" / "Clasificacion" / "Monedas.h").read_text(encoding="utf-8")
-CAL_H = (FW / "include" / "calibracion.h").read_text(encoding="utf-8")
+CAL_H = (FW / "include" / "calibracion_fabrica.h").read_text(encoding="utf-8")
 PINES_H = (FW / "include" / "pines.h").read_text(encoding="utf-8")
 GENERADOR = (RAIZ / "scripts" / "generar_v5.py").read_text(encoding="utf-8")
 PRUEBA_MOTOR = (RAIZ / "firmware" / "etapa1_prueba_motor" / "src" / "config.h").read_text(encoding="utf-8")

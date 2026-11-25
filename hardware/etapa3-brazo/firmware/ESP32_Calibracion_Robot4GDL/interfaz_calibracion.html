@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibración Robot 4 GDL — ESP32 Serial</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-border: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --input-bg: #0b1220;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    padding-bottom: 48px;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 12px 16px;
+  }
+  .header-inner {
+    max-width: 1260px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title-box h1 {
+    margin: 0;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .title-box p {
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #334155;
+    color: var(--text);
+  }
+  .badge.ok { background: rgba(34,197,94,0.18); color: #86efac; border: 1px solid rgba(34,197,94,0.4); }
+  .badge.warn { background: rgba(245,158,11,0.18); color: #fcd34d; border: 1px solid rgba(245,158,11,0.4); }
+  .badge.err { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.45); }
+  .badge.info { background: rgba(56,189,248,0.18); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.4); }
+
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+  }
+  .dot.off { background: var(--red); }
+
+  .top-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .serial-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0b1220;
+    border: 1px solid var(--card-border);
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+  .serial-bar select {
+    width: auto;
+    padding: 4px 8px;
+    font-size: 0.82rem;
+    border: none;
+    background: transparent;
+  }
+  button {
+    border: 1px solid var(--card-border);
+    background: #273549;
+    color: var(--text);
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.06s ease, background 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+  }
+  button:hover { background: #334155; border-color: #475569; }
+  button:active { transform: scale(0.97); }
+  button.btn-sm { padding: 5px 9px; font-size: 0.8rem; }
+  button.btn-stop {
+    background: var(--red);
+    border-color: #f87171;
+    color: #fff;
+    font-size: 0.92rem;
+    padding: 9px 15px;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.35);
+  }
+  button.btn-stop:hover { background: #dc2626; }
+  button.btn-primary { background: #0284c7; border-color: #38bdf8; color: #fff; }
+  button.btn-primary:hover { background: #0369a1; }
+  button.btn-green { background: #15803d; border-color: #22c55e; color: #fff; }
+  button.btn-green:hover { background: #166534; }
+  button.btn-amber { background: #b45309; border-color: #f59e0b; color: #fff; }
+  button.btn-amber:hover { background: #92400e; }
+  button.btn-purple { background: #7e22ce; border-color: #a855f7; color: #fff; }
+  button.btn-purple:hover { background: #6b21a8; }
+  button.btn-outline { background: transparent; }
+
+  .container {
+    max-width: 1260px;
+    margin: 16px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .card h2 {
+    margin: 0 0 10px;
+    font-size: 1.02rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    border-radius: 7px;
+    padding: 7px 9px;
+    font-size: 0.88rem;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .steps-display {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .steps-big {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .steps-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .step-size-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+    align-items: center;
+  }
+  .pill {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    background: #0b1220;
+    border: 1px solid var(--card-border);
+  }
+  .pill.active {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #fff;
+  }
+
+  .jog-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .jog-fine {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .jog-btn {
+    padding: 12px 10px;
+    font-size: 0.98rem;
+  }
+  .fine-btn {
+    padding: 7px 6px;
+    font-size: 0.82rem;
+    background: #172033;
+  }
+
+  .cal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    margin-top: 8px;
+  }
+  .cal-actions .full { grid-column: 1 / -1; }
+
+  .range-bar-wrap { margin: 10px 0 4px; }
+  .range-track {
+    position: relative;
+    height: 12px;
+    background: #0b1220;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .range-fill {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: linear-gradient(90deg, rgba(245,158,11,0.45), rgba(56,189,248,0.45));
+  }
+  .range-zero {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: #22c55e;
+  }
+  .range-cursor {
+    position: absolute;
+    top: -1px; bottom: -1px;
+    width: 6px;
+    margin-left: -3px;
+    border-radius: 3px;
+    background: #fff;
+    box-shadow: 0 0 6px #38bdf8;
+  }
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: ui-monospace, monospace;
+    font-size: 0.76rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .check-row input { width: auto; accent-color: var(--accent); transform: scale(1.15); }
+
+  .servo-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(168,85,247,0.1);
+    border: 1px solid rgba(168,85,247,0.35);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+
+  pre#jsonPreview {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    max-height: 360px;
+    overflow: auto;
+    margin: 10px 0 0;
+    white-space: pre;
+  }
+
+  .guide-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #cbd5e1;
+  }
+  .guide-item {
+    background: #0b1220;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .guide-item strong { color: var(--accent); display: block; margin-bottom: 2px; }
+
+  .toast {
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    background: #0f172a;
+    border: 1px solid var(--accent);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  details summary {
+    cursor: pointer;
+    color: var(--accent);
+    font-size: 0.84rem;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .small-muted { font-size: 0.76rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="title-box">
+      <h1>🤖 Calibración Robot 4 GDL + Garra <span id="connBadge" class="badge err"><span id="connDot" class="dot off"></span>Conectando Serial...</span></h1>
+      <p>Comunicación USB Serial (115200 baud) — Fase 1: Fijar Cero (0) paso a paso y medir límites hacia cada lado</p>
+    </div>
+    <div class="top-actions">
+      <div class="serial-bar">
+        <span class="small-muted">Puerto:</span>
+        <select id="portSelect"></select>
+        <button class="btn-sm btn-primary" onclick="connectSelectedPort()">🔌 Conectar</button>
+        <button class="btn-sm" onclick="refreshPorts()" title="Refrescar puertos COM">🔄</button>
+      </div>
+      <button id="btnEnable" class="btn-green" onclick="toggleEnable()">⚡ Motores: ON</button>
+      <button class="btn-primary" onclick="homeAll()">🏠 Ir a todos los 0</button>
+      <button class="btn-stop" onclick="emergencyStop()">🛑 PARADA (ESC)</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- SERVOS FIJOS EN 90° + GUÍA -->
+  <div class="card">
+    <div class="servo-box">
+      <div>
+        <strong style="color:#d8b4fe;">🔧 Servos SG90 bloqueados en 90° (Fase 1)</strong>
+        <div class="small-muted" style="margin-top:3px;">
+          <strong>J4 Muñeca (Pitch, GPIO 18):</strong> <span id="servoPitchVal">90°</span> &nbsp;|&nbsp;
+          <strong>Garra (Pinza, GPIO 19):</strong> <span id="servoGarraVal">90°</span>
+          — Fijos en el centro (90°) mientras calibras los 3 motores paso a paso.
+        </div>
+      </div>
+      <button class="btn-purple" onclick="centerServos()">Re-enviar 90° a servos</button>
+    </div>
+
+    <div style="margin-top:12px;" class="guide-steps">
+      <div class="guide-item"><strong>1. Ajusta hardware</strong>Indica driver, microstepping y relación de reductora (16:1 en el CAD).</div>
+      <div class="guide-item"><strong>2. Lleva al CERO (0)</strong>Usa los botones de pasos para poner cada motor en su postura de referencia y pulsa <em>Fijar CERO</em>.</div>
+      <div class="guide-item"><strong>3. Mide límites (- y +)</strong>Avanza paso a paso hacia cada tope seguro (sin forzar) y guarda <em>Límite NEG</em> y <em>Límite POS</em>.</div>
+      <div class="guide-item"><strong>4. Guarda el JSON</strong>Guarda o descarga <code>robot_4gdl_calibracion.json</code> para construir la Fase 2 (control angular).</div>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN GLOBAL DE HARDWARE Y VELOCIDAD -->
+  <div class="card">
+    <h2>
+      <span>⚙️ Configuración de Hardware y Velocidad</span>
+      <span class="small-muted">Se guarda en la ESP32 y en el archivo JSON exportado</span>
+    </h2>
+    <div class="grid-4">
+      <div>
+        <label for="hwDriver">Tipo de Driver (NEMA 17)</label>
+        <select id="hwDriver" onchange="onMetaChange()">
+          <option value="TB6560 + TB6600" selected>TB6560 / TB6600 (Optoacoplados)</option>
+          <option value="TB6560">TB6560</option>
+          <option value="TB6600">TB6600</option>
+          <option value="A4988">A4988</option>
+          <option value="DRV8825">DRV8825</option>
+          <option value="TMC2208">TMC2208</option>
+          <option value="TMC2209">TMC2209</option>
+          <option value="Otro">Otro (STEP/DIR)</option>
+        </select>
+      </div>
+      <div>
+        <label for="hwFullSteps">Pasos por vuelta del motor</label>
+        <select id="hwFullSteps" onchange="onMetaChange()">
+          <option value="200">200 pasos (NEMA 17 1.8°)</option>
+          <option value="400">400 pasos (NEMA 17 0.9°)</option>
+        </select>
+      </div>
+      <div>
+        <label for="hwMicrostep">Microstepping (Jumpers MS1-MS3)</label>
+        <select id="hwMicrostep" onchange="onMetaChange()">
+          <option value="1">1/1 (Full step - máximo torque)</option>
+          <option value="2" selected>1/2 (Recomendado TB6560/TB6600)</option>
+          <option value="4">1/4</option>
+          <option value="8">1/8</option>
+          <option value="16">1/16</option>
+          <option value="32">1/32</option>
+        </select>
+      </div>
+      <div>
+        <label for="speedSlider">Velocidad: <strong id="speedLabel">600</strong> pasos/s</label>
+        <input id="speedSlider" type="range" min="20" max="2500" step="20" value="600"
+               oninput="document.getElementById('speedLabel').textContent=this.value"
+               onchange="setSpeed(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- TARJETAS DE LOS 3 MOTORES PASO A PASO -->
+  <div class="grid-3" id="motorsContainer"></div>
+
+  <!-- NOTAS GENERALES Y EXPORTACIÓN DE ARCHIVO DE CONFIGURACIÓN -->
+  <div class="card">
+    <h2>
+      <span>📄 Archivo de Configuración para Fase 2 (Control por Ángulos)</span>
+      <span id="calSummaryBadge" class="badge warn">Calibración incompleta</span>
+    </h2>
+
+    <div class="grid-2" style="margin-bottom:10px;">
+      <div>
+        <label for="generalNotes">Notas generales de montaje / posibles choques entre J2 y J3 (opcional)</label>
+        <textarea id="generalNotes" rows="3" placeholder="Ej: Si J2 baja demasiado y J3 sube mucho, las bielas se acercan. Reductora impresa 16:1 con holgura pequeña..." oninput="onMetaChange()"></textarea>
+      </div>
+      <div style="display:flex; flex-direction:column; justify-content:flex-end; gap:8px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <button class="btn-green" onclick="saveConfigToProject()">💾 Guardar JSON en proyecto</button>
+          <button class="btn-primary" onclick="downloadConfig()">⬇️ Descargar .json</button>
+          <button class="btn-outline" onclick="copyConfig()">📋 Copiar JSON</button>
+          <button class="btn-amber" onclick="saveToEsp32()">⚡ Guardar en ESP32</button>
+        </div>
+        <div class="small-muted">
+          "Guardar JSON en proyecto" crea directamente <code>robot_4gdl_calibracion.json</code> en tu carpeta <code>ESP32_Calibracion_Robot4GDL/</code> para que lo usemos en la Fase 2.
+        </div>
+      </div>
+    </div>
+
+    <details open>
+      <summary>Vista previa en vivo de robot_4gdl_calibracion.json</summary>
+      <pre id="jsonPreview">{}</pre>
+    </details>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const CAD_DEFAULTS = [
+  {
+    key: "J1_base",
+    title: "J1 — Base (Giro Torreta)",
+    cadPart: "010_Basement -> 016_Driven_Gear -> 011_Round_Plate",
+    axisDesc: "Rotación horizontal (Yaw) alrededor del eje vertical Z",
+    pins: { step: 26, dir: 25 },
+    defaultGearRatio: 16.0,
+    defaultZeroPose: "Torreta mirando exactamente hacia el frente (+X)",
+    defaultZeroAngleDeg: 0,
+    defaultPosDir: "Al sumar pasos (+), la base gira hacia: [anota Izquierda/CCW o Derecha/CW]"
+  },
+  {
+    key: "J2_hombro",
+    title: "J2 — Hombro (Brazo Principal)",
+    cadPart: "004_Forward_Drive_Arm (L1 = 155 mm, lado izquierdo)",
+    axisDesc: "Inclinación del brazo principal L1 respecto a la horizontal",
+    pins: { step: 33, dir: 32 },
+    defaultGearRatio: 16.0,
+    defaultZeroPose: "Brazo principal 004 completamente vertical (90° respecto a la base)",
+    defaultZeroAngleDeg: 90,
+    defaultPosDir: "Al sumar pasos (+), el brazo principal se mueve hacia: [anota Adelante/Abajo o Atrás/Arriba]"
+  },
+  {
+    key: "J3_codo",
+    title: "J3 — Codo / Antebrazo (Palanca)",
+    cadPart: "002_Vertical_Drive_Arm (R=50 mm) -> 003_Link -> 005_Horizontal_Arm (L2 = 130 mm)",
+    axisDesc: "Inclinación global del antebrazo horizontal L2 mediante paralelogramo",
+    pins: { step: 27, dir: 14 },
+    defaultGearRatio: 16.0,
+    defaultZeroPose: "Antebrazo 005 completamente horizontal (0° paralelo a la mesa)",
+    defaultZeroAngleDeg: 0,
+    defaultPosDir: "Al sumar pasos (+), el antebrazo se mueve hacia: [anota Arriba o Abajo]"
+  }
+];
+
+const STEP_PRESETS = [1, 10, 50, 100, 500, 1000];
+
+let espState = {
+  connected: false,
+  port: "",
+  enabled: true,
+  speed: 400,
+  servoPitchDeg: 90,
+  servoGarraDeg: 90,
+  motors: [
+    { currentSteps: 0, targetSteps: 0, moving: false, invertDir: false, zeroSet: false, minSet: false, minSteps: 0, maxSet: false, maxSteps: 0 },
+    { currentSteps: 0, targetSteps: 0, moving: false, invertDir: false, zeroSet: false, minSet: false, minSteps: 0, maxSet: false, maxSteps: 0 },
+    { currentSteps: 0, targetSteps: 0, moving: false, invertDir: false, zeroSet: false, minSet: false, minSteps: 0, maxSet: false, maxSteps: 0 }
+  ]
+};
+
+let uiMeta = {
+  driver: "TB6560 + TB6600",
+  fullSteps: 200,
+  microstepping: 2,
+  generalNotes: "",
+  stepSize: [50, 50, 50],
+  motors: CAD_DEFAULTS.map(d => ({
+    gearRatio: d.defaultGearRatio,
+    zeroPose: d.defaultZeroPose,
+    zeroAngleDeg: d.defaultZeroAngleDeg,
+    posDirDesc: d.defaultPosDir,
+    measuredMinDeg: "",
+    measuredMaxDeg: "",
+    notes: ""
+  }))
+};
+
+let metaLoadedFromEsp = false;
+let lastPreviewJson = "";
+let pollInFlight = false;
+
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+function buildMotorCards() {
+  const container = document.getElementById("motorsContainer");
+  container.innerHTML = CAD_DEFAULTS.map((d, i) => `
+    <div class="card" id="card_${i}">
+      <h2>
+        <span>${d.title}</span>
+        <span id="zBadge_${i}" class="badge warn">Sin Cero</span>
+      </h2>
+      <div class="small-muted">${d.cadPart} &bull; STEP GPIO ${d.pins.step} / DIR GPIO ${d.pins.dir}</div>
+
+      <div class="steps-display">
+        <div>
+          <div class="small-muted">Posición actual (pasos)</div>
+          <div class="steps-big" id="pos_${i}">0</div>
+        </div>
+        <div class="steps-sub">
+          <div>Objetivo: <strong id="tgt_${i}">0</strong></div>
+          <div>Ángulo est.: <strong id="deg_${i}">0.0°</strong></div>
+          <div id="mov_${i}" style="color:#94a3b8;">Detenido</div>
+        </div>
+      </div>
+
+      <div class="range-bar-wrap">
+        <div class="range-track">
+          <div class="range-fill" id="rFill_${i}" style="left:50%;width:0%;"></div>
+          <div class="range-zero" id="rZero_${i}" style="left:50%;"></div>
+          <div class="range-cursor" id="rCur_${i}" style="left:50%;"></div>
+        </div>
+        <div class="range-labels">
+          <span id="lblMin_${i}">NEG: —</span>
+          <span>0</span>
+          <span id="lblMax_${i}">POS: —</span>
+        </div>
+      </div>
+
+      <div class="step-size-bar">
+        <span class="small-muted">Paso:</span>
+        ${STEP_PRESETS.map(s => `<button class="pill ${uiMeta.stepSize[i]===s?'active':''}" id="pill_${i}_${s}" onclick="setStepSize(${i},${s})">${s}</button>`).join("")}
+        <input type="number" id="customStep_${i}" value="${uiMeta.stepSize[i]}" min="1" max="50000"
+               style="width:74px;padding:4px 6px;font-size:0.8rem;"
+               onchange="setStepSize(${i}, parseInt(this.value)||1)">
+      </div>
+
+      <div class="jog-row">
+        <button class="jog-btn" onclick="jog(${i}, -1)">◀ -<span id="lblStepNeg_${i}">${uiMeta.stepSize[i]}</span></button>
+        <button class="jog-btn" onclick="jog(${i},  1)">+<span id="lblStepPos_${i}">${uiMeta.stepSize[i]}</span> ▶</button>
+      </div>
+      <div class="jog-fine">
+        <button class="fine-btn" onclick="moveExact(${i}, -10)">-10</button>
+        <button class="fine-btn" onclick="moveExact(${i}, -1)">-1</button>
+        <button class="fine-btn" onclick="moveExact(${i},  1)">+1</button>
+        <button class="fine-btn" onclick="moveExact(${i}, 10)">+10</button>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" id="inv_${i}" onchange="toggleInvert(${i}, this.checked)">
+        Invertir sentido físico del motor (<code>invert_dir</code>)
+      </label>
+
+      <div class="cal-actions">
+        <button class="btn-green full" onclick="setZero(${i})">🎯 1. Fijar CERO (0) aquí</button>
+        <button class="btn-amber" onclick="setLimit(${i}, 'min')">⬅️ 2. Límite NEG</button>
+        <button class="btn-amber" onclick="setLimit(${i}, 'max')">3. Límite POS ➡️</button>
+        <button class="btn-primary" onclick="goZero(${i})">↩️ Ir al CERO (0)</button>
+        <button class="btn-outline" onclick="clearLimits(${i})">🗑️ Borrar límites</button>
+      </div>
+
+      <details>
+        <summary>Datos para el archivo JSON (reductora, postura 0 y notas)</summary>
+        <div style="margin-top:8px; display:flex; flex-direction:column; gap:7px;">
+          <div class="grid-2">
+            <div>
+              <label>Relación reductora (ej. 16 = 16:1)</label>
+              <input type="number" step="0.01" id="gear_${i}" value="${uiMeta.motors[i].gearRatio}" oninput="onMetaChange()">
+            </div>
+            <div>
+              <label>Ángulo físico en CERO (°)</label>
+              <input type="number" step="0.5" id="zAng_${i}" value="${uiMeta.motors[i].zeroAngleDeg}" oninput="onMetaChange()">
+            </div>
+          </div>
+          <div>
+            <label>Descripción de la postura en CERO (0)</label>
+            <input type="text" id="zPose_${i}" value="${escapeAttr(uiMeta.motors[i].zeroPose)}" oninput="onMetaChange()">
+          </div>
+          <div>
+            <label>¿Hacia dónde se mueve con pasos (+)?</label>
+            <input type="text" id="pDir_${i}" value="${escapeAttr(uiMeta.motors[i].posDirDesc)}" oninput="onMetaChange()">
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Ángulo real en tope NEG (° opc.)</label>
+              <input type="number" step="0.5" id="mMinDeg_${i}" placeholder="Ej: -90" value="${uiMeta.motors[i].measuredMinDeg}" oninput="onMetaChange()">
+            </div>
+            <div>
+              <label>Ángulo real en tope POS (° opc.)</label>
+              <input type="number" step="0.5" id="mMaxDeg_${i}" placeholder="Ej: +90" value="${uiMeta.motors[i].measuredMaxDeg}" oninput="onMetaChange()">
+            </div>
+          </div>
+          <div>
+            <label>Notas adicionales de este motor</label>
+            <input type="text" id="notes_${i}" placeholder="Holgura, ruido, tope mecánico..." value="${escapeAttr(uiMeta.motors[i].notes)}" oninput="onMetaChange()">
+          </div>
+        </div>
+      </details>
+    </div>
+  `).join("");
+}
+
+function escapeAttr(str) {
+  return String(str || "").replace(/"/g, "&quot;");
+}
+
+function setStepSize(i, val) {
+  val = Math.max(1, Math.min(50000, parseInt(val) || 1));
+  uiMeta.stepSize[i] = val;
+  document.getElementById(`customStep_${i}`).value = val;
+  document.getElementById(`lblStepNeg_${i}`).textContent = val;
+  document.getElementById(`lblStepPos_${i}`).textContent = val;
+  STEP_PRESETS.forEach(s => {
+    const btn = document.getElementById(`pill_${i}_${s}`);
+    if (btn) btn.classList.toggle("active", s === val);
+  });
+  saveLocalMeta();
+}
+
+async function apiCall(url, method = "POST", body = null) {
+  try {
+    const opts = { method };
+    if (body !== null) {
+      opts.headers = { "Content-Type": "application/json" };
+      opts.body = body;
+    }
+    const res = await fetch(url, opts);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      showToast("⚠️ " + (data.error || "Error en la ESP32"));
+      return null;
+    }
+    return data;
+  } catch (e) {
+    showToast("❌ Sin conexión con el servidor serial");
+    return null;
+  }
+}
+
+async function refreshPorts() {
+  try {
+    const res = await fetch("/api/ports");
+    const data = await res.json();
+    const sel = document.getElementById("portSelect");
+    const current = data.connectedPort || sel.value;
+    sel.innerHTML = (data.ports || []).map(p => `<option value="${p}" ${p === current ? "selected" : ""}>${p}</option>`).join("");
+    if (!data.ports || data.ports.length === 0) {
+      sel.innerHTML = '<option value="">(sin puertos)</option>';
+    }
+  } catch (e) {}
+}
+
+async function connectSelectedPort() {
+  const port = document.getElementById("portSelect").value;
+  if (!port) {
+    showToast("⚠️ No hay puerto COM seleccionado");
+    return;
+  }
+  const r = await apiCall(`/api/connect?port=${encodeURIComponent(port)}`);
+  if (r) {
+    showToast(`🔌 Conectado a ${port}`);
+    metaLoadedFromEsp = false;
+    pollStatus();
+  }
+}
+
+function jog(i, sign) {
+  moveExact(i, sign * uiMeta.stepSize[i]);
+}
+
+async function moveExact(i, steps) {
+  if (!espState.enabled) {
+    showToast("⚠️ Motores deshabilitados (activa 'Motores: ON' arriba)");
+    return;
+  }
+  await apiCall(`/api/move?motor=${i}&steps=${steps}`);
+}
+
+async function setZero(i) {
+  const m = espState.motors[i];
+  if (m.minSet || m.maxSet) {
+    if (!confirm("Al fijar un nuevo CERO (0) se reinician los límites NEG/POS de este motor para medirlos desde el nuevo 0. ¿Continuar?")) {
+      return;
+    }
+  }
+  const r = await apiCall(`/api/zero?motor=${i}`);
+  if (r) {
+    showToast(`🎯 CERO fijado en ${CAD_DEFAULTS[i].key}`);
+    pollStatus();
+  }
+}
+
+async function setLimit(i, side) {
+  const m = espState.motors[i];
+  if (!m.zeroSet) {
+    showToast("⚠️ Primero fija el CERO (0) de este motor");
+    return;
+  }
+  if (side === "min" && m.currentSteps > 0) {
+    showToast("⚠️ El límite NEG debe ser <= 0 pasos (muévete hacia - primero)");
+    return;
+  }
+  if (side === "max" && m.currentSteps < 0) {
+    showToast("⚠️ El límite POS debe ser >= 0 pasos (muévete hacia + primero)");
+    return;
+  }
+  const r = await apiCall(`/api/set_limit?motor=${i}&side=${side}`);
+  if (r) {
+    showToast(`✅ Límite ${side === "min" ? "NEG" : "POS"} guardado en ${m.currentSteps} pasos`);
+    pollStatus();
+  }
+}
+
+async function clearLimits(i) {
+  const r = await apiCall(`/api/clear_limits?motor=${i}`);
+  if (r) {
+    showToast(`🗑️ Límites borrados en ${CAD_DEFAULTS[i].key}`);
+    pollStatus();
+  }
+}
+
+async function goZero(i) {
+  if (!espState.enabled) {
+    showToast("⚠️ Activa los motores primero");
+    return;
+  }
+  const r = await apiCall(`/api/goto?motor=${i}&pos=0`);
+  if (r) showToast(`↩️ Regresando ${CAD_DEFAULTS[i].key} al 0`);
+}
+
+async function homeAll() {
+  if (!espState.enabled) {
+    showToast("⚠️ Activa los motores primero");
+    return;
+  }
+  const r = await apiCall(`/api/home_all`);
+  if (r) showToast("🏠 Regresando motores calibrados a 0");
+}
+
+async function toggleInvert(i, checked) {
+  await apiCall(`/api/invert?motor=${i}&val=${checked ? 1 : 0}`);
+  showToast(`Sentido de ${CAD_DEFAULTS[i].key}: ${checked ? "INVERTIDO" : "NORMAL"}`);
+  pollStatus();
+}
+
+async function toggleEnable() {
+  const next = espState.enabled ? 0 : 1;
+  await apiCall(`/api/enable?val=${next}`);
+  showToast(next ? "⚡ Motores ENERGIZADOS" : "🔓 Motores LIBRES (sin torque)");
+  pollStatus();
+}
+
+async function emergencyStop() {
+  await apiCall(`/api/stop`);
+  showToast("🛑 PARADA DE EMERGENCIA ACTIVADA");
+  pollStatus();
+}
+
+async function setSpeed(val) {
+  await apiCall(`/api/speed?val=${val}`);
+  pollStatus();
+}
+
+async function centerServos() {
+  const r = await apiCall(`/api/servos/center`);
+  if (r) showToast("🔧 Ambos servos fijados en 90°");
+}
+
+function readMetaFromInputs() {
+  uiMeta.driver = document.getElementById("hwDriver").value;
+  uiMeta.fullSteps = parseInt(document.getElementById("hwFullSteps").value) || 200;
+  uiMeta.microstepping = parseInt(document.getElementById("hwMicrostep").value) || 8;
+  uiMeta.generalNotes = document.getElementById("generalNotes").value;
+  for (let i = 0; i < 3; i++) {
+    uiMeta.motors[i].gearRatio = parseFloat(document.getElementById(`gear_${i}`).value) || 16.0;
+    uiMeta.motors[i].zeroAngleDeg = parseFloat(document.getElementById(`zAng_${i}`).value);
+    if (isNaN(uiMeta.motors[i].zeroAngleDeg)) uiMeta.motors[i].zeroAngleDeg = 0;
+    uiMeta.motors[i].zeroPose = document.getElementById(`zPose_${i}`).value;
+    uiMeta.motors[i].posDirDesc = document.getElementById(`pDir_${i}`).value;
+    uiMeta.motors[i].measuredMinDeg = document.getElementById(`mMinDeg_${i}`).value;
+    uiMeta.motors[i].measuredMaxDeg = document.getElementById(`mMaxDeg_${i}`).value;
+    uiMeta.motors[i].notes = document.getElementById(`notes_${i}`).value;
+  }
+}
+
+function applyMetaToInputs() {
+  document.getElementById("hwDriver").value = uiMeta.driver || "A4988";
+  document.getElementById("hwFullSteps").value = String(uiMeta.fullSteps || 200);
+  document.getElementById("hwMicrostep").value = String(uiMeta.microstepping || 8);
+  document.getElementById("generalNotes").value = uiMeta.generalNotes || "";
+  for (let i = 0; i < 3; i++) {
+    const mm = uiMeta.motors[i] || {};
+    document.getElementById(`gear_${i}`).value = mm.gearRatio ?? CAD_DEFAULTS[i].defaultGearRatio;
+    document.getElementById(`zAng_${i}`).value = mm.zeroAngleDeg ?? CAD_DEFAULTS[i].defaultZeroAngleDeg;
+    document.getElementById(`zPose_${i}`).value = mm.zeroPose ?? CAD_DEFAULTS[i].defaultZeroPose;
+    document.getElementById(`pDir_${i}`).value = mm.posDirDesc ?? CAD_DEFAULTS[i].defaultPosDir;
+    document.getElementById(`mMinDeg_${i}`).value = mm.measuredMinDeg ?? "";
+    document.getElementById(`mMaxDeg_${i}`).value = mm.measuredMaxDeg ?? "";
+    document.getElementById(`notes_${i}`).value = mm.notes ?? "";
+  }
+}
+
+function saveLocalMeta() {
+  try { localStorage.setItem("robot4gdl_cal_meta", JSON.stringify(uiMeta)); } catch(e) {}
+}
+
+function loadLocalMeta() {
+  try {
+    const raw = localStorage.getItem("robot4gdl_cal_meta");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.motors && parsed.motors.length === 3) {
+        uiMeta = Object.assign(uiMeta, parsed);
+      }
+    }
+  } catch(e) {}
+}
+
+function onMetaChange() {
+  readMetaFromInputs();
+  saveLocalMeta();
+  renderUI();
+}
+
+async function saveToEsp32() {
+  readMetaFromInputs();
+  saveLocalMeta();
+  const r = await apiCall("/api/save_nvs", "POST", JSON.stringify(uiMeta));
+  if (r) showToast("⚡ Calibración guardada en la memoria flash de la ESP32");
+}
+
+function buildConfigObject(includeTimestamp = false) {
+  const fullSteps = uiMeta.fullSteps || 200;
+  const micro = uiMeta.microstepping || 8;
+  const stepsPerMotorRev = fullSteps * micro;
+
+  const motoresOut = {};
+  let allComplete = true;
+
+  CAD_DEFAULTS.forEach((d, i) => {
+    const st = espState.motors[i];
+    const mm = uiMeta.motors[i];
+    const gear = Number(mm.gearRatio) || 16.0;
+    const stepsPerOutRev = stepsPerMotorRev * gear;
+    const stepsPerDegTheo = stepsPerOutRev / 360.0;
+
+    const minS = st.minSet ? st.minSteps : null;
+    const maxS = st.maxSet ? st.maxSteps : null;
+    const totalS = (st.minSet && st.maxSet) ? (st.maxSteps - st.minSteps) : null;
+
+    if (!st.zeroSet || !st.minSet || !st.maxSet) allComplete = false;
+
+    const measMin = mm.measuredMinDeg !== "" ? Number(mm.measuredMinDeg) : null;
+    const measMax = mm.measuredMaxDeg !== "" ? Number(mm.measuredMaxDeg) : null;
+    let stepsPerDegReal = null;
+    if (totalS !== null && totalS > 0 && measMin !== null && measMax !== null && measMax !== measMin) {
+      stepsPerDegReal = Number(Math.abs(totalS / (measMax - measMin)).toFixed(4));
+    }
+
+    motoresOut[d.key] = {
+      nombre: d.title,
+      pieza_cad: d.cadPart,
+      eje_cinematico: d.axisDesc,
+      pines_esp32: d.pins,
+      invert_dir: st.invertDir,
+      relacion_reductora: gear,
+      pasos_por_vuelta_motor: stepsPerMotorRev,
+      pasos_por_vuelta_salida_teorico: Number(stepsPerOutRev.toFixed(2)),
+      pasos_por_grado_teorico: Number(stepsPerDegTheo.toFixed(4)),
+      calibracion_cero: {
+        cero_fijado: st.zeroSet,
+        posicion_actual_pasos: st.currentSteps,
+        pose_fisica_en_cero: mm.zeroPose,
+        angulo_fisico_en_cero_deg: Number(mm.zeroAngleDeg) || 0,
+        sentido_pasos_positivos: mm.posDirDesc
+      },
+      limites_medidos_desde_cero: {
+        limite_negativo_fijado: st.minSet,
+        limite_positivo_fijado: st.maxSet,
+        min_steps: minS,
+        max_steps: maxS,
+        pasos_hacia_lado_negativo: minS !== null ? Math.abs(minS) : null,
+        pasos_hacia_lado_positivo: maxS !== null ? maxS : null,
+        recorrido_total_steps: totalS
+      },
+      estimacion_angular_teorica_desde_cero: {
+        min_deg_relativo_al_cero: minS !== null ? Number((minS / stepsPerDegTheo).toFixed(2)) : null,
+        max_deg_relativo_al_cero: maxS !== null ? Number((maxS / stepsPerDegTheo).toFixed(2)) : null,
+        rango_total_deg: totalS !== null ? Number((totalS / stepsPerDegTheo).toFixed(2)) : null
+      },
+      medicion_real_opcional_con_transportador: {
+        angulo_real_en_min_steps_deg: measMin,
+        angulo_real_en_max_steps_deg: measMax,
+        pasos_por_grado_calibrado_real: stepsPerDegReal
+      },
+      notas_motor: mm.notes || ""
+    };
+  });
+
+  return {
+    _meta: {
+      proyecto: "Robot 4 GDL + Garra (EEZYbotARM 40cm NEMA 17 + Planetaria + 2x SG90)",
+      schema_version: "1.0-fase1-calibracion-serial",
+      generado_en: includeTimestamp ? new Date().toISOString() : "(se completa al guardar/descargar)",
+      calibracion_completa: allComplete,
+      guia_para_ia_fase_2:
+        "Este archivo fue generado en Fase 1 (vía Serial USB) para programar el control angular y cinemático (Fase 2). " +
+        "Cada motor paso a paso (J1_base, J2_hombro, J3_codo) tiene su origen (0 pasos) definido en 'pose_fisica_en_cero' " +
+        "correspondiente a 'angulo_fisico_en_cero_deg'. 'limites_medidos_desde_cero.min_steps' (<=0) y 'max_steps' (>=0) " +
+        "indican los topes seguros medidos desde el 0 en pasos. Si 'pasos_por_grado_calibrado_real' no es null, priorizarlo " +
+        "sobre 'pasos_por_grado_teorico'. Respetar 'invert_dir' en el firmware de Fase 2. Los servos J4_pitch y garra estuvieron " +
+        "fijos en 90 grados durante esta calibración."
+    },
+    geometria_cad_mm: {
+      fuente: "CAD/generar_brazo_step.py",
+      L1_brazo_principal_004_mm: 155.0,
+      L2_antebrazo_horizontal_005_mm: 130.0,
+      L_pitch_muneca_W1_a_eje_pitch_mm: 28.0,
+      L3_garra_eje_pitch_a_punta_mm: 90.0,
+      R_crank_palanca_002_mm: 50.0,
+      Z_altura_hombro_O1_desde_base_mm: 197.0,
+      arquitectura_mecanica: "Paralelogramo doble tipo EEZYbotARM: J2 mueve el brazo principal L1; J3 controla el ángulo global del antebrazo L2 respecto a la horizontal; el soporte de muñeca 020 se mantiene horizontal y aloja el servo J4 de cabeceo (Pitch)."
+    },
+    hardware_esp32: {
+      placa: "ESP32 DevKit",
+      comunicacion: "USB Serial 115200 baud",
+      puerto_com_usado: espState.port || "COM5",
+      driver_steppers: uiMeta.driver,
+      pasos_completos_por_vuelta_motor: fullSteps,
+      microstepping: micro,
+      velocidad_calibracion_pasos_seg: espState.speed,
+      pin_enable_comun: { gpio: 13, activo_en_bajo: true }
+    },
+    motores_paso_a_paso: motoresOut,
+    servos_sg90: {
+      J4_muneca_pitch: {
+        gpio: 18,
+        angulo_fijo_fase1_deg: espState.servoPitchDeg,
+        rango_cad_sugerido_deg: [45, 135],
+        notas: "Fijo en 90 grados (horizontal) durante la Fase 1."
+      },
+      garra_pinza: {
+        gpio: 19,
+        angulo_fijo_fase1_deg: espState.servoGarraDeg,
+        notas: "Fijo en 90 grados (centro para montaje de pala blanca) durante la Fase 1."
+      }
+    },
+    notas_generales: uiMeta.generalNotes || ""
+  };
+}
+
+function renderUI() {
+  const btnEn = document.getElementById("btnEnable");
+  btnEn.textContent = espState.enabled ? "⚡ Motores: ON" : "🔓 Motores: OFF";
+  btnEn.className = espState.enabled ? "btn-green" : "btn-amber";
+
+  document.getElementById("servoPitchVal").textContent = espState.servoPitchDeg + "°";
+  document.getElementById("servoGarraVal").textContent = espState.servoGarraDeg + "°";
+
+  const fullSteps = uiMeta.fullSteps || 200;
+  const micro = uiMeta.microstepping || 8;
+  let doneCount = 0;
+
+  for (let i = 0; i < 3; i++) {
+    const st = espState.motors[i];
+    const gear = Number(uiMeta.motors[i].gearRatio) || 16.0;
+    const stepsPerDeg = (fullSteps * micro * gear) / 360.0;
+    const degEst = st.currentSteps / stepsPerDeg;
+
+    document.getElementById(`pos_${i}`).textContent = (st.currentSteps > 0 ? "+" : "") + st.currentSteps;
+    document.getElementById(`tgt_${i}`).textContent = (st.targetSteps > 0 ? "+" : "") + st.targetSteps;
+    document.getElementById(`deg_${i}`).textContent = (degEst >= 0 ? "+" : "") + degEst.toFixed(1) + "°";
+    const movEl = document.getElementById(`mov_${i}`);
+    movEl.textContent = st.moving ? "🔄 Moviendo..." : "Detenido";
+    movEl.style.color = st.moving ? "#38bdf8" : "#94a3b8";
+
+    const invEl = document.getElementById(`inv_${i}`);
+    if (invEl.checked !== st.invertDir) invEl.checked = st.invertDir;
+
+    const zBadge = document.getElementById(`zBadge_${i}`);
+    if (st.zeroSet && st.minSet && st.maxSet) {
+      zBadge.className = "badge ok";
+      zBadge.textContent = "Calibrado ✓";
+      doneCount++;
+    } else if (st.zeroSet) {
+      zBadge.className = "badge info";
+      zBadge.textContent = "Cero fijado (faltan topes)";
+    } else {
+      zBadge.className = "badge warn";
+      zBadge.textContent = "Sin Cero";
+    }
+
+    document.getElementById(`lblMin_${i}`).textContent = "NEG: " + (st.minSet ? st.minSteps : "—");
+    document.getElementById(`lblMax_${i}`).textContent = "POS: " + (st.maxSet ? ("+" + st.maxSteps) : "—");
+
+    const minVal = st.minSet ? st.minSteps : Math.min(-100, st.currentSteps);
+    const maxVal = st.maxSet ? st.maxSteps : Math.max(100, st.currentSteps);
+    const lo = Math.min(minVal, st.currentSteps, -1);
+    const hi = Math.max(maxVal, st.currentSteps, 1);
+    const span = hi - lo;
+    const pct = v => Math.max(0, Math.min(100, ((v - lo) / span) * 100));
+
+    const pZero = pct(0);
+    const pCur  = pct(st.currentSteps);
+    const pMin  = st.minSet ? pct(st.minSteps) : pZero;
+    const pMax  = st.maxSet ? pct(st.maxSteps) : pZero;
+
+    document.getElementById(`rZero_${i}`).style.left = pZero + "%";
+    document.getElementById(`rCur_${i}`).style.left = pCur + "%";
+    document.getElementById(`rFill_${i}`).style.left = pMin + "%";
+    document.getElementById(`rFill_${i}`).style.width = Math.max(0, pMax - pMin) + "%";
+  }
+
+  const cfg = buildConfigObject(false);
+  const pretty = JSON.stringify(cfg, null, 2);
+  if (pretty !== lastPreviewJson) {
+    lastPreviewJson = pretty;
+    document.getElementById("jsonPreview").textContent = pretty;
+  }
+
+  const sumBadge = document.getElementById("calSummaryBadge");
+  if (doneCount === 3) {
+    sumBadge.className = "badge ok";
+    sumBadge.textContent = "3/3 motores calibrados ✓ Listo para guardar";
+  } else {
+    sumBadge.className = "badge warn";
+    sumBadge.textContent = `${doneCount}/3 motores completos`;
+  }
+}
+
+async function saveConfigToProject() {
+  readMetaFromInputs();
+  const cfg = buildConfigObject(true);
+  const r = await apiCall("/api/save_config_file", "POST", JSON.stringify(cfg, null, 2));
+  if (r) {
+    showToast("💾 Guardado en " + (r.path || "robot_4gdl_calibracion.json"));
+  }
+}
+
+function downloadConfig() {
+  readMetaFromInputs();
+  const cfg = buildConfigObject(true);
+  const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "robot_4gdl_calibracion.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("⬇️ Descargado robot_4gdl_calibracion.json");
+}
+
+async function copyConfig() {
+  readMetaFromInputs();
+  const text = JSON.stringify(buildConfigObject(true), null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("📋 JSON copiado al portapapeles");
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast("📋 JSON copiado al portapapeles");
+  }
+}
+
+async function loadMetaFromEsp() {
+  try {
+    const res = await fetch("/api/meta");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.uiMeta && data.uiMeta.motors && data.uiMeta.motors.length === 3) {
+      metaLoadedFromEsp = true;
+      uiMeta = Object.assign(uiMeta, data.uiMeta);
+      applyMetaToInputs();
+      renderUI();
+    }
+  } catch (e) {}
+}
+
+async function pollStatus() {
+  if (pollInFlight) return;
+  pollInFlight = true;
+  try {
+    const res = await fetch("/api/status");
+    const data = await res.json();
+    const badge = document.getElementById("connBadge");
+    if (!res.ok || data.error) {
+      badge.className = "badge err";
+      badge.innerHTML = `<span class="dot off"></span>${data.error || "Desconectado"}`;
+      return;
+    }
+    espState = data;
+
+    const sl = document.getElementById("speedSlider");
+    if (document.activeElement !== sl) {
+      sl.value = data.speed;
+      document.getElementById("speedLabel").textContent = Math.round(data.speed);
+    }
+
+    if (!metaLoadedFromEsp) {
+      metaLoadedFromEsp = true;
+      loadMetaFromEsp();
+    }
+
+    badge.className = "badge ok";
+    badge.innerHTML = `<span class="dot"></span>ESP32 en ${data.port || "COM"}`;
+    renderUI();
+  } catch (e) {
+    const badge = document.getElementById("connBadge");
+    badge.className = "badge err";
+    badge.innerHTML = '<span class="dot off"></span>Servidor offline';
+  } finally {
+    pollInFlight = false;
+  }
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    emergencyStop();
+  }
+});
+
+loadLocalMeta();
+buildMotorCards();
+applyMetaToInputs();
+renderUI();
+refreshPorts();
+pollStatus();
+setInterval(pollStatus, 150);
+</script>
+</body>
+</html>

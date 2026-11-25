@@ -48,7 +48,7 @@ flowchart TB
 | Calibración | `lib/Clasificacion/Calibrador.*` | Ajusta por mínimos cuadrados la altura y el ancho efectivos del haz con monedas conocidas. |
 | Ciclo | `lib/Secuenciador/*` | Máquina de estados no bloqueante; el tiempo se inyecta, así que se prueba completa en el PC con una planta simulada. |
 | Hardware | `src/hal/*` | ISR, timer, PCNT, pasos con rampa, servo, pulsador. |
-| Configuración | `include/pines.h`, `include/config.h`, `include/calibracion.h` | Pines, tiempos y valores de fábrica de la calibración, cada uno con su etiqueta `[CAL-xx]`. |
+| Configuración | `include/pines.h`, `include/config.h`, `include/calibracion_fabrica.h` | Pines, tiempos y valores de fábrica de la calibración, cada uno con su etiqueta `[CAL-xx]`. |
 
 ## Medición del diámetro
 
@@ -167,8 +167,9 @@ VASOS:50x3a1,100x2,200x4a1,500x2a1,1000x1
 ## Calibración
 
 Todos los valores que dependen del prototipo armado tienen una etiqueta `[CAL-xx]` en
-`include/` y aparecen en [TODO.md](../../TODO.md) (fase 4). Ninguno se ha medido todavía
-con piezas reales: hoy valen lo que dicen el CAD y la simulación.
+`include/` y aparecen en [TODO.md](../../TODO.md) (fase 4). Los valores de fábrica salen del CAD
+y de la simulación; el procedimiento de la fase 4 los ajusta en el prototipo armado y los guarda
+en la NVS.
 
 | Etiqueta | Parámetro | Valor de fábrica | Cómo se calibra |
 |---|---|---|---|
@@ -181,7 +182,7 @@ con piezas reales: hoy valen lo que dicen el CAD y la simulación.
 | CAL-08 | Umbrales del ADC | 50 % / 70 % de la base | Monitor `m`: la moneda debe bajar la lectura bien por debajo del 50 % |
 | CAL-09 | Velocidad de la tolva | 800 pasos/s | Barrido `t` con la tolva cargada; usar el 75 % del límite |
 | CAL-10 | Ángulos y tiempo de la compuerta | 0° / 60°, 350 ms | `w<grados>` hasta paleta horizontal y caída limpia |
-| CAL-11 | Posiciones de la banda | paso 40 mm, rechazo 342 mm | Con la banda montada, `z<vaso>` y medir |
+| CAL-11 | Posiciones de la banda | 42,44 pasos/mm, paso 38 mm, rechazo 342 mm | Con la banda montada, `z<vaso>` y medir |
 | CAL-12 | Llegada a la compuerta | 500 ms | Video a cámara lenta del fin de pista a la paleta |
 
 ## Pines

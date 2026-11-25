@@ -436,7 +436,7 @@ $('mat').innerHTML = `
 <span class="pill ok">Cama</span> la pieza mayor mide ${RES.mx[0]} × ${RES.mx[1]} × ${RES.mx[2]} mm.<br>
 <span class="pill ok">Voladizos</span> análisis de las caras que miran hacia abajo con cada pieza en su posición de impresión: ninguna pasa de 45°; 0 mm² en todas las piezas salvo ≈ 1 mm² de ruido de malla en los módulos.</p>
 
-<h3>Lo que queda para confirmar</h3>
+<h3>Puntos que dependían de piezas reales (versión reemplazada por la v7)</h3>
 <p>Medidas del NEMA17 (cuerpo 42,3 mm, piloto Ø22, eje Ø5 con plano a 2 mm del centro), tomadas del estándar: medirlas en el motor que llegue. Las tolerancias, y sobre todo la articulación print-in-place (pasador Ø3 en agujero Ø3,6) y la presilla de 2,7 mm, se prueban con la cama 00 antes de imprimir lo demás. La presilla es de PLA y puede ser frágil. Coeficientes de rozamiento y torque real. De qué lado queda el brazo y si estorba el motor del lado −X. Con el vaso 1 en el punto A el cartucho sobresale ${fmt(SIM.cart[1]+SIM.s_a[0]-SIM.x_ten,0)} mm del eje del rodillo libre; su centro de masa (supuesto en el centro geométrico) queda ${fmt(SIM.x_ten-((SIM.cart[0]+SIM.cart[1])/2+SIM.s_a[0]),0)} mm antes de ese eje. Si el brazo puede tomar ese vaso más atrás, o si se prefiere alargar la banda, hay que decidirlo.</p>`;
 
 // ---------------- modos

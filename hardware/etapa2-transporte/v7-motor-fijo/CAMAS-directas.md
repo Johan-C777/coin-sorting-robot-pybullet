@@ -1,4 +1,4 @@
-# Etapa 2 v7 (motor fijo): camas de impresión, sin pruebas
+# Etapa 2 v7 (motor fijo): camas de impresión directa, sin piezas de prueba
 
 Impresora: Creality K1C, cama 220 × 220 × 250. Capa 0,2 mm, boquilla 0,4. **Sin soportes en ninguna pieza.** Son 4 camas, ≈ 377 g. Cada cama es un solo STL ya acomodado en `camas/`; las piezas sueltas están en `stl/`.
 
@@ -21,7 +21,7 @@ Barras en negro y riel en mármol: así se distinguen al armar. La cama 2 mezcla
 
 ## Orden
 
-Imprime en orden de cama y revisar cada una antes de seguir: así un fallo cuesta una cama y no todo.
+Imprime en orden de cama y revisa cada una antes de seguir: así un fallo cuesta una cama y no todo.
 
 1. Cama 1: revisa que el motor asienta por el piloto, que el eje entra en el piñón y que el brazo entra por arriba en la ranura del carro.
 2. Cama 2: encaja las barras 1, 2 y 3 (la lengüeta debe entrar firme) y rueda el piñón por los dientes.
@@ -100,7 +100,7 @@ Los gramos son estimaciones mías, no medidas.
 
 Sirve cola de cianoacrilato en gel y una lima fina o lija de grano 200 a 400. Es una guía mía, no una garantía.
 
-| Falla | Arreglo | Alcanza |
+| Problema | Arreglo | Alcanza |
 |---|---|---|
 | Un tramo de la barra no entra en el siguiente (lengüeta apretada) | Lijar 2 a 3 pasadas la lengüeta por los flancos, nunca el techo, y probar de nuevo | Sí |
 | Un tramo de la barra queda flojo | Una gota de gel de cianoacrilato en la lengüeta y juntar. PLA+ con PLA+ pega bien. Después ya no se separa | Sí |
