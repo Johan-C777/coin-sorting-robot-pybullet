@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del clasificador</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1b1f24;--mut:#5f6b7a;--bd:#d9dee5;--acc:#1f6feb;--ok:#1a7f37;--warn:#b26b00;--bad:#c4302b;--bar:#e8ecf1}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#171c23;--tx:#e6e9ee;--mut:#9aa6b4;--bd:#2a323d;--acc:#4c8dff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--bar:#232a34}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:2}
+h1{font-size:17px;margin:0 auto 0 0}
+main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;padding:12px 16px;max-width:1300px;margin:0 auto}
+section{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 10px}
+button{font:inherit;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:8px;padding:8px 12px;cursor:pointer;min-height:38px}
+button:hover{border-color:var(--acc)}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.bad{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.pill{padding:4px 10px;border-radius:999px;font-weight:600;background:var(--bar)}
+.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.pill.bad{background:color-mix(in srgb,var(--bad) 20%,transparent);color:var(--bad)}
+.pill.warn{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
+label{color:var(--mut);font-size:12px}
+input[type=range]{flex:1;min-width:120px}
+input[type=number],select,input[type=text]{font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx)}
+.meter{height:14px;background:var(--bar);border-radius:7px;overflow:hidden;position:relative;flex:1}
+.meter>i{position:absolute;left:0;top:0;bottom:0;background:var(--acc)}
+.meter>b{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--tx)}
+.meter.cut>i{background:var(--bad)}
+.k{display:grid;grid-template-columns:64px 1fr 72px;gap:8px;align-items:center;margin:6px 0}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:5px 6px;border-bottom:1px solid var(--bd);text-align:left}
+th{color:var(--mut);font-weight:600;font-size:12px}
+#log{height:220px;overflow:auto;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;font:12px/1.35 ui-monospace,Consolas,monospace;white-space:pre-wrap;margin:0}
+.swatch{width:38px;height:38px;border-radius:8px;border:1px solid var(--bd)}
+.wide{grid-column:1/-1}
+.mut{color:var(--mut)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Clasificador de monedas · etapa 1</h1>
+  <span id="est" class="pill">sin conexión</span>
+  <span id="auto" class="pill">auto —</span>
+  <button id="bcon" class="pri">Conectar ESP32</button>
+  <button id="brcon">Conectar RAMBo</button>
+  <span id="rest" class="pill">RAMBo —</span>
+  <button class="bad" data-c="e">PARO</button>
+</header>
+<main>
+  <section>
+    <h2>Ciclo</h2>
+    <div class="row">
+      <button class="pri" data-c="a">Auto on / off</button>
+      <button data-c="d">Un ciclo</button>
+      <button data-c="R">Rearmar</button>
+    </div>
+    <div class="row">
+      <button data-c="i">Actualizar estado</button>
+      <button data-c="r">Resumen del lote</button>
+      <button id="bmon">Ver sensores</button>
+    </div>
+    <p class="mut" id="falla">Falla: —</p>
+  </section>
+
+  <section>
+    <h2>Tolva (bolsillos)</h2>
+    <div class="row"><button data-c="b">◀ Atrás</button><button data-c="f">Adelante ▶</button><button data-c="t">Barrido de velocidad</button></div>
+    <div class="row"><label style="width:70px">vmax</label><input type="range" min="100" max="1600" step="50" value="800" data-p="v"><span class="num" style="width:48px">800</span></div>
+    <div class="row"><label style="width:70px">acel</label><input type="range" min="200" max="20000" step="200" value="4000" data-p="k"><span class="num" style="width:48px">4000</span></div>
+    <div class="row"><label style="width:70px">v0</label><input type="range" min="50" max="400" step="10" value="150" data-p="s"><span class="num" style="width:48px">150</span></div>
+  </section>
+
+  <section>
+    <h2>Compuerta (servo)</h2>
+    <div class="row"><button data-c="o">Abrir</button><button data-c="p">Cerrar</button></div>
+    <div class="row"><label style="width:70px">ángulo</label><input type="range" min="0" max="180" step="5" value="90" data-p="w"><span class="num" style="width:48px">90</span></div>
+  </section>
+
+  <section>
+    <h2>Banda (RAMBo)</h2>
+    <div class="row" id="zbtn"></div>
+    <div class="row"><button data-c="z-1">Rechazo</button><button data-c="z8">Inicio (vaso 9)</button></div>
+    <div class="row"><label style="width:70px">posición</label><input type="range" id="xpos" min="0" max="350" step="1" value="0"><span class="num" style="width:120px" id="xval">0 mm · 0 pasos</span></div>
+    <div class="row"><label style="width:70px">velocidad</label><input type="range" id="xvel" min="5" max="60" step="5" value="30"><span class="num" style="width:120px" id="xvv">30 mm/s</span></div>
+    <div class="row"><button data-j="-10">−10 mm</button><button data-j="-1">−1 mm</button><button data-j="1">+1 mm</button><button data-j="10">+10 mm</button><button id="bx0">Fijar cero aquí</button><button id="bxoff">Soltar motor</button></div>
+    <div class="row"><input type="text" id="gcode" placeholder="G-code directo (ej. G91 / G1 X10 F600)" style="flex:1"><button id="bg">Enviar a RAMBo</button></div>
+    <p class="mut">Al encender, el vaso 9 debe quedar bajo el embudo: esa es la posición cero.</p>
+  </section>
+
+  <section>
+    <h2>Sensores en vivo</h2>
+    <div class="k"><span>IR 1</span><div class="meter" id="m1"><i></i><b></b></div><span class="num" id="v1">—</span></div>
+    <div class="k"><span>IR 2</span><div class="meter" id="m2"><i></i><b></b></div><span class="num" id="v2">—</span></div>
+    <div class="row" style="margin-top:10px"><div class="swatch" id="sw"></div><div><div id="rgb" class="num" style="text-align:left">R — G — B —</div><div class="mut" id="raz">razón dorado —</div></div></div>
+    <p class="mut">La línea negra es el nivel con el haz libre; en rojo, haz cortado.</p>
+  </section>
+
+  <section>
+    <h2>Vasos</h2>
+    <table><thead><tr><th>Vaso</th><th>Moneda</th><th>Ø mm</th><th class="num">n</th><th></th></tr></thead><tbody id="vasos"></tbody></table>
+    <div class="row" style="margin-top:8px"><span class="mut" id="tot">Rechazo — · total —</span><button data-c="x-1" style="margin-left:auto">Vaciar todos</button></div>
+  </section>
+
+  <section>
+    <h2>Últimas monedas</h2>
+    <table><thead><tr><th>#</th><th>Ø mm</th><th>v mm/s</th><th>Color</th><th>Vaso</th></tr></thead><tbody id="ult"></tbody></table>
+  </section>
+
+  <section>
+    <h2>Calibración</h2>
+    <div class="row"><label>Moneda conocida</label><select id="selv"></select></div>
+    <div class="row"><button id="bcal">Empezar a pasar monedas</button><button data-c="c-1">Salir</button><button data-c="C">Ajustar haz</button></div>
+    <div class="row"><label>Umbral dorado</label><input type="number" id="udor" value="1.30" step="0.01" style="width:80px"><button id="budor">Aplicar</button></div>
+    <div class="row"><button data-c="g">Guardar en flash</button><button data-c="l">Cargar</button><button data-c="F">Valores de fábrica</button></div>
+    <h2 style="margin-top:14px">Un solo IR</h2>
+    <div class="row"><button data-c="j1">Usar GPIO 1</button><button data-c="j2">Usar GPIO 2</button></div>
+    <div class="row"><label>Velocidad</label><input type="number" id="vel" value="600" step="10" style="width:90px"><span class="mut">mm/s</span><button id="bvel">Aplicar</button></div>
+    <div class="row"><button id="bq">Calcular v con la última moneda (la elegida arriba)</button></div>
+  </section>
+
+  <section class="wide">
+    <h2>Consola</h2>
+    <pre id="log"></pre>
+    <div class="row" style="margin-top:8px"><input type="text" id="cmd" placeholder="Comando manual (ej. z0)" style="flex:1"><button id="benv">Enviar</button><button id="blim">Limpiar</button></div>
+  </section>
+</main>
+<script>
+const VASOS=[["N50","$50 nueva",17.0],["N100","$100 nueva",20.3],["A50","$50 antigua",21.5],["N200","$200 nueva",22.4],["A100","$100 antigua",23.0],["A500","$500 antigua",23.7],["N500","$500 nueva",23.7],["A200","$200 antigua",24.4],["N1000","$1000",26.7]];
+const $=id=>document.getElementById(id);
+let port=null,writer=null,reader=null,monitor=false,cuentas=Array(9).fill(0);
+let rport=null,rwriter=null,rreader=null;
+$("zbtn").innerHTML=Array.from({length:9},(_,i)=>`<button data-c="z${i}">Vaso ${i}</button>`).join("");
+async function aRambo(g){if(!rwriter){log("! RAMBo sin conectar: "+g);return}await rwriter.write(new TextEncoder().encode(g+"\n"));log("→ RAMBo "+g)}
+async function leerLineas(p,cb,setReader){const dec=new TextDecoderStream();p.readable.pipeTo(dec.writable).catch(()=>{});const r=dec.readable.getReader();setReader(r);let buf="";
+  try{for(;;){const {value,done}=await r.read();if(done)break;buf+=value;let k;while((k=buf.indexOf("\n"))>=0){const l=buf.slice(0,k).replace(/\r$/,"");buf=buf.slice(k+1);if(l)cb(l)}}}catch(e){log("! "+e.message)}}
+function rLinea(l){
+  if(/^ok/.test(l)){if(writer)enviarRaw("@ok");return}
+  if(/^echo:busy/.test(l))return;
+  log("RAMBo: "+l);
+  if(/^Error/i.test(l)&&writer)enviarRaw("@"+l.slice(0,20));
+}
+async function enviarRaw(c){if(writer)await writer.write(new TextEncoder().encode(c+"\n"))}
+async function conectarRambo(){
+  if(rport){try{if(rreader)await rreader.cancel()}catch(e){}try{rwriter&&rwriter.releaseLock()}catch(e){}try{await rport.close()}catch(e){}
+    rport=rwriter=rreader=null;$("brcon").textContent="Conectar RAMBo";$("rest").textContent="RAMBo —";$("rest").className="pill";return}
+  if(!("serial" in navigator)){alert("Abre este panel en Chrome o Edge: usa Web Serial.");return}
+  try{rport=await navigator.serial.requestPort();await rport.open({baudRate:115200});rwriter=rport.writable.getWriter();
+    $("brcon").textContent="Desconectar RAMBo";$("rest").textContent="RAMBo conectada";$("rest").className="pill ok";log("* RAMBo conectada (arranca en 3 s)");
+    leerLineas(rport,rLinea,r=>rreader=r);
+    setTimeout(()=>{aRambo("M115");enviarRaw("@reset")},3500);
+  }catch(e){log("! "+e.message);rport=null}
+}
+const sel=$("selv");VASOS.forEach((v,i)=>sel.add(new Option(`${i} · ${v[1]} (${v[2]} mm)`,i)));
+function pintarVasos(){$("vasos").innerHTML=VASOS.map((v,i)=>`<tr><td>${i}</td><td>${v[1]}</td><td>${v[2].toFixed(1)}</td><td class="num">${cuentas[i]}</td><td><button data-c="x${i}" style="min-height:28px;padding:2px 8px">Vaciar</button></td></tr>`).join("")}
+pintarVasos();
+function log(t){const l=$("log");l.textContent+=t+"\n";if(l.textContent.length>60000)l.textContent=l.textContent.slice(-40000);l.scrollTop=l.scrollHeight}
+async function enviar(c){if(!writer){log("! sin conexión");return}await writer.write(new TextEncoder().encode(c+"\n"));log("> "+c)}
+function estado(e,f,a){const p=$("est");p.textContent=e;p.className="pill "+(e==="FALLA"?"bad":e==="REPOSO"?"ok":"warn");$("falla").textContent="Falla: "+f;const q=$("auto");q.textContent="auto "+a;q.className="pill "+(a==="ON"?"ok":"")}
+function barra(id,vid,crudo,base,cut){const m=$(id);m.querySelector("i").style.width=(crudo/4095*100)+"%";m.querySelector("b").style.left=(base/4095*100)+"%";m.classList.toggle("cut",cut);$(vid).textContent=crudo}
+const ult=[];
+function linea(t){
+  let m;
+  if(t[0]==="@"){aRambo(t.slice(1));return}
+  if(m=t.match(/estado (\S+) \| falla: (.+) \| auto (ON|OFF)/))estado(m[1],m[2],m[3]);
+  if(m=t.match(/IR1=(\d+)\/(\d+)(\*?)\s+IR2=(\d+)\/(\d+)(\*?)\s+\| TCS R=(\d+) G=(\d+) B=(\d+) razon=([\d.]+) \| (\S+)/)){
+    barra("m1","v1",+m[1],+m[2],m[3]==="*");barra("m2","v2",+m[4],+m[5],m[6]==="*");
+    const r=+m[7],g=+m[8],b=+m[9],mx=Math.max(r,g,b,1);
+    $("sw").style.background=`rgb(${r/mx*255|0},${g/mx*255|0},${b/mx*255|0})`;
+    $("rgb").textContent=`R ${r} · G ${g} · B ${b}`;$("raz").textContent="razón dorado "+m[10];
+    const p=$("est");p.textContent=m[11];p.className="pill "+(m[11]==="FALLA"?"bad":m[11]==="REPOSO"?"ok":"warn");
+    return}
+  if(m=t.match(/vaso (\d) \S+\s+D=[\d.]+ tol=[\d.]+\s+n=(\d+)/)){cuentas[+m[1]]=+m[2];pintarVasos()}
+  if(m=t.match(/rechazo n=(\d+) \| total (\d+)/))$("tot").textContent=`Rechazo ${m[1]} · total ${m[2]}`;
+  if(m=t.match(/#D n=(\d+) v0=(-?\d+) a=(-?\d+) c=([\d.-]+) D=([\d.-]+) razon=([\d.]+) -> (\S+) \((.+)\)/)){
+    ult.unshift(`<tr><td>${m[1]}</td><td>${(+m[5]).toFixed(2)}</td><td>${m[2]}</td><td>${m[6]}</td><td>${m[7]==="RECHAZO"?"<span class='pill bad'>rechazo · "+m[8]+"</span>":m[7]}</td></tr>`);
+    ult.length=Math.min(ult.length,12);$("ult").innerHTML=ult.join("");
+    const i=VASOS.findIndex(v=>v[0]===m[7]);if(i>=0){cuentas[i]++;pintarVasos()}}
+  log(t)}
+async function leer(){
+  const dec=new TextDecoderStream();port.readable.pipeTo(dec.writable).catch(()=>{});reader=dec.readable.getReader();let buf="";
+  try{for(;;){const {value,done}=await reader.read();if(done)break;buf+=value;let k;while((k=buf.indexOf("\n"))>=0){const l=buf.slice(0,k).replace(/\r$/,"");buf=buf.slice(k+1);if(l)linea(l)}}}catch(e){log("! "+e.message)}
+}
+async function conectar(){
+  if(port){
+    try{if(reader)await reader.cancel()}catch(e){}
+    try{if(writer){writer.releaseLock()}}catch(e){}
+    try{await port.close()}catch(e){}
+    port=writer=reader=null;monitor=false;$("bmon").textContent="Ver sensores";
+    $("bcon").textContent="Conectar ESP32";const p=$("est");p.textContent="sin conexión";p.className="pill";return}
+  if(!("serial" in navigator)){alert("Abre este panel en Chrome o Edge: usa Web Serial.");return}
+  try{
+    port=await navigator.serial.requestPort();
+    await port.open({baudRate:115200});
+    try{await port.setSignals({dataTerminalReady:false,requestToSend:false})}catch(e){}
+    writer=port.writable.getWriter();
+    $("bcon").textContent="Desconectar";log("* conectado");
+    leer();
+    setTimeout(()=>enviar("i"),2500);
+  }catch(e){log("! "+e.message);port=null}
+}
+$("bcon").onclick=conectar;
+$("brcon").onclick=conectarRambo;
+const PASOS_MM=42.44;let xmm=0;
+function mostrarX(){$("xpos").value=xmm;$("xval").textContent=`${xmm.toFixed(1)} mm · ${Math.round(xmm*PASOS_MM)} pasos`}
+async function irX(mm){xmm=Math.max(-50,Math.min(400,mm));mostrarX();await aRambo("G90");await aRambo(`G1 X${xmm.toFixed(2)} F${$("xvel").value*60}`)}
+$("xpos").oninput=()=>{$("xval").textContent=`${(+$("xpos").value).toFixed(1)} mm · ${Math.round($("xpos").value*PASOS_MM)} pasos`};
+$("xpos").onchange=()=>irX(+$("xpos").value);
+$("xvel").oninput=()=>$("xvv").textContent=$("xvel").value+" mm/s";
+document.querySelectorAll("[data-j]").forEach(b=>b.onclick=()=>irX(xmm+ +b.dataset.j));
+$("bx0").onclick=async()=>{await aRambo("G92 X0");xmm=0;mostrarX()};
+$("bxoff").onclick=()=>aRambo("M18 X");
+$("bg").onclick=()=>{const g=$("gcode").value.trim();if(g){aRambo(g);$("gcode").value=""}};
+$("gcode").onkeydown=e=>{if(e.key==="Enter")$("bg").click()};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(b)enviar(b.dataset.c)});
+document.querySelectorAll("input[data-p]").forEach(r=>{const out=r.nextElementSibling;r.oninput=()=>out.textContent=r.value;r.onchange=()=>enviar(r.dataset.p+r.value)});
+$("bmon").onclick=()=>{monitor=!monitor;$("bmon").textContent=monitor?"Ocultar sensores":"Ver sensores";enviar("m")};
+$("bcal").onclick=()=>enviar("c"+sel.value);
+$("budor").onclick=()=>enviar("u"+$("udor").value);
+$("bvel").onclick=()=>enviar("y"+$("vel").value);
+$("bq").onclick=()=>enviar("q"+sel.value);
+$("benv").onclick=()=>{const c=$("cmd").value.trim();if(c){enviar(c);$("cmd").value=""}};
+$("cmd").onkeydown=e=>{if(e.key==="Enter")$("benv").click()};
+$("blim").onclick=()=>$("log").textContent="";
+</script>
+</body>
+</html>

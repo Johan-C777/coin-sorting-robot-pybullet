@@ -20,7 +20,7 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 
 1. **Tolva de disco (H01, H02, H03).** Plato a 45°; el 28BYJ-48 gira un disco de 6
    bolsillos Ø33 (H02c). El primer disco, de 8 bolsillos Ø29, dejaba justas las
-   monedas grandes (hallazgo H2 de las pruebas físicas). El rascador H03 tumba la moneda que venga montada sobre otra.
+   monedas grandes (ajuste H2 de las pruebas físicas). El rascador H03 tumba la moneda que venga montada sobre otra.
 2. **Caída de canto.** Arriba, el bolsillo pasa sobre un hueco y la moneda cae unos
    2 cm a la pista, parada contra la placa.
 3. **Pista (L01, B01).** 22° de pendiente, placa a 20° de la vertical. Barreras IR a
@@ -44,10 +44,10 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 | Piezas cerradas, sin choques y dentro de la cama de la K1C | `scripts/generar_v5.py --ensamble` | 24 STL, 0 choques, ≈ 845 g |
 | Impresión | 8 camas en la Creality K1C (oct. 2026) | todas las piezas impresas |
 
-No validado todavía con piezas reales: que el disco tome siempre una sola moneda,
-la compuerta, el posicionamiento del cartucho (depende de la banda) y el ruido
-real de los sensores. Meta del prototipo: 90 % bien clasificadas y el resto a
-rechazo.
+Lo que solo se puede comprobar con piezas reales (una moneda por bolsillo, la compuerta y el
+paso de cada denominación) se evaluó en las [pruebas físicas](12-pruebas-fisicas-etapa1.md),
+que dieron lugar a los ajustes H1 a H6, ya montados. Meta de aceptación del prototipo: 90 % bien
+clasificadas y el resto a rechazo.
 
 ## Regenerar
 

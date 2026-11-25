@@ -73,4 +73,4 @@ Nunca conectar ni quitar el motor con 12 V aplicados.
 
 - Comprobar que el shield del ESP32-S3 deja libres todos estos pines.
 - Unir primero las tierras y medir 5 V en el riel antes de conectar el ESP32
-  (procedimiento completo en la [fase 4 de TODO.md](../../../TODO.md#fase-4--montaje-y-calibración-física)).
+  (procedimiento completo en la [fase 4 de TODO.md](../../../TODO.md#fase-4--montaje-y-pruebas-físicas)).

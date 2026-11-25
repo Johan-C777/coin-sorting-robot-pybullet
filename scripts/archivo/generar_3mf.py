@@ -25,7 +25,7 @@ from typing import Dict, List, Tuple
 
 RAIZ = Path(__file__).resolve().parents[2]
 STL = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "stl"
-STL_BRAZO = RAIZ / "hardware" / "etapa3-brazo" / "stl"
+STL_BRAZO = RAIZ / "hardware" / "archivo" / "etapa3-brazo-v1" / "stl"
 SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "sistema_monedas_completo.3mf"
 
 # ----------------------------------------------------------------------

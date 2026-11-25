@@ -1,6 +1,6 @@
 #pragma once
 // Parámetros del sistema (no dependen de la moneda). Los marcados [CAL-xx] se ajustan
-// con el prototipo armado; ver include/calibracion.h y README.md#calibración.
+// con el prototipo armado; ver include/calibracion_fabrica.h y README.md#calibración.
 #include <stdint.h>
 
 #include "Secuenciador.h"
@@ -16,6 +16,15 @@
 //                   fototransistor sature (o una etapa 2N3904/LM393). Verificar con 'm'.
 #define BARRERAS_ADC 0
 #define BARRERAS_DIGITAL 1
+// UNA_BARRERA = 1: mide con un solo haz y supone velocidad constante (menos precisión).
+// Consola: j1 / j2 elige el haz (GPIO 1 o 2); y<mm/s> fija la velocidad; q<vaso> la calcula
+// con la última moneda conocida que pasó.
+#ifndef UNA_BARRERA
+#define UNA_BARRERA 0
+#endif
+#ifndef UNA_BARRERA_V_MM_S
+#define UNA_BARRERA_V_MM_S 600.0f                // [CAL-13] velocidad de la moneda en el haz
+#endif
 #ifndef BARRERAS_MODO
 #define BARRERAS_MODO BARRERAS_ADC   // [CAL-07] >>> pasar a DIGITAL si 'm' muestra niveles limpios
 #endif
@@ -45,6 +54,14 @@ constexpr int SERVO_US_MIN = 500, SERVO_US_MAX = 2400;
 #ifndef HABILITAR_BANDA
 #define HABILITAR_BANDA 1                      // banda v7 montada (0 = solo la torre)
 #endif
+#ifndef BANDA_RAMBO
+#define BANDA_RAMBO 0                          // 1 = la banda la mueve una RAMBo (Marlin) por UART
+#endif
+#ifndef BANDA_PUENTE_PC
+#define BANDA_PUENTE_PC 0                       // 1 = la RAMBo va por USB al PC; el panel web hace de puente
+#endif
+constexpr long RAMBO_BAUD = 115200;
+constexpr float RAMBO_F_MM_MIN = 3500;         // 58 mm/s, la misma velocidad que con el A4988
 constexpr float BANDA_PASOS_MM = 42.44f;       // [CAL-11] A4988 1/16 + piñón v7 de 16 dientes m1,5 (75,40 mm/vuelta)
 constexpr float BANDA_V0 = 400, BANDA_VMAX = 2500, BANDA_ACC = 8000;    // pasos/s, pasos/s² (suave: el piñón no patina)
 constexpr float BANDA_PASO_VASO_MM = 38.0f;    // [CAL-11] entre centros de vasos del cartucho v5

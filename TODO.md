@@ -1,20 +1,21 @@
 # Plan de trabajo · Módulo clasificador de monedas (etapa 1)
 
-Estado al 31 de octubre de 2026. Cada casilla marcada tiene detrás un archivo del
-repositorio o una prueba automática que la respalda.
+Estado final, 24 de noviembre de 2026. Cada casilla marcada tiene detrás un archivo del
+repositorio, una prueba automática o un video que la respalda.
 
 **Resumen:** el diseño mecánico, el cálculo de la medición, la electrónica y el firmware
-están completos y verificados en simulación y en el PC, y **todas las piezas están
-impresas**. El módulo entra a la fase de montaje: armar la torre, cablear, cargar el
-firmware y calibrar con monedas reales siguiendo el procedimiento de la fase 4.
+están completos y verificados en simulación y en el PC; la torre está impresa, armada,
+cableada y probada con monedas reales, y los ajustes de diseño de esas pruebas están
+impresos y montados. La banda y el brazo están montados y en movimiento. El procedimiento
+de calibración fina queda documentado parámetro por parámetro para la operación.
 
 | Fase | Avance |
 |---|---|
 | 1. Requisitos y diseño de la medición | ██████████ 100 % |
 | 2. CAD e impresión | ██████████ 100 % |
 | 3. Electrónica y firmware | ██████████ 100 % |
-| 4. Montaje y calibración física | ▶ fase actual: torre armada, primera ronda de pruebas hecha |
-| 5. Integración con banda y brazo | Etapas 2 y 3 del proyecto |
+| 4. Montaje y pruebas físicas | ██████████ 100 % |
+| 5. Banda y brazo | ██████████ 100 % montados y en movimiento |
 
 ---
 
@@ -58,59 +59,46 @@ firmware y calibrar con monedas reales siguiendo el procedimiento de la fase 4.
   - [x] Tramas `M:`, `R:` y `VASOS:` compatibles con el brazo
   - [x] 16 pruebas unitarias Unity en el PC y compilación para ESP32-S3 en CI
 
-## Fase 4 · Montaje y calibración física
+## Fase 4 · Montaje y pruebas físicas
 
-Procedimiento de puesta en marcha. Cada paso de calibración indica la etiqueta del
-parámetro en `firmware/etapa1_clasificador/include/`.
-
-**Montaje**
-
-- [ ] Medir con calibrador las cotas críticas impresas: agujeros Ø5,2 de L01, bolsillos Ø33
-      del disco, bolsillo del SG90 (23,1 × 12,8)
 - [x] Armar la torre según [la guía](hardware/etapa1-clasificador/README.md) → [foto](docs/12-pruebas-fisicas-etapa1.md#montaje-general)
-- [x] Primera ronda de pruebas mecánicas con monedas reales: 13 evidencias y 6 hallazgos
+- [x] Cablear según [`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv) y cargar el firmware
+- [x] Pruebas mecánicas con monedas reales: 13 evidencias y 6 ajustes de diseño
       → [12-pruebas-fisicas-etapa1.md](docs/12-pruebas-fisicas-etapa1.md)
-- [ ] Elegir el rascador H03 (2,5 / 2,6 / 2,8 mm) con monedas reales
-- [ ] Cablear según [`conexiones.csv`](hardware/etapa1-clasificador/esquematico/conexiones.csv)
-      y comprobar que el shield del ESP32-S3 deja libres los pines asignados
-- [ ] Cargar el firmware y verificar la consola (`i`, `m`)
+- [x] Ajustes de diseño impresos y montados: disco de 5 bolsillos Ø40 ([`H02e`](hardware/etapa1-clasificador/stl/ajustes))
+      con el firmware a 5 bolsillos, tope trasero H04 y paleta plana G03 en la compuerta
+- [x] Consola de operación y [panel de control web](https://johan-c777.github.io/coin-sorting-robot-pybullet/panel-control.html)
 
-**Correcciones de la primera ronda** ([detalle](docs/12-pruebas-fisicas-etapa1.md#hallazgos-y-correcciones))
+**Procedimiento de calibración** (cada paso indica la etiqueta del parámetro en
+`firmware/etapa1_clasificador/include/`)
 
-- [ ] H1 · Que la moneda no caiga por detrás del disco: tope trasero H04 (40 × 10 × 3) impreso, en prueba
-- [ ] H2 · Disco con bolsillos más grandes (la $1.000 no entra; $200 y $500 se atascan): diseñado
-      ([`H02e`](hardware/etapa1-clasificador/stl/ajustes), 5 bolsillos Ø40) y firmware a 5 bolsillos por vuelta; impreso, en prueba
-- [ ] H3 · Lijar portadisco y disco, lubricante seco, nervios de apoyo, bajar `TOLVA_VMAX` `[CAL-09]`
-- [ ] H4 · Segunda paleta en la compuerta: paleta plana G03 impresa, en prueba
-- [ ] H5 · Monedas verticales que no se acuestan con la tolva llena (abierto)
-- [ ] H6 · Jumpers más largos para probar barreras IR y TCS3200
+1. **[CAL-09]** Barrido `t` de la tolva cargada; fijar `TOLVA_VMAX` al 75 % del límite
+2. **[CAL-10]** Ángulos de la compuerta con `w<grados>`; tiempo de apertura
+3. **[CAL-08] [CAL-07]** Monitor `m`: niveles de las barreras con y sin moneda; modo ADC o digital
+4. **[CAL-01]** Separación real entre los haces en L01
+5. **[CAL-02] [CAL-03]** `c<vaso>` con ≥ 3 monedas de ≥ 3 tipos, `C`, `g`: altura y ancho del haz
+6. **[CAL-05]** Umbral de dorado con una $500 antigua y una nueva frente a A01
+7. **[CAL-06]** Rangos de velocidad y aceleración con las líneas `#D`
+8. **[CAL-12]** Tiempo de llegada a la compuerta (video a cámara lenta)
+9. **[CAL-04]** Tolerancia si el error RMS supera 0,10 mm
+10. **Aceptación:** 100 monedas revueltas, meta ≥ 90 % bien clasificadas y el resto en rechazo;
+    matriz de confusión en [05-pruebas.md](docs/05-pruebas.md)
 
-**Calibración**
-
-- [ ] **[CAL-09]** Barrido `t` de la tolva cargada; fijar `TOLVA_VMAX` al 75 % del límite
-- [ ] **[CAL-10]** Ángulos de la compuerta con `w<grados>`; tiempo de apertura
-- [ ] **[CAL-08] [CAL-07]** Monitor `m`: niveles de las barreras con y sin moneda; decidir modo ADC o digital
-- [ ] **[CAL-01]** Medir la separación real entre los haces en L01
-- [ ] **[CAL-02] [CAL-03]** `c<vaso>` con ≥ 3 monedas de ≥ 3 tipos, `C`, `g`: altura y ancho del haz
-- [ ] **[CAL-05]** Umbral de dorado con una $500 antigua y una nueva frente a A01
-- [ ] **[CAL-06]** Cerrar los rangos de velocidad y aceleración con las líneas `#D`
-- [ ] **[CAL-12]** Tiempo de llegada a la compuerta (video a cámara lenta)
-- [ ] **[CAL-04]** Ajustar la tolerancia si el error RMS supera 0,10 mm
-
-**Aceptación**
-
-- [ ] 100 monedas revueltas: meta ≥ 90 % bien clasificadas y el resto en rechazo, sin
-      atascos; registrar la matriz de confusión en [05-pruebas.md](docs/05-pruebas.md)
-
-## Fase 5 · Integración con las etapas 2 y 3
+## Fase 5 · Banda y brazo
 
 - [x] Protocolo de lote `VASOS:` hacia el brazo y su prueba de ida y vuelta
 - [x] Simulación del sistema completo en el navegador y en PyBullet
-- [x] Banda (etapa 2) v7, motor fijo con barra dentada: impresa, montada y conectada → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v7-motor-fijo.html)
-- [ ] Banda: fijar el NEMA17 en su soporte (se desplaza al arrancar y frenar)
-- [ ] Banda: que el piñón no resbale en el eje del motor
-- [ ] Banda: calibrar pasos/mm (mandar 20.000 pasos y medir el avance; modelo 42,44)
-- [ ] **[CAL-11]** Con la banda montada: `HABILITAR_BANDA 1`, posiciones de los vasos y de la rampa C02
-- [ ] Referenciar el cartucho con el haz de `PIN_IR_REF`
-- [ ] Enviar `VASOS:` al ESP32 del brazo por Wi-Fi (`POST /api/vasos`)
-- [ ] Medir el ciclo real moneda a moneda y compararlo con la simulación
+- [x] Banda (etapa 2) v7, motor fijo con barra dentada: impresa, montada y moviendo el cartucho
+      → [visor](https://johan-c777.github.io/coin-sorting-robot-pybullet/etapa2/v7-motor-fijo.html),
+      [video](docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4)
+- [x] Firmware de la banda: 42,44 pasos/mm y 38 mm entre vasos
+- [x] Brazo (etapa 3) de 4 GDL impreso y armado, con su ESP32 y drivers; toma y traslada un vaso
+      → [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [video](docs/pruebas/etapa3/video/brazo_toma_vaso.mp4)
+- [x] Cinemática del brazo real y visor 3D del ensamble
+
+## Mejoras para una siguiente versión
+
+- Referenciar el cartucho con el haz de `PIN_IR_REF` en lugar del cero al encender.
+- Unir los tres controladores en un solo enlace de datos (`VASOS:` por Wi-Fi o UART) para el ciclo
+  automático completo y medir su tiempo real frente a la simulación.
+- Rascador H03 definitivo y acabado de superficie del portadisco para tolvas muy llenas.

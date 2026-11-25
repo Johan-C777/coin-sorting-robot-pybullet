@@ -1,5 +1,7 @@
 # Monedas antiguas y nuevas: diseño del selector
 
+> El catálogo de monedas de este documento es el que usa todo el sistema. El selector por ranuras que se describe es el de la v4; la torre construida (v5) mide el diámetro por tiempo de vuelo con dos barreras IR ([09-clasificador-v5.md](09-clasificador-v5.md)).
+
 La tolva recibe monedas colombianas de las dos familias que siguen circulando:
 la **nueva**, que el Banco de la República emite desde el segundo semestre de
 2012, y la **anterior**, emitida entre 1989 y 1996. El riel las separa por
@@ -111,9 +113,11 @@ Cada moneda contada sale además por el serie con su estación y su familia:
 M:100,5,antigua
 ```
 
-## Riesgos y siguiente paso
+## Riesgos de diseño del selector por ranuras
 
-- La ranura 4 tiene 0,30 mm a cada lado. Antes de imprimir el riel completo hay
+Estos riesgos llevaron a reemplazar las ranuras por la medición por tiempo de vuelo de la v5.
+
+- La ranura 4 tiene 0,30 mm a cada lado. Antes de imprimir el riel completo había
   que imprimir una probeta de las estaciones 3 a 6 y medirla (ver
   [despiece de la v1](archivo/despiece-etapa1-v1.md#tolerancias-y-calibración)). Si no alcanza la
   precisión, ese tramo se corta en acrílico.

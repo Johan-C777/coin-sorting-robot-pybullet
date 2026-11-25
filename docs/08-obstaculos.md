@@ -88,8 +88,9 @@ aleatorias. La diferencia máxima es de 10⁻¹⁴ cm.
 | `test_los_extremos_de_la_ruta_estan_vigilados` | El O1 vigila A y el O4 al menos tres puestos de B |
 | `test_las_poses_de_evasion_las_alcanza_el_brazo` | Cada maniobra tiene inversa y deja la pinza vertical |
 
-## Qué falta
+## Alcance
 
-La evasión corre en la simulación y en Python. El firmware del ESP32 todavía
-hace el tránsito nominal sin obstáculos; llevar `plan_en()` al secuenciador del
-ESP32 es parte de la siguiente entrega, junto con los móviles físicos.
+La evasión corre en la simulación y en Python, verificada por las pruebas de arriba. El brazo
+construido (etapa 3) ejecuta sus trayectorias con comandos `GOTO` desde su propia ESP32
+([13-etapa3-brazo.md](13-etapa3-brazo.md)); llevar `plan_en()` a ese firmware, junto con
+obstáculos móviles físicos, queda como mejora para una siguiente versión.

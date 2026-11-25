@@ -1,5 +1,7 @@
 # Etapa 2 v5: riel impreso, carro e hilo de casa
 
+> **Versión del proceso de diseño, reemplazada por la [v7](../v7-motor-fijo/LEEME.md) (vigente, impresa y montada).** Se conserva como registro de las decisiones; las notas de verificación son las del diseño.
+
 Reemplaza la banda de cadena de la v3 (46 piezas, 1.506 g). **No se compra nada.** Un solo riel por tramos, un carro que lo abraza y un hilo que da vueltas al motor y a una polea. Todo se imprime como está, sin soportes (un techo plano de 6 mm en la ranura del eje de la polea es un puente).
 
 | | v3 cadena | v5 riel |
@@ -91,11 +93,11 @@ La resolución depende del hilo real: **calibra** mandando 20.000 pasos y midien
 - El motor llega a Y = 81 y los patines de la torre empiezan en |Y| = 83; además no coinciden en X con la base del motor. El motor queda a 4,85 mm bajo el fondo del cartucho.
 - El hilo de abajo queda a 4,5 mm de la mesa y a 1,6 mm sobre la base de los bloques.
 
-## Qué queda por confirmar con piezas reales
+## Puntos que dependían de piezas reales
 
 - El juego carro–riel (0,5 mm) en tu impresora: se mide con la cama 1.
 - El hilo que uses y cuánto estira.
-- El motor: medidas del NEMA17 (cuerpo 42,3 mm, piloto Ø22, eje Ø5 con plano a 2 mm del centro): mídelas en el que tengas. Si el cuerpo es más largo que 48 mm, avisa.
+- El motor: medidas del NEMA17 (cuerpo 42,3 mm, piloto Ø22, eje Ø5 con plano a 2 mm del centro): mídelas en el que tengas. Si el cuerpo es más largo que 48 mm, hay que alargar el soporte.
 - El motor queda a 4,85 mm bajo el cartucho: una brida normal cabe; si es gruesa, usa una liga.
 
 ## Archivos

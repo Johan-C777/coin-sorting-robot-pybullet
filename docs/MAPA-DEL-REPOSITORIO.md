@@ -7,10 +7,13 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 
 | Qué | Dónde está |
 |---|---|
+| El estado final de las tres etapas y el panel de control | [14-estado-final.md](14-estado-final.md) · [panel-control.html](panel-control.html) |
 | El estado del módulo de monedas | [README](../README.md#estado-estratégico) y [TODO.md](../TODO.md) |
 | El estado de la banda (etapa 2) | [README, sección Etapa 2](../README.md#etapa-2--banda-transportadora) |
-| Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
+| Las pruebas físicas (videos y fotos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
+| El brazo (etapa 3): mecánica, cálculos, electrónica, G-code, cinemática y su video | [13-etapa3-brazo.md](13-etapa3-brazo.md) |
 | El diseño de la torre clasificadora | [09-clasificador-v5.md](09-clasificador-v5.md) y el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) |
+| El brazo de 4 GDL en 3D, con sus articulaciones móviles | [Visor 3D del brazo](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-brazo-4gdl.html) |
 | Las etapas 1 y 2 juntas con la electrónica | [Visor 3D de las etapas 1 y 2](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html) |
 | Las piezas para imprimir | [`hardware/etapa1-clasificador/stl/`](../hardware/etapa1-clasificador/stl) y las camas en [`impresion/`](../hardware/etapa1-clasificador/impresion) |
 | La guía de armado | [`hardware/etapa1-clasificador/README.md`](../hardware/etapa1-clasificador/README.md) y la [guía de montaje y pruebas](../hardware/etapa1-clasificador/GUIA-MONTAJE-PRUEBAS.md) |
@@ -52,9 +55,12 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `08-obstaculos.md` | Ruta de A a B con cuatro obstáculos |
 | `09-clasificador-v5.md` | **Diseño de la torre clasificadora v5 (vigente)** |
 | `11-electronica-etapa1.md` | Pines, alimentación y sensores del ESP32-S3 |
-| `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y hallazgos** |
+| `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y ajustes** |
+| `13-etapa3-brazo.md` | **Brazo de 4 GDL: mecánica, reductora, cálculos, electrónica, G-code, cinemática, pruebas** |
+| `14-estado-final.md` | **Estado final de las tres etapas: arquitectura, resultados, ajustes realizados y siguientes mejoras** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
+| `visor-brazo-4gdl.html` | Visor 3D del brazo de 4 GDL: ensamble real, articulaciones móviles, punta y pasos de motor |
 | `visor-etapas-1-2.html` | Visor 3D de las etapas 1 y 2 con la electrónica, el cableado y los colores de filamento (generador en `scripts/visor_etapas/`) |
 | `etapa2/` | Visor de la banda v7 vigente; `etapa2/proceso/` guarda los visores v4, v5 y v6 |
 | `simulacion_sistema_completo.html` | Simulación del sistema completo |
@@ -82,8 +88,8 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `etapa1-clasificador/impresion/` | 8 camas `.3mf` para la Creality K1C y `CAMAS.md` | Vigente |
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
 | `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
-| `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada, en ajustes |
-| `etapa3-brazo/` | Planos del brazo (PDF de SolidWorks), puesto del rack, bandeja y BOM | Diseñado |
+| `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada y en movimiento |
+| `etapa3-brazo/` | Brazo 4 GDL, garra, reductora, firmware de calibración y BOM | Impreso, armado y en movimiento |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |
 

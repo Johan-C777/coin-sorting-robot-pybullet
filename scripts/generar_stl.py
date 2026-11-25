@@ -31,7 +31,7 @@ from brazo.monedas import SELECTOR                                 # noqa: E402
 
 RAIZ = Path(__file__).resolve().parents[1]
 SALIDA = RAIZ / "hardware" / "archivo" / "etapa1-v1" / "stl"     # etapa 1 v1 (E*)
-SALIDA_BRAZO = RAIZ / "hardware" / "etapa3-brazo" / "stl"       # rack y bandeja (B*)
+SALIDA_BRAZO = RAIZ / "hardware" / "archivo" / "etapa3-brazo-v1" / "stl"       # rack y bandeja (B*)
 
 # =====================================================================
 # Parámetros maestros (mm). Son los mismos de la simulación HTML.

@@ -54,5 +54,7 @@ jobs:
         run: pio test -e native
       - name: Compilar para ESP32-S3
         run: pio run -e esp32s3
+      - name: Firmware del clasificador con la banda en la RAMBo
+        run: pio run -e esp32s3_rambo
       - name: Tamaño del binario
         run: pio run -e esp32s3 -t size
