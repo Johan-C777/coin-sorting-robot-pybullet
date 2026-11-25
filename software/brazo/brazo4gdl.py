@@ -123,7 +123,8 @@ def alcanzable(p: Pose) -> bool:
 
 
 # ---- G-code para la RAMBo (Marlin) --------------------------------------------
-# Ejes de Marlin: X = banda (mm), Y = J1, Z = J2, E = J3. Con los pasos por
+# Ejes de Marlin 2.1 (EXTRUDERS 0): X = banda (mm), Y = J1, Z = J2 y A = J3 (en el
+# driver E0). Con los pasos por
 # unidad en pasos/grado, una coordenada de Marlin es directamente un ángulo.
 # CERO_* es el ángulo real del eslabón cuando Marlin marca 0 (G92 en la pose
 # de arranque); se miden con la calibración.
@@ -138,12 +139,12 @@ def a_marlin(j: Juntas) -> Tuple[float, float, float]:
 
 def gcode_mover(j: Juntas, avance: float = 1200.0) -> str:
     y, z, e = a_marlin(j)
-    return f"G1 Y{y:.2f} Z{z:.2f} E{e:.2f} F{avance:.0f}"
+    return f"G1 Y{y:.2f} Z{z:.2f} A{e:.2f} F{avance:.0f}"
 
 
 def gcode_secuencia(poses: Iterable[Pose], avance: float = 1200.0) -> List[str]:
     """Bloque de G-code que lleva la punta por las poses dadas y espera a terminar."""
-    lineas = ["G90", "M82", "M302 S0"]   # absolutas, E absoluto, permite mover E en frío
+    lineas = ["G90"]                      # coordenadas absolutas
     for p in poses:
         lineas.append(gcode_mover(inversa(p), avance))
     lineas.append("M400")

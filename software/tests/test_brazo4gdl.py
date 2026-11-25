@@ -44,5 +44,5 @@ def test_fuera_de_alcance():
 
 def test_gcode():
     lineas = b.gcode_secuencia([b.Pose(250, 0, 100, -90)])
-    assert lineas[:3] == ["G90", "M82", "M302 S0"] and lineas[-1] == "M400"
-    assert lineas[3].startswith("G1 Y0.00 Z") and " E" in lineas[3]
+    assert lineas[0] == "G90" and lineas[-1] == "M400"
+    assert lineas[1].startswith("G1 Y0.00 Z") and " A" in lineas[1]

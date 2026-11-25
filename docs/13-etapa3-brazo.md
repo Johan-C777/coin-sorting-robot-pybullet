@@ -27,7 +27,7 @@ SolidWorks; todas las piezas están impresas en 3D.
 | Tipo | Brazo articulado de doble paralelogramo (familia EEZYbotARM), alcance de la punta ≈ 40 cm |
 | Grados de libertad | J1 base · J2 hombro · J3 codo · J4 cabeceo de la muñeca · pinza |
 | Actuadores | 3 × NEMA 17 (1,8°, 5,3 kg·cm) con reductora planetaria impresa 16:1 · 2 × SG90 |
-| Controlador de motores | RAMBo con Marlin (4 drivers A4984 para la banda y J1-J3) |
+| Controlador de motores | RAMBo con Marlin 2.1.2.5 (4 drivers A4984 para la banda y J1-J3) |
 | Medidas (mm) | Eje del hombro a 197 de la base · L₁ = 155 · L₂ = 130 · muñeca a cabeceo 28 · garra 90 |
 | Resolución | 200 × 16 × 16 / 360 = **142,2 micropasos por grado** de salida |
 | Piezas | 25 STL del brazo, 7 de la garra, 9 de cada reductora; sin piezas compradas salvo motores, servos y tornillos M4 |
@@ -172,11 +172,11 @@ limita la carga por vaso o se añaden almohadillas de TPU para subir μ.
 
 ```mermaid
 flowchart LR
-    S3["ESP32-S3<br/>etapa 1 (maestra)"] -- "UART1 · G-code" --> R["RAMBo · Marlin"]
+    S3["ESP32-S3<br/>etapa 1 (maestra)"] -- "G-code" --> R["RAMBo · Marlin 2.1"]
     R -- X --> B["NEMA 17 banda"]
     R -- Y --> J1["NEMA 17 + 16:1<br/>J1 base"]
     R -- Z --> J2["NEMA 17 + 16:1<br/>J2 hombro"]
-    R -- E0 --> J3["NEMA 17 + 16:1<br/>J3 codo"]
+    R -- "A (driver E0)" --> J3["NEMA 17 + 16:1<br/>J3 codo"]
     E32["ESP32"] -. "PWM 50 Hz" .-> SV["SG90 cabeceo<br/>SG90 pinza"]
     F12["Fuente 12 V"] --> R
     F5["5 V"] --> SV
@@ -187,15 +187,17 @@ flowchart LR
 | X | Banda (etapa 2) | mm | 42,44 |
 | Y | J1 base | grados | 142,2 |
 | Z | J2 hombro | grados | 142,2 |
-| E0 | J3 codo | grados | 142,2 |
+| A (en el driver E0) | J3 codo | grados | 142,2 |
 
 - **Alimentación:** fuente de 12 V a la RAMBo; en la prueba del video la fuente marca 12,00 V y
   ≈ 1,4 A con el brazo moviéndose. Los SG90 van a 5 V aparte. Todas las tierras unidas.
-- **Enlace:** la ESP32-S3 envía G-code por UART1 (GPIO 41 TX → RX1 de la RAMBo; GPIO 42 RX ← TX1 con
+- **Enlace:** la ESP32-S3 emite el G-code. En el montaje actual las dos placas van por USB al PC
+  (S3 en COM8, RAMBo en COM9) y el [panel web](panel-control.html) hace de puente: reenvía a la RAMBo
+  cada línea que la S3 marca con `@` y le devuelve el `ok`. La conexión directa prevista es por UART1 (GPIO 41 TX → RX1 de la RAMBo; GPIO 42 RX ← TX1 con
   divisor 1 kΩ / 2 kΩ, porque la RAMBo trabaja a 5 V) y espera el `ok` de `M400` antes de seguir.
-- **Ajustes de Marlin:** `TEMP_SENSOR_0 0` y `PREVENT_COLD_EXTRUSION` desactivado (E0 mueve un
-  motor, no un extrusor), `M211 S0` para quitar los límites de software y la corriente de cada driver
-  por digipot.
+- **Configuración de Marlin:** `EXTRUDERS 0` y un cuarto eje lineal **A** en el driver E0 para J3 (así
+  Marlin no lo trata como extrusor), sin termistores, 115200 baudios, pasos por unidad X 42,44 y
+  Y/Z/A 142,2, corriente de cada driver por digipot.
 
 ---
 
@@ -210,9 +212,7 @@ Ejemplo: tomar un vaso a 250 mm del eje y 100 mm de altura con la garra hacia ab
 
 ```
 G90                 ; coordenadas absolutas
-M82                 ; E absoluto
-M302 S0             ; permite mover E0 "en frío"
-G1 Y0.00 Z-56.89 E-44.84 F1200   ; θ₂ = 33,1°, θ₃ = −44,8°
+G1 Y0.00 Z-56.89 A-44.84 F1200   ; θ₂ = 33,1°, θ₃ = −44,8°
 M400                ; espera a que termine; Marlin responde ok
 ```
 
@@ -275,7 +275,7 @@ ajustan con la calibración física. La figura se regenera con `python scripts/b
 2. La **etapa 2** mueve el cartucho por la barra dentada y deja el vaso pedido en el punto A.
 3. La ESP32-S3 manda a la RAMBo el G-code del brazo: bajar sobre el vaso, cerrar la pinza, subir,
    girar la base, bajar en el puesto del rack y abrir. La misma placa mueve la banda (eje X) y el
-   brazo (Y, Z, E0), así que los dos nunca se mueven a la vez sin que el programa lo pida.
+   brazo (Y, Z, A), así que los dos nunca se mueven a la vez sin que el programa lo pida.
 4. El orden del rack (por valor, cantidad, peso o monedas antiguas) lo decide el software de
    [`software/brazo/`](../software/brazo) con el lote `VASOS:` que entrega la etapa 1
    ([04-protocolo.md](04-protocolo.md)).

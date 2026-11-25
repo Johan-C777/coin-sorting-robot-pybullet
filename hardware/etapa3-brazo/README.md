@@ -3,7 +3,7 @@
 Brazo de doble paralelogramo (alcance ≈ 40 cm) diseñado en SolidWorks por Javier León y Samuel Rubio.
 Tres NEMA 17 con reductora planetaria impresa 16:1 mueven la base (J1), el hombro (J2) y el codo (J3);
 dos micro servos SG90 mueven el cabeceo de la muñeca (J4) y la pinza. Los tres NEMA los controla la
-RAMBo con Marlin (ejes Y, Z y E0, a 142,2 pasos por grado).
+RAMBo con Marlin 2.1 (ejes Y, Z y A, este último en el driver E0, a 142,2 pasos por grado).
 
 **Explicación completa** (mecánica, reductora, cálculos de par y de la pinza, electrónica, G-code,
 cinemática, pruebas y fallos): [`docs/13-etapa3-brazo.md`](../../docs/13-etapa3-brazo.md).

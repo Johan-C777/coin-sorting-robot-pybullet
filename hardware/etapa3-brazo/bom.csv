@@ -1,6 +1,6 @@
 cantidad,componente,detalle,uso,nota
 3,Motor NEMA 17 (1.8°; 5.3 kg·cm),con reductora planetaria impresa 16:1,J1 base / J2 hombro / J3 codo,eje de acero Ø25.6 x 39.3 mm con pasador Ø12
-1,RAMBo con Marlin,5 drivers A4984 con corriente por digipot,J1 (Y) / J2 (Z) / J3 (E0) y banda (X),compartida con la etapa 2
+1,RAMBo con Marlin,5 drivers A4984 con corriente por digipot,J1 (Y) / J2 (Z) / J3 (A en el driver E0) y banda (X),compartida con la etapa 2
 1,Fuente 12 V,alimentacion de la RAMBo,,consumo medido ≈ 1.4 A con el brazo en movimiento
 2,Micro servo SG90,palas blancas de 22 mm,J4 cabeceo y pinza,5 V aparte; PWM 50 Hz desde la ESP32
 1,Fuente 5 V (1 a 2 A),servos,,GND comun con la ESP32 y los drivers

@@ -533,9 +533,9 @@ Montaje físico vigente:
 flowchart LR
     C["ESP32-S3 etapa 1<br/>2 IR · tolva · color · compuerta"]
     R["RAMBo · Marlin"]
-    C -->|"UART1 · G-code"| R
+    C -->|"G-code"| R
     R -->|X| BA["NEMA 17 banda"]
-    R -->|"Y · Z · E0"| BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
+    R -->|"Y · Z · A"| BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
     E["ESP32"] -.->|PWM| SG["SG90 cabeceo y pinza"]
 ```
 
