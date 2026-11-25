@@ -19,7 +19,7 @@ Torre de 33 cm que recibe monedas colombianas revueltas de **las dos familias**
 **mide el diámetro de cada moneda por tiempo de vuelo** con dos barreras infrarrojas,
 separa las dos $500 por color y deja cada una en su vaso de un cartucho de 9. Es la
 primera de las tres etapas de una celda robótica: después una banda lleva los vasos al
-punto A y un brazo de 5 GDL los ordena en un rack esquivando cuatro obstáculos.
+punto A y un brazo de 4 GDL los ordena en un rack esquivando cuatro obstáculos.
 
 Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Militar Nueva Granada.
 
@@ -104,10 +104,29 @@ Los archivos de la banda están en [`hardware/etapa2-transporte/`](hardware/etap
 
 ## Etapa 3 · Brazo
 
-En diseño en SolidWorks; algunas piezas ya se están imprimiendo. La cinemática, el
-planificador entre obstáculos y el firmware ya están hechos y probados en simulación
-([memoria de cálculo](https://johan-c777.github.io/coin-sorting-robot-pybullet/memoria-calculo.html),
-[`software/brazo/`](software/brazo), [`firmware/esp32_brazo/`](firmware/esp32_brazo)).
+<p align="center">
+  <img src="docs/pruebas/etapa3/secuencia_brazo.jpg" alt="El brazo toma un vaso del cartucho y lo traslada" width="820">
+  <br><sub>Brazo de 4 GDL impreso y armado: baja sobre un vaso del cartucho, lo agarra, lo levanta, gira y
+  lo deja al otro lado. <a href="docs/pruebas/etapa3/video/brazo_toma_vaso.mp4">Video de la prueba</a>.</sub>
+</p>
+
+Brazo de **doble paralelogramo** diseñado en SolidWorks: tres NEMA 17 con reductora planetaria impresa
+**16:1** mueven la base, el hombro y el codo, y dos SG90 el cabeceo y la pinza. Los motores quedan
+quietos en la torreta y el paralelogramo mantiene la garra horizontal, así que el vaso no se inclina.
+Los NEMA los controla una **RAMBo con Marlin**, la misma placa de la banda, con un eje de Marlin por
+articulación a 142,2 pasos por grado.
+
+| | |
+|---|---|
+| Medidas | hombro a 197 mm · L₁ 155 · L₂ 130 · muñeca 28 · garra 90 mm; alcance ≈ 40 cm |
+| Par en el hombro | 5,0 N·m disponibles frente a 0,83 N·m pedidos con el brazo estirado (FS ≈ 6) |
+| Resolución | 0,007° por micropaso, 0,05 mm en la punta |
+| Pinza | Sostiene ≈ 0,18 kg (un vaso con ~15 monedas de $1.000) |
+| Cinemática | Directa e inversa cerradas en [`software/brazo/brazo4gdl.py`](software/brazo/brazo4gdl.py), que también genera el G-code |
+
+**Todo explicado paso a paso** (cómo funciona el paralelogramo y la reductora, cálculos, electrónica,
+G-code, cinemática, espacio de trabajo, pruebas y fallos): [**docs/13-etapa3-brazo.md**](docs/13-etapa3-brazo.md).
+Piezas, garra, reductora y BOM en [`hardware/etapa3-brazo/`](hardware/etapa3-brazo).
 
 ---
 
@@ -421,7 +440,7 @@ Las versiones anteriores están en [`hardware/archivo/`](hardware/archivo) y
 
 ## El resto del sistema: etapas 2 y 3
 
-La etapa 2 está montada y en ajustes, y la etapa 3 está en diseño mecánico; las dos ya están simuladas.
+La etapa 2 está montada y en ajustes, y el brazo de la etapa 3 está impreso, armado y moviendo vasos.
 
 ```mermaid
 flowchart LR
@@ -436,7 +455,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
 | **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | v7 (motor fijo y barra dentada) impresa y montada, en ajustes ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
-| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Simulado y con firmware probado en el PC; diseño en SolidWorks y piezas en impresión | [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Brazo de 4 GDL impreso, armado y movido por la RAMBo; toma y traslada un vaso. Ruta entre obstáculos probada en simulación | [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
 
@@ -465,7 +484,12 @@ recorrido y 400 poses aleatorias: la diferencia máxima es de 10⁻¹⁴ cm.
 
 ---
 
-## El brazo
+## El brazo simulado (planificador de obstáculos)
+
+El brazo construido es el de 4 GDL de la [sección Etapa 3](#etapa-3--brazo). La ruta entre
+obstáculos, la app y la memoria de cálculo se desarrollaron antes, con este modelo de 5 GDL y servos;
+sirven como base del planificador y se pasan al brazo real cambiando la cinemática por la de
+[`brazo4gdl.py`](software/brazo/brazo4gdl.py).
 
 Cadena antropomórfica de 5 GDL más pinza, con los tres ejes centrales
 paralelos, así que la inversa es cerrada y el ESP32 la resuelve sin iterar.
@@ -502,6 +526,20 @@ Desarrollo completo en [02-cinematica.md](docs/02-cinematica.md), la
 ---
 
 ## Arquitectura y comunicación
+
+Montaje físico vigente:
+
+```mermaid
+flowchart LR
+    C["ESP32-S3 etapa 1<br/>2 IR · tolva · color · compuerta"]
+    R["RAMBo · Marlin"]
+    C -->|"UART1 · G-code"| R
+    R -->|X| BA["NEMA 17 banda"]
+    R -->|"Y · Z · E0"| BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
+    E["ESP32"] -.->|PWM| SG["SG90 cabeceo y pinza"]
+```
+
+Arquitectura del modelo simulado (app, protocolo y planificador):
 
 ```mermaid
 flowchart LR
@@ -585,10 +623,12 @@ pip install -r requirements.txt
 python software/apps/cli_demo.py --criterio peso --sentido asc   # lote, ruta A→B y orden
 python sim/pybullet/run_sim_integrada.py                         # las etapas con física
 streamlit run software/apps/streamlit_app.py                     # dashboard y asistente
+cd software && python -m brazo.brazo4gdl                          # brazo real: alcance y pasos/°
 ```
 
-Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). Para el
-brazo: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
+Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). El brazo real se
+mueve con G-code a la RAMBo ([13-etapa3-brazo.md § 5](docs/13-etapa3-brazo.md#5-control-g-code-a-la-rambo)).
+Para el brazo simulado: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
 (librería Adafruit PWM Servo Driver) y probar por monitor serie antes de conectar la
 potencia de 6 V:
 

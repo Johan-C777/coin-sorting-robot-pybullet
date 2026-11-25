@@ -4,7 +4,7 @@
 |---|---|---|
 | [`etapa1-clasificador/`](etapa1-clasificador) | Torre de canto v5: 24 STL (`stl/`), 8 camas `.3mf` (`impresion/`), [`despiece.csv`](etapa1-clasificador/despiece.csv), [`compras.md`](etapa1-clasificador/compras.md) y guía de armado en su [README](etapa1-clasificador/README.md) | Todas las piezas impresas; en montaje |
 | [`etapa2-transporte/`](etapa2-transporte) | Banda transportadora que mueve el cartucho de 9 vasos | En diseño |
-| [`etapa3-brazo/`](etapa3-brazo) | Brazo de 4 GDL con garra: 25 STL, garra SG90, reductora planetaria 16:1, firmware de calibración y [`bom.csv`](etapa3-brazo/bom.csv) | Diseñado; en impresión y calibración |
+| [`etapa3-brazo/`](etapa3-brazo) | Brazo de 4 GDL con garra: 25 STL, garra SG90, reductora planetaria 16:1, firmware de calibración y [`bom.csv`](etapa3-brazo/bom.csv) | Impreso, armado y en pruebas con la RAMBo |
 | [`archivo/`](archivo) | Brazo de 5 servos ([`etapa3-brazo-v1/`](archivo/etapa3-brazo-v1)) y versiones reemplazadas de la etapa 1: [`etapa1-v1/`](archivo/etapa1-v1) (riel con varillas M5 y 3MF), [`etapa1-v3-canto/`](archivo/etapa1-v3-canto) (probetas del riel de canto) y [`etapa1-v4/`](archivo/etapa1-v4) (riel de 8 ranuras con ductos y base de PVC, su BOM). Por qué se reemplazó cada una: [`archivo/README.md`](archivo/README.md) | Solo referencia |
 
 [`materiales.md`](materiales.md) justifica la elección de materiales.

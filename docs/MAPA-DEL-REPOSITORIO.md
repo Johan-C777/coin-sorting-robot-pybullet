@@ -10,6 +10,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | El estado del módulo de monedas | [README](../README.md#estado-estratégico) y [TODO.md](../TODO.md) |
 | El estado de la banda (etapa 2) | [README, sección Etapa 2](../README.md#etapa-2--banda-transportadora) |
 | Las pruebas físicas (videos, fotos, fallos) | [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md) |
+| El brazo (etapa 3): mecánica, cálculos, electrónica, G-code, cinemática y su video | [13-etapa3-brazo.md](13-etapa3-brazo.md) |
 | El diseño de la torre clasificadora | [09-clasificador-v5.md](09-clasificador-v5.md) y el [visor 3D](https://johan-c777.github.io/coin-sorting-robot-pybullet/clasificador-v5.html) |
 | Las etapas 1 y 2 juntas con la electrónica | [Visor 3D de las etapas 1 y 2](https://johan-c777.github.io/coin-sorting-robot-pybullet/visor-etapas-1-2.html) |
 | Las piezas para imprimir | [`hardware/etapa1-clasificador/stl/`](../hardware/etapa1-clasificador/stl) y las camas en [`impresion/`](../hardware/etapa1-clasificador/impresion) |
@@ -53,6 +54,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `09-clasificador-v5.md` | **Diseño de la torre clasificadora v5 (vigente)** |
 | `11-electronica-etapa1.md` | Pines, alimentación y sensores del ESP32-S3 |
 | `12-pruebas-fisicas-etapa1.md` | **Pruebas con la torre armada: videos, fotos y hallazgos** |
+| `13-etapa3-brazo.md` | **Brazo de 4 GDL: mecánica, reductora, cálculos, electrónica, G-code, cinemática, pruebas** |
 | `index.html` | Portada del sitio de demos |
 | `clasificador-v5.html` | Visor 3D de la torre v5 |
 | `visor-etapas-1-2.html` | Visor 3D de las etapas 1 y 2 con la electrónica, el cableado y los colores de filamento (generador en `scripts/visor_etapas/`) |
@@ -83,7 +85,7 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
 | `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
 | `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada, en ajustes |
-| `etapa3-brazo/` | Brazo 4 GDL, garra, reductora, firmware de calibración y BOM | En impresión y calibración |
+| `etapa3-brazo/` | Brazo 4 GDL, garra, reductora, firmware de calibración y BOM | Impreso, armado y en pruebas |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |
 

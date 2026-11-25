@@ -1,10 +1,8 @@
 cantidad,componente,detalle,uso,nota
-3,Motor NEMA 17,con reductora planetaria impresa 16:1,J1 base / J2 hombro / J3 codo,eje de acero Ø25.6 x 39.3 mm con pasador Ø12
-2,Driver TB6560,alimentado a 24 V,J1 y J2,1.9 A; microstepping 1/2
-1,Driver TB6600,alimentado a 24 V,J3,1.9 A; microstepping 1/2
-2,Micro servo SG90 o MG90S,palas blancas de 22 mm,J4 cabeceo y pinza,fuente externa de 5 V
-1,ESP32 DevKit (clasico 30 o 38 pines),controlador del brazo,STEP/DIR y PWM de servos,no es la ESP32-S3 de las etapas 1 y 2
-1,Fuente 24 V (3 a 5 A),potencia de los 3 drivers,,cable 18-22 AWG
+3,Motor NEMA 17 (1.8°; 5.3 kg·cm),con reductora planetaria impresa 16:1,J1 base / J2 hombro / J3 codo,eje de acero Ø25.6 x 39.3 mm con pasador Ø12
+1,RAMBo con Marlin,5 drivers A4984 con corriente por digipot,J1 (Y) / J2 (Z) / J3 (E0) y banda (X),compartida con la etapa 2
+1,Fuente 12 V,alimentacion de la RAMBo,,consumo medido ≈ 1.4 A con el brazo en movimiento
+2,Micro servo SG90,palas blancas de 22 mm,J4 cabeceo y pinza,5 V aparte; PWM 50 Hz desde la ESP32
 1,Fuente 5 V (1 a 2 A),servos,,GND comun con la ESP32 y los drivers
 8,Pasador impreso Ø8 articulacion,Pin_8mm_Articulacion,paralelogramos,100 % relleno
 1,Pasador impreso Ø8 codo largo,Pin_8mm_Codo_Largo,codo E1,
