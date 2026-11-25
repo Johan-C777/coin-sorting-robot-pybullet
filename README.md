@@ -113,19 +113,19 @@ Los archivos de la banda están en [`hardware/etapa2-transporte/`](hardware/etap
 Brazo de **doble paralelogramo** diseñado en SolidWorks: tres NEMA 17 con reductora planetaria impresa
 **16:1** mueven la base, el hombro y el codo, y dos SG90 el cabeceo y la pinza. Los motores quedan
 quietos en la torreta y el paralelogramo mantiene la garra horizontal, así que el vaso no se inclina.
-Los NEMA los controla una **RAMBo con Marlin**, la misma placa de la banda, con un eje de Marlin por
-articulación a 142,2 pasos por grado.
+El brazo tiene **su propia ESP32** con dos drivers TB6560 y un TB6600 a 24 V, una interfaz web de
+calibración por USB y los ceros guardados en la placa.
 
 | | |
 |---|---|
 | Medidas | hombro a 197 mm · L₁ 155 · L₂ 130 · muñeca 28 · garra 90 mm; alcance ≈ 40 cm |
 | Par en el hombro | 5,0 N·m disponibles frente a 0,83 N·m pedidos con el brazo estirado (FS ≈ 6) |
-| Resolución | 0,007° por micropaso, 0,05 mm en la punta |
+| Resolución | 17,8 pasos por grado: 0,056° por paso, 0,39 mm en la punta |
 | Pinza | Sostiene ≈ 0,18 kg (un vaso con ~15 monedas de $1.000) |
-| Cinemática | Directa e inversa cerradas en [`software/brazo/brazo4gdl.py`](software/brazo/brazo4gdl.py), que también genera el G-code |
+| Cinemática | Directa e inversa cerradas en [`software/brazo/brazo4gdl.py`](software/brazo/brazo4gdl.py), que también genera los comandos para la ESP32 |
 
 **Todo explicado paso a paso** (cómo funciona el paralelogramo y la reductora, cálculos, electrónica,
-G-code, cinemática, espacio de trabajo, pruebas y fallos): [**docs/13-etapa3-brazo.md**](docs/13-etapa3-brazo.md).
+control, cinemática, espacio de trabajo, pruebas y fallos): [**docs/13-etapa3-brazo.md**](docs/13-etapa3-brazo.md).
 Piezas, garra, reductora y BOM en [`hardware/etapa3-brazo/`](hardware/etapa3-brazo).
 
 ---
@@ -455,7 +455,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
 | **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | v7 (motor fijo y barra dentada) impresa y montada, en ajustes ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
-| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Brazo de 4 GDL impreso, armado y movido por la RAMBo; toma y traslada un vaso. Ruta entre obstáculos probada en simulación | [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
+| **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Brazo de 4 GDL impreso, armado y con su propia ESP32; toma y traslada un vaso. Ruta entre obstáculos probada en simulación | [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
 
@@ -527,16 +527,16 @@ Desarrollo completo en [02-cinematica.md](docs/02-cinematica.md), la
 
 ## Arquitectura y comunicación
 
-Montaje físico vigente:
+Montaje físico: cada etapa con su controlador.
 
 ```mermaid
 flowchart LR
-    C["ESP32-S3 etapa 1<br/>2 IR · tolva · color · compuerta"]
-    R["RAMBo · Marlin"]
+    C["ESP32-S3 · etapa 1<br/>2 IR · tolva · color · compuerta"]
+    R["RAMBo · Marlin · etapa 2"]
     C -->|"G-code"| R
-    R -->|X| BA["NEMA 17 banda"]
-    R -->|"Y · Z · A"| BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
-    E["ESP32"] -.->|PWM| SG["SG90 cabeceo y pinza"]
+    R --> BA["NEMA 17 banda"]
+    E["ESP32 · etapa 3"] -->|"STEP/DIR"| DR["2 TB6560 + TB6600"] --> BR["NEMA 17 + 16:1<br/>J1 · J2 · J3"]
+    E -->|PWM| SG["SG90 cabeceo y pinza"]
 ```
 
 Arquitectura del modelo simulado (app, protocolo y planificador):
@@ -627,7 +627,7 @@ cd software && python -m brazo.brazo4gdl                          # brazo real: 
 ```
 
 Para el clasificador basta PlatformIO (ver [Firmware](#firmware-platformio)). El brazo real se
-mueve con G-code a la RAMBo ([13-etapa3-brazo.md § 5](docs/13-etapa3-brazo.md#5-control-g-code-a-la-rambo)).
+mueve con su firmware de ESP32 y la interfaz de calibración ([13-etapa3-brazo.md § 5](docs/13-etapa3-brazo.md#5-control)).
 Para el brazo simulado: copiar `secrets_example.h` como `secrets.h`, subirlo con el IDE de Arduino
 (librería Adafruit PWM Servo Driver) y probar por monitor serie antes de conectar la
 potencia de 6 V:

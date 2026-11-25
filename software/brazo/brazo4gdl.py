@@ -32,9 +32,9 @@ R_PALANCA = 50.0      # palanca 002 y extensión trasera de 005
 
 # ---- transmisión -------------------------------------------------------------
 PASOS_MOTOR = 200            # NEMA 17 de 1,8°
-MICROPASOS = 16              # A4984 de la RAMBo
+MICROPASOS = 2               # TB6560 / TB6600 en 1/2 paso
 REDUCCION = 16.0             # planetaria de dos etapas 4:1 x 4:1 (corona 30, planetas 10, sol 10)
-PASOS_POR_GRADO = PASOS_MOTOR * MICROPASOS * REDUCCION / 360.0   # 142,22
+PASOS_POR_GRADO = PASOS_MOTOR * MICROPASOS * REDUCCION / 360.0   # 17,78
 
 # ---- límites (estimados del CAD; se fijan con la calibración física) ---------
 LIM_J1 = (-135.0, 135.0)
@@ -122,32 +122,30 @@ def alcanzable(p: Pose) -> bool:
         return False
 
 
-# ---- G-code para la RAMBo (Marlin) --------------------------------------------
-# Ejes de Marlin 2.1 (EXTRUDERS 0): X = banda (mm), Y = J1, Z = J2 y A = J3 (en el
-# driver E0). Con los pasos por
-# unidad en pasos/grado, una coordenada de Marlin es directamente un ángulo.
-# CERO_* es el ángulo real del eslabón cuando Marlin marca 0 (G92 en la pose
-# de arranque); se miden con la calibración.
+# ---- comandos para la ESP32 del brazo -----------------------------------------
+# Firmware hardware/etapa3-brazo/firmware/ESP32_Calibracion_Robot4GDL: "GOTO <eje> <pasos>"
+# lleva el eje 0 (J1), 1 (J2) o 2 (J3) a una posición absoluta en pasos desde su cero.
+# CERO_* es el ángulo real del eslabón cuando el eje está en su cero (fijado con
+# "ZERO" desde la interfaz de calibración).
 CERO_J1 = 0.0
-CERO_J2 = 90.0        # brazo principal vertical al encender
-CERO_J3 = 0.0         # antebrazo horizontal al encender
+CERO_J2 = 90.0        # brazo principal vertical en el cero
+CERO_J3 = 0.0         # antebrazo horizontal en el cero
 
 
-def a_marlin(j: Juntas) -> Tuple[float, float, float]:
-    return j.j1 - CERO_J1, j.j2 - CERO_J2, j.j3 - CERO_J3
+def a_pasos(j: Juntas) -> Tuple[int, int, int]:
+    return tuple(round((a - c) * PASOS_POR_GRADO)
+                 for a, c in ((j.j1, CERO_J1), (j.j2, CERO_J2), (j.j3, CERO_J3)))
 
 
-def gcode_mover(j: Juntas, avance: float = 1200.0) -> str:
-    y, z, e = a_marlin(j)
-    return f"G1 Y{y:.2f} Z{z:.2f} A{e:.2f} F{avance:.0f}"
+def comandos_mover(j: Juntas) -> List[str]:
+    return [f"GOTO {eje} {n}" for eje, n in enumerate(a_pasos(j))]
 
 
-def gcode_secuencia(poses: Iterable[Pose], avance: float = 1200.0) -> List[str]:
-    """Bloque de G-code que lleva la punta por las poses dadas y espera a terminar."""
-    lineas = ["G90"]                      # coordenadas absolutas
+def comandos_secuencia(poses: Iterable[Pose]) -> List[str]:
+    """Comandos serie (115200 baudios) que llevan la punta por las poses dadas."""
+    lineas = ["ENABLE 1"]
     for p in poses:
-        lineas.append(gcode_mover(inversa(p), avance))
-    lineas.append("M400")
+        lineas.extend(comandos_mover(inversa(p)))
     return lineas
 
 

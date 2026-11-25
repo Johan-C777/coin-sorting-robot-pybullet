@@ -2,11 +2,11 @@
 
 Brazo de doble paralelogramo (alcance ≈ 40 cm) diseñado en SolidWorks por Javier León y Samuel Rubio.
 Tres NEMA 17 con reductora planetaria impresa 16:1 mueven la base (J1), el hombro (J2) y el codo (J3);
-dos micro servos SG90 mueven el cabeceo de la muñeca (J4) y la pinza. Los tres NEMA los controla la
-RAMBo con Marlin 2.1 (ejes Y, Z y A, este último en el driver E0, a 142,2 pasos por grado).
+dos micro servos SG90 mueven el cabeceo de la muñeca (J4) y la pinza. El brazo tiene su propia ESP32
+con dos drivers TB6560 y un TB6600 a 24 V (17,8 pasos por grado con 1/2 paso).
 
-**Explicación completa** (mecánica, reductora, cálculos de par y de la pinza, electrónica, G-code,
-cinemática, pruebas y fallos): [`docs/13-etapa3-brazo.md`](../../docs/13-etapa3-brazo.md).
+**Explicación completa** (mecánica, reductora, cálculos de par y de la pinza, electrónica, control,
+cinemática y pruebas): [`docs/13-etapa3-brazo.md`](../../docs/13-etapa3-brazo.md).
 
 <p align="center"><img src="../../docs/pruebas/etapa3/secuencia_brazo.jpg" alt="Prueba del brazo" width="700"></p>
 
@@ -15,7 +15,7 @@ cinemática, pruebas y fallos): [`docs/13-etapa3-brazo.md`](../../docs/13-etapa3
 | [`brazo/`](brazo) | 25 STL (`stl/`), ensamble y actuadores en STEP (`step/`), [`GUIA_IMPRESION.md`](brazo/GUIA_IMPRESION.md), [`INFORME_CAD.md`](brazo/INFORME_CAD.md), scripts generadores |
 | [`garra/`](garra) | Muñeca y pinza para SG90 (7 STL, SolidWorks nativo + STEP), [`GUIA_ENSAMBLE.md`](garra/GUIA_ENSAMBLE.md) |
 | [`reductora/`](reductora) | Caja planetaria 16:1 de dos etapas (STL, STEP, generador paramétrico) |
-| [`firmware/`](firmware) | Primera versión del control: ESP32 con TB6560/TB6600, interfaz web de calibración y prueba de motores ([`GUIA_CONEXIONES_Y_CALIBRACION.md`](firmware/ESP32_Calibracion_Robot4GDL/GUIA_CONEXIONES_Y_CALIBRACION.md)) |
+| [`firmware/`](firmware) | Firmware de la ESP32 del brazo: interfaz web de calibración y prueba de motores ([`GUIA_CONEXIONES_Y_CALIBRACION.md`](firmware/ESP32_Calibracion_Robot4GDL/GUIA_CONEXIONES_Y_CALIBRACION.md)) |
 | [`bom.csv`](bom.csv) | Lista de materiales del brazo |
 | [`ENTREGA_ORIGINAL.md`](ENTREGA_ORIGINAL.md) | Índice del paquete CAD y firmware tal como se entregó |
 

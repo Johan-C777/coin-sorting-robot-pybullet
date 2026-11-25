@@ -3,8 +3,8 @@
 ## Etapa 3 · Brazo de 4 GDL armado
 
 - `hardware/etapa3-brazo/`: brazo de doble paralelogramo (25 STL y STEP), garra SG90 con SolidWorks nativo, reductora planetaria 16:1, firmware de calibración de la primera versión, BOM y orden de armado. El brazo de 5 servos pasa a `hardware/archivo/etapa3-brazo-v1/`.
-- `docs/13-etapa3-brazo.md`: paralelogramo y reductora explicados, par en el hombro (FS ≈ 6), agarre de la pinza, resolución, electrónica con la RAMBo (ejes Y, Z y A a 142,2 pasos/°), G-code, cinemática directa e inversa, espacio de trabajo, pruebas y fallos.
-- `software/brazo/brazo4gdl.py`: cinemática del brazo real y generador de G-code; 6 pruebas nuevas. `scripts/brazo4gdl_espacio.py` dibuja `docs/img/espacio-trabajo-4gdl.svg`.
+- `docs/13-etapa3-brazo.md`: paralelogramo y reductora explicados, par en el hombro (FS ≈ 6), agarre de la pinza, resolución, electrónica (ESP32 propia con TB6560/TB6600, 17,8 pasos/°), comandos de control, cinemática directa e inversa, espacio de trabajo, pruebas y fallos.
+- `software/brazo/brazo4gdl.py`: cinemática del brazo real y comandos para su ESP32; 6 pruebas nuevas. `scripts/brazo4gdl_espacio.py` dibuja `docs/img/espacio-trabajo-4gdl.svg`.
 - Video y secuencia de fotos de la prueba en `docs/pruebas/etapa3/`; README y portada de Pages con la etapa 3.
 
 ## 0.11.1 · Firmware con la banda v7

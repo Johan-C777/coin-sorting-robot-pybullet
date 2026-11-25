@@ -8,7 +8,7 @@ from brazo import brazo4gdl as b
 
 
 def test_pasos_por_grado():
-    assert b.PASOS_POR_GRADO == pytest.approx(142.222, abs=1e-3)
+    assert b.PASOS_POR_GRADO == pytest.approx(17.778, abs=1e-3)
 
 
 def test_pose_cero_es_la_del_cad():
@@ -42,7 +42,7 @@ def test_fuera_de_alcance():
         b.inversa(b.Pose(600, 0, 100, 0))
 
 
-def test_gcode():
-    lineas = b.gcode_secuencia([b.Pose(250, 0, 100, -90)])
-    assert lineas[0] == "G90" and lineas[-1] == "M400"
-    assert lineas[1].startswith("G1 Y0.00 Z") and " A" in lineas[1]
+def test_comandos_esp32():
+    lineas = b.comandos_secuencia([b.Pose(250, 0, 100, -90)])
+    assert lineas[0] == "ENABLE 1" and len(lineas) == 4
+    assert lineas[1] == "GOTO 0 0" and lineas[2].startswith("GOTO 1 -") and lineas[3].startswith("GOTO 2 -")

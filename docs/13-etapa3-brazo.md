@@ -14,8 +14,8 @@ SolidWorks; todas las piezas están impresas en 3D.
 
 **Contenido:** [1. Resumen](#1-resumen) · [2. Mecánica](#2-mecánica) ·
 [3. Cálculos](#3-cálculos-de-diseño) · [4. Electrónica](#4-electrónica) ·
-[5. Control](#5-control-g-code-a-la-rambo) · [6. Cinemática](#6-cinemática) ·
-[7. Integración](#7-integración-con-las-etapas-1-y-2) · [8. Pruebas y fallos](#8-pruebas-fallos-y-correcciones) ·
+[5. Control](#5-control) · [6. Cinemática](#6-cinemática) ·
+[7. Integración](#7-integración-con-las-etapas-1-y-2) · [8. Pruebas](#8-pruebas-y-decisiones-de-diseño) ·
 [9. Archivos](#9-archivos)
 
 ---
@@ -27,9 +27,9 @@ SolidWorks; todas las piezas están impresas en 3D.
 | Tipo | Brazo articulado de doble paralelogramo (familia EEZYbotARM), alcance de la punta ≈ 40 cm |
 | Grados de libertad | J1 base · J2 hombro · J3 codo · J4 cabeceo de la muñeca · pinza |
 | Actuadores | 3 × NEMA 17 (1,8°, 5,3 kg·cm) con reductora planetaria impresa 16:1 · 2 × SG90 |
-| Controlador de motores | RAMBo con Marlin 2.1.2.5 (4 drivers A4984 para la banda y J1-J3) |
+| Controlador | ESP32 propia del brazo con 2 drivers TB6560 y 1 TB6600 (24 V) para los NEMA y PWM para los SG90 |
 | Medidas (mm) | Eje del hombro a 197 de la base · L₁ = 155 · L₂ = 130 · muñeca a cabeceo 28 · garra 90 |
-| Resolución | 200 × 16 × 16 / 360 = **142,2 micropasos por grado** de salida |
+| Resolución | 200 × 2 × 16 / 360 = **17,8 pasos por grado** de salida (drivers en 1/2 paso) |
 | Piezas | 25 STL del brazo, 7 de la garra, 9 de cada reductora; sin piezas compradas salvo motores, servos y tornillos M4 |
 | Estado | Impreso, armado y moviéndose: toma un vaso del cartucho y lo traslada (video arriba) |
 
@@ -153,72 +153,84 @@ limita la carga por vaso o se añaden almohadillas de TPU para subir μ.
 
 ### 3.4 Resolución y precisión
 
-- 1 micropaso = 1 / 142,2 = 0,007° en la articulación, es decir **0,05 mm en la punta** a 400 mm.
-- Lo que limita la precisión no es eso, sino el juego de los engranajes impresos y del pasador del
-  eje. Por eso cada posición se alcanza siempre desde el mismo sentido.
+- 1 paso = 1 / 17,8 = 0,056° en la articulación, es decir **0,39 mm en la punta** a 400 mm: sobra
+  para tomar un vaso de 34 mm. Con 1/8 de paso bajaría a 0,1 mm.
+- El juego de los engranajes impresos y del pasador del eje se compensa llegando a cada posición
+  siempre desde el mismo sentido.
 
 ---
 
 ## 4. Electrónica
 
-### 4.1 Cómo cambió
-
-| Versión | Motores | Por qué se cambió |
-|---|---|---|
-| 1 | ESP32 con 2 TB6560 + 1 TB6600 a 24 V (firmware de calibración en [`firmware/`](../hardware/etapa3-brazo/firmware)) | Algunos drivers se trababan, y la banda no se movía con su A4988 |
-| **2 (vigente)** | **RAMBo con Marlin**: 5 drivers A4984 con corriente ajustada por software (digipot) | Una sola placa mueve los 4 NEMA de las etapas 2 y 3 |
-
-### 4.2 Conexiones vigentes
+El brazo tiene **su propio controlador**, independiente de las etapas 1 y 2 (la etapa 1 usa una
+ESP32-S3 y la banda una RAMBo con Marlin). Así cada módulo se prueba y se ajusta por separado.
 
 ```mermaid
 flowchart LR
-    S3["ESP32-S3<br/>etapa 1 (maestra)"] -- "G-code" --> R["RAMBo · Marlin 2.1"]
-    R -- X --> B["NEMA 17 banda"]
-    R -- Y --> J1["NEMA 17 + 16:1<br/>J1 base"]
-    R -- Z --> J2["NEMA 17 + 16:1<br/>J2 hombro"]
-    R -- "A (driver E0)" --> J3["NEMA 17 + 16:1<br/>J3 codo"]
-    E32["ESP32"] -. "PWM 50 Hz" .-> SV["SG90 cabeceo<br/>SG90 pinza"]
-    F12["Fuente 12 V"] --> R
-    F5["5 V"] --> SV
+    PC["PC<br/>interfaz web por USB"] -- "Serie 115200" --> E["ESP32 DevKit<br/>del brazo"]
+    E -- "STEP/DIR" --> D1["TB6560"] --> J1["NEMA 17 + 16:1<br/>J1 base"]
+    E -- "STEP/DIR" --> D2["TB6560"] --> J2["NEMA 17 + 16:1<br/>J2 hombro"]
+    E -- "STEP/DIR" --> D3["TB6600"] --> J3["NEMA 17 + 16:1<br/>J3 codo"]
+    E -- "PWM 50 Hz" --> SV["SG90 cabeceo<br/>SG90 pinza"]
+    F24["Fuente 24 V"] --> D1 & D2 & D3
+    F5["Fuente 5 V"] --> SV
 ```
 
-| Eje de Marlin | Motor | Unidad | Pasos por unidad |
-|---|---|---|---|
-| X | Banda (etapa 2) | mm | 42,44 |
-| Y | J1 base | grados | 142,2 |
-| Z | J2 hombro | grados | 142,2 |
-| A (en el driver E0) | J3 codo | grados | 142,2 |
+| Señal | GPIO | Va a |
+|---|---|---|
+| J1 STEP / DIR | 26 / 25 | CLK+ / CW+ del driver de la base |
+| J2 STEP / DIR | 33 / 32 | CLK+ / CW+ del driver del hombro |
+| J3 STEP / DIR | 27 / 14 | CLK+ / CW+ del driver del codo |
+| Enable común | 13 | EN+ de los tres drivers (activo en bajo) |
+| Servo de cabeceo | 18 | Señal del SG90 de la muñeca |
+| Servo de la pinza | 19 | Señal del SG90 de la pinza |
 
-- **Alimentación:** fuente de 12 V a la RAMBo; en la prueba del video la fuente marca 12,00 V y
-  ≈ 1,4 A con el brazo moviéndose. Los SG90 van a 5 V aparte. Todas las tierras unidas.
-- **Enlace:** la ESP32-S3 emite el G-code. En el montaje actual las dos placas van por USB al PC
-  (S3 en COM8, RAMBo en COM9) y el [panel web](panel-control.html) hace de puente: reenvía a la RAMBo
-  cada línea que la S3 marca con `@` y le devuelve el `ok`. La conexión directa prevista es por UART1 (GPIO 41 TX → RX1 de la RAMBo; GPIO 42 RX ← TX1 con
-  divisor 1 kΩ / 2 kΩ, porque la RAMBo trabaja a 5 V) y espera el `ok` de `M400` antes de seguir.
-- **Configuración de Marlin:** `EXTRUDERS 0` y un cuarto eje lineal **A** en el driver E0 para J3 (así
-  Marlin no lo trata como extrusor), sin termistores, 115200 baudios, pasos por unidad X 42,44 y
-  Y/Z/A 142,2, corriente de cada driver por digipot.
+Se evitaron los pines de arranque (0, 2, 5, 12, 15), los de solo entrada (34-39) y los de la flash
+(6-11). `CLK−` y `CW−` de cada driver van a GND de la ESP32.
+
+**Ajuste de los drivers a 24 V** (con la fuente apagada antes de mover un interruptor):
+
+| Driver | Corriente 1,9 A | Micropasos 1/2 | Otros |
+|---|---|---|---|
+| TB6560 (× 2) | SW1 ON, SW2 ON, SW3 OFF, S1 ON | S3 ON, S4 OFF | S2 OFF (par de reposo 50 %); decay 50 %: S5 OFF, S6 ON |
+| TB6600 | S4 ON, S5 ON, S6 OFF | S1 OFF, S2 ON, S3 ON | — |
+
+**Alimentación:** 24 V a los drivers con cable de 18-22 AWG; 5 V aparte para los SG90 (no desde el
+3V3 de la ESP32); todas las tierras unidas. Detalle en la
+[guía de conexiones](../hardware/etapa3-brazo/firmware/ESP32_Calibracion_Robot4GDL/GUIA_CONEXIONES_Y_CALIBRACION.md).
 
 ---
 
-## 5. Control: G-code a la RAMBo
+## 5. Control
 
-Como los pasos por unidad están en **pasos por grado**, una coordenada de Marlin es un ángulo:
-`G1 Y30` gira la base 30°. Al encender, Marlin toma la pose actual como cero (`G92`), igual que la
-banda; por eso el brazo se arranca siempre en la misma pose (brazo vertical, antebrazo horizontal).
+El firmware ([`ESP32_Calibracion_Robot4GDL.ino`](../hardware/etapa3-brazo/firmware/ESP32_Calibracion_Robot4GDL))
+no usa librerías externas. Cada eje tiene una rampa trapezoidal que se actualiza cada 1 ms, con pulsos
+de 20 µs (los TB6560/TB6600 piden al menos 5 µs) y 800 pasos/s y 2.500 pasos/s² por defecto. Los
+comandos llegan por USB a 115200 baudios y la placa responde su estado en JSON cada 100 ms mientras
+se mueve.
 
-Ejemplo: tomar un vaso a 250 mm del eje y 100 mm de altura con la garra hacia abajo, generado por
-[`software/brazo/brazo4gdl.py`](../software/brazo/brazo4gdl.py):
+| Comando | Qué hace |
+|---|---|
+| `ENABLE 1` / `ENABLE 0` | Activa o suelta los tres motores |
+| `GOTO <eje> <pasos>` | Lleva el eje 0 (J1), 1 (J2) o 2 (J3) a una posición absoluta |
+| `MOVE <eje> <pasos>` | Movimiento relativo |
+| `ZERO <eje>` | Fija el cero en la posición actual |
+| `LIMIT <eje> MIN` / `MAX` | Guarda los topes seguros de cada eje |
+| `SPEED <pasos/s>` · `STOP` · `STATUS` | Velocidad, parada y estado |
 
-```
-G90                 ; coordenadas absolutas
-G1 Y0.00 Z-56.89 A-44.84 F1200   ; θ₂ = 33,1°, θ₃ = −44,8°
-M400                ; espera a que termine; Marlin responde ok
-```
+**Calibración.** Con la interfaz web (`servidor_serial.py` + `interfaz_calibracion.html`) se lleva
+cada eje a su pose de cero (base al frente, brazo vertical, antebrazo horizontal), se fija con `ZERO`,
+se marcan los topes de cada lado y todo queda guardado en la memoria de la ESP32 y en
+`robot_4gdl_calibracion.json`.
+
+**De la pose a los pasos.** [`software/brazo/brazo4gdl.py`](../software/brazo/brazo4gdl.py) resuelve la
+cinemática inversa y convierte cada ángulo en pasos desde el cero. Ejemplo: tomar un vaso a 250 mm del
+eje y 100 mm de altura con la garra hacia abajo:
 
 ```python
 from brazo import brazo4gdl as b
-b.gcode_secuencia([b.Pose(250, 0, 100, -90)])
+b.comandos_secuencia([b.Pose(250, 0, 100, -90)])
+# ['ENABLE 1', 'GOTO 0 0', 'GOTO 1 -1011', 'GOTO 2 -797']   θ₂ = 33,1°, θ₃ = −44,8°
 ```
 
 ---
@@ -273,9 +285,9 @@ ajustan con la calibración física. La figura se regenera con `python scripts/b
 
 1. La **etapa 1** clasifica cada moneda en su vaso del cartucho.
 2. La **etapa 2** mueve el cartucho por la barra dentada y deja el vaso pedido en el punto A.
-3. La ESP32-S3 manda a la RAMBo el G-code del brazo: bajar sobre el vaso, cerrar la pinza, subir,
-   girar la base, bajar en el puesto del rack y abrir. La misma placa mueve la banda (eje X) y el
-   brazo (Y, Z, A), así que los dos nunca se mueven a la vez sin que el programa lo pida.
+3. El brazo, con su propia ESP32, baja sobre el vaso, cierra la pinza, sube, gira la base, baja en
+   el puesto del rack y abre. Cada módulo tiene su controlador; la secuencia completa se coordina
+   enviando a la ESP32 del brazo el número de vaso y su puesto en el rack.
 4. El orden del rack (por valor, cantidad, peso o monedas antiguas) lo decide el software de
    [`software/brazo/`](../software/brazo) con el lote `VASOS:` que entrega la etapa 1
    ([04-protocolo.md](04-protocolo.md)).
@@ -290,21 +302,23 @@ por la de `brazo4gdl.py`.
 
 ---
 
-## 8. Pruebas, fallos y correcciones
+## 8. Pruebas y decisiones de diseño
 
 | Prueba | Resultado |
 |---|---|
-| Movimiento de J1, J2 y J3 con la RAMBo | ✅ Los tres ejes y la base se mueven a 12 V (video) |
-| Agarre de un vaso del cartucho desde arriba | ✅ Lo toma, lo levanta y lo lleva al otro lado de la base |
+| Movimiento de J1, J2 y J3 con su ESP32 y sus drivers | ✅ Los tres ejes se mueven con rampa suave |
+| Agarre de un vaso del cartucho desde arriba | ✅ Lo toma, lo levanta y lo traslada al otro lado de la base (video) |
 | Garra horizontal durante el traslado | ✅ El paralelogramo la mantiene; el vaso no se inclina al subir |
-| Ciclo completo A → B dentro del ciclo de las etapas 1 y 2 | ⏳ Pendiente de la secuencia automática |
+| Integración en el ciclo de las etapas 1 y 2 | Siguiente paso: enviar al brazo el número de vaso y su puesto en el rack |
 
-| Fallo | Causa | Corrección |
-|---|---|---|
-| Drivers TB6560 que se trababan | Drivers de corriente fija, sensibles al cableado a 24 V | Paso a la RAMBo con drivers A4984 y corriente por software |
-| Brazos del modelo simulado y del real distintos | La simulación se hizo con un brazo de 5 servos antes de cerrar el CAD | Cinemática nueva `brazo4gdl.py` con las medidas del CAD |
-| Sin finales de carrera | El diseño no los tiene | Cero al encender en una pose fija, como la banda |
-| La pinza no sostiene un vaso lleno | Par del SG90 (§ 3.3) | Carga limitada por vaso o almohadillas de TPU |
+| Decisión | Por qué |
+|---|---|
+| Reductora planetaria impresa 16:1 | Multiplica por ≈ 10 el par del NEMA 17 sin comprar cajas reductoras |
+| Motores fijos en la torreta y doble paralelogramo | El brazo no carga el peso de los motores y la garra queda horizontal sin control |
+| Controlador propio del brazo | Cada etapa se prueba y calibra por separado |
+| Cero fijado con la interfaz de calibración | Diseño más simple, sin finales de carrera; los ceros quedan guardados en la ESP32 |
+| Carga por vaso acotada a ≈ 0,18 kg | Capacidad de agarre del SG90 (§ 3.3); la pinza admite almohadillas de TPU para subirla |
+| Cinemática propia (`brazo4gdl.py`) | El modelo de la simulación era de 5 servos; el brazo real usa sus medidas del CAD |
 
 ---
 
@@ -315,8 +329,8 @@ por la de `brazo4gdl.py`.
 | Piezas del brazo (STL, STEP, ensamble, scripts generadores) | [`hardware/etapa3-brazo/brazo/`](../hardware/etapa3-brazo/brazo) |
 | Garra SG90 (STL y SolidWorks nativo) | [`hardware/etapa3-brazo/garra/`](../hardware/etapa3-brazo/garra) |
 | Reductora planetaria 16:1 | [`hardware/etapa3-brazo/reductora/`](../hardware/etapa3-brazo/reductora) |
-| Firmware de calibración (versión 1 con ESP32) | [`hardware/etapa3-brazo/firmware/`](../hardware/etapa3-brazo/firmware) |
+| Firmware del brazo (ESP32: calibración y prueba de motores) | [`hardware/etapa3-brazo/firmware/`](../hardware/etapa3-brazo/firmware) |
 | Lista de materiales | [`hardware/etapa3-brazo/bom.csv`](../hardware/etapa3-brazo/bom.csv) |
-| Cinemática y G-code | [`software/brazo/brazo4gdl.py`](../software/brazo/brazo4gdl.py) |
+| Cinemática y comandos del brazo | [`software/brazo/brazo4gdl.py`](../software/brazo/brazo4gdl.py) |
 | Video y fotos de la prueba | [`docs/pruebas/etapa3/`](pruebas/etapa3) |
 | Brazo anterior de 5 servos (simulación) | [`hardware/archivo/etapa3-brazo-v1/`](../hardware/archivo/etapa3-brazo-v1), [02-cinematica.md](02-cinematica.md) |
