@@ -6,7 +6,7 @@ Rediseño completo del último grado de libertad (cabeceo / Pitch) y de la garra
 
 ## 1. Estructura de Carpetas en `garra/`
 
-- **`garra/SolidWorks/`**: Ensamble nativo [`Ensamble_Garra_SG90.SLDASM`](file:///c:/Users/samue/PycharmProjects/REI/CAD/garra/SolidWorks/Ensamble_Garra_SG90.SLDASM) junto con todas sus piezas `.SLDPRT` (incluidos los 2 servos SG90 reales y sus 2 palas de `22 mm`) y respaldo universal [`Ensamble_Garra_SG90.step`](file:///c:/Users/samue/PycharmProjects/REI/CAD/garra/SolidWorks/Ensamble_Garra_SG90.step).
+- **`garra/SolidWorks/`**: Ensamble nativo [`Ensamble_Garra_SG90.SLDASM`](solidworks/Ensamble_Garra_SG90.SLDASM) junto con todas sus piezas `.SLDPRT` (incluidos los 2 servos SG90 reales y sus 2 palas de `22 mm`) y respaldo universal [`Ensamble_Garra_SG90.step`](solidworks/Ensamble_Garra_SG90.step).
 - **`garra/Imprimibles_STL/`**: Las **7 piezas STL** listas para laminar (todas ya orientadas y apoyadas planas en `Z = 0.0 mm`).
 
 ---

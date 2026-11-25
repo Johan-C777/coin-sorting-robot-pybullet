@@ -3,7 +3,7 @@ import glob
 import cadquery as cq
 import generar_brazo_step as g
 
-DEST_DIR = r"C:\Users\samue\PycharmProjects\REI\CAD\PIEZAS_IMPRIMIBLES_3D"
+DEST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "PIEZAS_IMPRIMIBLES_3D")
 DIR_STL = os.path.join(DEST_DIR, "STL")
 DIR_STEP = os.path.join(DEST_DIR, "STEP")
 

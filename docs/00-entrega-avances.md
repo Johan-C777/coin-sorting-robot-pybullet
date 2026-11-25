@@ -39,8 +39,8 @@ en el repositorio, y deja claro qué está hecho, qué está a medias y qué sig
 
 ## Avance después de la entrega
 
-- **Módulo clasificador: firmware de operación (0.8.0, 31 oct 2026).** Firmware PlatformIO por capas en [`firmware/etapa1_clasificador/`](../firmware/etapa1_clasificador/README.md): medición del diámetro con los 4 instantes de las barreras y aceleración constante, tolerancia por clase, color para las $500, máquina de estados de 11 estados, barreras por interrupción y 12 parámetros de calibración física `[CAL-xx]`. 16 pruebas en el PC y compilación para el ESP32-S3 en CI. Plan de ensamble y calibración en [TODO.md](../TODO.md); visor 3D en [clasificador-v5.html](clasificador-v5.html). Falta el ensamble físico: aún no hay mediciones con monedas reales.
-- **Etapa 1 v5 y electrónica (0.7.0).** La etapa 1 pasó a una torre de canto: tolva de disco, pista con dos barreras IR que miden el diámetro, TCS3200 para las $500, embudo y compuerta sobre un cartucho de 9 vasos que mueve la banda. 24 STL, 8 camas (1 a 6 ya impresas), despiece y compras en [`hardware/etapa1-clasificador/`](../hardware/etapa1-clasificador/README.md); diseño y simulaciones MuJoCo en [09-clasificador-v5.md](09-clasificador-v5.md); pines del ESP32-S3, esquema y firmware en [11-electronica-etapa1.md](11-electronica-etapa1.md). La v4 quedó en `hardware/archivo/etapa1-v4/`.
+- **Módulo clasificador: firmware de operación (0.8.0, 31 oct 2026).** Firmware PlatformIO por capas en [`firmware/etapa1_clasificador/`](../firmware/etapa1_clasificador/README.md): medición del diámetro con los 4 instantes de las barreras y aceleración constante, tolerancia por clase, color para las $500, máquina de estados de 11 estados, barreras por interrupción y 12 parámetros de calibración física `[CAL-xx]`. 16 pruebas en el PC y compilación para el ESP32-S3 en CI. Plan de ensamble y calibración en [TODO.md](../TODO.md); visor 3D en [clasificador-v5.html](clasificador-v5.html). El ensamble y las pruebas con monedas reales siguieron después: [12-pruebas-fisicas-etapa1.md](12-pruebas-fisicas-etapa1.md).
+- **Etapa 1 v5 y electrónica (0.7.0).** La etapa 1 pasó a una torre de canto: tolva de disco, pista con dos barreras IR que miden el diámetro, TCS3200 para las $500, embudo y compuerta sobre un cartucho de 9 vasos que mueve la banda. 24 STL, 8 camas, despiece y compras en [`hardware/etapa1-clasificador/`](../hardware/etapa1-clasificador/README.md); diseño y simulaciones MuJoCo en [09-clasificador-v5.md](09-clasificador-v5.md); pines del ESP32-S3, esquema y firmware en [11-electronica-etapa1.md](11-electronica-etapa1.md). La v4 quedó en `hardware/archivo/etapa1-v4/`.
 - **Nueve vasos al brazo (0.6.0).** El contador, el brazo (Python, ESP32 y simulación web) y PyBullet reciben y ordenan 9 vasos Ø34 × 60 mm en un rack de 9 puestos; las $500 antiguas y nuevas van en vasos distintos. Las ranuras del riel usan los diámetros oficiales del Banco de la República (0.5.1).
 
 - **Etapa 1 lista para imprimir.** Clasificador físico generado por código: riel de 22° en dos módulos, 7 ranuras y extremo abierto, tolva con 28BYJ-48 y las dos $500 separadas por color (TCS34725) con un plato basculante. Nueve salidas, cada una a su propio vaso.
@@ -86,12 +86,12 @@ python software/apps/cli_demo.py --criterio peso
 
 ## Plan fijado en el avance
 
-| Paso planeado | Para qué |
-| --- | --- |
-| Armar la torre v5 (todas las piezas ya impresas) con su [guía](../hardware/etapa1-clasificador/README.md) | Pasar la tolva y la selección de diseño a construido |
-| Calibrar tolva, barreras y color con monedas reales según la [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-pruebas-físicas) | Fijar los parámetros `[CAL-01]` a `[CAL-12]` del firmware |
-| Diseñar la banda transportadora (etapa 2) | Llevar los 9 vasos al punto A |
-| Medir L₂ y L₃ en el ensamble de SolidWorks | Cerrar el perfil real del brazo construido |
-| Llevar la evasión de obstáculos al firmware del brazo | Hoy corre en simulación y en Python |
+| Paso planeado | Para qué | Resultado en la entrega final |
+| --- | --- | --- |
+| Armar la torre v5 (todas las piezas ya impresas) con su [guía](../hardware/etapa1-clasificador/README.md) | Pasar la tolva y la selección de diseño a construido | ✅ Armada, cableada y probada con monedas reales ([12](12-pruebas-fisicas-etapa1.md)) |
+| Calibrar tolva, barreras y color con monedas reales según la [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-pruebas-físicas) | Fijar los parámetros `[CAL-01]` a `[CAL-12]` del firmware | ✅ Ajustes de diseño montados y procedimiento de calibración documentado |
+| Diseñar la banda transportadora (etapa 2) | Llevar los 9 vasos al punto A | ✅ Banda v7 montada y moviendo el cartucho |
+| Medir L₂ y L₃ en el ensamble de SolidWorks | Cerrar el perfil real del brazo construido | ✅ Brazo de 4 GDL con medidas del CAD ([13](13-etapa3-brazo.md)) |
+| Llevar la evasión de obstáculos al firmware del brazo | Hoy corre en simulación y en Python | Verificada en simulación y Python; en el brazo físico, mejora para una siguiente versión ([08](08-obstaculos.md)) |
 | Montar la celda, calibrar barreras IR y medir el ciclo real | Pasar de simulado a construido |
 | Actualizar el orquestador de PyBullet al riel de 8 estaciones | Hoy modela la familia nueva |

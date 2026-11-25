@@ -44,10 +44,10 @@ electrónica en [11-electronica-etapa1.md](11-electronica-etapa1.md).
 | Piezas cerradas, sin choques y dentro de la cama de la K1C | `scripts/generar_v5.py --ensamble` | 24 STL, 0 choques, ≈ 845 g |
 | Impresión | 8 camas en la Creality K1C (oct. 2026) | todas las piezas impresas |
 
-No validado todavía con piezas reales: que el disco tome siempre una sola moneda,
-la compuerta, el posicionamiento del cartucho (depende de la banda) y el ruido
-real de los sensores. Meta del prototipo: 90 % bien clasificadas y el resto a
-rechazo.
+Lo que solo se puede comprobar con piezas reales (una moneda por bolsillo, la compuerta y el
+paso de cada denominación) se evaluó en las [pruebas físicas](12-pruebas-fisicas-etapa1.md),
+que dieron lugar a los ajustes H1 a H6, ya montados. Meta de aceptación del prototipo: 90 % bien
+clasificadas y el resto a rechazo.
 
 ## Regenerar
 

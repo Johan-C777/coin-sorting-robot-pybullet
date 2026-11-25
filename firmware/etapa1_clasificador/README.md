@@ -167,8 +167,9 @@ VASOS:50x3a1,100x2,200x4a1,500x2a1,1000x1
 ## Calibración
 
 Todos los valores que dependen del prototipo armado tienen una etiqueta `[CAL-xx]` en
-`include/` y aparecen en [TODO.md](../../TODO.md) (fase 4). Ninguno se ha medido todavía
-con piezas reales: hoy valen lo que dicen el CAD y la simulación.
+`include/` y aparecen en [TODO.md](../../TODO.md) (fase 4). Los valores de fábrica salen del CAD
+y de la simulación; el procedimiento de la fase 4 los ajusta en el prototipo armado y los guarda
+en la NVS.
 
 | Etiqueta | Parámetro | Valor de fábrica | Cómo se calibra |
 |---|---|---|---|

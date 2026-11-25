@@ -3,7 +3,7 @@
  * ROBOT 4 GDL + GARRA (EEZYbotARM 40cm NEMA 17 + Planetaria + 2x SG90)
  * FASE 1: Calibración de Cero (0) y Límites en Pasos vía USB SERIAL (115200)
  * ============================================================================
- * Arquitectura sin latencia (idéntica a C:\Users\samue\CLionProjects\ESP\main.cpp):
+ * Arquitectura sin latencia (la misma del ejemplo de control de motores del equipo):
  *   - Comandos de movimiento no bloqueantes (respuesta instantánea)
  *   - Telemetría push automática cada 100 ms mientras se mueven (y al detenerse)
  *   - Rampa StepperAxis cada 1 ms, pulso CLK=20 us, setup CW=25 us (TB6560/TB6600)

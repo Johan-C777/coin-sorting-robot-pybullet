@@ -2,7 +2,7 @@
  * ============================================================================
  * CÓDIGO MÍNIMO — SOLO MOVER LOS 3 MOTORES PASO A PASO (+ 2 SERVOS EN 90°)
  * ============================================================================
- * Basado directamente en tu ejemplo funcional C:\Users\samue\CLionProjects\ESP\main.cpp
+ * Basado en el ejemplo funcional de control de motores del equipo (ESP-IDF, main.cpp)
  *
  * Pines ESP32:
  *   Motor 1 (Base)   : STEP (CLK+) = 26, DIR (CW+) = 25

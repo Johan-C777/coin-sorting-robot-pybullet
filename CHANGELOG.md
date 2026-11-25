@@ -1,5 +1,11 @@
 # Cambios
 
+## 1.0.0 · Entrega final de las tres etapas
+
+- Documentación revisada de punta a punta con el estado final: etapa 1 armada, probada y con sus ajustes de diseño montados; etapa 2 (banda v7) montada y moviendo el cartucho; etapa 3 (brazo de 4 GDL) armada y probada con un vaso.
+- `docs/12-pruebas-fisicas-etapa1.md`: cada observación con su causa y el ajuste aplicado.
+- `ESTADO.md`: resumen técnico de una página. Versiones anteriores de la banda (v3 a v6) marcadas como proceso de diseño; `v7-motor-fijo/CAMAS-directas.md` (antes `CAMAS-sin-pruebas.md`).
+
 ## 0.12.0 · Integración de las etapas 1 y 2 y panel de control
 
 - Etapa 2 movida por una RAMBo con Marlin 2.1.2.5 (NEMA17 en el driver X, 42,44 pasos/mm). La ESP32-S3 pide el vaso de cada moneda en G-code y espera el `ok` de `M400` antes de abrir la compuerta.
@@ -62,7 +68,7 @@
 - 16 pruebas Unity en el PC (`pio test -e native`) y job de CI que compila para la placa (RAM 6,5 %, flash 9,8 %). 4 pruebas de Python nuevas cruzan el firmware con `monedas.py`, el CAD v5 y los pines del banco.
 - `hardware/etapa1-clasificador/esquematico/`: lista de conexiones (`conexiones.csv`), diagrama y presupuesto de potencia.
 - GitHub Pages: visor 3D del clasificador v5 (`docs/clasificador-v5.html`) y de la banda propuesta (`docs/banda-etapa2.html`), con capturas; portada con sección del módulo clasificador.
-- README maestro centrado en el módulo (estado, arquitectura lógica, modelo matemático, especificaciones, BOM) y `TODO.md` con las fases y la calibración pendiente. Pruebas: 65 de Python y 64 de C++ en verde.
+- README maestro centrado en el módulo (estado, arquitectura lógica, modelo matemático, especificaciones, BOM) y `TODO.md` con las fases y el procedimiento de calibración. Pruebas: 65 de Python y 64 de C++ en verde.
 
 ## 0.7.0 · Etapa 1 v5 y electrónica en ESP32-S3
 
@@ -81,7 +87,7 @@
 - Contador: `N_VASOS = 9`, trama `VASOS:` y JSON con la familia; las $500 antiguas y nuevas van a vasos distintos.
 - Brazo: `config.py`, `cups.py`, `planner.py`, `obstaculos.py` (los móviles O2 y O3 se reajustaron para conservar su nivel), simulador web, firmware ESP32 (`movs[2*N_PUESTOS]`, buffers mayores) y PyBullet (`celda.py`, `run_sim_integrada.py`: 9 ductos, 9 vasos).
 - Pruebas: 61 de Python y 48 de C++ en verde. **PyBullet no se pudo ejecutar** en el entorno de desarrollo (no compila en Python 3.13): hay que correr `run_sim_integrada.py --headless` en el PC.
-- Pendiente: `docs/memoria-calculo.html` conserva las cifras del perfil anterior (lleva un aviso); el brazo del CAD (r_arco 9,7 cm) no cabe los 9 puestos en su arco.
+- Nota: `docs/memoria-calculo.html` conserva las cifras del perfil anterior (lleva un aviso); el brazo del CAD (r_arco 9,7 cm) no cabe los 9 puestos en su arco.
 
 ## 0.5.1 · Ranuras del riel con los diámetros oficiales
 

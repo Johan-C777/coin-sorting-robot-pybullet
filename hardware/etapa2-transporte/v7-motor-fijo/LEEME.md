@@ -1,6 +1,6 @@
 # Etapa 2 v7: motor fijo, barra dentada en la mesa
 
-> **Estado (2026-11):** impresa, montada y movida por la RAMBo con Marlin; lleva el cartucho bajo la torre. Las secciones de riesgos y plan por fases de abajo son las del diseño, antes de imprimir.
+> **Estado (noviembre de 2026):** impresa, montada y movida por la RAMBo con Marlin; lleva el cartucho bajo la torre ([video](../../../docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4)). Las secciones de plan por fases y de riesgos se conservan como registro de cómo se planeó la impresión; el resultado está al final.
 
 El motor NEMA17 y su piñón **no se mueven**. Una **barra dentada** impresa descansa en la mesa pegada al piñón y arrastra el carro por un **brazo** con cola de milano. Al girar el motor solo se mueven la barra, el carro y los vasos; el cable queda quieto. Todo se imprime como está, **sin soportes y sin comprar nada**. ≈ **372 g** de plástico.
 
@@ -81,9 +81,9 @@ Antes de imprimir, **mide el NEMA17**: cuerpo (lado y largo), diámetro y altura
 5. Pon el carro en el riel; la barra se apoya en la base del soporte y pasa entre la pared guía y el piñón. **Pega una regla o una tira de cartón a lo largo de la cola de la barra**, para que no se vaya de lado. Mete el brazo por arriba en la ranura del carro y encaja su clavija en la barra.
 6. Gira el piñón a mano hasta que engrane y mueve el carro de punta a punta. Frota los dientes con cera.
 
-## Riesgos y confianza (estimación mía, no medida)
+## Riesgos evaluados en el diseño
 
-Nada está impreso. Estos porcentajes son un juicio de ingeniería sobre cada punto, no una garantía.
+Antes de imprimir se estimó la probabilidad de que cada punto funcionara a la primera. Es un juicio de ingeniería que sirvió para decidir qué probar primero.
 
 | Punto | Antes de la fase 0 | Después de la fase 0 | Por qué |
 |---|---|---|---|
@@ -108,10 +108,14 @@ Nada está impreso. Estos porcentajes son un juicio de ingeniería sobre cada pu
 
 Los scripts están en `generador/`: `generar_v7.py` (piezas), `choques_v7.py`, `holguras_v7.py`, `revisar_v7.py`, `masa_v7.py`, `numeros_v7.py`, `exportar_v7.py` (stl, camas y pruebas), `construir_visor7.py` (visor). Requieren `manifold3d` y `numpy`.
 
-## Lo que falta confirmar
+## Resultado del montaje
 
-- Nada está impreso ni probado. Primero la fase 0.
-- Medidas del NEMA17: cuerpo de 42,3 mm, largo de 48 mm, piloto Ø22 de 2 mm de alto, eje Ø5 con plano a 2 mm y 24 mm de largo.
-- La mesa debe tener 1,58 m libres en X y ser plana: la barra descansa en ella.
-- El soporte tiene 5,5 mm de margen a cada lado entre los patines; hay que pegarlo bien o engraparlo.
-- La v6 (motor en el carro) queda en el repositorio como respaldo, pero cuelga el motor del carro; si se pide motor quieto, esta es la solución.
+- Las 13 piezas están impresas y montadas; el carro recorre el riel completo arrastrado por la barra
+  y lleva el cartucho de 9 vasos bajo la torre.
+- El NEMA17 real (Folger 17HS) asienta en el soporte por el piloto; el soporte va pegado a la mesa
+  entre los patines.
+- Firmware de la RAMBo con **42,44 pasos/mm** y **38 mm entre vasos**; el cero de operación es la
+  posición al encender, con el vaso 9 bajo el embudo.
+- Mejoras para una siguiente versión: prisionero M3 en el cubo del piñón, brida en el soporte del
+  motor y búsqueda automática del cero con la barrera infrarroja del tramo 1.
+- La v6 (motor en el carro) se conserva en el repositorio como alternativa de diseño.

@@ -1,5 +1,7 @@
 # Etapa 2 v4: carro sobre dos varillas y un hilo
 
+> **Versión del proceso de diseño, reemplazada por la [v7](../v7-motor-fijo/LEEME.md) (vigente, impresa y montada).** Se conserva como registro de las decisiones; las notas de verificación son las del diseño.
+
 Reemplaza la banda de cadena de la v3 (46 piezas, 1.506 g de plástico). El cartucho de vasos va sobre un carro que corre por **dos varillas de acero** y lo mueve un **hilo** enrollado en el eje del NEMA17.
 
 | | v3 cadena | v4 varillas |
@@ -80,7 +82,7 @@ La resolución depende del hilo real: **calibra** mandando 20.000 pasos y midien
 - Voladizos: capa por capa, 0 islas sin apoyo en las 8 piezas en su posición de impresión.
 - Nada bajo el cartucho pasa de Z = 47,5 mm (el fondo está en Z = 50).
 
-## Qué queda por confirmar con piezas reales
+## Puntos que dependían de piezas reales
 
 - El diámetro real de las varillas y que sean rectas.
 - El juego de los manguitos en PETG (la impresión puede cerrar el agujero 0,1 mm).

@@ -1,5 +1,7 @@
 # Banda transportadora (etapa 2): camas de impresión (versión print-and-place)
 
+> **Versión del proceso de diseño, reemplazada por la [v7](../v7-motor-fijo/LEEME.md) (vigente, impresa y montada).** Se conserva como registro de las decisiones; las notas de verificación son las del diseño.
+
 Para la torre de la etapa 1 v5. Impresora: Creality K1C, cama 220 × 220 × 250. Sin rodamientos, tornillos, tuercas ni correa. Son **46 piezas** en vez de unas 460: la cadena sale en 12 secciones ya articuladas, el bastidor en 6 módulos grandes con rompecabezas, las clavijas y los pasadores sueltos desaparecieron (van fundidos en la pieza) y no hay piezas de menos de 18 mm salvo las 2 ruedas, el acople y los tornillos.
 
 Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene cada cama ya acomodada en un solo STL. Si prefieres acomodar tú, usa `stl/`.
@@ -26,7 +28,7 @@ Archivos: `stl/` tiene cada pieza en su posición de impresión; `camas/` tiene 
 
 ## Orden de impresión
 
-1. **Cama 00 (prueba, ≈ 25 min).** Dobla los dos tramos de eslabones: deben girar libres sin holgura exagerada. Encaja un tramo en el otro por la presilla del primer eslabón: tiene que entrar con un clic y no salirse al jalar. Mete la clavija en el zócalo y el eje en el agujero grande. **Si algo falla, dime la medida y lo corrijo antes de gastar filamento.**
+1. **Cama 00 (prueba, ≈ 25 min).** Dobla los dos tramos de eslabones: deben girar libres sin holgura exagerada. Encaja un tramo en el otro por la presilla del primer eslabón: tiene que entrar con un clic y no salirse al jalar. Mete la clavija en el zócalo y el eje en el agujero grande. **Si algo no ajusta, se corrige el parámetro en el generador antes de gastar filamento.**
 1B. **Cama 00B (prueba de la articulación, PETG Azul, ≈ 25 g y ≈ 1 h 30).** Seis tiras de 4 eslabones de 24 mm de ancho y tres presillas sueltas, para escoger el juego y el material de la cadena **antes** de imprimir las camas 02 a 05. Cada tira tiene tantos agujeros cuadrados como su número (1 a 6) y cada fila de la cama es un juego distinto:
 
 | Fila (de abajo hacia arriba) | Juego por lado | Tira izquierda (n.° impar) | Tira central (n.° par) | Presilla |
@@ -204,7 +206,7 @@ Total aproximado: **1505 g** en 10 camas.
 | `BT18_pata.stl` | 6 | PLA+ Mármol 4DLAB |
 | `BT19_seccion-cadena.stl` | 12 | PLA+ Azul 4DLAB |
 
-## Qué se hizo contra los fallos
+## Decisiones para imprimir sin fallos
 
 - **Voladizos:** ninguna cara pasa de 45°. Los agujeros horizontales son en gota o rombo, las clavijas en gota, el cubo y los muñones de los ejes son octogonales, los zócalos verticales de clavija terminan en cono, los bolsillos de las tapas tienen el techo en V y la ranura del tensor está abierta por abajo. Un análisis automático de las caras que miran hacia abajo, con cada pieza en su posición de impresión, da 0 mm² en todas las piezas salvo ≈ 1 mm² de ruido de malla en los módulos.
 - **Cadena print-in-place:** juego de 0,3 mm por lado (agujero Ø3,6 sobre pasador Ø3); si en la cama 00 queda dura, se corrige con un número. El pasador es un rombo (cuadrado girado 45°), los nudillos tienen el canto a 45° y en la ranura de la rueda el pasador lleva una quilla que baja hasta la cama: ningún tramo de pasador nace en el aire. Bajo el pasador, en el fondo de cada nudillo suelto, hay una lámina de 0,4 mm que lo sostiene mientras se imprime, y en el último pasador de cada sección una aleta de 0,4 mm hasta la cama. **Al doblar cada articulación por primera vez esas láminas se rompen solas** (hazlo a mano al sacar la pieza de la cama, doblando cada articulación a ambos lados unos 60°); si alguna aleta del extremo estorba al encajar la sección siguiente, quítala con la uña.

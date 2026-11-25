@@ -1,6 +1,6 @@
 # Guía de Conexiones y Calibración — Robot 4 GDL + Garra (Fase 1)
 
-Esta guía acompaña al firmware [`ESP32_Calibracion_Robot4GDL.ino`](file:///C:/Users/samue/PycharmProjects/REI/ESP32_Calibracion_Robot4GDL/ESP32_Calibracion_Robot4GDL.ino), diseñado a partir del ensamble CAD en [`CAD/generar_brazo_step.py`](file:///C:/Users/samue/PycharmProjects/REI/CAD/generar_brazo_step.py) y [`CAD/Caja_Reductora_Planetaria/generar_caja_planetaria.py`](file:///C:/Users/samue/PycharmProjects/REI/CAD/Caja_Reductora_Planetaria/generar_caja_planetaria.py).
+Esta guía acompaña al firmware [`ESP32_Calibracion_Robot4GDL.ino`](ESP32_Calibracion_Robot4GDL.ino), diseñado a partir del ensamble CAD en [`brazo/generadores/generar_brazo_step.py`](../../brazo/generadores/generar_brazo_step.py) y [`reductora/generar_caja_planetaria.py`](../../reductora/generar_caja_planetaria.py).
 
 ---
 
@@ -43,7 +43,7 @@ Todos los pines elegidos son salidas 100% seguras (se evitaron los pines *strapp
 3. **Nunca desconectes un NEMA 17 con la fuente de 12V/24V encendida**: destruye el driver al instante.
 4. **Ajusta la corriente `Vref`** en el potenciómetro de cada driver antes de probar (para NEMA 17 típicos de 1.2A–1.5A, empieza suave alrededor de 0.8A–1.0A para que no se calienten las piezas impresas en PLA).
 5. **Tierra común (`GND`)**: el `GND` de la ESP32, el `GND` de la fuente de 5V de los servos y el `GND` lógico de los drivers deben estar conectados entre sí.
-6. **Microstepping recomendado (`1/8` o `1/16`)**: con la reductora planetaria 16:1 del CAD, `1/8` da `200 × 8 × 16 = 25,600 pasos/vuelta` (`71.11 pasos/grado`), logrando movimiento suave y preciso sin exigir demasiada frecuencia de pasos a la ESP32.
+6. **Microstepping.** En el brazo montado, los TB6560 y el TB6600 trabajan en **1/2 paso**: `200 × 2 × 16 = 6.400 pasos/vuelta` (**17,78 pasos/grado**, configuración de los DIP en [13-etapa3-brazo.md](../../../../docs/13-etapa3-brazo.md)), que mantiene baja la frecuencia de pasos con la reductora 16:1. Alternativa de mayor suavidad (`1/8` o `1/16`): con la reductora planetaria 16:1 del CAD, `1/8` da `200 × 8 × 16 = 25,600 pasos/vuelta` (`71.11 pasos/grado`), logrando movimiento suave y preciso sin exigir demasiada frecuencia de pasos a la ESP32.
 
 | Microstepping | A4988 (`MS1, MS2, MS3`) | DRV8825 (`M0, M1, M2`) | TMC2208/2209 (`MS1, MS2`) |
 | :---: | :---: | :---: | :---: |
@@ -59,14 +59,14 @@ Todos los pines elegidos son salidas 100% seguras (se evitaron los pines *strapp
 
 ## 3. Cómo Subir el Código y Abrir la Interfaz HTML (por USB Serial)
 
-1. Abre [`ESP32_Calibracion_Robot4GDL.ino`](file:///C:/Users/samue/PycharmProjects/REI/ESP32_Calibracion_Robot4GDL/ESP32_Calibracion_Robot4GDL.ino) en **Arduino IDE** (o compílalo con `arduino-cli`).
+1. Abre [`ESP32_Calibracion_Robot4GDL.ino`](ESP32_Calibracion_Robot4GDL.ino) en **Arduino IDE** (o compílalo con `arduino-cli`).
 2. Selecciona `ESP32 Dev Module` y tu puerto COM (ej. `COM5`). **No necesitas instalar librerías externas.**
 3. Sube el código. Al arrancar:
    - Ambos servos (**J4 Pitch** y **Garra**) se colocan automáticamente en **90°** (aprovecha para atornillar las palas blancas centradas si aún no lo hiciste).
    - La ESP32 escucha comandos en **USB Serial a 115200 baud** (sin Wi-Fi, con pulsos más estables).
 4. Ejecuta el puente serial local (no requiere `pip install`):
    ```powershell
-   python "C:\Users\samue\PycharmProjects\REI\ESP32_Calibracion_Robot4GDL\servidor_serial.py" COM5
+   python servidor_serial.py COM5
    ```
 5. Abre **`http://127.0.0.1:5050`** en tu navegador. *(Cierra el Monitor Serie de Arduino IDE si estaba abierto, ya que solo un programa puede usar `COM5` a la vez).*
 
