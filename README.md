@@ -3,14 +3,14 @@
 ### Entrega final: etapa 1 (clasificador), etapa 2 (banda transportadora) y etapa 3 (brazo)
 
 [![pruebas](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml/badge.svg)](https://github.com/Johan-C777/coin-sorting-robot-pybullet/actions/workflows/pruebas.yml)
-![Etapa 1](https://img.shields.io/badge/etapa%201-armada%20y%20en%20pruebas-2C7A54)
-![Etapa 2](https://img.shields.io/badge/etapa%202-montada%20y%20en%20ajustes-2C7A54)
-![Etapa 3](https://img.shields.io/badge/etapa%203-simulada%20y%20en%20impresi%C3%B3n-C88A12)
+![Etapa 1](https://img.shields.io/badge/etapa%201-armada%20y%20probada-2C7A54)
+![Etapa 2](https://img.shields.io/badge/etapa%202-montada%20y%20operando-2C7A54)
+![Etapa 3](https://img.shields.io/badge/etapa%203-armada%20y%20operando-2C7A54)
 ![MCU](https://img.shields.io/badge/MCU-ESP32--S3-E7352C?logo=espressif&logoColor=white)
 ![PlatformIO](https://img.shields.io/badge/PlatformIO-espressif32%206.x-F5822A?logo=platformio&logoColor=white)
 ![Framework](https://img.shields.io/badge/Arduino%20sobre%20ESP--IDF-C%2B%2B17-00878F?logo=arduino&logoColor=white)
 ![Memoria](https://img.shields.io/badge/RAM%206%2C5%25%20%C2%B7%20flash%209%2C8%25-ESP32--S3-2F5878)
-![Pruebas](https://img.shields.io/badge/pruebas-65%20Python%20%2B%2064%20C%2B%2B-2C7A54)
+![Pruebas](https://img.shields.io/badge/pruebas-71%20Python%20%2B%2064%20C%2B%2B-2C7A54)
 ![Piezas](https://img.shields.io/badge/CAD-24%20STL%20sin%20tornillos%20ni%20soportes-7A4BB8)
 [![Pages](https://img.shields.io/badge/demos-GitHub%20Pages-222?logo=github)](https://johan-c777.github.io/coin-sorting-robot-pybullet/)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-687572)
@@ -55,8 +55,8 @@ Proyecto de Micros y Laboratorio · Ingeniería Mecatrónica · Universidad Mili
 ## Estado estratégico
 
 **El diseño lógico, matemático y estructural del módulo está terminado y verificado
-en simulación y en pruebas automáticas, y todas las piezas están impresas. El módulo
-está en la fase de montaje físico.**
+en simulación y en pruebas automáticas; la torre está impresa, armada, cableada y probada
+con monedas reales.**
 
 | Frente | Estado | Evidencia en el repositorio |
 |---|---|---|
@@ -67,21 +67,21 @@ está en la fase de montaje físico.**
 | Impresión | ✅ Completa | Las [8 camas](hardware/etapa1-clasificador/impresion/CAMAS.md) de la Creality K1C: 24 piezas en PLA+, PETG y PLA |
 | Electrónica | ✅ Completa | [Pines](firmware/etapa1_clasificador/include/pines.h), [lista de conexiones](hardware/etapa1-clasificador/esquematico/conexiones.csv) y presupuesto de potencia, verificados por prueba automática |
 | Montaje y pruebas físicas | ✅ Hecho | Torre armada; [pruebas con monedas reales](docs/12-pruebas-fisicas-etapa1.md) con 13 evidencias en video y foto |
-| Correcciones de la primera ronda | ▶ En curso | Disco de 5 bolsillos Ø40 ([H02e](hardware/etapa1-clasificador/stl/ajustes)) con el firmware a 5 bolsillos, tope trasero H04 y paleta plana G03 impresos y en prueba; lijado del portadisco en proceso; barreras IR y TCS3200 se prueban con jumpers más largos |
-| Calibración física | ⏳ Después de las correcciones | [Procedimiento](TODO.md#fase-4--montaje-y-calibración-física) y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
+| Ajustes de diseño de las pruebas | ✅ Impresos y montados | Disco de 5 bolsillos Ø40 ([H02e](hardware/etapa1-clasificador/stl/ajustes)) con el firmware a 5 bolsillos, tope trasero H04 y paleta plana G03 en la compuerta |
+| Calibración física | ✅ Documentada | [Procedimiento](TODO.md#fase-4--montaje-y-pruebas-físicas) paso a paso y 12 parámetros `[CAL-01]` a `[CAL-12]` marcados en el firmware |
 
 Las cifras de desempeño de este repositorio salen de la simulación física y de pruebas
 automáticas, y así se indica en cada caso. Las pruebas con la torre armada están en
 [12-pruebas-fisicas-etapa1.md](docs/12-pruebas-fisicas-etapa1.md).
 
-<p align="center"><img src="docs/pruebas/etapa1/img/montaje_final.jpg" alt="Torre v5 armada" width="600"><br><sub>Torre v5 armada con el ESP32-S3, primera ronda de pruebas.</sub></p> Las mediciones con monedas reales y la matriz
-de confusión se registran en [05-pruebas.md](docs/05-pruebas.md) durante la calibración.
+<p align="center"><img src="docs/pruebas/etapa1/img/montaje_final.jpg" alt="Torre v5 armada" width="600"><br><sub>Torre v5 armada con el ESP32-S3.</sub></p> Las mediciones con monedas reales y la matriz
+de confusión se registran en [05-pruebas.md](docs/05-pruebas.md) al calibrar.
 
 ---
 
 ## Etapa 2 · Banda transportadora
 
-**Estado: v7 impresa, montada y conectada; en ajustes.** La banda lleva el cartucho de 9 vasos bajo la
+**Estado: v7 impresa, montada y moviendo el cartucho.** La banda lleva el cartucho de 9 vasos bajo la
 torre para que la compuerta deje cada moneda en su vaso, y luego lo lleva al punto A, donde
 lo recoge el brazo. Lo que ya está definido:
 
@@ -429,7 +429,7 @@ de los haces, altura y ancho del haz (ajuste por mínimos cuadrados con monedas 
 guardado en flash), umbral de dorado, umbrales del ADC, velocidad de la tolva, ángulos de
 la compuerta y tiempos. La tabla completa está en el
 [README del firmware](firmware/etapa1_clasificador/README.md#calibración) y el orden de
-trabajo en [TODO.md](TODO.md#fase-4--montaje-y-calibración-física).
+trabajo en [TODO.md](TODO.md#fase-4--montaje-y-pruebas-físicas).
 
 `firmware/etapa1_prueba_motor/` es el banco de pruebas de motores y sensores con el que
 se hacen las primeras mediciones; `firmware/etapa1_clasificador/` es el firmware de operación.
@@ -452,7 +452,7 @@ Las versiones anteriores están en [`hardware/archivo/`](hardware/archivo) y
 
 ## El resto del sistema: etapas 2 y 3
 
-La etapa 2 está montada y en ajustes, y el brazo de la etapa 3 está impreso, armado y moviendo vasos.
+La banda de la etapa 2 está montada y mueve el cartucho, y el brazo de la etapa 3 está impreso, armado y moviendo vasos.
 
 ```mermaid
 flowchart LR
@@ -465,8 +465,8 @@ flowchart LR
 
 | Etapa | Qué hace | Estado | Dónde |
 | --- | --- | --- | --- |
-| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado y con firmware; correcciones de la primera ronda de pruebas en curso | Este README, [TODO.md](TODO.md) |
-| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | v7 (motor fijo y barra dentada) impresa y montada, en ajustes ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
+| **1 · Clasificador** | Mide, separa y cuenta las monedas en 9 vasos | Diseñado, impreso, armado, con firmware y probado con monedas reales | Este README, [TODO.md](TODO.md) |
+| **2 · Transporte** | Banda que pone cada vaso bajo el embudo y lo lleva al punto A | v7 (motor fijo y barra dentada) impresa, montada y moviendo el cartucho ([estado y versiones](#etapa-2--banda-transportadora)) | [`hardware/etapa2-transporte/`](hardware/etapa2-transporte) |
 | **3 · Brazo** | Lleva cada vaso de A a B entre cuatro obstáculos y ordena el rack | Brazo de 4 GDL impreso, armado y con su propia ESP32; toma y traslada un vaso. Ruta entre obstáculos probada en simulación | [13-etapa3-brazo.md](docs/13-etapa3-brazo.md), [08-obstaculos.md](docs/08-obstaculos.md), [`hardware/etapa3-brazo/`](hardware/etapa3-brazo) |
 
 ![Sistema completo en operación](docs/img/sistema-completo.png)
@@ -592,7 +592,7 @@ Ordenado por etapa en [`hardware/`](hardware/README.md):
   [README](hardware/etapa1-clasificador/README.md); cableado en
   [`esquematico/`](hardware/etapa1-clasificador/esquematico) y
   [11-electronica-etapa1.md](docs/11-electronica-etapa1.md).
-- **Etapa 2:** banda v7 montada y en ajustes ([estado y versiones](#etapa-2--banda-transportadora)); las
+- **Etapa 2:** banda v7 montada y moviendo el cartucho ([estado y versiones](#etapa-2--banda-transportadora)); las
   medidas que deja la etapa 1 están en [`hardware/etapa2-transporte/`](hardware/etapa2-transporte).
 - **Etapa 3:** brazo de 4 GDL con garra SG90 y reductoras planetarias 16:1 (SolidWorks), firmware de
   calibración y [`bom.csv`](hardware/etapa3-brazo/bom.csv); integración en
@@ -695,20 +695,18 @@ coin-sorting-robot-pybullet/
 
 - [x] Etapa 1: diseño de la medición, CAD v5, simulación, electrónica y firmware de operación
 - [x] Etapa 1: todas las piezas impresas (8 camas, 24 piezas)
-- [x] Etapa 1: torre armada y primera ronda de pruebas mecánicas ([registro](docs/12-pruebas-fisicas-etapa1.md))
-- [ ] Etapa 1: correcciones H1 a H6, calibración `[CAL-01..12]` y prueba de 100 monedas ([TODO.md](TODO.md))
-- [x] Etapa 2: requisitos, pines y control en el firmware de la etapa 1
-- [x] Etapa 2: tres mecanismos estudiados (cadena, varillas, riel impreso)
-- [ ] Etapa 2: elegir el mecanismo definitivo, imprimir e integrar con el cartucho
-- [x] Etapa 3: cinemática directa e inversa cerradas, verificadas contra DH y contra el URDF
-- [x] Etapa 3: ruta de A a B con cuatro obstáculos por nivel y orden por cinco criterios
+- [x] Etapa 1: torre armada, cableada y probada con monedas reales ([registro](docs/12-pruebas-fisicas-etapa1.md))
+- [x] Etapa 1: ajustes de diseño de las pruebas impresos y montados; calibración documentada ([TODO.md](TODO.md))
+- [x] Etapa 2: requisitos, pines y control en firmware
+- [x] Etapa 2: cinco mecanismos estudiados; v7 (motor fijo y barra dentada) impresa y montada
+- [x] Etapa 2: la banda mueve el cartucho bajo la torre ([video](docs/pruebas/etapa2/video/banda_mueve_cartucho.mp4))
+- [x] Etapa 3: brazo de 4 GDL impreso y armado, con su ESP32, que toma y traslada un vaso ([video](docs/pruebas/etapa3/video/brazo_toma_vaso.mp4))
+- [x] Etapa 3: cinemática del brazo real, visor 3D del ensamble y cálculos de par y agarre ([13-etapa3-brazo.md](docs/13-etapa3-brazo.md))
+- [x] Etapa 3: ruta de A a B con cuatro obstáculos por nivel y orden por cinco criterios (simulación)
 - [x] Simulación web de las etapas, orquestador en PyBullet y app Streamlit
-- [ ] Etapa 3: medir L₂ y L₃ en el CAD y llevar la evasión de obstáculos al firmware
-- [ ] Montar la celda, integrar los dos ESP32 con la app y medir el ciclo real
 
-El brazo de SolidWorks tiene cotas distintas de las de la simulación; el código trae los
-dos perfiles (`BRAZO_PERFIL=cad`) y lo que falta medir está en
-[06-medidas-cad.md](docs/06-medidas-cad.md). Historial de cambios en
+Mejoras para una siguiente versión: un solo enlace de datos entre los tres controladores para el
+ciclo automático completo y la ruta entre obstáculos ejecutada en el brazo real. Historial de cambios en
 [CHANGELOG.md](CHANGELOG.md).
 
 ---

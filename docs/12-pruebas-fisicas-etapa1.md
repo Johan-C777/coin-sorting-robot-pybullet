@@ -130,5 +130,5 @@ protoboard. Observación H6: los jumpers son demasiado cortos.
    y la segunda paleta de la compuerta (H4); lijar el portadisco (H3).
 2. Ajustar el firmware a 6 bolsillos por vuelta.
 3. Con jumpers largos (H6), probar las barreras IR y el TCS3200 y seguir la calibración
-   `[CAL-xx]` de la [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-calibración-física).
+   `[CAL-xx]` de la [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-pruebas-físicas).
 4. Repetir las 7 denominaciones y probar la tolva llena (H5).

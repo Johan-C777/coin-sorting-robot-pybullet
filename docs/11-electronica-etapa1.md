@@ -94,4 +94,4 @@ monte la etapa 2.
 - Probar el motor con la tolva cargada y fijar la velocidad máxima real.
 - Calibrar barreras y color con monedas reales: con este firmware, `K_CUERDA` y `UMBRAL_DORADO`
   (líneas `MONEDA … c1 c2 razon` y monitor `m`); con el de operación, los pasos `[CAL-xx]` de la
-  [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-calibración-física).
+  [fase 4 de TODO.md](../TODO.md#fase-4--montaje-y-pruebas-físicas).

@@ -88,8 +88,8 @@ anteriores que ya no se usan y se guardan como historia del diseño.
 | `etapa1-clasificador/impresion/` | 8 camas `.3mf` para la Creality K1C y `CAMAS.md` | Vigente |
 | `etapa1-clasificador/esquematico/` | Lista de conexiones, diagrama y potencia | Vigente |
 | `etapa1-clasificador/` (raíz) | Guía de armado, guía de montaje y pruebas, `despiece.csv`, `compras.md`, ensamble de referencia | Vigente |
-| `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada, en ajustes |
-| `etapa3-brazo/` | Brazo 4 GDL, garra, reductora, firmware de calibración y BOM | Impreso, armado y en pruebas |
+| `etapa2-transporte/` | Banda: versión vigente v7 (motor fijo con barra dentada) y versiones v3 a v6 del proceso | Montada y en movimiento |
+| `etapa3-brazo/` | Brazo 4 GDL, garra, reductora, firmware de calibración y BOM | Impreso, armado y en movimiento |
 | `materiales.md` | Justificación de materiales del brazo | Vigente |
 | `archivo/` | **Archivo:** etapa 1 v1, v3 y v4 ([qué es cada una](../hardware/archivo/README.md)) | Archivo |
 

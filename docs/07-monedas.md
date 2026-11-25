@@ -111,7 +111,7 @@ Cada moneda contada sale además por el serie con su estación y su familia:
 M:100,5,antigua
 ```
 
-## Riesgos y siguiente paso
+## Riesgos de diseño
 
 - La ranura 4 tiene 0,30 mm a cada lado. Antes de imprimir el riel completo hay
   que imprimir una probeta de las estaciones 3 a 6 y medirla (ver

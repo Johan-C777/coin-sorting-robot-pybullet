@@ -75,7 +75,7 @@ Serial a la ESP32-S3 y a la RAMBo. Desde ahí se maneja todo con botones:
 - Nervios bajos en el plato de la tolva para acostar las monedas que llegan de canto.
 - Barreras IR en una placa perforada con el LED y el fototransistor fijos y alineados.
 - Calibración física `[CAL-01]` a `[CAL-13]` y prueba de 100 monedas revueltas, con meta ≥ 90 %
-  bien clasificadas ([procedimiento](../TODO.md#fase-4--montaje-y-calibración-física)).
+  bien clasificadas ([procedimiento](../TODO.md#fase-4--montaje-y-pruebas-físicas)).
 
 ---
 

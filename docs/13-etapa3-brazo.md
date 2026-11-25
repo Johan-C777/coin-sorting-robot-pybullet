@@ -315,7 +315,7 @@ por la de `brazo4gdl.py`.
 | Movimiento de J1, J2 y J3 con su ESP32 y sus drivers | ✅ Los tres ejes se mueven con rampa suave |
 | Agarre de un vaso del cartucho desde arriba | ✅ Lo toma, lo levanta y lo traslada al otro lado de la base (video) |
 | Garra horizontal durante el traslado | ✅ El paralelogramo la mantiene; el vaso no se inclina al subir |
-| Integración en el ciclo de las etapas 1 y 2 | Siguiente paso: enviar al brazo el número de vaso y su puesto en el rack |
+| Interfaz con las etapas 1 y 2 | Definida: el brazo recibe el número de vaso y su puesto en el rack (trama `VASOS:`) |
 
 | Decisión | Por qué |
 |---|---|
